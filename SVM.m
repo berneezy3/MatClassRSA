@@ -1,4 +1,4 @@
-function [confusionMatrix, confusionMatrix2, accuracy, testFoldIndx] = SVM(X, Y, kernel)
+function [predictedLabelsAll, accuracy, testFoldIndx] = SVM(X, Y, kernel)
     kernelNum = NaN;
 
     switch kernel
@@ -27,8 +27,8 @@ function [confusionMatrix, confusionMatrix2, accuracy, testFoldIndx] = SVM(X, Y,
 
     %%
     predictAccuracyArr = zeros(10,1);
-    predictedLabelsAll = [] %= zeros(length(Y));
-    predictedLabelsAll2 = NaN(size(Y));
+    %predictedLabelsAll = [] %= zeros(length(Y));
+    predictedLabelsAll = NaN(size(Y));
     correctLabelsAll = [] %= zeros(length(Y));
     testFoldIndx = NaN(size(Y));
     
@@ -59,9 +59,9 @@ function [confusionMatrix, confusionMatrix2, accuracy, testFoldIndx] = SVM(X, Y,
         %predictedLabels = predictedLabels(:,end);
         %disp('this is the label matrix');
         %disp(predictedLabels);
-        disp('here is the size of the predicted matrix');
-        disp(size(predictedLabels));
-        predictedLabelsAll2(c.test(i)==1) = predictedLabels;
+        %disp('here is the size of the predicted matrix');
+        %disp(size(predictedLabels));
+        predictedLabelsAll(c.test(i)==1) = predictedLabels;
         correctPredictionsCount = sum(not(bitxor(predictedLabels, testY)));
         wrongPredictionsCount = size(testY) - correctPredictionsCount;
         disp(acc);
@@ -71,18 +71,18 @@ function [confusionMatrix, confusionMatrix2, accuracy, testFoldIndx] = SVM(X, Y,
         disp( correctPredictionsCount/length(testY) );
 
         %create corresponding predictions and correct vectors
-        predictedLabelsAll = [predictedLabelsAll; predictedLabels];
-        correctLabelsAll = [correctLabelsAll; testY];
+        %predictedLabelsAll = [predictedLabelsAll; predictedLabels];
+        %correctLabelsAll = [correctLabelsAll; testY];
         
         testFoldIndx(c.test(i)==1) = i;
 
     end
     %%
+    %accuracy = mean(predictAccuracyArr)
     accuracy = mean(predictAccuracyArr)
-    accuracy2 = mean(predictAccuracyArr2)
-    confusionMatrix = confusionmat(correctLabelsAll, predictedLabelsAll)
-    confusionMatrix2 = confusionmat(Y, predictedLabelsAll2)
-    imagesc(confusionMatrix);
-    imagesc(confusionMatrix2);
+    %confusionMatrix = confusionmat(correctLabelsAll, predictedLabelsAll)
+    %confusionMatrix2 = confusionmat(Y, predictedLabelsAll2)
+    %imagesc(confusionMatrix);
+    %imagesc(confusionMatrix2);
 
 end

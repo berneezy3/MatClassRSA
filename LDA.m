@@ -1,11 +1,9 @@
 function [predictions, accuracy, testFoldIndx] = LDA(X, Y)
 
-    X = getPCs(X);
-
     c = cvpartition(Y,'KFold',10);
 
     %check partition is stratified;  besides 0, other values should be the same
-    hist(Y.*c.test(1));
+    %hist(Y.*c.test(1));
 
     err = zeros(c.NumTestSets, 1);
 
@@ -33,18 +31,6 @@ function [predictions, accuracy, testFoldIndx] = LDA(X, Y)
         
         mdl = fitcdiscr(trainX, trainY);
         
-        %
-        % Elastic Net
-        %        
-        
-        %mdl = glmnet(X, Y, 'multinomial');
-        
-        %
-        % Random Forest
-        %
-
-        %mdl = TreeBagger(NumTrees,X,Y);
-        
         %test set
         testInd = c.test(i);
         testX = testInd .* X;
@@ -52,8 +38,7 @@ function [predictions, accuracy, testFoldIndx] = LDA(X, Y)
         testY = testInd .* Y;
         testY = testY(any(testY, 2),:);
 
-        %predictedLabels = predict(mdl,testX);
-        predictedLabels = glmnetPredict(mdl,testX, [], 'class');
+        predictedLabels = predict(mdl,testX);
         predictedLabels = predictedLabels(:,end);
         predictedLabelsAll(c.test(i)==1) = predictedLabels;
         correctPredictionsCount = sum(not(bitxor(predictedLabels, testY)));
@@ -70,8 +55,8 @@ function [predictions, accuracy, testFoldIndx] = LDA(X, Y)
 
     end
     %%
-    accuracy = mean(predictAccuracyArr)
-    predictions = predictedLabelsAll
+    accuracy = mean(predictAccuracyArr);
+    predictions = predictedLabelsAll;
     %confusionMatrix = confusionmat(Y, predictedLabelsAll)
     %confusionMatrix2 = confusionmat(Y, predictedLabelsAll2)
 

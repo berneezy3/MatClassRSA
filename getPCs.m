@@ -2,8 +2,10 @@
 
 function y = getPCs(X, PCs)
 
-    [U,S,V] = svd(X);
+    disp('getting PCs');
 
+    
+    [U,S,V] = svd(X);
 
     % This graph shows how many PCs explain 
     diagS = diag(S);
@@ -25,5 +27,7 @@ function y = getPCs(X, PCs)
 
     xPC = X * V;
     y = xPC(:,1:nPC);
+    
+    disp(['got ' num2str(nPC) ' PCs']);
 
 end
