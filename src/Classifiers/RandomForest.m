@@ -11,7 +11,7 @@ function [predictions, accuracy, testIndex] = RandomForest(X, Y, numTrees)
     [r c] = size(X);
     numFeatures = round(sqrt(c)*4);
     
-    mdl = TreeBagger(numTrees, X, Y, 'OOBPrediction', 'on', 'NumPredictorsToSample', numFeatures);
+    mdl = TreeBagger(numTrees, X, Y, 'OOBPrediction', 'on');
         
     predictedLabelsAll = oobPredict(mdl);
     predictions = str2num(cell2mat(predictedLabelsAll));

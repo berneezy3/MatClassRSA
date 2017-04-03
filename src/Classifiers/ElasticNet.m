@@ -1,4 +1,4 @@
-function [predictions, accuracy, testIndex] = ElasticNet2(X, Y)
+function [predictions, accuracy] = ElasticNet(X, Y)
 
     predictAccuracyArr = zeros(10,1);
     predictedLabelsAll = NaN(size(Y));
@@ -16,8 +16,8 @@ function [predictions, accuracy, testIndex] = ElasticNet2(X, Y)
     
     %mdl = TreeBagger(numTrees, X, Y, 'OOBPrediction', 'on', 'NumPredictorsToSample', numFeatures);
     
-    predictedLabelsAll = oobPredict(mdl);
-    predictions = str2num(cell2mat(predictedLabelsAll));
+    predictions = glmnetPredict(mdl, X);
+    %predictions = str2num(cell2mat(predictedLabelsAll));
     accuracy = 1 - oobError(mdl, 'mode', 'ensemble')
 
 end
