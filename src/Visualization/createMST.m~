@@ -1,4 +1,4 @@
-function y = createMST(distMat, varargin)
+function y = createMST(distMat, vara)
 
     ip = inputParser;
     ip.FunctionName = 'createMST';
