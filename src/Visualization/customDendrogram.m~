@@ -57,12 +57,6 @@ function y = customDendrogram(distMat, varargin)
         return;
     end
 
-    %iconPath(1).name
-    
-%     for i = 1:r+1
-%         split = (1449-208)/(r+2);
-%         plot(208 + split * i, 950, 'g.', 'MarkerSize', 20);
-%     end
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
