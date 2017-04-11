@@ -38,6 +38,6 @@ function y = createMST(distMat, varargin)
     disp(T.Edges);
     disp(T.Edges.Weight);
     plot(T, 'EdgeLabel', T.Edges.Weight)
-    %highlight(p,T)
+    
     
     end

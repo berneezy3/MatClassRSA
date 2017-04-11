@@ -58,11 +58,8 @@ function y = customDendrogram(distMat, varargin)
     end
 
     %iconPath(1).name
-    
-%     for i = 1:r+1
-%         split = (1449-208)/(r+2);
-%         plot(208 + split * i, 950, 'g.', 'MarkerSize', 20);
-%     end
+
+    image(dendrogramImg);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
@@ -83,13 +80,37 @@ function y = customDendrogram(distMat, varargin)
     %           rectangle('Position',[centerX-width/2, centerY-height, width, height], ...
     %              'FaceColor',[1 0 0],'EdgeColor', ip.Results.nodeColors(i),'LineWidth',1)
                 label = labels(i)
-                t = text(centerX-width/3, centerY-height, label);
+                t = text(centerX-width/2, centerY-height, label);
                 t.Color = ip.Results.nodeColors(i);
                 t(1).FontSize = 14;
             else
     %           %dendrogramImg(centerX-width/2, centerY-height, :) = thisIcon;
     %           rectangle('Position',[centerX-width/2, centerY-height, width, height], ...
     %                'FaceColor',[1 0 0],'LineWidth',4)
+            end
+
+            
+        end
+        
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % CASE: NODE
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
+
+        disp('CASE: NODE');
+        for i = 1:length(labels)
+
+            split = (1449-205)/(r+2);
+            centerX =  208 + split * i;
+            centerY =  950;
+            width = 40;
+            height = 40;
+            if i <= length(ip.Results.nodeLabels)
+                label = labels(i)
+                disp(centerX)
+                t = text(centerX-width/2, centerY-height, label);
+                t.Color = 'black';
+                t(1).FontSize = 14;
             end
 
             
@@ -172,7 +193,7 @@ function y = customDendrogram(distMat, varargin)
          
     end
      
-    imagesc(dendrogramImg);
+    
     set(gca,'xtick',[]);
     set(gca,'ytick',[]);
 
