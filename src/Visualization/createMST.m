@@ -40,4 +40,4 @@ function y = createMST(distMat, varargin)
     plot(T, 'EdgeLabel', T.Edges.Weight)
     
     
-    end
+end

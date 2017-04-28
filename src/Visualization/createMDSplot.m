@@ -33,7 +33,7 @@ function y = createMDSplot(distMat, varargin)
     end
     
     
-    Y = cmdscale(distMat);
+    [Y eigs] = cmdscale(distMat);
     [r c] = size(Y);
     
 
@@ -45,10 +45,13 @@ function y = createMDSplot(distMat, varargin)
     
         disp('CASE: COLOR AND NODE')
         for i = 1:r
-            plot( Y(i,1) ,Y(i,2) , 's', 'MarkerSize', 15, 'LineWidth', 4, ....
-                'MarkerEdgeColor', ip.Results.nodeColors(i));
+            plot( Y(i,1) ,Y(i,2) , 's', 'MarkerSize', 15, 'LineWidth', 2, ....
+                'MarkerEdgeColor', 'w');
+            text( Y(i,1), Y(i,2), ip.Results.nodeLabels(i), ...
+                'color', ip.Results.nodeColors(i), ...
+                'FontWeight', 'bold', 'FontSize', 30 ...
+            );
             hold on
-            text( Y(i,1), Y(i,2), ip.Results.nodeLabels(i));
         end
         
         
@@ -68,12 +71,84 @@ function y = createMDSplot(distMat, varargin)
     elseif ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.nodeLabels)
         
+        labels = dir(ip.Results.iconPath);
+        labels = labels(4:length(labels));
+        for i = 1:length(labels)
+            hold on;
+            [thisIcon map] = imread([labels(i).folder '/' labels(i).name]);
+            [height width] = size(thisIcon);
+            %convert thisIcon to scale 0~1
+            if ~isempty(map)
+                thisIcon = ind2rgb(thisIcon, map);
+            else
+                thisIcon = double(thisIcon)/255;
+            end
+            
+            if length(size(thisIcon)) == 2
+                disp('KSJDKAJSNDKA')
+                thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
+            end
+            
+            % Resize to 40*40 square
+            if height > width
+                thisIcon = imresize(thisIcon, [30 NaN]);
+            else
+                thisIcon = imresize(thisIcon, [NaN 30]);
+            end
+            
+            plotLength = (max(Y(:,1)) - min(Y(:,1)))/12;
+            plotHeight = (max(Y(:,2)) - min(Y(:,2)))/12;
+
+
+            rectangle('Position', [Y(i,1)-plotLength-.1*plotLength, Y(i,2)-plotHeight-.1*plotLength, plotLength+.2*plotLength, plotHeight+.2*plotLength], ...
+                        'faceColor', ip.Results.nodeColors(i), 'EdgeColor', ip.Results.nodeColors(i));
+            
+            imagesc([Y(i,1), Y(i,1) - plotLength], ...
+                [Y(i,2), Y(i,2) - plotHeight], thisIcon);
+        end
+        
+       
+        
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: IMAGE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.nodeLabels)
+        
+        labels = dir(ip.Results.iconPath);
+        labels = labels(4:length(labels));
+        for i = 1:length(labels)
+            hold on;
+            [thisIcon map] = imread([labels(i).folder '/' labels(i).name]);
+            [height width] = size(thisIcon);
+            %convert thisIcon to scale 0~1
+            if ~isempty(map)
+                thisIcon = ind2rgb(thisIcon, map);
+            else
+                thisIcon = double(thisIcon)/255;
+            end
+            
+            if length(size(thisIcon)) == 2
+                disp('KSJDKAJSNDKA')
+                thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
+            end
+            
+            % Resize to 40*40 square
+            if height > width
+                thisIcon = imresize(thisIcon, [40 NaN]);
+            else
+                thisIcon = imresize(thisIcon, [NaN 40]);
+            end
+            
+            plotLength = (max(Y(:,1)) - min(Y(:,1)))/12;
+            plotHeight = (max(Y(:,2)) - min(Y(:,2)))/12;
+            disp(i)
 
+            imagesc([Y(i,1), Y(i,1) - plotLength], ...
+                [Y(i,2), Y(i,2) - plotHeight], thisIcon);
+        end
+        
+       
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -81,8 +156,9 @@ function y = createMDSplot(distMat, varargin)
             && isempty(ip.Results.nodeLabels)
         
         for i = 1:r
-            plot( Y(i,1) ,Y(i,2) , 's', 'MarkerSize', 15, 'LineWidth', 4, ....
-                'MarkerEdgeColor', ip.Results.nodeColors(i));
+            plot( Y(i,1) ,Y(i,2) , 'o', 'MarkerSize', 15, 'LineWidth', 4, ...
+                'MarkerEdgeColor', ip.Results.nodeColors(i), ...
+                'MarkerFaceColor', ip.Results.nodeColors(i));
             hold on
         end
         

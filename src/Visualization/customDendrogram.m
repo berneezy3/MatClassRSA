@@ -1,7 +1,36 @@
-function y = customDendrogram(distMat, varargin)
+function y = createDendrogram(distMat, varargin)
+% createCMplot = createDendrogram(distMat, varargin)
+% ------------------------------------------------
+% Bernard Wang - April 23, 2017
+%
+% This function creates a dendrogram plot with the distance matrix
+% passed in.
+%
+% Required inputs:
+% - distMat: A distance matrix.  Diagonals must be 0, and must be
+%               symmetrical along the diagonal
+%
+% Optional name-value pairs:
+% - 'nodeColors': a vector of colors, ordered by the order of labels in the 
+%                   confusion matrix
+%                   e.g. ['y' 'm' 'c' 'r' 'g' 'b' 'w' 'k']
+%                   or ['yellow' 'magenta' 'cyan' 'red' 'green' 
+%                       'blue' 'white' 'black']            
+% - 'nodeLabels': a matrix of alphanumeric labels, ordered by same order of
+%                   labels in the confusion matrix
+%                   e.g. ['cat' 'dog' 'fish']
+% - 'iconPath': a directory containing images used to label, in which the
+%                   image files must be ordered in the same order as the 
+%                   labels of the confusion matrix
+%
+%
+% Notes
+%
+%
+%
 
     ip = inputParser;
-    ip.FunctionName = 'customDendrogram';
+    ip.FunctionName = 'createDendrogram';
     ip.addRequired('distMat',@ismatrix);
     options = [1, 0];
     ip.addParameter('nodeColors', [], @(x) isvector(x)); 
@@ -37,19 +66,13 @@ function y = customDendrogram(distMat, varargin)
     % check which set of labels to use
     % alphanumeric labels
     if ~isempty(ip.Results.nodeLabels)
-        
         labels = ip.Results.nodeLabels;
-        
     %picture labels
     elseif ~isempty(ip.Results.iconPath)
-        
-        labels = dir(ip.Results.iconPath);
-        labels = labels(4:length(labels));
-        
+        labels = getImageFiles(ip.Results.iconPath);
+    %color labels
     elseif isempty(ip.Results.nodeLabels) && isempty(ip.Results.iconPath) && ~isempty(ip.Results.nodeColors)
-        
          labels = ip.Results.nodeColors;
-        
     else %no labels specified
         set(gca,'xtick',[]);
         set(gca,'ytick',[]);
@@ -75,18 +98,12 @@ function y = customDendrogram(distMat, varargin)
             width = 40;
             height = 40;
             if i <= length(ip.Results.nodeColors)
-
-              %dendrogramImg(centerX-width/2, centerY-height, :) = thisIcon;
-    %           rectangle('Position',[centerX-width/2, centerY-height, width, height], ...
-    %              'FaceColor',[1 0 0],'EdgeColor', ip.Results.nodeColors(i),'LineWidth',1)
                 label = labels(i)
                 t = text(centerX-width/2, centerY-height, label);
                 t.Color = ip.Results.nodeColors(i);
                 t(1).FontSize = 14;
             else
-    %           %dendrogramImg(centerX-width/2, centerY-height, :) = thisIcon;
-    %           rectangle('Position',[centerX-width/2, centerY-height, width, height], ...
-    %                'FaceColor',[1 0 0],'LineWidth',4)
+
             end
 
             
@@ -117,19 +134,17 @@ function y = customDendrogram(distMat, varargin)
         end
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: COLOR AND IMAGE
+    % CASE: COLOR AND IMAGE OR IMAGE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.iconPath)
-        
+    elseif isempty(ip.Results.nodeLabels) && ~isempty(ip.Results.iconPath)
         for i = 1:length(labels)
-            disp(i)
-            [thisIcon map] = imread([labels(i).name]);
+            [thisIcon map] = imread([char(labels(i))]);
             [height width] = size(thisIcon);
             %convert thisIcon to scale 0~1
             
             if ~isempty(map)
                 disp('converting to RGB')
-                disp(map)
+                %disp(map);
                 thisIcon = ind2rgb(thisIcon, map);
             else
                 thisIcon = thisIcon/255;
@@ -143,7 +158,6 @@ function y = customDendrogram(distMat, varargin)
             end
 
             % Add 3rd(color) dimension if there is none
-            disp(size(thisIcon))
             if length(size(thisIcon)) == 2
                 disp('KSJDKAJSNDKA')
                 thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
@@ -157,20 +171,20 @@ function y = customDendrogram(distMat, varargin)
             height = 40;
             cWidth = 58;
             cHeight = 58;
-            if i <= length(ip.Results.nodeColors)
+            if i <= length(labels)
                 rect = rectangle('Position',[centerX-cWidth/2, centerY-cHeight, cWidth, cHeight], ...
                 'FaceColor', [0 1 0]);
                 %dendrogramImg(centerY-cHeight:centerY-1, centerX-cWidth/2:centerX+cWidth/2-1, 1:3) = rect;
-                x = [centerX-cWidth/2, centerX-cWidth/2, centerX+cWidth/2, centerX+cWidth/2];
-                y = [centerY-cHeight, centerY, centerY-cHeight, centerY];
-                patch(x,y, 'red');
-                %dendrogramImg(centerY-height:centerY-1, centerX-width/2:centerX+width/2-1, 1:3) = thisIcon;
+                if ~isempty(ip.Results.nodeColors)
+                    dendrogramImg = insertShape(dendrogramImg, 'FilledRectangle', ...
+                        [centerX-cWidth/2, centerY-cHeight, cWidth, cHeight], ...
+                        'color', ip.Results.nodeColors(i));
+                end
+                dendrogramImg(centerY-height-9:centerY-1-9, centerX-width/2:centerX+width/2-1, 1:3) ...
+                    = thisIcon;
                 image(dendrogramImg);
                 label = labels(i);
             else
-    %           %dendrogramImg(centerX-width/2, centerY-height, :) = thisIcon;
-    %           rectangle('Position',[centerX-width/2, centerY-height, width, height], ...
-    %                'FaceColor',[1 0 0],'LineWidth',4)
             end
         end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
