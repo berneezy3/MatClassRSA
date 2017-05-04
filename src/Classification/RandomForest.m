@@ -1,4 +1,4 @@
-function [predictions, accuracy, testIndex] = RandomForest(X, Y, numTrees)
+function [predictions, accuracy] = RandomForest(X, Y, numTrees)
 
     predictAccuracyArr = zeros(10,1);
     predictedLabelsAll = NaN(size(Y));

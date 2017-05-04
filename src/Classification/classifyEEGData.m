@@ -1,10 +1,8 @@
 function [predictions, accuracy, confusionMatrix] = classifyEEGData(X, Y, classifier, varargin)
 
     classifier = char(classifier);
-    
-    tic
-    addpath('glmnet_matlab/');
-    addpath('libsvm-3.21/matlab');
+    addpath('../../ext/glmnet_matlab/');
+    addpath('../../ext/libsvm-3.21/matlab');
 
     %%%
     %%% INPUT PARSING :)
@@ -40,9 +38,6 @@ function [predictions, accuracy, confusionMatrix] = classifyEEGData(X, Y, classi
     elseif ~isnan(inputs.varPC)
         X = getPCs(X, inputs.varPC);
     end
-
-    %X = getPCs(X, .9);
-    disp(size(X));
     
     predictions = [];
     acc = NaN;
@@ -51,25 +46,24 @@ function [predictions, accuracy, confusionMatrix] = classifyEEGData(X, Y, classi
     switch classifier
         case 'SVM'
             disp('in svm')
-            [predictions accuracy testIndex] = SVM(X, Y, 'rbf');
+            [predictions accuracy] = SVM(X, Y, 'rbf');
         case 'RandomForest'
             disp('in RF')
-            [predictions accuracy testIndex] = RandomForest(X, Y, 350 );
+            [predictions accuracy] = RandomForest(X, Y, 350 );
         case 'LDA'
             disp('in LDA')
-            [predictions accuracy testIndex] = LDA(X, Y);
-        case 'ElasticNet'
-            disp('in ENET')
-            [predictions accuracy] = ElasticNet(X, Y);
-        case 'Multinomial'
-            disp('in multinomial')
-            [predictions accuracy testIndex] = Multinomial(X, Y);
+            [predictions accuracy] = LDA(X, Y);
+%         case 'ElasticNet'
+%             disp('in ENET')
+%             [predictions accuracy] = ElasticNet(X, Y);
+%         case 'Multinomial'
+%             disp('in multinomial')
+%             [predictions accuracy testIndex] = Multinomial(X, Y);
         otherwise
             error('input valid kernel type')
     end
     
     confusionMatrix = confusionmat(Y, predictions);
     imagesc(confusionMatrix);
-    toc
     
 end

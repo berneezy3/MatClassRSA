@@ -1,5 +1,5 @@
-function y = createDendrogram(distMat, varargin)
-% createCMplot = createDendrogram(distMat, varargin)
+function y = plotDendrogram(distMat, varargin)
+% plotDendrogram(distMat, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
@@ -24,13 +24,14 @@ function y = createDendrogram(distMat, varargin)
 %                   labels of the confusion matrix
 %
 %
-% Notes
-%
-%
-%
+% Notes:
+%   - linkage order - inorder w/crossing, best order w/o crossing, dist
+%   order
+%   - flip horizontal
+%   - make sure the side thin
 
     ip = inputParser;
-    ip.FunctionName = 'createDendrogram';
+    ip.FunctionName = 'plotDendrogram';
     ip.addRequired('distMat',@ismatrix);
     options = [1, 0];
     ip.addParameter('nodeColors', [], @(x) isvector(x)); 

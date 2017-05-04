@@ -1,33 +1,34 @@
-% [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
+function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
 % -------------------------------------------------------------
 % Blair - Feb. 22, 2017
 %
 % The main function for sorting user inputs and calling classifier.
 
-% % Initialize the input parser
-% ip = inputParser;
-% ip.CaseSensitive = false;
-% 
-% % Initialize the input parser
-% ip = inputParser;
-% ip.CaseSensitive = false;
+% Initialize the input parser
+ip = inputParser;
+ip.CaseSensitive = false;
 
-% Specify default values
-% defaultNormalize = 'diagonal';
+%Specify default values
+defaultNormalize = 'diagonal';
+defaultShuffleData = 0;
 
-% Specify expected values
-% expectedNormalize = {'diagonal', 'sum', 'none'};
+%Specify expected values
+expectedNormalize = {'diagonal', 'sum', 'none'};
+expectedShuffleData = [0, 1];
 
-% Required inputs
-% addRequired(ip, 'CM', @isnumeric)
 
-% Optional inputs
-% addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
+%Required inputs
+addRequired(ip, 'CM', @isnumeric)
 
-% Optional name-value pairs
-% NOTE: Should use addParameter for R2013b and later.
-% addParamValue(ip, 'normalize', defaultNormalize,...
-%     @(x) any(validatestring(x, expectedNormalize)));
+%Optional positional inputs
+%addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
+addParameter(ip, 'shuffleData', defaultShuffleData, ...
+    @(x) any(validatestring(x, expectedShuffleData)));
+
+%Optional name-value pairs
+%NOTE: Should use addParameter for R2013b and later.
+addParameter(ip, 'normalize', defaultNormalize,...
+    @(x) any(validatestring(x, expectedNormalize)));
 
 % Parse
 % parse(ip, CM, varargin{:});
@@ -103,7 +104,7 @@ if ndims(X) == 3
        nTime = size(X_subset, 2);
    end
    % Reshape the X_subset matrix
-   X_subset = cube2trRows(X_subset); % NOW IT'S 2D
+   %X_subset = cube2toRows(X_subset); % NOW IT'S 2D
    
 %%% 2D input matrix
 elseif ndims(X) == 2
@@ -137,17 +138,24 @@ elseif ndims(X) == 2
        nFeature = size(X_subset, 2);
     end  
 end
+X = X_subset;
 
 %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
 % moving forward.
 
 % DATA SHUFFLING (doing)
 % Default 1
-% If shuffleData
+if ~(isempty(ip.Results.shuffleData))
+    if (ip.Results.shuffleData)
+        [X, Y] = shuffleData(X, Y);
+    end
+end
+
 %   rIdx = randperm(nTrials)
 %   Shuffle data by rIdx (trial dimension is dim 1)
 %   Shuffle labels by rIdx
 % Else output = input
+
 
 % TRIAL AVERAGING (doing)
 % Default 0

@@ -1,7 +1,36 @@
-function y = createMDSplot(distMat, varargin)
+function y = plotMDS(distMat, varargin)
+% createDendrogram(distMat, varargin)
+% ------------------------------------------------
+% Bernard Wang - April 23, 2017
+%
+% This function creates a dendrogram plot with the distance matrix
+% passed in.
+%
+% Required inputs:
+% - distMat: A distance matrix.  Diagonals must be 0, and must be
+%               symmetrical along the diagonal
+%
+% Optional name-value pairs:
+% - 'nodeColors': a vector of colors, ordered by the order of labels in the 
+%                   confusion matrix
+%                   e.g. ['y' 'm' 'c' 'r' 'g' 'b' 'w' 'k']
+%                   or ['yellow' 'magenta' 'cyan' 'red' 'green' 
+%                       'blue' 'white' 'black']            
+% - 'nodeLabels': a matrix of alphanumeric labels, ordered by same order of
+%                   labels in the confusion matrix
+%                   e.g. ['cat' 'dog' 'fish']
+% - 'iconPath': a directory containing images used to label, in which the
+%                   image files must be ordered in the same order as the 
+%                   labels of the confusion matrix
+%
+%
+% Notes:
+%   - linkage order
+%   - do more things regarding order
+%
 
     ip = inputParser;
-    ip.FunctionName = 'createMDSplot';
+    ip.FunctionName = 'plotMDS';
     ip.addRequired('distMat',@ismatrix);
     options = [1, 0];
     ip.addParameter('nodeColors', [], @(x) isvector(x)); 

@@ -1,4 +1,4 @@
-function distanceMatrix = computeDistanceMatrix(CM, varargin)
+cfunction distanceMatrix = C(CM, varargin)
 % distanceMatrix = computeDistanceMatrix(CM, varargin)
 % ------------------------------------------------
 % Blair - January 31, 2017

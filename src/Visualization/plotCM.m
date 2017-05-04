@@ -1,5 +1,5 @@
-function createCMplot(confMat, varargin)
-% createCMplot = createCMplot(confMat, varargin)
+function plotCM(confMat, varargin)
+% plotCM(confMat, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
@@ -37,7 +37,7 @@ function createCMplot(confMat, varargin)
 
     % parse inputs
     ip = inputParser;
-    ip.FunctionName = 'createCMplot';
+    ip.FunctionName = 'plotCM';
     ip.addRequired('confMat',@ismatrix);
     options = [1, 0];
     ip.addParameter('axisColors', [], @(x) isvector(x)); 

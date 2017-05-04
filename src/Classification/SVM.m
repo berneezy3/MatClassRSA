@@ -1,4 +1,4 @@
-function [predictedLabelsAll, accuracy, testFoldIndx] = SVM(X, Y, kernel)
+function [predictedLabelsAll, accuracy] = SVM(X, Y, kernel)
     kernelNum = NaN;
 
     switch kernel
