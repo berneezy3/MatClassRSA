@@ -6,10 +6,9 @@ function plotCM(confMat, varargin)
 % This function plots a confusion matrix with the
 % specified labels.
 %
-% Required inputs:
+% INPUT ARGS:
 % - CM: A square confusion matrix
 %
-
 % Optional name-value pairs:
 % - 'axisColors': a vector of colors, ordered by the order of labels in the 
 %                   confusion matrix

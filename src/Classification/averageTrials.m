@@ -1,20 +1,38 @@
 function [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
+%  [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
-% function to average trials for training data matrix X and corresponding
+% Bernard Wang - April. 30, 2017
+% 
+% Function to average trials for training data matrix X and corresponding
 % label vector Y
 % Input Args:
 %       X - training data matrix
 %       Y - label vector
 %       groupSize - number of trials you wish each group to average
-%       handleRemainder - how to handle the remainder trials.  Takes 4
-%           options, 'discard', 'newGroup', 'append', 'distribute'.
-%           'discard' will discard the remainder trials.  'newgroup'
-%           creates a new averaged for the remainder trials. 'append'
-%           appends the remainder trials to the last group with the same
-%           label and then computes the average.  'distribute' distributes
-%           the labels to different groups with the same labels and
-%           recomputes the average.
-
+%       handleRemainder (optional) - method to handle remainder trials.  
+%           For example if you have 21 rows with label 1, and set averaging 
+%           group size to 5, you would have 4 groups (20/5), and 1 remainder 
+%           row with label 1.
+%           --- options ---
+%               'discard'
+%                   disregard the remaining data.
+%               'newGroup'
+%                   Creates a new averaged row with the remainder trials,
+%                   despite the rows not fulfilling the group size.
+%               'append'
+%                   Appends the remaining data to the last averaged row of
+%                   the same label.
+%               'distribute'
+%                   Distributes the remaining data to the different groups
+%                   of the same label.
+%
+% Output Args:
+%       averagedX - the X matrix after averaging
+%       averagedY - the label vector for the trials in averagedXh
+%       
+% Example:
+%             
+%
 % TODO: more testing
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

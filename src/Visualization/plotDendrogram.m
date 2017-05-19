@@ -6,7 +6,7 @@ function y = plotDendrogram(distMat, varargin)
 % This function creates a dendrogram plot with the distance matrix
 % passed in.
 %
-% Required inputs:
+% INPUT ARGS:
 % - distMat: A distance matrix.  Diagonals must be 0, and must be
 %               symmetrical along the diagonal
 %

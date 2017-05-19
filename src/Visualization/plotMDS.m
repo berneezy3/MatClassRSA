@@ -1,5 +1,5 @@
 function y = plotMDS(distMat, varargin)
-% createDendrogram(distMat, varargin)
+% y = plotMDS(distMat, 'nodeColors', 'nodeLabels', 'iconPath')
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %

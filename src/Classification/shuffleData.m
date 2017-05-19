@@ -1,4 +1,5 @@
 function [shuffledX, shuffledY] = shuffleData(X,Y)
+% [shuffledX, shuffledY] = shuffleData(X,Y)
 % -------------------------------------------------------------
 % Bernard Wang - April. 30, 2017
 %
@@ -12,6 +13,10 @@ function [shuffledX, shuffledY] = shuffleData(X,Y)
 %       shuffledX - X after shuffling
 %       shuffledY - Y after shuffling (ordering still consistent 
 %                   w/ shuffledX)
+%
+% EXAMPLES:
+%
+% TODO:
 
 
     numTrials = length(Y);

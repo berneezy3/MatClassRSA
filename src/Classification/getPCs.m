@@ -1,13 +1,21 @@
 function y = getPCs(X, PCs)
+% y = getPCs(X, PCs)
 %-------------------------------------------------------------------
-% function to average extract principle componenets via singular value
+% Function to extract principle componenets via singular value
 % decomposition
 %
-% Input Args:
+% INPUT ARGS:
 %       X - training data matrix
-%       PCs - either number of PCs to extract based on significance if
-%       value is a positive integer, or variance explained by PCs if value
-%       < 0 and > 1.
+%       PCs - if value is a positive integer, either number of PCs to extract based on significance , or variance explained by PCs if value
+%       between 0 and 1
+%
+% OUTPUT ARGS:
+%       y - training data matrix with only principle compenents
+%
+% EXAMPLES:
+%
+% TODO:
+% 
 
 
 

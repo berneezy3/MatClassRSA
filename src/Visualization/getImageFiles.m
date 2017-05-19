@@ -1,19 +1,22 @@
 function y = getImageFiles(iconPath)
-% createCMplot = createCMplot(confMat, varargin)
+% y = getImageFiles(iconPath)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
 % This is a helper function for the visualization functions
 % to retrieve jpg, jpeg, or png files from a directory
 %
-% Required inputs:
-% - iconPath: Absolute or relative path to the images to be used
+% INPUT ARGS:
+%   iconPath - Absolute or relative path to the images to be used
 %               for labeling
+%   
+% OUTPUT ARGS:
+%   y - a vector of jpg, jpeg, or png file names
 %
-% Outputs:
-% - y: a vector of jpg, jpeg, or png file names
+% EXAMPLES:
 %
-% Notes
+% TODO:
+%
 
     labelStructs = dir(iconPath);
     tempLabelStruct = NaN;
