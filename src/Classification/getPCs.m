@@ -17,8 +17,6 @@ function y = getPCs(X, PCs)
 % TODO:
 % 
 
-
-
     disp('getting PCs');
     
     [U,S,V] = svd(X);

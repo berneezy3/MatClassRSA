@@ -1,7 +1,20 @@
-function [predictedLabelsAll, accuracy] = SVM(X, Y, kernel)
+function [predictedLabelsAll, accuracy] = SVM(X, Y, varargin)
+    
+    addpath('../ext/libsvm-3.21/matlab')
+
+    ip = inputParser;
+    ip.FunctionName = 'SVM';
+    ip.addRequired('X',@ismatrix);
+    ip.addRequired('Y',@isvector);
+    expectedKernels = {'linear', 'polynomial', 'rbf', 'sigmoid'};
+    ip.addOptional('kernel', 'rbf',  @(x) any(validatestring(x, expectedKernels)));
+   
+
+    parse(ip, X, Y, varargin{:});
+
     kernelNum = NaN;
 
-    switch kernel
+    switch ip.Results.kernel
         case 'linear'
             kernelNum = 0;
         case 'polynomial'

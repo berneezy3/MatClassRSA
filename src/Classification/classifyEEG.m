@@ -11,19 +11,34 @@ ip.CaseSensitive = false;
 %Specify default values
 defaultNormalize = 'diagonal';
 defaultShuffleData = 0;
+defaultAverageTrials = 10;
+defaultPermutationTest = 0;
+defaultPCA = .9;
+defaultFolds = 10;
+defaultClassify = 0;
 
 %Specify expected values
 expectedNormalize = {'diagonal', 'sum', 'none'};
 expectedShuffleData = [0, 1];
-
+expectedPermutationTest = 0;
+expectedPCA = 0;
+expectedFolds = 10;
+expectedClassify = 0;
 
 %Required inputs
-addRequired(ip, 'CM', @isnumeric)
+addRequired(ip, 'X', @ismatrix)
+addRequired(ip, 'Y', @isvector)
 
 %Optional positional inputs
 %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
 addParameter(ip, 'shuffleData', defaultShuffleData, ...
     @(x) any(validatestring(x, expectedShuffleData)));
+addParameter(ip, 'averageTrials', defaultAverageTrials, ...
+    @(x) assert(rem(x,1) == 0 ));
+addParameter(ip, 'permutationTest', defaultPermutationTest, ...
+     @(x) any(validatestring(x, expectedPermutationTest)));
+addParameter(ip, 'doPCA', defaultPCA, ...
+    @(x) assert(rem(x,1) == 0 ));
 
 %Optional name-value pairs
 %NOTE: Should use addParameter for R2013b and later.
@@ -31,12 +46,12 @@ addParameter(ip, 'normalize', defaultNormalize,...
     @(x) any(validatestring(x, expectedNormalize)));
 
 % Parse
-% parse(ip, CM, varargin{:});
+parse(ip, X, Y, varargin{:});
 
-X3 = randi(12, [5 3 10]);
-X2 = randi(12, [10 15]);
-Y = randi(20, [10 1])';
-X = X3;
+% X3 = randi(12, [5 3 10]);
+% X2 = randi(12, [10 15]);
+% Y = randi(20, [10 1])';
+% X = X3;
 featureUse = []; spaceUse = []; timeUse = [];
 
 %%%%% INPUT DATA CHECKING (doing)
@@ -151,21 +166,11 @@ if ~(isempty(ip.Results.shuffleData))
     end
 end
 
-%   rIdx = randperm(nTrials)
-%   Shuffle data by rIdx (trial dimension is dim 1)
-%   Shuffle labels by rIdx
-% Else output = input
-
-
 % TRIAL AVERAGING (doing)
-% Default 0
-% If nTrialsPerGroup (> 0)
-%   Make sure it's an integer
-%   Make sure there will be at least 2 groups
-%   How to handle stragglers? Rounding? Exclude excess trials?
-%   For each stim, get and average groups of trials
-%
-%   Else ouptut = input
+ if ~(isempty(ip.Results.averageTrials))
+    [X, Y] = averageTrials(X, Y, ip.Results.averageTrials);
+ end
+
 
 % PERMUTATION TEST (assigning)
 % Default 0
@@ -174,13 +179,18 @@ end
 %   Get integer number of permutation iterations
 
 % PCA PARAMS (assigning)
-% Default: usePC = 1; nPC = 0.9
-% If usePC == 1 & nPC <= 0, 
-%   error('Variable nPC should specify proportion of variance to explain, 
-%   or integer number of PCs to use')
+ if ~(isempty(ip.Results.doPCA))
+    X = getPCs(X, ip.Results.doPCA);
+ end
+ 
 
 % CROSS VALIDATION (assigning)
 % Default 10
+[r c] = size(X);
+
+cvpartition(r, 'Kfold', ip.Results.folds);
+
+
 % Just partition, as shuffling (or not) was handled in previous step
 % if nFolds == 1
 %   Special case of fitting model with no test set (argh)
