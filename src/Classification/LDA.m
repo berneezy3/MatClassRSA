@@ -1,63 +1,52 @@
-function [predictions, accuracy, testFoldIndx] = LDA(X, Y)
+function [predictions, accuracy] = predictLDA(X, Y, classifyOptionsStruct)
 
-    c = cvpartition(Y,'KFold',10);
-
-    %check partition is stratified;  besides 0, other values should be the same
-    %hist(Y.*c.test(1));
-
-    err = zeros(c.NumTestSets, 1);
-
-    %if sum should be 5188 (AKA # of examples)
-    disp(sum(bitor(c.training(1), c.test(1))))
-
-    %%
-    predictAccuracyArr = zeros(10,1);
-    %predictedLabelsAll = [] %= zeros(length(Y));
-    predictedLabelsAll = NaN(size(Y));
-    correctLabelsAll = [] %= zeros(length(Y));
-    testFoldIndx = NaN(size(Y));
-    
-    for i = 1:c.NumTestSets
-        %train set
-        trainInd = c.training(i);
-        trainX = trainInd .* X;
-        trainX = trainX(any(trainX, 2),:);
-        trainY = trainInd .* Y;
-        trainY = trainY(any(trainY, 2),:);
-
-        %
-        % LDA
-        %
-        
-        mdl = fitcdiscr(trainX, trainY);
-        
-        %test set
-        testInd = c.test(i);
-        testX = testInd .* X;
-        testX = testX(any(testX, 2),:);
-        testY = testInd .* Y;
-        testY = testY(any(testY, 2),:);
-
-        predictedLabels = predict(mdl,testX);
-        predictedLabels = predictedLabels(:,end);
-        predictedLabelsAll(c.test(i)==1) = predictedLabels;
-        correctPredictionsCount = sum(not(bitxor(predictedLabels, testY)));
-        wrongPredictionsCount = size(testY) - correctPredictionsCount;
-        predictAccuracyArr(i) = correctPredictionsCount/length(testY);
-
-        disp( correctPredictionsCount/length(testY) );
-
-        %create corresponding predictions and correct vectors
-        %predictedLabelsAll2 = [predictedLabelsAll; predictedLabels];
-        correctLabelsAll = [correctLabelsAll; testY];
-        
-        testFoldIndx(c.test(i)==1) = i;
-
+    structLength = length(fieldnames(classifyOptionsStruct));
+    params = fieldnames(classifyOptionsStruct);
+    values = fields(classifyOptionsStruct);
+    discrimType = 'linear';
+    expectedDiscrimTypes = {'linear', 'quadratic', 'diagLinear', ... 
+        'diagQuadratic', 'pseudoLinear', 'pseudoLinear'}
+    for i=1:structLength
+        switch params(i)
+            case 'DiscrimType' 
+%                 switch values(i)
+%                     case 'linear'
+%                     case 'quadratic'
+%                     case 'diagLinear'
+%                     case 'diagQuadratic'
+%                     case 'pseudoLinear'
+%                     case 'pseudoLinear'
+%                     otherwise
+%                 end
+                validatestring(params(i), expectedDiscrimTypes);
+                discrimType = params(i);
+            otherwise
+                warning([params(i) 'not a real input parameter to LDA.'])
+        end
     end
-    %%
-    accuracy = mean(predictAccuracyArr);
-    predictions = predictedLabelsAll;
-    %confusionMatrix = confusionmat(Y, predictedLabelsAll)
-    %confusionMatrix2 = confusionmat(Y, predictedLabelsAll2)
+    
+    mdl = fitcdiscr(X, Y, 'DiscrimType', discrimType);
+
+    %test set
+    testInd = c.test(i);
+    testX = testInd .* X;
+    testX = testX(any(testX, 2),:);
+    testY = testInd .* Y;
+    testY = testY(any(testY, 2),:);
+
+    predictedLabels = predict(mdl,testX);
+    predictedLabels = predictedLabels(:,end);
+    predictedLabelsAll(c.test(i)==1) = predictedLabels;
+    correctPredictionsCount = sum(not(bitxor(predictedLabels, testY)));
+    wrongPredictionsCount = size(testY) - correctPredictionsCount;
+    predictAccuracyArr(i) = correctPredictionsCount/length(testY);
+
+    disp( correctPredictionsCount/length(testY) );
+
+    %create corresponding predictions and correct vectors
+    %predictedLabelsAll2 = [predictedLabelsAll; predictedLabels];
+    correctLabelsAll = [correctLabelsAll; testY];
+
+    testFoldIndx(c.test(i)==1) = i;
 
 end

@@ -1,4 +1,4 @@
-function y = getPCs(X, PCs)
+function [y, V] = getPCs(X, PCs)
 % y = getPCs(X, PCs)
 %-------------------------------------------------------------------
 % Function to extract principle componenets via singular value
@@ -15,6 +15,7 @@ function y = getPCs(X, PCs)
 % EXAMPLES:
 %
 % TODO:
+%   Retrieve the indices of the principle componenets
 % 
 
     disp('getting PCs');

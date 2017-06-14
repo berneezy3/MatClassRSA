@@ -10,41 +10,10 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
 %   Y - labels
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   normalize - method to normalize rows of X, 
-%       --options--
-%       'diagonal'
-%       'sum'
-%       'none'
-%   shuffleData - 1 to shuffle trainig data along with labels (default), or
-%       --options--
-%       1 - shuffle
-%       0 - do not shuffle
-%   averageTrials - how to compute averaging of trials in X to increase accuracy
-%       --options--
-%       (negative value) - don't average
-%       (postitive int) - number of integers to average over
-%   permutationTest - TODO
-%       --options--
-%       TODO
-%   PCA - Principle Component analysis on data matrix X. Default is to
-%       keep components that explan 90% of the variance. To retrieve
-%       components that explain a certain variance, enter the variance as a
-%       decimal <1 and >0.  To retrieve a certain number of most
-%       significant features, enter an integer >1.
-%   PCAinFold - whether or not to conduct PCA in each fold
-%       --options--
-%       1 (default) - PCA within each fold
-%       0 - one PCA for entire training data matrix X
-%   nFolds - number of folds in cross validation.  Must be integer
-%       greater than 1
-%   classify - parameter to select classifier. 
-%        --options--
-%       'SVM' (default)
-%       'LDA' 
-%       'RandomForest'
-%   classifyOptionStruct - Option vector specific to each classifier.  
-%       --options--
-%       TODO
+%   normalize - method to normalize rows
+%   shuffleData - whether or not to shuffle trainig data along with labels
+%   
+%
 % TODO:
 %   Check when the folds = 1, what we should do 
 
@@ -88,7 +57,8 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
          @(x) any(validatestring(x, expectedPermutationTest)));
     addParameter(ip, 'PCA', defaultPCA, ...
         @(x) assert(rem(x,1) == 0 ));
-    addParameter(ip, 'PCAinFold', defaultPCAinFold);
+    addParameter(ip, 'PCAinFold', defaultPCAinFold, ...
+        @(x) assert(rem(x,1) == 0 ));
     addParameter(ip, 'nFolds', defaultNFolds);
     addParameter(ip, 'classify', defaultClassify, ...
          @(x) any(validatestring(x, expectedClassify)));
