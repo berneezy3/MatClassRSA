@@ -1,4 +1,4 @@
-cfunction distanceMatrix = C(CM, varargin)
+function distanceMatrix = computeDistanceMatrix(CM, varargin)
 % distanceMatrix = computeDistanceMatrix(CM, varargin)
 % ------------------------------------------------
 % Blair - January 31, 2017
@@ -54,14 +54,26 @@ addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
 
 % Optional name-value pairs
 % NOTE: Should use addParameter for R2013b and later.
-addParamValue(ip, 'normalize', defaultNormalize,...
-    @(x) any(validatestring(x, expectedNormalize)));
-addParamValue(ip, 'symmetrize', defaultSymmetrize,...
-    @(x) any(validatestring(x, expectedSymmetrize)));
-addParamValue(ip, 'distance', defaultDistance,...
-    @(x) any(validatestring(x, expectedDistance)));
-addParamValue(ip, 'rankdistances', defaultRankdistances,...
-    @(x) any(validatestring(x, expectedRankdistances)));
+if verLessThan('matlab', '8.2')
+    addParamValue(ip, 'normalize', defaultNormalize,...
+        @(x) any(validatestring(x, expectedNormalize)));
+    addParamValue(ip, 'symmetrize', defaultSymmetrize,...
+        @(x) any(validatestring(x, expectedSymmetrize)));
+    addParamValue(ip, 'distance', defaultDistance,...
+        @(x) any(validatestring(x, expectedDistance)));
+    addParamValue(ip, 'rankdistances', defaultRankdistances,...
+        @(x) any(validatestring(x, expectedRankdistances)));
+else
+    addParameter(ip, 'normalize', defaultNormalize,...
+        @(x) any(validatestring(x, expectedNormalize)));
+    addParameter(ip, 'symmetrize', defaultSymmetrize,...
+        @(x) any(validatestring(x, expectedSymmetrize)));
+    addParameter(ip, 'distance', defaultDistance,...
+        @(x) any(validatestring(x, expectedDistance)));
+    addParameter(ip, 'rankdistances', defaultRankdistances,...
+        @(x) any(validatestring(x, expectedRankdistances)));
+end
+
 
 % Parse
 parse(ip, CM, varargin{:});

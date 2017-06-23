@@ -48,6 +48,10 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
 % TODO:
 %   Check when the folds = 1, what we should do 
 
+    % Initilize info struct
+    classifierInfo = struct('Normalize', '', 'shuffleData', 'on', 'averageTrials', '', ...
+        'permutationTest', '', 'PCA', '', 'PCAinFold', '', 'nFolds', '', 'classifier', '');
+
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = false;
@@ -56,6 +60,7 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
     defaultNormalize = 'diagonal';
     defaultShuffleData = 1;
     defaultAverageTrials = 10;
+    defaultAverageTrialsHandleRemainder = 'discard';
     defaultPermutationTest = 0;
     defaultPCA = -1;
     defaultPCAinFold = 1;
@@ -67,6 +72,7 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
     %Specify expected values
     expectedNormalize = {'diagonal', 'sum', 'none'};
     expectedShuffleData = [0, 1];
+    expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     expectedPermutationTest = 0;
     expectedPCAinFold = [0,1];
     expectedClassify = {'SVM', 'LDA', 'RandomForest'};
@@ -78,23 +84,44 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
 
     %Optional positional inputs
     %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
-    addParameter(ip, 'normalize', defaultNormalize,...
-        @(x) any(validatestring(x, expectedNormalize)));
-    addParameter(ip, 'shuffleData', defaultShuffleData, ...
-        @(x) any(validatestring(x, expectedShuffleData)));
-    addParameter(ip, 'averageTrials', defaultAverageTrials, ...
-        @(x) assert(rem(x,1) == 0 ));
-    addParameter(ip, 'permutationTest', defaultPermutationTest, ...
-         @(x) any(validatestring(x, expectedPermutationTest)));
-    addParameter(ip, 'PCA', defaultPCA, ...
-        @(x) assert(rem(x,1) == 0 ));
-    addParameter(ip, 'PCAinFold', defaultPCAinFold);
-    addParameter(ip, 'nFolds', defaultNFolds);
-    addParameter(ip, 'classify', defaultClassify, ...
-         @(x) any(validatestring(x, expectedClassify)));
-    addParameter(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
-        @(x) assert(isStruct(defaultClassifyOptionsStruct)));
-
+    if verLessThan('matlab', '8.2')
+        addParamValue(ip, 'normalize', defaultNormalize,...
+            @(x) any(validatestring(x, expectedNormalize)));
+        addParamValue(ip, 'shuffleData', defaultShuffleData, ...
+            @(x) any(validatestring(x, expectedShuffleData)));
+        addParamValue(ip, 'averageTrials', defaultAverageTrials, ...
+            @(x) assert(rem(x,1) == 0 ));
+        addParamValue(ip, 'permutationTest', defaultPermutationTest, ...
+             @(x) any(validatestring(x, expectedPermutationTest)));
+        addParamValue(ip, 'PCA', defaultPCA, ...
+            @(x) assert(rem(x,1) == 0 ));
+        addParamValue(ip, 'PCAinFold', defaultPCAinFold);
+        addParamValue(ip, 'nFolds', defaultNFolds);
+        addParamValue(ip, 'classify', defaultClassify, ...
+             @(x) any(validatestring(x, expectedClassify)));
+        addParamValue(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
+            @(x) assert(isStruct(defaultClassifyOptionsStruct)));
+    else
+        addParameter(ip, 'normalize', defaultNormalize,...
+            @(x) any(validatestring(x, expectedNormalize)));
+        addParameter(ip, 'shuffleData', defaultShuffleData, ...
+            @(x) any(validatestring(x, expectedShuffleData)));
+        addParameter(ip, 'averageTrials', defaultAverageTrials, ...
+            @(x) assert(rem(x,1) == 0 ));
+        addParameter(ip, 'averageTrialsHandleRemainder', ...
+            defaultAverageTrialsHandleRemainder, ...
+            @(x) assert(validatestring(x, expectedAverageTrialsHandleRemainder)));
+        addParameter(ip, 'permutationTest', defaultPermutationTest, ...
+             @(x) any(validatestring(x, expectedPermutationTest)));
+        addParameter(ip, 'PCA', defaultPCA, ...
+            @(x) assert(rem(x,1) == 0 ));
+        addParameter(ip, 'PCAinFold', defaultPCAinFold);
+        addParameter(ip, 'nFolds', defaultNFolds);
+        addParameter(ip, 'classify', defaultClassify, ...
+             @(x) any(validatestring(x, expectedClassify)));
+        addParameter(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
+            @(x) assert(isStruct(defaultClassifyOptionsStruct)));
+    end
 
     %Optional name-value pairs
     %NOTE: Should use addParameter for R2013b and later.
@@ -217,12 +244,19 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
     % Default 1
     if (ip.Results.shuffleData)
         [X, Y] = shuffleData(X, Y);
+    else
+        classifierInfo.shuffleData = 'off';
     end
 
 
     % TRIAL AVERAGING (doing)
-     if ~(isempty(ip.Results.averageTrials))
-        [X, Y] = averageTrials(X, Y, ip.Results.averageTrials);
+     if(ip.Results.averageTrials >= 1)
+        [X, Y] = averageTrials(X, Y, ip.Results.averageTrials, ...
+            'handleRemainder' ,ip.Results.averageTrialsHandleRemainder);
+        averageTrialsInfo = 'on';
+        classifierInfo.averageTrials = 'on';
+     else
+         warning('variable "defaultAverageTrialsHandleRemainder" not used')
      end
 
 
@@ -256,7 +290,8 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
         ceil(ip.Results.nFolds) == floor(ip.Results.nFolds) & ...
         ip.Results.nFolds < nTrials, ...
         'nFolds must be an integer between 2 and nTrials to perform CV' );
-
+ 
+        % TODO: This needs to be regular cvpartition object
         partition = cvpartition(r, 'Kfold', ip.Results.nFolds);
         trainX = [];
         trainY = [];

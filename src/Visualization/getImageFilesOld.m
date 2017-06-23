@@ -1,4 +1,4 @@
-function y = getImageFilesNew(iconPath)
+function y = getImageFiles(iconPath)
 % y = getImageFiles(iconPath)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
@@ -11,7 +11,7 @@ function y = getImageFilesNew(iconPath)
 %               for labeling
 %
 % OUTPUT ARGS:
-%   y - an array of jpg, jpeg, or png file names
+%   y - a vector of jpg, jpeg, or png file names
 %
 % EXAMPLES:
 %
@@ -20,34 +20,25 @@ function y = getImageFilesNew(iconPath)
 
     labelStructs = dir(iconPath);
     tempLabelStruct = NaN;
-    labels = {};
+    labels = [];
     for i =1:length(labelStructs)
         tempLabelStruct = labelStructs(i);
-        labels = [labels tempLabelStruct.name];
+        labels = [labels string(tempLabelStruct.name)];
     end
     removeArr = [];
     % remove non-png, non-jpg files
     for i = 1:length(labels)
-        if ~(endswith(cell2mat(labels(i)), '.jpg') ...
-            || endswith(cell2mat(labels(i)), '.png') ...
-            || endswith(cell2mat(labels(i)), '.jpeg') )
+        if ~(endsWith(labels(i), '.jpg') ...
+            || endsWith(labels(i), '.png') ...
+            || endsWith(labels(i), '.jpeg') )
             removeArr = [labels(i) removeArr];
         end
     end
-    tempLabels = {};
-    
-    % add all labels not in the remove list into the new array
+    tempLabels = [];
     for i = 1:length(labels)
-        insertFlag = 1;
-        for j = 1:length(removeArr)
-            %  if string is in removeArray, then dont add it into our
-            %  return array
-            if strcmp(cell2mat(removeArr(j)), cell2mat(labels(i))) == 1
-                insertFlag = 0;
-            end
-        end
-        if insertFlag
+        if ~any(removeArr==labels(i))
             tempLabels = [tempLabels labels(i)];
+            continue;
         end
     end
     y = tempLabels;

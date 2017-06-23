@@ -1,4 +1,4 @@
-function overlayImage(original, new, X, Y, width, height)
+Ifunction overlayImage(original, new, X, Y, width, height)
 % overlayImage(original, new, X, Y, width, height)
 % ------------------------------------------------
 % Bernard - April 12, 2017

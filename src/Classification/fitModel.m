@@ -60,6 +60,7 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
                             "numTrees must be a numeric integer");
                         numTrees = values(i)
                     otherwise
+                        error([params(i) 'not a real input parameter to Random Forest Function. '])
                 end
             end
             mdl = TreeBagger(numTrees, X, Y, 'OOBPrediction', 'on');

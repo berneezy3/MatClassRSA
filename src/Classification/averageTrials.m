@@ -51,8 +51,11 @@ function [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
     defaultHandleRemainder = 'discard';
     validHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     checkHandleRemainder = @(x) any(validatestring(x, validHandleRemainder));
-    ip.addParameter('handleRemainder', defaultHandleRemainder, checkHandleRemainder); 
-    
+    if verLessThan('matlab', '8.2')
+        addParamValue(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder); 
+    else
+        addParameter(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder); 
+    end
     parse(ip, X, Y, groupSize, varargin{:});
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

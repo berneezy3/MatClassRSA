@@ -14,7 +14,7 @@ function plotCM(confMat, varargin)
 %                   confusion matrix
 %                   e.g. ['y' 'm' 'c' 'r' 'g' 'b' 'w' 'k']
 %                   or ['yellow' 'magenta' 'cyan' 'red' 'green' 
-%                       'blue' 'white' 'black']            
+%                       'blue' 'white' 'black']
 % - 'axisLabels': a matrix of alphanumeric labels, ordered by same order of
 %                   labels in the confusion matrix
 %                   e.g. ['cat' 'dog' 'fish']
