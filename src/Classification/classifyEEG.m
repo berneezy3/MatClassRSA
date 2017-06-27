@@ -302,20 +302,20 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
 
     for i = 1:partition.NumTestSets
 
-        trainX = partition.training(i) .* X;
+        trainX = bsxfun(@times, partition.training(i), X);
         trainX = trainX(any(trainX, 2),:);
-        trainY = partition.training(i)' .* Y;
+        trainY = bsxfun(@times, partition.training(i)', Y);
         trainY = trainY(trainY ~=0);
-        testX = partition.test(i) .* X;
+        testX = bsxfun(@times, partition.test(i), X);
         testX = testX(any(testX, 2),:);
-        testY = partition.test(i)' .* Y;
+        testY = bsxfun(@times, partition.test(i)', Y);
         testY = testY(testY ~=0);
         predictedY = NaN(1, length(testY));
 
         if (ip.Results.PCAinFold == 1)
             if (ip.Results.PCA >0)
                 [trainX, V] = getPCs(trainX, ip.Results.PCA);
-                testX = testX.*V;
+                testX = testX*V;
             end
         end
 
