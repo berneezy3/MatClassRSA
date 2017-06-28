@@ -1,4 +1,4 @@
-function [y, V] = getPCs(X, PCs)
+function [y, V, nPC] = getPCs(X, PCs)
 % y = getPCs(X, PCs)
 %-------------------------------------------------------------------
 % Function to extract principle componenets via singular value

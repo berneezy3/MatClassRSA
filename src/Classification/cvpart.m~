@@ -11,7 +11,7 @@ classdef cvpart
 %   - k: number of folds
 %
 % OUTPUT ARGS:
-%   - obj:  ann object of the cvpart class
+%   - 
     
    properties
       folds
@@ -29,7 +29,7 @@ classdef cvpart
         obj.folds = {};
         
         %initialize number of sets
-        obj.NumTestSets = k;
+        NumTestSets = k;
         
         %get remainder
         remainder = rem(n, k);

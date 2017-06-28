@@ -1,6 +1,6 @@
 function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
 
-    addpath('libsvm-3.21/matlab');
+   
 
     % initialize variable to parse classifyOptionsStruct
     structLength = length(fieldnames(classifyOptionsStruct));
