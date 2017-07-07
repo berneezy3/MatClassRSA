@@ -1,4 +1,4 @@
-function plotCM(confMat, varargin)
+function img = plotCM(confMat, varargin)
 % plotCM(confMat, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017

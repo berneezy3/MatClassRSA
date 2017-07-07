@@ -1,8 +1,19 @@
 function pVal = pbinom(Y, nFolds, accuracy)
-% pbinom.m
+% pVal = pbinom(Y, nFolds, accuracy)
 % -----------
-% Blair
+% Bernard Wang
 % January 30 2012
+%
+% This function computes the p-value via binomial CDF (cumutalive
+% Distribution Function)
+%
+% INPUT ARGS:
+%   - Y: the labels for the training data
+%   - nFolds: the number of folds 
+%   - accuracy: the actual accuracy of the classifier
+%
+% OUTPUT ARGS:
+%   - pVal: P-value
 
 classes = unique(Y);
 classCount = sum(Y == classes(1));

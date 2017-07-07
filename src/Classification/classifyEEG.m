@@ -1,4 +1,4 @@
-function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
+function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
 % [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
 % -------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
@@ -69,6 +69,8 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
     defaultNFolds = 10;
     defaultClassify = 'SVM';
     defaultClassifyOptionsStruct = struct([]);
+    defaultPValueMethod = 'binomcdf';
+    defaultPermutations = 0;
 
 
     %Specify expected values
@@ -78,7 +80,8 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
     expectedPermutationTest = 0;
     expectedPCAinFold = [0,1];
     expectedClassify = {'SVM', 'LDA', 'RandomForest'};
-
+    expectedPValueMethod = {'binomcdf', 'permuteLabels', 'permuteModels'};
+    
     %Required inputs
     addRequired(ip, 'X', @ismatrix)
     addRequired(ip, 'Y', @isvector)
@@ -106,6 +109,11 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
              @(x) any(validatestring(x, expectedClassify)));
         addParamValue(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
             @(x) assert(isStruct(defaultClassifyOptionsStruct)));
+        addParamValue(ip, 'pValueMethod', defaultPValueMethod, ...
+            @(x) any(validatestring(x, expectedPValueMethod)));
+        % must be a positive integer
+        addParamValue(ip, 'permutations', defaultPermutations, ...
+            @(x) (x>0 && rem(x,1) == 0));
     else
         addParameter(ip, 'normalize', defaultNormalize,...
             @(x) any(validatestring(x, expectedNormalize)));
@@ -126,6 +134,11 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
              @(x) any(validatestring(x, expectedClassify)));
         addParameter(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
             @(x) assert(isStruct(defaultClassifyOptionsStruct)));
+        addParameter(ip,'pValueMethod', defaultPValueMethod, ...
+             @(x) any(validatestring(x, expectedPValueMethod)));
+        % must be a positive integer
+        addParameter(ip, 'permutations', defaultPermutations, ...
+            @(x) (x>0 && rem(x,1) == 0));
     end
 
     %Optional name-value pairs
@@ -298,6 +311,8 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
  
         % TODO: This needs to be regular cvpartition object
         partition = cvpart(r, ip.Results.nFolds);
+        % shuffled Y vector for Permutation testing
+        pY = Y(randperm(r));
         trainX = [];
         trainY = [];
         testX = [];
@@ -316,6 +331,12 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
         testY = bsxfun(@times, partition.test{i}', Y);
         testY = testY(testY ~=0);
         predictedY = NaN(1, length(testY));
+        
+        pTrainY = bsxfun(@times, partition.training{i}', pY);
+        pTrainY = pTrainY(pTrainY ~=0);
+        pTestY = bsxfun(@times, partition.test{i}', pY);
+        pTestY = pTestY(pTestY ~=0);
+        pPredictedY = NaN(1, length(pTestY));
 
         if (ip.Results.PCAinFold == 1)
             if (ip.Results.PCA > 0)
@@ -325,12 +346,20 @@ function [CM, accuracy, classifierInfo] = classifyEEG(X, Y, varargin)
             end
         end
 
-        mdl = fitModel(trainX, trainY, ip.Results.classify, ...
-            ip.Results.classifyOptionsStruct);
 
-        predictions = modelPredict(testX, mdl);
+        if verLessThan('matlab', '8.2') & strcmp(ip.Results.classify, 'LDA')
+            classfy(testX, trainX, trainY, group, 'linear');
+            preditions = modelPredict;
+        else
+            mdl = fitModel(trainX, trainY, ip.Results.classify, ...
+                ip.Results.classifyOptionsStruct);
+            predictions = modelPredict(testX, mdl);
+        end
+
         labelsConcat = [labelsConcat testY];
         predictionsConcat = [predictionsConcat predictions];
+        
+        
         %predictcedY(partition.test(i)) = predictions;
     end
     CM = confusionmat(labelsConcat, predictionsConcat);
