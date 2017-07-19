@@ -1,4 +1,4 @@
-function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
+ function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
 % [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
 % -------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
@@ -12,12 +12,12 @@ function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
 %   normalize - method to normalize rows of X, 
 %       --options--
-%       'diagonal'
+%       'diagonal' (default)
 %       'sum'
 %       'none'
 %   shuffleData - 1 to shuffle trainig data along with labels (default), or
 %       --options--
-%       1 - shuffle
+%       1 - shuffle (default)
 %       0 - do not shuffle
 %   averageTrials - how to compute averaging of trials in X to increase accuracy
 %       --options--
@@ -36,15 +36,28 @@ function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
 %       1 (default) - PCA within each fold
 %       0 - one PCA for entire training data matrix X
 %   nFolds - number of folds in cross validation.  Must be integer
-%       greater than 1
+%       greater than 1. Default is 10.
 %   classify - parameter to select classifier. 
 %        --options--
 %       'SVM' (default)
 %       'LDA' 
 %       'RandomForest'
-%   classifyOptionStruct - Option vector specific to each classifier.  
-%       --options--
-%       TODO
+%   classifyOptionStruct - This is an option vector specific to each classifier
+%       that comes in the form of a struct containing name-value pairs.
+%       Acceptable name-value pairs are dependent on which classifier is
+%       chosen for the 'classify' parameter in the main function.  
+%       classifier: LDA
+%           name: 'DiscrimType'
+%           value: {'linear', 'quadratic', 'diagLinear', ... 
+%                           'diagQuadratic', 'pseudoLinear', 'pseudoLinear'} 
+%       classifier: SVM
+%           name: 'kernel'
+%           value: {'linear', 'polynomial', 'rbf', 'sigmoid'}
+%       classifier: RF
+%           name: 'numTrees'
+%           value: *some positive integer*
+%       pValueMethod: 
+%       
 % TODO:
 %   Check when the folds = 1, what we should do 
 
@@ -279,11 +292,22 @@ function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
 
 
     % PERMUTATION TEST (assigning)
-    % Default 0
-    % If doPermTest
-    %   (details are TODO)
-    %   Get integer number of permutation iterations
-
+    [r c] = size(X);
+    partition = cvpart(r, ip.Results.nFolds);
+    switch ip.Results.pValueMethod
+        case 'binocdf'
+        case 'permuteLabels'
+            pVal = permuteLabels(X, Y, partition, partition.NumTestSets, ...
+                ip.Results.permutations, ip.Results.classify, ...
+                ip.Results.classifyOptionsStruct );
+        case 'permuteModel'
+            pVal = permuteModel(X, Y, partition, partition.NumTestSets, ...
+                ip.Results.permutations, ip.Results.classify, ...
+                ip.Results.classifyOptionsStruct );
+        case 'None'
+            ;
+    end
+    
     % PCA PARAMS (assigning)
     if (ip.Results.PCAinFold == 0)
         if (ip.Results.PCA >0)
@@ -293,7 +317,7 @@ function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
 
     % CROSS VALIDATION (assigning)
     % Default 10
-    [r c] = size(X);
+
 
     % Just partition, as shuffling (or not) was handled in previous step
     % if nFolds == 1
@@ -310,7 +334,7 @@ function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
         'nFolds must be an integer between 2 and nTrials to perform CV' );
  
         % TODO: This needs to be regular cvpartition object
-        partition = cvpart(r, ip.Results.nFolds);
+        
         % shuffled Y vector for Permutation testing
         pY = Y(randperm(r));
         trainX = [];
@@ -319,19 +343,24 @@ function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
         testY = [];
         predictionsConcat = [];
         labelsConcat = [];
+        
+        pVal = permuteLabels(X, Y, partition, partition.NumTestSets, ...
+            ip.Results.permutations, ip.Results.classify, ...
+            ip.Results.classifyOptionsStruct );
 
     for i = 1:partition.NumTestSets
 
         trainX = bsxfun(@times, partition.training{i}, X);
-        trainX = trainX(any(trainX, 2),:);
+        trainX = trainX(any(trainX~=0,2),:);
         trainY = bsxfun(@times, partition.training{i}', Y);
         trainY = trainY(trainY ~=0);
         testX = bsxfun(@times, partition.test{i}, X);
-        testX = testX(any(testX, 2),:);
+        testX = testX(any(testX~=0, 2),:);
         testY = bsxfun(@times, partition.test{i}', Y);
         testY = testY(testY ~=0);
         predictedY = NaN(1, length(testY));
         
+        % data for permutation testing
         pTrainY = bsxfun(@times, partition.training{i}', pY);
         pTrainY = pTrainY(pTrainY ~=0);
         pTestY = bsxfun(@times, partition.test{i}', pY);
@@ -346,16 +375,15 @@ function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
             end
         end
 
-
         if verLessThan('matlab', '8.2') & strcmp(ip.Results.classify, 'LDA')
             classfy(testX, trainX, trainY, group, 'linear');
-            preditions = modelPredict;
+            predictions = modelPredict;
         else
             mdl = fitModel(trainX, trainY, ip.Results.classify, ...
                 ip.Results.classifyOptionsStruct);
             predictions = modelPredict(testX, mdl);
         end
-
+        
         labelsConcat = [labelsConcat testY];
         predictionsConcat = [predictionsConcat predictions];
         

@@ -1,7 +1,6 @@
 function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
 
-   
-
+  
     % initialize variable to parse classifyOptionsStruct
     structLength = length(fieldnames(classifyOptionsStruct));
     params = fieldnames(classifyOptionsStruct);
@@ -59,7 +58,7 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
                     case 'numTrees'
                         assert(isnumeric(values(i)) & ...
                             ceil(values(i)) ~= floor(values(i)), ...
-                            "numTrees must be a numeric integer");
+                            'numTrees must be a numeric integer');
                         numTrees = values(i)
                     otherwise
                         error([params(i) 'not a real input parameter to Random Forest Function. '])

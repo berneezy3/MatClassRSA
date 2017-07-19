@@ -1,4 +1,4 @@
-function plotMST(distMat, varargin)
+function plt = plotMST(distMat, varargin)
 % plotMST = plotMST(distMat, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 28, 2017

@@ -46,13 +46,13 @@ function [predictions, accuracy, confusionMatrix] = classifyEEGData(X, Y, classi
     switch classifier
         case 'SVM'
             disp('in svm')
-            [predictions accuracy] = SVM(X, Y, 'rbf');
+            [predictions accuracy] = oldSVM(X, Y, 'rbf');
         case 'RandomForest'
             disp('in RF')
-            [predictions accuracy] = RandomForest(X, Y, 350 );
+            [predictions accuracy] = oldRandomForest(X, Y, 350 );
         case 'LDA'
             disp('in LDA')
-            [predictions accuracy] = LDA(X, Y);
+            [predictions accuracy] = oldLDA(X, Y);
 %         case 'ElasticNet'
 %             disp('in ENET')
 %             [predictions accuracy] = ElasticNet(X, Y);
@@ -60,7 +60,7 @@ function [predictions, accuracy, confusionMatrix] = classifyEEGData(X, Y, classi
 %             disp('in multinomial')
 %             [predictions accuracy testIndex] = Multinomial(X, Y);
         otherwise
-            error('input valid kernel type')
+            error('input valid classifer type')
     end
     
     confusionMatrix = confusionmat(Y, predictions);

@@ -19,10 +19,12 @@ classes = unique(Y);
 classCount = sum(Y == classes(1));
 foldSize = floor(length(Y)/nFolds);
 
+% make sure nObs > 100, so we have at least the minimal amount of trials
 if (length(Y)) < 100
     error('To use binomial CDF to computer P-value, number of observatons must > 100.')
 end
 
+% make sure N > nObs/10, to achieve minimal amount of folds viable 
 if foldSize < length(Y)/10
     error(['To use binomial CDF to computer P-value, the size of each fold ' ...
         'should be greater than the number of observations/10. Make sure number ' ...
@@ -39,6 +41,5 @@ end
 %rate = 13.16;  % number between 0-100
 chance = 1/length(classes);
 trialsPerFold = floor(length(Y)/nFolds);
-
 
 pVal = 1-binocdf(floor(trialsPerFold*accuracy/100), trialsPerFold, chance)

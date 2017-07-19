@@ -41,10 +41,10 @@ classdef cvpart
         %case divisible
         if remainder == 0
             for i = 1:k
-                trainIndices = zeros( n,1 );
+                trainIndices = ones( n,1 );
                 
                 for j = 1:quotient
-                    trainIndices(j+(i-1)*quotient) = 1;
+                    trainIndices(j+(i-1)*quotient) = 0;
                     
                 end
                 obj.training{end+1} = trainIndices;
@@ -54,9 +54,9 @@ classdef cvpart
         else
             indexlocation = 0;
             for i = 1:k-remainder
-                trainingIndices = zeros( n,1 );
+                trainingIndices = ones( n,1 );
                 for j = 1:quotient
-                    trainingIndices(j+(i-1)*quotient) = 1;
+                    trainingIndices(j+(i-1)*quotient) = 0;
                     indexlocation = indexlocation + 1;
                 end
                 obj.training{end+1} = trainingIndices;
@@ -65,9 +65,9 @@ classdef cvpart
             for i = 1:remainder
                 %disp('ajhdbfajhsdbfljahsdf');
                 %disp(indexlocation);
-                trainingIndices = zeros( n,1 );
+                trainingIndices = ones( n,1 );
                 for j = 1:quotient+1
-                    trainingIndices(j+(i-1)*quotient+indexlocation+(i-1)) = 1;
+                    trainingIndices(j+(i-1)*quotient+indexlocation+(i-1)) = 0;
                 end
                 obj.training{end+1} = trainingIndices;
                 obj.test{end+1} = 1-trainingIndices;

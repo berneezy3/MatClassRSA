@@ -134,8 +134,8 @@ function img = plotCM(confMat, varargin)
     elseif isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
             && isempty(ip.Results.iconPath)
         disp('CASE: axis')
-        xticks(1:72)
-        yticks(1:72)
+        xticks(1:length(ip.Results.axisLabels))
+        yticks(1:length(ip.Results.axisLabels))
         xticklabels(ip.Results.axisLabels)
         yticklabels(ip.Results.axisLabels)
         

@@ -29,6 +29,8 @@ function y = plotDendrogram(distMat, varargin)
 %   order
 %   - flip horizontal
 %   - make sure the side thin
+%   - make sure the dendrogram is in the correct order, not the order of
+%   the dist matrix
 
     ip = inputParser;
     ip.FunctionName = 'plotDendrogram';
@@ -41,7 +43,7 @@ function y = plotDendrogram(distMat, varargin)
     
     tree = linkage(distMat);
     [r c] = size(tree);
-    d = dendrogram(tree, 0);
+    [d T P] = dendrogram(tree, 0);
 
     %set(gca,'xtick',[]);
     if length(ip.Results.nodeLabels) >= 1
@@ -99,10 +101,10 @@ function y = plotDendrogram(distMat, varargin)
             width = 40;
             height = 40;
             if i <= length(ip.Results.nodeColors)
-                label = labels(i)
+                label = labels(P(i));
                 t = text(centerX-width/2, centerY-height, label);
-                t.Color = ip.Results.nodeColors(i);
-                t(1).FontSize = 14;
+                t.Color = ip.Results.nodeColors(P(i));
+                t(1).FontSize = 25;
             else
 
             end
@@ -124,7 +126,7 @@ function y = plotDendrogram(distMat, varargin)
             width = 40;
             height = 40;
             if i <= length(ip.Results.nodeLabels)
-                label = labels(i)
+                label = labels(P(i))
                 disp(centerX)
                 t = text(centerX-width/2, centerY-height, label);
                 t.Color = 'black';
@@ -179,12 +181,12 @@ function y = plotDendrogram(distMat, varargin)
                 if ~isempty(ip.Results.nodeColors)
                     dendrogramImg = insertShape(dendrogramImg, 'FilledRectangle', ...
                         [centerX-cWidth/2, centerY-cHeight, cWidth, cHeight], ...
-                        'color', ip.Results.nodeColors(i));
+                        'color', ip.Results.nodeColors(P(i)));
                 end
                 dendrogramImg(centerY-height-9:centerY-1-9, centerX-width/2:centerX+width/2-1, 1:3) ...
                     = thisIcon;
                 image(dendrogramImg);
-                label = labels(i);
+                label = labels(P(i));
             else
             end
         end

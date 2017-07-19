@@ -14,10 +14,8 @@ function distanceMatrix = computeDistanceMatrix(CM, varargin)
 %
 % Optional name-value pairs:
 % - 'normalize': 'diagonal' (default), 'sum', 'none'
-% - 'symmetrize': 'average' (default),
-%   'geometric', 'harmonic', 'none'
-% - 'distance': 'linear' (default), 'power',
-%   'logarithmic', 'none'
+% - 'symmetrize': 'average' (default), 'geometric', 'harmonic', 'none'
+% - 'distance': 'linear' (default), 'power', 'logarithmic', 'none'
 % - 'rankdistances': 'none' (default), 'rank', 'percentrank'
 %
 % Outputs:
