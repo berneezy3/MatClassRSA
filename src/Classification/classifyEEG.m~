@@ -51,11 +51,23 @@
 %           value: {'linear', 'quadratic', 'diagLinear', ... 
 %                           'diagQuadratic', 'pseudoLinear', 'pseudoLinear'} 
 %       classifier: SVM
-%           name: ''
-%       
+%           name: 'kernel'
+%           value: {'linear', 'polynomial', 'rbf', 'sigmoid'}
+%       classifier: RF
+%           name: 'numTrees'
+%           value: *some positive integer*
+%       pValueMethod: 
 %       
 % TODO:
 %   Check when the folds = 1, what we should do 
+
+    % convert to vector if
+
+    % Make sure input vector Y is int vector, convert if it is string
+    % vector, string cell array, char vector
+    if ischar(Y)
+        
+    
 
      addpath([pwd '/src/Classification/libsvm-3.21/matlab']);
 
