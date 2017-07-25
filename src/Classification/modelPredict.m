@@ -12,8 +12,13 @@ function predictions = modelPredict(X, mdl)
             predictions = predict(mdl,X);
             predictions = predictions(:,end);
             predictions = predictions';
-        case 'TreeBagger' 
-            predictions = str2num(cell2mat(predict(mdl,X)))';
+        case 'TreeBagger'
+            predictions = predict(mdl,X);
+            [rows, cols] = size(predictions);
+            if (rows>cols)
+                predictions = reshape(predictions,[cols rows]);
+            end
+            predictions = str2num(cell2mat(predictions));
         otherwise
             error(['mdl must be of class TreeBagger, ClassificationDiscriminant' ...
                 'or TreeBagger']);

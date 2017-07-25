@@ -61,6 +61,11 @@
 % TODO:
 %   Check when the folds = 1, what we should do 
 
+    % convert Y to vector if its a cell array
+
+    % Make sure input vector Y is int vector, convert if it is string
+    % vector, string cell array, char vectors  
+
      addpath([pwd '/src/Classification/libsvm-3.21/matlab']);
 
     % Initilize info struct
