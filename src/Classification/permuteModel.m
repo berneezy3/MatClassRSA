@@ -24,7 +24,6 @@ function pVal = permuteModel(X, Y, partObj, nFolds, nPerms, PCAinFold, classifie
             [r c] = size(trainX)
             pTrainX = trainX(randperm(r), :);
 
-
             %get correctly predicted labels
             mdl = fitModel(pTrainX, trainY, classifier, ...
             classifyOptions);

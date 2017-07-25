@@ -43,6 +43,7 @@ if s == 0
         X0 = [X1; X2]; % Concatenate the data frame
         catLabels = [Y1category; Y2category];
         exLabels = [Y1exemplar; Y2exemplar];
+        exLabels = exLabels/5 - 4;
         sub = 'all';
     end
 else
