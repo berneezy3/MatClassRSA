@@ -68,18 +68,18 @@
 
      addpath([pwd '/src/Classification/libsvm-3.21/matlab']);
 
-    % Initilize info struct
-    classifierInfo = struct('Normalize', '', 'shuffleData', 'on', 'averageTrials', '', ...
-        'permutationTest', '', 'PCA', '', 'PCAinFold', '', 'nFolds', '', 'classifier', '');
+
 
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = false;
 
+    % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
+    
     %Specify default values
     defaultNormalize = 'diagonal';
     defaultShuffleData = 1;
-    defaultAverageTrials = 10;
+    defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
     defaultPermutationTest = 0;
     defaultPCA = -1;
@@ -89,6 +89,9 @@
     defaultClassifyOptionsStruct = struct([]);
     defaultPValueMethod = 'binomcdf';
     defaultPermutations = 0;
+    defaultTimeUse = [];
+    defaultSpaceUse = [];
+    defaultFeatureUse = [];
 
 
     %Specify expected values
@@ -98,10 +101,10 @@
     expectedPermutationTest = 0;
     expectedPCAinFold = [0,1];
     expectedClassify = {'SVM', 'LDA', 'RandomForest'};
-    expectedPValueMethod = {'binomcdf', 'permuteLabels', 'permuteModels'};
+    expectedPValueMethod = {'binomcdf', 'permuteLabels', 'permuteModel'};
     
     %Required inputs
-    addRequired(ip, 'X', @ismatrix)
+    addRequired(ip, 'X', @is2Dor3DMatrix)
     addRequired(ip, 'Y', @isvector)
     [r c] = size(X);
 
@@ -119,19 +122,24 @@
             @(x) assert(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParamValue(ip, 'permutationTest', defaultPermutationTest, ...
              @(x) any(validatestring(x, expectedPermutationTest)));
-        addParamValue(ip, 'PCA', defaultPCA, ...
-            @(x) assert(rem(x,1) == 0 ));
+        addParamValue(ip, 'PCA', defaultPCA);
         addParamValue(ip, 'PCAinFold', defaultPCAinFold);
         addParamValue(ip, 'nFolds', defaultNFolds);
         addParamValue(ip, 'classify', defaultClassify, ...
              @(x) any(validatestring(x, expectedClassify)));
         addParamValue(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
-            @(x) assert(isStruct(defaultClassifyOptionsStruct)));
+            @(x) assert(isstruct(x)));
         addParamValue(ip, 'pValueMethod', defaultPValueMethod, ...
             @(x) any(validatestring(x, expectedPValueMethod)));
         % must be a positive integer
         addParamValue(ip, 'permutations', defaultPermutations, ...
             @(x) (x>0 && rem(x,1) == 0));
+        addParamValue(ip, 'timeUse', defaultTimeUse, ...
+            @(x) (assert(isvector(x))));
+        addParamValue(ip, 'spaceUse', defaultSpaceUse, ...
+            @(x) (assert(isvector(x))));
+        addParamValue(ip, 'featureUse', defaultFeatureUse, ...
+            @(x) (assert(isvector(x))));
     else
         addParameter(ip, 'normalize', defaultNormalize,...
             @(x) any(validatestring(x, expectedNormalize)));
@@ -144,33 +152,48 @@
             @(x) assert(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParameter(ip, 'permutationTest', defaultPermutationTest, ...
              @(x) any(validatestring(x, expectedPermutationTest)));
-        addParameter(ip, 'PCA', defaultPCA, ...
-            @(x) assert(rem(x,1) == 0 ));
+        addParameter(ip, 'PCA', defaultPCA);
         addParameter(ip, 'PCAinFold', defaultPCAinFold);
         addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'classify', defaultClassify, ...
              @(x) any(validatestring(x, expectedClassify)));
         addParameter(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
-            @(x) assert(isStruct(defaultClassifyOptionsStruct)));
+            @(x) assert(isstruct(x)));
         addParameter(ip,'pValueMethod', defaultPValueMethod, ...
              @(x) any(validatestring(x, expectedPValueMethod)));
         % must be a positive integer
         addParameter(ip, 'permutations', defaultPermutations, ...
             @(x) (x>0 && rem(x,1) == 0));
+        addParameter(ip, 'timeUse', defaultTimeUse, ...
+            @(x) (assert(isvector(x))));
+        addParameter(ip, 'spaceUse', defaultSpaceUse, ...
+            @(x) (assert(isvector(x))));
+        addParameter(ip, 'featureUse', defaultFeatureUse, ...
+            @(x) (assert(isvector(x))));
     end
-
+    
     %Optional name-value pairs
     %NOTE: Should use addParameter for R2013b and later.
 
 
     % Parse
     parse(ip, X, Y, varargin{:});
-
-    % X3 = randi(12, [5 3 10]);
-    % X2 = randi(12, [10 15]);
-    % Y = randi(20, [10 1])';
-    % X = X3;
-    featureUse = []; spaceUse = []; timeUse = [];
+    
+    
+    % Initilize info struct
+    classifierInfo = struct('normalize', ip.Results.normalize, ...
+                        'shuffleData', ip.Results.shuffleData, ...
+                        'averageTrials', ip.Results.averageTrials, ...
+                        'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder,...
+                        'permutationTest', ip.Results.permutationTest, ...
+                        'PCA', ip.Results.PCA, ...
+                        'PCAinFold', ip.Results.PCAinFold, ...
+                        'nFolds', ip.Results.nFolds, ...
+                        'classify', ip.Results.classify, ...
+                        'classifyOptionsStruct', ip.Results.classifyOptionsStruct, ...
+                        'pValueMethod', ip.Results.pValueMethod, ...
+                        'permutations', ip.Results.permutations);
+    
 
     %%%%% INPUT DATA CHECKING (doing)
     %%% Check the input data matrix X
@@ -200,11 +223,15 @@
 
     %%%%% INPUT DATA SUBSETTING (doing)
     % Default chanUse, timeUse, featureUse = [ ]
+    spaceUse = ip.Results.spaceUse;
+    timeUse = ip.Results.timeUse;
+    featureUse = ip.Results.featureUse;
+    
     %%% 3D input matrix
     X_subset = X; % This will be the next output; currently 3D or 2D
     if ndims(X) == 3
         % Message about ignoring 'featureUse' input
-       if ~isempty(featureUse)
+       if ~isempty(ip.Results.featureUse)
            warning('Ignoring ''featureUse'' for 3D input data matrix.')
            warning('Use ''spaceUse'' and ''timeUse'' for 3D input data matrix.')
        end
@@ -237,7 +264,7 @@
            nTime = size(X_subset, 2);
        end
        % Reshape the X_subset matrix
-       %X_subset = cube2toRows(X_subset); % NOW IT'S 2D
+       X_subset = cube2trRows(X_subset); % NOW IT'S 2D
 
     %%% 2D input matrix
     elseif ndims(X) == 2
@@ -272,7 +299,9 @@
         end  
     end
     X = X_subset;
-
+    % let r and c store size of 2D matrix
+    [r c] = size(X);
+    
     %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
     % moving forward.
 
@@ -284,7 +313,6 @@
         classifierInfo.shuffleData = 'off';
     end
 
-
     % TRIAL AVERAGING (doing)
      if(ip.Results.averageTrials >= 1)
         [X, Y] = averageTrials(X, Y, ip.Results.averageTrials, ...
@@ -295,34 +323,35 @@
          warning('variable "defaultAverageTrialsHandleRemainder" not used')
      end
 
-
-    % PERMUTATION TEST (assigning)
-    [r c] = size(X);
+    % Split Data into fold (w/ or w/o PCA)
     partition = cvpart(r, ip.Results.nFolds);
-    switch ip.Results.pValueMethod
-        case 'binocdf'
-        case 'permuteLabels'
-            pVal = permuteLabels(X, Y, partition, partition.NumTestSets, ...
-                ip.Results.permutations, ip.Results.classify, ...
-                ip.Results.classifyOptionsStruct );
-        case 'permuteModel'
-            pVal = permuteModel(X, Y, partition, partition.NumTestSets, ...
-                ip.Results.permutations, ip.Results.classify, ...
-                ip.Results.classifyOptionsStruct );
-        case 'None'
-            ;
-    end
+    tic
+    cvDataObj = cvData(X,Y, partition,ip.Results.PCA, ip.Results.PCAinFold);
+    toc
     
-    % PCA PARAMS (assigning)
-    if (ip.Results.PCAinFold == 0)
-        if (ip.Results.PCA >0)
-            X = getPCs(X, ip.Results.PCA);
-        end
+    
+    %PERMUTATION TEST (assigning)
+    [r c] = size(X);
+    tic
+    switch ip.Results.pValueMethod
+        case 'binomcdf'
+            % case is handled at the end, when the accuracy of the
+            % classifier is calculated
+        case 'permuteLabels'
+            [funcOutput accDist] = evalc( ['permuteLabels(Y, cvDataObj, ip.Results.nFolds,'   ...
+                'ip.Results.permutations, ip.Results.classify,' ...
+                'ip.Results.classifyOptionsStruct )'] );
+        case 'permuteModel'
+            [funcOutput accDist] = evalc( ['permuteModel(cvDataObj, ip.Results.nFolds,' ...
+                'ip.Results.permutations, ip.Results.classify,' ...
+                'ip.Results.classifyOptionsStruct )'] );
+        case 'None'
     end
-
-    % CROSS VALIDATION (assigning)
-    % Default 10
-
+    toc
+    
+    disp('AYYYYYE TOCCED');
+    
+    
 
     % Just partition, as shuffling (or not) was handled in previous step
     % if nFolds == 1
@@ -337,57 +366,49 @@
         ceil(ip.Results.nFolds) == floor(ip.Results.nFolds) & ...
         ip.Results.nFolds < nTrials, ...
         'nFolds must be an integer between 2 and nTrials to perform CV' );
- 
-        % TODO: This needs to be regular cvpartition object
         
-        % shuffled Y vector for Permutation testing
-        pY = Y(randperm(r));
-        trainX = [];
-        trainY = [];
-        testX = [];
-        testY = [];
         predictionsConcat = [];
         labelsConcat = [];
         
-        pVal = permuteLabels(X, Y, partition, partition.NumTestSets, ...
-            ip.Results.permutations, ip.Results.classify, ...
-            ip.Results.classifyOptionsStruct );
+%         pVal = permuteLabels(X, Y, cvDataObj, ip.Results.nFolds, ...
+%             ip.Results.permutations, ip.Results.classify, ...
+%             ip.Results.classifyOptionsStruct );
 
-    for i = 1:partition.NumTestSets
+    for i = 1:ip.Results.nFolds
 
-        trainX = bsxfun(@times, partition.training{i}, X);
-        trainX = trainX(any(trainX~=0,2),:);
-        trainY = bsxfun(@times, partition.training{i}', Y);
-        trainY = trainY(trainY ~=0);
-        testX = bsxfun(@times, partition.test{i}, X);
-        testX = testX(any(testX~=0, 2),:);
-        testY = bsxfun(@times, partition.test{i}', Y);
-        testY = testY(testY ~=0);
-        predictedY = NaN(1, length(testY));
+%         trainX = bsxfun(@times, partition.training{i}, X);
+%         trainX = trainX(any(trainX~=0,2),:);
+%         trainY = bsxfun(@times, partition.training{i}', Y);
+%         trainY = trainY(trainY ~=0);
+%         testX = bsxfun(@times, partition.test{i}, X);
+%         testX = testX(any(testX~=0, 2),:);
+%         testY = bsxfun(@times, partition.test{i}', Y);
+%         testY = testY(testY ~=0);
         
         % data for permutation testing
-        pTrainY = bsxfun(@times, partition.training{i}', pY);
-        pTrainY = pTrainY(pTrainY ~=0);
-        pTestY = bsxfun(@times, partition.test{i}', pY);
-        pTestY = pTestY(pTestY ~=0);
-        pPredictedY = NaN(1, length(pTestY));
+        % seems like we don't need
+%         pTrainY = bsxfun(@times, partition.training{i}', pY);
+%         pTrainY = pTrainY(pTrainY ~=0);
+%         pTestY = bsxfun(@times, partition.test{i}', pY);
+%         pTestY = pTestY(pTestY ~=0);
+%         pPredictedY = NaN(1, length(pTestY));
 
-        if (ip.Results.PCAinFold == 1)
-            if (ip.Results.PCA > 0)
-                [trainX, V, nPC] = getPCs(trainX, ip.Results.PCA);
-                testX = testX*V;
-                testX = testX(:,1:nPC);
-            end
-        end
+%         if (ip.Results.PCAinFold == 1)
+%             if (ip.Results.PCA > 0)
+%                 [trainX, V, nPC] = getPCs(trainX, ip.Results.PCA);
+%                 testX = testX*V;
+%                 testX = testX(:,1:nPC);
+%             end
+%         end
 
-        if verLessThan('matlab', '8.2') & strcmp(ip.Results.classify, 'LDA')
-            classfy(testX, trainX, trainY, group, 'linear');
-            predictions = modelPredict;
-        else
-            mdl = fitModel(trainX, trainY, ip.Results.classify, ...
-                ip.Results.classifyOptionsStruct);
+        trainX = cvDataObj.trainXall{i};
+        trainY = cvDataObj.trainYall{i};
+        testX = cvDataObj.trainXall{i};
+        testY = cvDataObj.trainYall{i};
+
+            [funcOutput mdl] = evalc(['fitModel(trainX, trainY, ip.Results.classify,' ...
+                'ip.Results.classifyOptionsStruct)']);
             predictions = modelPredict(testX, mdl);
-        end
         
         labelsConcat = [labelsConcat testY];
         predictionsConcat = [predictionsConcat predictions];
@@ -398,5 +419,27 @@
     CM = confusionmat(labelsConcat, predictionsConcat);
     accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
     
-end
+    switch ip.Results.pValueMethod
+        case 'binomcdf'
+            pVal = pbinom(Y, ip.Results.nFolds, accuracy);
+        case 'permuteLabels'
+            pVal = permTestPVal(accuracy, accDist);
+        case 'permuteModel'
+            pVal = permTestPVal(accuracy, accDist);
+        case 'None'
+    end
+    
+ end
+
+ 
+ function y = is2Dor3DMatrix(x)
+ 
+    if ismatrix(x)
+        y = 1;
+    elseif isequal(size(size(x)), [1 3])
+        y = 1;
+    else
+        y=0;
+    end
+ end
     

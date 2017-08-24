@@ -13,7 +13,7 @@ function predictions = modelPredict(X, mdl)
             predictions = predictions(:,end);
             predictions = predictions';
         case 'TreeBagger'
-            predictions = predict(mdl,X);
+            predictions = oobPredict(mdl);
             [rows, cols] = size(predictions);
             if (rows>cols)
                 predictions = reshape(predictions,[cols rows]);

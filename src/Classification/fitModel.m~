@@ -4,7 +4,7 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
     % initialize variable to parse classifyOptionsStruct
     structLength = length(fieldnames(classifyOptionsStruct));
     params = fieldnames(classifyOptionsStruct);
-    values = cell(1,structLength);
+    values = cell(1,length(classifyOptionsStruct));
     
     for i=1:length(classifyOptionsStruct)
 
@@ -60,18 +60,13 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
         case 'RandomForest'
             numTrees = 10;
             for i=1:structLength
-                switch char(params(i))
+                switch params(i)
                     case 'numTrees'
-                        assert(isnumeric(cell2mat(values(i))) & ...
-                            ceil(cell2mat(values(i))) == floor(cell2mat(values(i))), ...
-                            'numTrees must be a numeric integer');
-                        assert(cell2mat(values(i))>0, 'numTrees must be positive');
-                        numTrees = cell2mat(values(i));
-                    case 'minLeafSize'
-                        assert(isnumeric(cell2mat(values(i))) & ...
-                            ceil(cell2mat(values(i))) == floor(cell2mat(values(i))), ...
-                            'minLeafSize must be a numeric integer');
-                        assert(cell2mat(values(i))>0, 'minLeafSize must be positive');
+                        assert(isnumeric(values(i)) & ...
+                            ceil(values(i)) ~= floor(values(i)), ...
+                            'numTrees must be a positive numeric integer');
+                        assert(values(i)>0)
+                        numTrees = values(i);
                     otherwise
                         error([params(i) 'not a real input parameter to Random Forest Function. '])
                 end

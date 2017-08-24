@@ -22,7 +22,7 @@ classdef cvpart
    methods
       function obj = cvpart(n, k)
                   
-        assert(n >= k, 'first parameter, k must be lager than second parameter, n');
+        assert(n >= k, 'first parameter, k, must be lager than second parameter, n');
 
           
         %initialize indices list

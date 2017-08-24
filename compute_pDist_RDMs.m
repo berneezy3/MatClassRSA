@@ -12,7 +12,7 @@
 % Recommend doing this for each subject separately and averaging the
 % matrices across subjects later on (in a different script).
 
-clear all; close all; clc
+%clear all; close all; clc
 
 %%%%%%%% Edit stuff %%%%%%%%%%%
 % Which subject to look at - 1:10 for vision, 1:2 for music
@@ -37,10 +37,10 @@ if s == 0
     exLabels = [];
     for i = 1:2
         % May need to edit the next line for music data
-        fnIn = '/Users/berneezy/Projects/researchCCRMA/shortChordEEG/data.mat';
+        %fnIn = '/Users/berneezy/Projects/researchCCRMA/shortChordEEG/data.mat';
         
-        load(fnIn)
-        X0 = [X1; X2]; % Concatenate the data frame
+        %load(fnIn)
+        X0 = [corrX1; corrX2]; % Concatenate the data frame
         catLabels = [Y1category; Y2category];
         exLabels = [Y1exemplar; Y2exemplar];
         exLabels = exLabels/5 - 4;
@@ -51,11 +51,19 @@ else
     load(fnIn)
     X0 = [X i]; catLabels = ['Y' i 'category']; exLabels = ['Y' i 'exemplar'];
 end
-clear X categoryLabels exemplarLabels
+%clear X categoryLabels exemplarLabels
 
+addpath('/Users/berneezy/Projects/researchCCRMA/MatlabEEGClassification/');
+% X0 = trRows2cube(X0, 39);
+% X0 = X0(:,[16 17 18 19 20 21], :);
+% X0 = cube2trRows(X0);
+
+% X0 = trRows2cube(X0, 39);
+% X0 = X0(:,[1 2 3 4 5 6], :);
+% X0 = cube2trRows(X0);
 
 %%
-close all
+%close all
 %%%%%% Edit - catLabels or exLabels %%%%%%
 labUse = exLabels;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,4 +1,4 @@
-function pVal = permuteLabels(X, Y, partObj, folds, nPerms, classifier, classifyOptions)
+function accArr = permuteLabels(Y, cvPartObj, nfolds, nPerms, classifier, classifyOptions, PCAinFold, PCA)
 
     % make sure nObs > 100, so we have at least the minimal amount of trials
     if (length(Y)) < 100
@@ -6,28 +6,31 @@ function pVal = permuteLabels(X, Y, partObj, folds, nPerms, classifier, classify
         'observatons must > 100.'])
     end
 
-    % make sure N > nObs/10, to achieve minimal amount of folds viable 
-    if folds >= length(Y)/10
+    % make sure N > nObs/10, to achieve minimal amount of nfolds viable 
+    if nfolds >= length(Y)/10
         error(['To use binomial CDF to computer P-value, the size of each fold ' ...
             'should be greater than the number of observations/10. Make ' ...
-            'sure number of folds is < 10'])
+            'sure number of nfolds is < 10'])
     end
 
+    % initialize return variable and also intermediary storage variable
+    accArr = NaN(nPerms, 1);
+    %correct and all prediction # matrix
+    corrMat = NaN(nPerms, nfolds);
+    allMat = NaN(nPerms, nfolds);
+    
     % initialize variables to store correct vs. incorrect
     correctPreds = 0;
     incorrectPreds = 0;
     
     %loop same # of times as cross validation
-    for i = 1:folds
+    for i = 1:nfolds
         %change CV fold and stuff
-        trainX = bsxfun(@times, partObj.training{i}, X);
-        trainX = trainX(any(trainX~=0,2),:);
-        trainY = bsxfun(@times, partObj.training{i}', Y);
-        trainY = trainY(trainY~=0);
-        testX = bsxfun(@times, partObj.test{i}, X);
-        testX = testX(any(testX~=0, 2),:);
-        testY = bsxfun(@times, partObj.test{i}', Y);
-        testY = testY(testY ~=0);
+        trainX = cvPartObj.trainXall{i};
+        trainY = cvPartObj.trainYall{i};
+        testX = cvPartObj.trainXall{i};
+        testY = cvPartObj.trainYall{i};
+            
         
         %get correctly predicted labels
         mdl = fitModel(trainX, trainY, classifier, ...
@@ -42,16 +45,24 @@ function pVal = permuteLabels(X, Y, partObj, folds, nPerms, classifier, classify
             pTestY = testY(randperm(length(testY)));
             %store accuracy
             for k = 1:length(predictedY)
-                if predictedY(k) == testY(k)
+                if predictedY(k) == pTestY(k)
                     correctPreds = correctPreds + 1;
                 else
                     incorrectPreds = incorrectPreds + 1;
                 end
             end
-        
+            corrMat(j,i) = correctPreds;
+            allMat(j,i) = correctPreds + incorrectPreds;
+            correctPreds = 0;
+            incorrectPreds = 0;
         end
+        
     end
     
-    pVal = correctPreds/(correctPreds + incorrectPreds);
+    %technically needs to change3d
+    for j=1:nPerms
+        accArr(j) = sum(corrMat(j,:))/sum(allMat(j,:));
+    end
+    
 
 end

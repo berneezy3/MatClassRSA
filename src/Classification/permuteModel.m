@@ -1,27 +1,26 @@
-function pVal = permuteModel(X, Y, partObj, nFolds, nPerms, PCAinFold, classifier, classifyOptions)
+function accArr = permuteModel(cvDataObj, nFolds, nPerms, classifier, classifyOptions)
 
-    
+    % initialize return variable
+    accArr = NaN(nPerms, 1);
+
     % initialize variables to store correct vs. incorrect
     correctPreds = 0;
     incorrectPreds = 0;
     
-    %change CV fold and stuff
-    trainX = bsxfun(@times, partObj.training{j}, X);
-    trainX = trainX(any(trainX~=0,2),:);
-    trainY = bsxfun(@times, partObj.training{j}', Y);
-    trainY = trainY(trainY~=0);
-    testX = bsxfun(@times, partObj.test{j}, X);
-    testX = testX(any(testX~=0, 2),:);
-    testY = bsxfun(@times, partObj.test{j}', Y);
-    testY = testY(testY ~=0);
-    
     %loop same # of times as cross validation
-    for i = 1:nPerms
-
+    parpool;
+    parfor i = 1:nPerms
+        correctPreds = 0;
+        incorrectPreds = 0;
         for j = 1:nFolds
             
+            trainX = cvDataObj.trainXall{j};
+            trainY = cvDataObj.trainYall{j};
+            testX = cvDataObj.trainXall{j};
+            testY = cvDataObj.trainYall{j};
+            
             % randomize
-            [r c] = size(trainX)
+            [r c] = size(trainX);
             pTrainX = trainX(randperm(r), :);
 
             %get correctly predicted labels
@@ -40,9 +39,12 @@ function pVal = permuteModel(X, Y, partObj, nFolds, nPerms, PCAinFold, classifie
             end
         
         end
+        accArr(i) = correctPreds/(correctPreds + incorrectPreds);
+
     end
     
-    pVal = correctPreds/(correctPreds + incorrectPreds);
+%     pVal = correctPreds/(correctPreds + incorrectPreds);
+    delete(gcp('nocreate'));
 
-
+    
 end
