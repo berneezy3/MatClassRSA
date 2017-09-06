@@ -1,4 +1,4 @@
-function [shuffledX, shuffledY] = shuffleData(X,Y)
+function [shuffledX, shuffledY, shuffledInd] = shuffleData(X,Y)
 % [shuffledX, shuffledY] = shuffleData(X,Y)
 % -------------------------------------------------------------
 % Bernard Wang - April. 30, 2017

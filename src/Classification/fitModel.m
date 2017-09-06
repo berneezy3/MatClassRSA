@@ -6,7 +6,7 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
     params = fieldnames(classifyOptionsStruct);
     values = cell(1,structLength);
     
-    for i=1:length(classifyOptionsStruct)
+    for i=1:structLength
 
         values{1, i} = getfield(classifyOptionsStruct, params{i});
 
@@ -35,7 +35,7 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
                                 kernelNum = 3;
                         end
                     otherwise
-                        error([params(i) 'not a real input parameter to SVM function.'])
+                        error([char(params(i)) ' not a real input parameter to SVM function.'])
                     end
             end
             mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum)]);
@@ -51,7 +51,7 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
                          validatestring(char(values(i)), expectedDiscrimTypes);
                          discrimType = char(values(i));
                     otherwise
-                         error([params(i) 'not a real input parameter to LDA function. '])
+                         error([char(params(i)) ' not a real input parameter to LDA function. '])
                 end
             end
             mdl = fitcdiscr(X, Y, 'DiscrimType', discrimType); 
@@ -73,7 +73,7 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
                             'minLeafSize must be a numeric integer');
                         assert(cell2mat(values(i))>0, 'minLeafSize must be positive');
                     otherwise
-                        error([params(i) 'not a real input parameter to Random Forest Function. '])
+                        error([char(params(i)) ' not a real input parameter to Random Forest Function. '])
                 end
             end
             mdl = TreeBagger(numTrees, X, Y, 'OOBPrediction', 'on');

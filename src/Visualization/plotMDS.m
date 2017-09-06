@@ -1,5 +1,5 @@
-function y = plotMDS(distMat, varargin)
-% y = plotMDS(distMat, 'nodeColors', 'nodeLabels', 'iconPath')
+function img = plotMDS(RDM, varargin)
+% y = plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
@@ -7,7 +7,7 @@ function y = plotMDS(distMat, varargin)
 % passed in.
 %
 % Required inputs:
-% - distMat: A distance matrix.  Diagonals must be 0, and must be
+% - RDM: A distance matrix.  Diagonals must be 0, and must be
 %               symmetrical along the diagonal
 %
 % Optional name-value pairs:
@@ -35,14 +35,14 @@ function y = plotMDS(distMat, varargin)
 % - if # iamges > # classes, print instead of error
 
 
-    if length(find(distMat<0)) > 0
+    if length(find(RDM<0)) > 0
         warning('Distance less than 0 detected, converting negative distances to 0');
-        distMat(distMat<0) = 0;
+        RDM(RDM<0) = 0;
     end
 
     ip = inputParser;
     ip.FunctionName = 'plotMDS';
-    ip.addRequired('distMat',@ismatrix);
+    ip.addRequired('RDM',@ismatrix);
     options = [1, 0];
     ip.addParameter('nodeColors', [], @(x) assert(isvector(x))); 
     ip.addParameter('nodeLabels', [], @(x) assert(isvector(x)));
@@ -55,7 +55,7 @@ function y = plotMDS(distMat, varargin)
         isequal(size(x), [1 2]),  'xlim must be length 2 vector'));
     ip.addParameter('yLim', [], @(x) assert(isequal(size(x), [2 1]) || ...
         isequal(size(x), [1 2]),  'ylim must be length 2 vector'));
-    parse(ip, distMat,varargin{:});
+    parse(ip, RDM,varargin{:});
     
     % check which set of labels to use
     % alphanumeric labels
@@ -78,18 +78,19 @@ function y = plotMDS(distMat, varargin)
         set(gca,'xtick',[]);
         set(gca,'ytick',[]);
         hold on;
-        return;
+        s = length(RDM);
+        labels = [1:s];
     end
     
-    
-    [Y eigs] = cmdscale(distMat);
+    img = figure;
+    [Y eigs] = cmdscale(RDM);
     [r c] = size(Y);
     
     % set dimensions
     xDim = ip.Results.dimensions(1);
     yDim = ip.Results.dimensions(2);
     if or((xDim<1 | xDim>r), (yDim<1 | yDim>r))
-        error('Both xDim and yDim must be between 1 and length(distMat)');
+        error('Both xDim and yDim must be between 1 and length(RDM)');
     end
     
     % Set plot axis limits
@@ -113,6 +114,9 @@ function y = plotMDS(distMat, varargin)
     else
         ylim(ip.Results.yLim);
     end
+     % x-axis, y-axis label
+    xlabel(['Dimension ' num2str(ip.Results.dimensions(1))], 'FontWeight', 'bold');
+    ylabel(['Dimension ' num2str(ip.Results.dimensions(2))], 'FontWeight', 'bold'); 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
@@ -127,7 +131,7 @@ function y = plotMDS(distMat, varargin)
 %             plot( Y(i,1) ,Y(i,2) , 's', 'MarkerSize', 15, 'LineWidth', 2, ....
 %                 'MarkerEdgeColor', 'k');
             text( Y(i,xDim), Y(i,yDim), char(ip.Results.nodeLabels(i)), ...
-                'color', char(ip.Results.nodeColors(i)), ...
+                'Color', ip.Results.nodeColors{i}, ...
                 'FontWeight', 'bold', 'FontSize', 30 ...
             );
             hold on
@@ -140,8 +144,9 @@ function y = plotMDS(distMat, varargin)
     elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels) ...
             && isempty(ip.Results.iconPath)
         disp('CASE: NODE')
-        for i = 1:length(distMat)
-            text(Y(i,xDim), Y(i,yDim), ip.Results.nodeLabels(i));
+        for i = 1:length(RDM)
+            text(Y(i,xDim), Y(i,yDim), ip.Results.nodeLabels(i), ...
+                'FontSize', 30);
         end
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
@@ -182,7 +187,7 @@ function y = plotMDS(distMat, varargin)
             rectangle('Position', [Y(i,xDim)-plotLength-.1*plotLength, ...
                 Y(i,yDim)-plotHeight-.1*plotLength, plotLength+.2*plotLength, ...
                 plotHeight+.2*plotLength], 'faceColor', ...
-                ip.Results.nodeColors(i), 'EdgeColor', ip.Results.nodeColors(i));
+                ip.Results.nodeColors{i}, 'EdgeColor', ip.Results.nodeColors{i});
             
             imagesc([Y(i,xDim), Y(i,xDim) - plotLength], ...
                 [Y(i,yDim), Y(i,yDim) - plotHeight], thisIcon);
@@ -238,12 +243,14 @@ function y = plotMDS(distMat, varargin)
         
         for i = 1:r
             plot( Y(i,xDim) ,Y(i,yDim) , 'o', 'MarkerSize', 15, 'LineWidth', 4, ...
-                'MarkerEdgeColor', ip.Results.nodeColors(i), ...
-                'MarkerFaceColor', ip.Results.nodeColors(i));
+                'MarkerEdgeColor', ip.Results.nodeColors{i}, ...
+                'MarkerFaceColor', ip.Results.nodeColors{i});
             hold on
         end
         
     end
+    
+    
     
 end
 

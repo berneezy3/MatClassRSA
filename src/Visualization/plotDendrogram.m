@@ -1,5 +1,5 @@
-function y = plotDendrogram(distMat, varargin)
-% plotDendrogram(distMat, varargin)
+function img = plotDendrogram(RDM, varargin)
+% plotDendrogram(RDM, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
@@ -7,7 +7,7 @@ function y = plotDendrogram(distMat, varargin)
 % passed in.
 %
 % INPUT ARGS:
-% - distMat: A distance matrix.  Diagonals must be 0, and must be
+% - RDM: A distance matrix.  Diagonals must be 0, and must be
 %               symmetrical along the diagonal
 %
 % Optional name-value pairs:
@@ -19,7 +19,7 @@ function y = plotDendrogram(distMat, varargin)
 % - 'nodeLabels': a matrix of alphanumeric labels, ordered by same order of
 %                   labels in the confusion matrix
 %                   e.g. ['cat' 'dog' 'fish']
-% - 'iconPath': a directory containing images used to label, in which the
+% - 'iconPath': a directory containing imaAges used to label, in which the
 %                   image files must be ordered in the same order as the 
 %                   labels of the confusion matrix
 %
@@ -40,7 +40,7 @@ function y = plotDendrogram(distMat, varargin)
 
     ip = inputParser;
     ip.FunctionName = 'plotDendrogram';
-    ip.addRequired('distMat',@ismatrix);
+    ip.addRequired('RDM',@ismatrix);
     options = [1, 0];
     ip.addParameter('distMethod', 'average', @(x) any(validatestring(x,  ...
         expectedDistMethod)));
@@ -49,27 +49,31 @@ function y = plotDendrogram(distMat, varargin)
     ip.addParameter('iconPath', '');
     ip.addParameter('orientation', 'down', @(x) any(validatestring(x, ...
         expectedOrientation)));
-    ip.addParameter('reorder', [], @(x) assert(x == length(distMat)));
+    ip.addParameter('reorder', [], @(x) assert(x == length(RDM)));
     ip.addParameter('maxLeafs', 30, @(x) assert(isPosInt(x)) );
     ip.addParameter('plotHeight', '', @(x) assert(isnumeric(x)));
     ip.addParameter('yLim', '', @(x) assert(isequal(size(x), [2 1]) || ...
         isequal(size(x), [1 2]),  'ylim must be length 2 vector'));
     ip.addParameter('textRotation', 0, @(x) assert(isnumeric(x), ...
         'textRotation must be a numeric value'));
+    ip.addParameter('lineWidth', 2, @(x) assert(isnumeric(x), ...
+        'textRotation must be a numeric value'));
     
-    parse(ip, distMat,varargin{:});
+    parse(ip, RDM,varargin{:});
     
-    tree = linkage(distMat, ip.Results.distMethod);
+    RDM = RDM(tril(true(size(RDM)),-1))';
+    tree = linkage(RDM, ip.Results.distMethod);
     [r c] = size(tree);
     [d T P] = dendrogram(tree, 0);
-
-%     set(gca,'xtick',[]);
+    set(d ,'LineWidth',  ip.Results.lineWidth);
+    %set(gca,'xtick',[]);
     if length(ip.Results.nodeLabels) >= 1
         xticklabels(ip.Results.nodeLabels);
     else
         set(gca,'xtick',[]);
     end
     
+
     set(gca,'FontSize',20);
     set(gca,'xtick',[]);
     set(gcf,'color',[1 1 1]);
@@ -84,7 +88,7 @@ function y = plotDendrogram(distMat, varargin)
     %%%%%%%%%%%%%%%%%%%%
     F = getframe(gcf);
     dendrogramImg = im2double(F.cdata);
-
+    
     %imagesc(dendrogramImg);
     addpath(ip.Results.iconPath);
     
@@ -109,7 +113,7 @@ function y = plotDendrogram(distMat, varargin)
 
     %iconPath(1).name
 
-    image(dendrogramImg);
+    img = image(dendrogramImg);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
@@ -120,7 +124,7 @@ function y = plotDendrogram(distMat, varargin)
         for i = 1:length(labels)
 
             split = (1449-205)/(r+2);
-            centerX =  208 + split * i;
+            centerX =  190 + split * i;
             centerY =  960;
             width = 40;
             height = 40;
@@ -128,7 +132,7 @@ function y = plotDendrogram(distMat, varargin)
                 label = labels(P(i));
                 t = text(centerX-width/2, centerY-height, label);
                 t.Rotation = ip.Results.textRotation;
-                t.Color = char(ip.Results.nodeColors(P(i)));
+                t.Color = ip.Results.nodeColors{P(i)};
                 t(1).FontSize = 25;
             else
 
@@ -202,12 +206,12 @@ function y = plotDendrogram(distMat, varargin)
             cHeight = 58;
             if i <= length(labels)
 %                 rect = rectangle('Position',[centerX-cWidth/2, centerY-cHeight, cWidth, cHeight], ...
-%                 'FaceColor', char(ip.Results.nodeColors(P(i))));
+%                 'FaceColor', char(ip.Results.nodeColors{P(i)}));
 %                 dendrogramImg(centerY-cHeight:centerY-1, centerX-cWidth/2:centerX+cWidth/2-1, 1:3) = rect;
                 if ~isempty(ip.Results.nodeColors)
                     dendrogramImg = insertShape(dendrogramImg, 'FilledRectangle', ...
                         [centerX-cWidth/2, centerY-cHeight, cWidth, cHeight], ...
-                        'color', colorShort2Long(char(ip.Results.nodeColors(P(i)))));
+                        'color', colorShort2Long(char(ip.Results.nodeColors{P(i)})));
                 end
                 dendrogramImg(centerY-height-9:centerY-1-9, centerX-width/2:centerX+width/2-1, 1:3) ...
                     = thisIcon;
@@ -241,6 +245,7 @@ function y = plotDendrogram(distMat, varargin)
     set(gca,'ytick',[]);
 
     hold on
+
      
 end
 
