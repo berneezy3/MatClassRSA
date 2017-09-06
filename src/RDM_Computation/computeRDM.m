@@ -1,5 +1,5 @@
-function distanceMatrix = computeDistanceMatrix(CM, varargin)
-% distanceMatrix = computeDistanceMatrix(CM, varargin)
+function RDM = computeRDM(CM, varargin)
+% RDM = computeRDM(CM, varargin)
 % ------------------------------------------------
 % Blair - January 31, 2017
 %
@@ -93,4 +93,4 @@ SM = symmetrizeMatrix(NM, ip.Results.symmetrize);
 DM = convertSimToDist(SM, ip.Results.distance, ip.Results.distpower);
 
 % RANKDISTANCES
-distanceMatrix = rankDistances(DM, ip.Results.rankdistances);
+RDM = rankDistances(DM, ip.Results.rankdistances);

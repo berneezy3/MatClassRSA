@@ -1,4 +1,4 @@
- function [CM, accuracy, pVal, classifierInfo] = classifyEEG(X, Y, varargin)
+ function [CM, accuracy, predY, pVal, classifierInfo, varargout] = classifyEEG(X, Y, varargin)
 % [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
 % -------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
@@ -66,7 +66,7 @@
     % Make sure input vector Y is int vector, convert if it is string
     % vector, string cell array, char vectors  
 
-     addpath([pwd '/src/Classification/libsvm-3.21/matlab']);
+    addpath([pwd '/src/Classification/libsvm-3.21/matlab']);
 
 
 
@@ -82,7 +82,7 @@
     defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
     defaultPermutationTest = 0;
-    defaultPCA = -1;
+    defaultPCA = .9;
     defaultPCAinFold = 1;
     defaultNFolds = 10;
     defaultClassify = 'SVM';
@@ -92,6 +92,8 @@
     defaultTimeUse = [];
     defaultSpaceUse = [];
     defaultFeatureUse = [];
+    defaultVerbose = 0;
+    defaultRandomSeed = 'default';
 
 
     %Specify expected values
@@ -102,6 +104,8 @@
     expectedPCAinFold = [0,1];
     expectedClassify = {'SVM', 'LDA', 'RandomForest'};
     expectedPValueMethod = {'binomcdf', 'permuteLabels', 'permuteModel'};
+    expectedVerbose = {0,1};
+    expectedRandomSeed = {'default', 'shuffle', 'shuffle'};
     
     %Required inputs
     addRequired(ip, 'X', @is2Dor3DMatrix)
@@ -140,6 +144,12 @@
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
+        addParamValue(ip, 'featureUse', defaultFeatureUse, ...
+            @(x) (assert(isvector(x))));
+        addParamValue(ip, 'verbose', defaultVerbose, ...
+            @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
+        addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
     else
         addParameter(ip, 'normalize', defaultNormalize,...
             @(x) any(validatestring(x, expectedNormalize)));
@@ -170,6 +180,10 @@
             @(x) (assert(isvector(x))));
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
+        addParameter(ip, 'verbose', defaultVerbose, ...
+            @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
+        addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
     end
     
     %Optional name-value pairs
@@ -307,8 +321,10 @@
 
     % DATA SHUFFLING (doing)
     % Default 1
+    % Set random seed
+    rng(ip.Results.randomSeed);
     if (ip.Results.shuffleData)
-        [X, Y] = shuffleData(X, Y);
+        [X, Y, shuffledInd] = shuffleData(X, Y);
     else
         classifierInfo.shuffleData = 'off';
     end
@@ -319,10 +335,12 @@
             'handleRemainder' ,ip.Results.averageTrialsHandleRemainder);
         averageTrialsInfo = 'on';
         classifierInfo.averageTrials = 'on';
+        [r c] = size(X);
      else
          warning('variable "defaultAverageTrialsHandleRemainder" not used')
      end
-
+     
+    % PCA 
     % Split Data into fold (w/ or w/o PCA)
     partition = cvpart(r, ip.Results.nFolds);
     tic
@@ -369,42 +387,14 @@
         
         predictionsConcat = [];
         labelsConcat = [];
-        
-%         pVal = permuteLabels(X, Y, cvDataObj, ip.Results.nFolds, ...
-%             ip.Results.permutations, ip.Results.classify, ...
-%             ip.Results.classifyOptionsStruct );
+        modelsConcat = {1, ip.Results.nFolds};
 
     for i = 1:ip.Results.nFolds
-
-%         trainX = bsxfun(@times, partition.training{i}, X);
-%         trainX = trainX(any(trainX~=0,2),:);
-%         trainY = bsxfun(@times, partition.training{i}', Y);
-%         trainY = trainY(trainY ~=0);
-%         testX = bsxfun(@times, partition.test{i}, X);
-%         testX = testX(any(testX~=0, 2),:);
-%         testY = bsxfun(@times, partition.test{i}', Y);
-%         testY = testY(testY ~=0);
         
-        % data for permutation testing
-        % seems like we don't need
-%         pTrainY = bsxfun(@times, partition.training{i}', pY);
-%         pTrainY = pTrainY(pTrainY ~=0);
-%         pTestY = bsxfun(@times, partition.test{i}', pY);
-%         pTestY = pTestY(pTestY ~=0);
-%         pPredictedY = NaN(1, length(pTestY));
-
-%         if (ip.Results.PCAinFold == 1)
-%             if (ip.Results.PCA > 0)
-%                 [trainX, V, nPC] = getPCs(trainX, ip.Results.PCA);
-%                 testX = testX*V;
-%                 testX = testX(:,1:nPC);
-%             end
-%         end
-
         trainX = cvDataObj.trainXall{i};
         trainY = cvDataObj.trainYall{i};
-        testX = cvDataObj.trainXall{i};
-        testY = cvDataObj.trainYall{i};
+        testX = cvDataObj.testXall{i};
+        testY = cvDataObj.testYall{i};
 
             [funcOutput mdl] = evalc(['fitModel(trainX, trainY, ip.Results.classify,' ...
                 'ip.Results.classifyOptionsStruct)']);
@@ -412,12 +402,20 @@
         
         labelsConcat = [labelsConcat testY];
         predictionsConcat = [predictionsConcat predictions];
+        modelsConcat{i} = mdl; 
         
         
         %predictcedY(partition.test(i)) = predictions;
     end
     CM = confusionmat(labelsConcat, predictionsConcat);
     accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
+    
+    
+    % unshuffle predictions vector to return to user
+    predY = NaN(1, r);
+    for i = 1:r
+        predY(shuffledInd(i)) = predictionsConcat(i);
+    end
     
     switch ip.Results.pValueMethod
         case 'binomcdf'
@@ -427,6 +425,11 @@
         case 'permuteModel'
             pVal = permTestPVal(accuracy, accDist);
         case 'None'
+    end
+    
+    if ip.Results.verbose
+        varargout{1} = accDist;
+        varargout{2} = modelsConcat;
     end
     
  end
