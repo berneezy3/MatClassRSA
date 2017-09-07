@@ -14,7 +14,7 @@ function accArr = permuteModel(cvDataObj, nFolds, nPerms, classifier, classifyOp
         incorrectPreds = 0;
         for j = 1:nFolds
                         
-            disp(['calculating ' num2str((i-1)*nFolds + j) ' of '...
+            disp(['calculating ' num2str((i-1)*nPerms + j) ' of '...
             num2str(nPerms*nFolds) ' fold-permutations']);
             trainX = cvDataObj.trainXall{j};
             trainY = cvDataObj.trainYall{j};
@@ -28,9 +28,10 @@ function accArr = permuteModel(cvDataObj, nFolds, nPerms, classifier, classifyOp
             %get correctly predicted labels
 %             mdl = fitModel(pTrainX, trainY, classifier, ...
 %             classifyOptions);
-%             [funcOutput mdl] = evalc( ['fitModel(pTrainX, trainY, classifier,' ...
-%             'classifyOptions)']);
-            mdl =  fitModel(pTrainX, trainY, classifier, classifyOptions);
+            [funcOutput mdl] = evalc( ['fitModel(pTrainX, trainY, classifier,' ...
+            'classifyOptions)']);
+            mdl =  fitModel(pTrainX, trainY, classifier, ...
+            classifyOptions)']);
             predictedY = modelPredict(testX, mdl);
 
 
