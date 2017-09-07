@@ -33,8 +33,8 @@ function accArr = permuteLabels(Y, cvPartObj, nfolds, nPerms, classifier, classi
             
         
         %get correctly predicted labels
-        [funcOutput mdl] = evalc( ['fitModel(trainX, trainY, classifier,' ...
-        'classifyOptions)']);
+        mdl = fitModel(trainX, trainY, classifier, ...
+        classifyOptions);
         predictedY = modelPredict(testX, mdl);
     
         for j = 1:nPerms
@@ -42,8 +42,7 @@ function accArr = permuteLabels(Y, cvPartObj, nfolds, nPerms, classifier, classi
             %permute the test labels
             % (check if randperm is seeded every single time differently)
             % (yes, it is)
-            disp(['calculating ' num2str((i-1)*nPerms + j) ' of '...
-                num2str(nPerms*nfolds) ' fold-permutations']);
+            disp(['calculating ' num2sti 'of ']);
             pTestY = testY(randperm(length(testY)));
             %store accuracy
             for k = 1:length(predictedY)

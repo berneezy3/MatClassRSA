@@ -17,8 +17,6 @@ function [y, V, nPC] = getPCs(X, PCs)
 % TODO:
 %   Retrieve the indices of the principle componenets
 % 
-
-    disp('getting PCs');
     
     [U,S,V] = svd(X);
 

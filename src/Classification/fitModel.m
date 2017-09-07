@@ -38,7 +38,7 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
                         error([char(params(i)) ' not a real input parameter to SVM function.'])
                     end
             end
-            mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum)]);
+            [funcOutput mdl] = evalc('svmtrain(Y, X, [''-t '' num2str(kernelNum)])');
             
             
         case 'LDA'
