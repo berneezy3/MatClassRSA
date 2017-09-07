@@ -38,8 +38,11 @@ function mdl = fitModel(X, Y, classifier, classifyOptionsStruct)
                         error([char(params(i)) ' not a real input parameter to SVM function.'])
                     end
             end
+            currpath = pwd;
+            [libsvmpath,name,ext] = fileparts(which('matlab/svmtrain'));
+            cd(libsvmpath);
             [funcOutput mdl] = evalc('svmtrain(Y, X, [''-t '' num2str(kernelNum)])');
-            
+            cd(currpath);
             
         case 'LDA'
             discrimType = 'linear';
