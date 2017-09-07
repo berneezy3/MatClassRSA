@@ -356,6 +356,7 @@
         case 'binomcdf'
             % case is handled at the end, when the accuracy of the
             % classifier is calculated
+            accDist = NaN;
         case 'permuteLabels'
             accDist = permuteLabels(Y, cvDataObj, ip.Results.nFolds,   ...
                 ip.Results.permutations, ip.Results.classify, ...
