@@ -1,3 +1,4 @@
+
 % classificationExample.m
 % -------------------------
 % Illustrative example for MatClassRSA toolbox. 

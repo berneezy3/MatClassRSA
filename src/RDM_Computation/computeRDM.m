@@ -1,4 +1,9 @@
 function RDM = computeRDM(CM, varargin)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % RDM = computeRDM(CM, varargin)
 % ------------------------------------------------
 % Blair - January 31, 2017

@@ -1,4 +1,9 @@
 function [y, V, nPC] = getPCs(X, PCs)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % y = getPCs(X, PCs)
 %-------------------------------------------------------------------
 % Function to extract principle componenets via singular value

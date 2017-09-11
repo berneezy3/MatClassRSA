@@ -1,4 +1,9 @@
 function [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 %  [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
 % Bernard Wang - April. 30, 2017

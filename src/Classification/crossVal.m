@@ -1,5 +1,10 @@
 
 function z = crossVal(X, Y, varargin)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 
     ip = inputParser;
     ip.FunctionName = 'crossVal';

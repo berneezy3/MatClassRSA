@@ -1,5 +1,8 @@
 function accArr = permuteModel(cvDataObj, nFolds, nPerms, classifier, classifyOptions)
-
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
     % initialize return variable
     accArr = NaN(nPerms, 1);
 

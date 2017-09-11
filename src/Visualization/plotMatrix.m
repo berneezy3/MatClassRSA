@@ -1,4 +1,9 @@
 function img = plotMatrix(matrix, varargin)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % plotMatrix(matrix, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017

@@ -1,4 +1,9 @@
 function img = plotMST(RDM, varargin)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % plotMST = plotMST(RDM, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 28, 2017

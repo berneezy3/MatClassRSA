@@ -1,4 +1,9 @@
 function [shuffledX, shuffledY, shuffledInd] = shuffleData(X,Y)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % [shuffledX, shuffledY] = shuffleData(X,Y)
 % -------------------------------------------------------------
 % Bernard Wang - April. 30, 2017

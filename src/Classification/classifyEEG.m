@@ -1,4 +1,9 @@
  function [CM, accuracy, predY, pVal, classifierInfo, varargout] = classifyEEG(X, Y, varargin)
+%-------------------------------------------------------------------
+ % (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
 % -------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
@@ -93,7 +98,7 @@
     defaultSpaceUse = [];
     defaultFeatureUse = [];
     defaultVerbose = 0;
-    defaultRandomSeed = 'default';
+    defaultRandomSeed = 'shuffle';
 
 
     %Specify expected values

@@ -1,4 +1,9 @@
 function xOut = rankDistances(xIn, rankType)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % xOut = rankDistances(xIn, rankType)
 % --------------------------------------------------------
 % Blair - February 22, 2017

@@ -1,4 +1,9 @@
 function p = permTestPVal(value, permVector, direction)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % p = permTestPVal(value, permVector, [direction])
 % -------------------------------------------------
 % Blair - April 17, 2017
