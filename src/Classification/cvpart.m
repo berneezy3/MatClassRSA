@@ -1,4 +1,9 @@
 classdef cvpart
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % partitionObj = cvpart(n,k)
 % --------------------------------
 % Bernard Wang, June 27, 2017

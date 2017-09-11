@@ -1,4 +1,9 @@
 function y = getImageFiles(iconPath)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % y = getImageFiles(iconPath)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017

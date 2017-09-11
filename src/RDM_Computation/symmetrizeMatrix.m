@@ -1,4 +1,9 @@
 function xOut = symmetrizeMatrix(xIn, symmType)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % xOut = symmetrizeMatrix(xIn, symmType)
 % --------------------------------------------------------
 % Blair - February 22, 2017

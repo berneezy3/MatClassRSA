@@ -1,4 +1,9 @@
 function xOut = convertSimToDist(xIn, distType, distPower)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % xOut = computeDistances(xIn, distType)
 % --------------------------------------------------------
 % Blair - February 22, 2017

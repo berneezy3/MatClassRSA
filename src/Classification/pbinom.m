@@ -1,4 +1,9 @@
 function pVal = pbinom(Y, nFolds, accuracy)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % pVal = pbinom(Y, nFolds, accuracy)
 % -----------
 % Bernard Wang

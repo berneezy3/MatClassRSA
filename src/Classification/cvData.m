@@ -1,4 +1,9 @@
 classdef cvData
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % cvDataObj = cvpart(n,k)
 % --------------------------------
 % Bernard Wang, August 17, 2017

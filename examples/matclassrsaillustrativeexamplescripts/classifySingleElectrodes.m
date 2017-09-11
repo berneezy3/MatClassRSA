@@ -1,3 +1,4 @@
+
 % classifySingleElectrodes.m
 % -----------------------------
 % Illustrative example for MatClassRSA toolbox. 

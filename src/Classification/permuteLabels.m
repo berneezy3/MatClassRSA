@@ -1,5 +1,9 @@
 function accArr = permuteLabels(Y, cvPartObj, nfolds, nPerms, classifier, classifyOptions, PCAinFold, PCA)
-
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
     % make sure nObs > 100, so we have at least the minimal amount of trials
     if (length(Y)) < 100
         error(['To use binomial CDF to computer P-value, number of ' ...

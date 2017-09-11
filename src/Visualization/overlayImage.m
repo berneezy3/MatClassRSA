@@ -1,4 +1,9 @@
 Ifunction overlayImage(original, new, X, Y, width, height)
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
 % overlayImage(original, new, X, Y, width, height)
 % ------------------------------------------------
 % Bernard - April 12, 2017
