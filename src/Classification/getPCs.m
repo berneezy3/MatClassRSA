@@ -6,7 +6,7 @@ function [y, V, nPC] = getPCs(X, PCs)
 %-------------------------------------------------------------------
 % y = getPCs(X, PCs)
 %-------------------------------------------------------------------
-% Function to extract principle componenets via singular value
+% Function to extract principal componenets via singular value
 % decomposition
 %
 % INPUT ARGS:
@@ -15,12 +15,12 @@ function [y, V, nPC] = getPCs(X, PCs)
 %       between 0 and 1
 %
 % OUTPUT ARGS:
-%       y - training data matrix with only principle compenents
+%       y - training data matrix with only principal compenents
 %
 % EXAMPLES:
 %
 % TODO:
-%   Retrieve the indices of the principle componenets
+%   Retrieve the indices of the principal componenets
 % 
     
     [U,S,V] = svd(X);

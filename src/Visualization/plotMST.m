@@ -110,7 +110,7 @@ function img = plotMST(RDM, varargin)
             && isempty(ip.Results.iconPath)
         
         disp('CASE: NODE')
-        MSTplothelper(sourceNodes, destNodes, weights, ip.Results.nodeLabels)
+        MSTplothelper(sourceNodes, destNodes, weights, ip.Results.nodeLabels, ip)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR AND IMAGE

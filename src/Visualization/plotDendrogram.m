@@ -54,9 +54,9 @@ function img = plotDendrogram(RDM, varargin)
     ip.addParameter('iconPath', '');
     ip.addParameter('orientation', 'down', @(x) any(validatestring(x, ...
         expectedOrientation)));
-    ip.addParameter('reorder', [], @(x) assert(x == length(RDM)));
-    ip.addParameter('maxLeafs', 30, @(x) assert(isPosInt(x)) );
-    ip.addParameter('plotHeight', '', @(x) assert(isnumeric(x)));
+    ip.addParameter('reorder', [], @(x) assert(length(x) == length(RDM)));
+    %ip.addParameter('maxLeafs', 0, @(x) assert(x >= 0 && isnumeric(x)) );
+%     ip.addParameter('plotHeight', '', @(x) assert(isnumeric(x)));
     ip.addParameter('yLim', '', @(x) assert(isequal(size(x), [2 1]) || ...
         isequal(size(x), [1 2]),  'ylim must be length 2 vector'));
     ip.addParameter('textRotation', 0, @(x) assert(isnumeric(x), ...
@@ -69,7 +69,14 @@ function img = plotDendrogram(RDM, varargin)
     RDM = RDM(tril(true(size(RDM)),-1))';
     tree = linkage(RDM, ip.Results.distMethod);
     [r c] = size(tree);
-    [d T P] = dendrogram(tree, 0);
+    
+    if (~isempty(ip.Results.reorder))
+        [d T P] = dendrogram(tree, 0, 'reorder', ip.Results.reorder);
+    else
+        % all leaf nodes
+        [d T P] = dendrogram(tree, 0);
+    end
+    
     set(d ,'LineWidth',  ip.Results.lineWidth);
     %set(gca,'xtick',[]);
     if length(ip.Results.nodeLabels) >= 1

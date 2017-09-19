@@ -52,6 +52,8 @@ function img = plotMDS(RDM, varargin)
     ip.addParameter('nodeColors', [], @(x) assert(isvector(x))); 
     ip.addParameter('nodeLabels', [], @(x) assert(isvector(x)));
     ip.addParameter('iconPath', '');
+    ip.addParameter('classical', 1, @(x) assert(isnumeric(x)));
+
     % which dimensions of MDS to plot
     ip.addParameter('dimensions', [1 2], @(x) assert(isvector(x) && ...
         isequal(size(x), [2 1]) || isequal(size(x), [1 2]), ...

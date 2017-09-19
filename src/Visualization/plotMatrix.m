@@ -74,13 +74,17 @@ function img = plotMatrix(matrix, varargin)
         end
     end
     
-    c = colorbar;
+    if ip.Results.colorbar > 0
+        c = colorbar;
+        c.FontSize = ip.Results.FontSize;
+    end
+    
     matMin = min(min(matrix));
     matMax = max(max(matrix));
     inc = (matMax - matMin)/(ip.Results.Ticks-1);
     %c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.Ticks-2] * inc + matMin  matMax]));
     %c.FontWeight = 'bold';
-    c.FontSize = ip.Results.FontSize;
+    
     xticklabels('');
     yticklabels('');
 
