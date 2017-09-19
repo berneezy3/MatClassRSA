@@ -31,7 +31,7 @@
 %   permutationTest - TODO
 %       --options--
 %       TODO
-%   PCA - Principle Component analysis on data matrix X. Default is to
+%   PCA - Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
 %       decimal <1 and >0.  To retrieve a certain number of most
@@ -387,8 +387,8 @@
     %   error, nFolds must be an integer between 2 and nTrials to perform CV
     assert(ip.Results.nFolds > 0 & ...
         ceil(ip.Results.nFolds) == floor(ip.Results.nFolds) & ...
-        ip.Results.nFolds < nTrials, ...
-        'nFolds must be an integer between 2 and nTrials to perform CV' );
+        ip.Results.nFolds <= nTrials, ...
+        'nFolds must be an integer between 1 and nTrials to perform CV' );
         
         predictionsConcat = [];
         labelsConcat = [];

@@ -39,7 +39,8 @@ end
 % check to make sure the amount of each class is equal
 for i = 1:length(classes)
     if classCount ~= sum(Y == classes(i))
-        warning('Number of trials per class should be equal');
+        warning('Should have equal amount of trials of each class');
+        break;
     end
 end
 

@@ -36,7 +36,7 @@ classdef cvData
             if (PCA >0)
                 % (outside of folds)
                 if (PCAinFold == 0)
-                    disp('Extracting princple components');
+                    disp('Extracting principal components');
                     X = getPCs(X, PCA);
                     
                     for i = 1:cvPart.NumTestSets
@@ -60,7 +60,7 @@ classdef cvData
                     [r c] = size(X);
 
                     for i = 1:cvPart.NumTestSets
-                        disp(['conducitng PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);
+                        disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);
                         trainX = bsxfun(@times, cvPart.training{i}, X);
                         trainX = trainX(any(trainX~=0,2),:);
                         trainY = bsxfun(@times, cvPart.training{i}', Y);
