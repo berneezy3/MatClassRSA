@@ -63,13 +63,16 @@ function img = plotDendrogram(RDM, varargin)
         'textRotation must be a numeric value'));
     ip.addParameter('lineWidth', 2, @(x) assert(isnumeric(x), ...
         'textRotation must be a numeric value'));
+    ip.addParameter('lineColor', 'black');
+    ip.addParameter('iconSize', 40);
     
     parse(ip, RDM,varargin{:});
     
-    RDM = RDM(tril(true(size(RDM)),-1))';
-    tree = linkage(RDM, ip.Results.distMethod);
+    RDMmod = RDM(tril(true(size(RDM)),-1))';
+    tree = linkage(RDMmod, ip.Results.distMethod);
     [r c] = size(tree);
     
+    img = figure;
     if (~isempty(ip.Results.reorder))
         [d T P] = dendrogram(tree, 0, 'reorder', ip.Results.reorder);
     else
@@ -77,17 +80,15 @@ function img = plotDendrogram(RDM, varargin)
         [d T P] = dendrogram(tree, 0);
     end
     
-    set(d ,'LineWidth',  ip.Results.lineWidth);
+    set(d ,'LineWidth',  ip.Results.lineWidth, 'Color', ip.Results.lineColor);
     %set(gca,'xtick',[]);
     if length(ip.Results.nodeLabels) >= 1
         xticklabels(ip.Results.nodeLabels);
-    else
-        set(gca,'xtick',[]);
     end
     
 
     set(gca,'FontSize',20);
-    set(gca,'xtick',[]);
+    %set(gca,'xtick',[]);
     set(gcf,'color',[1 1 1]);
     
     % Set dendrogram Y axis height
@@ -98,8 +99,8 @@ function img = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%
     % CONVERT TO MATRIX
     %%%%%%%%%%%%%%%%%%%%
-    F = getframe(gcf);
-    dendrogramImg = im2double(F.cdata);
+%     F = getframe(gcf);
+%     dendrogramImg = im2double(F.cdata);
     
     %imagesc(dendrogramImg);
     addpath(ip.Results.iconPath);
@@ -117,32 +118,29 @@ function img = plotDendrogram(RDM, varargin)
     elseif isempty(ip.Results.nodeLabels) && isempty(ip.Results.iconPath) && ~isempty(ip.Results.nodeColors)
          labels = ip.Results.nodeColors;
     else %no labels specified
-        set(gca,'xtick',[]);
-        set(gca,'ytick',[]);
-        hold on;
-        return;
+%         set(gca,'xtick',[]);
+%         set(gca,'ytick',[]);
+%         hold on;
+%         return;
     end
 
     %iconPath(1).name
 
-    img = image(dendrogramImg);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
-
         disp('CASE: COLOR NODE');
-        for i = 1:length(labels)
+        %
+        xTickCoords = getTickCoord;
+        set(gca,'xTickLabel', '');
 
-            split = (1449-205)/(r+2);
-            centerX =  190 + split * i;
-            centerY =  960;
-            width = 40;
-            height = 40;
+        for i = 1:length(labels)
             if i <= length(ip.Results.nodeColors)
                 label = labels(P(i));
-                t = text(centerX-width/2, centerY-height, label);
+                t = text(xTickCoords(i, 1), xTickCoords(i, 2), label, ...
+                    'HorizontalAlignment', 'center');
                 t.Rotation = ip.Results.textRotation;
                 t.Color = ip.Results.nodeColors{P(i)};
                 t(1).FontSize = 25;
@@ -152,36 +150,38 @@ function img = plotDendrogram(RDM, varargin)
 
             
         end
-        
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
+    elseif isempty(ip.Results.nodeColors) &&  ~isempty(ip.Results.nodeLabels)
 
-        disp('CASE: NODE');
-        for i = 1:length(labels)
+        disp('CASE: LABEL');
+        set(gca,'xTickLabel', '');
 
-            split = (1449-205)/(r+2);
-            centerX =  208 + split * i;
-            centerY =  960;
-            width = 40;
-            height = 40;
-            if i <= length(ip.Results.nodeLabels)
-                label = labels(P(i))
-                disp(centerX)
-                t = text(centerX-width/2, centerY-height, label);
-                t.Rotation = ip.Results.textRotation;
-                t.Color = 'black';
-                t(1).FontSize = 14;
-            end
 
-            
-        end
+%         labels = NaN{1,length(RDM)};
+%         for i = 1:length(RDM)
+%             labels(i) = ip.Results.nodeLabels{P(i)};
+%         end
         
+        set(gca,'xTickLabel', ip.Results.nodeLabels);
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: COLOR AND IMAGE OR IMAGE
+    % CASE: IMAGE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.nodeLabels) && ~isempty(ip.Results.iconPath)
+        
+        disp('CASE: IMAGE');
+        xTickCoords = getTickCoord;
+        set(gca,'xTickLabel', '');
+        pos = get(gca,'position');
+        x = pos(1);
+        y = pos(2);
+        dlta = (pos(3)) / (length(xTickCoords) + 1);
+        figPos = get(gcf, 'position');
+        figWidth = figPos(3);
+        figHeight = figPos(4);
+        
         for i = 1:length(labels)
             [thisIcon map] = imread([char(labels(i))]);
             [height width] = size(thisIcon);
@@ -197,38 +197,22 @@ function img = plotDendrogram(RDM, varargin)
             
             % Resize to 40*40 square
             if height > width
-                thisIcon = imresize(thisIcon, [40 NaN]);
+                thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
             else
-                thisIcon = imresize(thisIcon, [NaN 40]);
+                thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
             end
 
             % Add 3rd(color) dimension if there is none
             if length(size(thisIcon)) == 2
-                disp('KSJDKAJSNDKA')
                 thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
-
             end
-            
-            split = round((1449-208)/(r+2));
-            centerX =  208 + split * i;
-            centerY =  960;
-            width = 40;
-            height = 40;
-            cWidth = 58;
-            cHeight = 58;
+
             if i <= length(labels)
-%                 rect = rectangle('Position',[centerX-cWidth/2, centerY-cHeight, cWidth, cHeight], ...
-%                 'FaceColor', char(ip.Results.nodeColors{P(i)}));
-%                 dendrogramImg(centerY-cHeight:centerY-1, centerX-cWidth/2:centerX+cWidth/2-1, 1:3) = rect;
-                if ~isempty(ip.Results.nodeColors)
-                    dendrogramImg = insertShape(dendrogramImg, 'FilledRectangle', ...
-                        [centerX-cWidth/2, centerY-cHeight, cWidth, cHeight], ...
-                        'color', colorShort2Long(char(ip.Results.nodeColors{P(i)})));
-                end
-                dendrogramImg(centerY-height-9:centerY-1-9, centerX-width/2:centerX+width/2-1, 1:3) ...
-                    = thisIcon;
-                image(dendrogramImg);
-                label = labels(P(i));
+                lblAx = axes('parent',gcf,'position',[pos(1)+dlta*i - ...
+                    ip.Results.iconSize/2/figWidth,y-ip.Results.iconSize/figHeight, ...
+                    ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
+                imagesc(thisIcon,'parent',lblAx);
+                axis(lblAx,'off');
             else
             end
         end
@@ -238,26 +222,45 @@ function img = plotDendrogram(RDM, varargin)
     elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.nodeLabels)
         disp('CASE: COLOR');
+        
+        set(gca,'xTickLabel', '');
+        xTickCoords = getTickCoord;
+        set(gca,'xTickLabel', '');
+        pos = get(gca,'position');
+        x = pos(1);
+        y = pos(2);
+        dlta = (pos(3)) / (length(xTickCoords) + 1);
+        
+        figPos = get(gcf, 'position');
+        figWidth = figPos(3);
+        figHeight = figPos(4);
+        
         for i = 1:length(labels)
-            
-            split = round((1449-208)/(r+2));
-            centerX =  208 + split * i;
-            centerY =  960;
-            width = 40;
-            height = 40;
-            if i <= length(ip.Results.nodeColors)
-                %insertShape(dendrogramImg, 'Rectangle', [centerX-width/2 centerY-height width height]);
+
+            if i <= length(labels)
+                lblAx = axes('parent',gcf,'position',[pos(1)+dlta*i - ...
+                    ip.Results.iconSize/2/figWidth,y-ip.Results.iconSize/figHeight, ...
+                    ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
+                rectangle('FaceColor', labels{i});
+                axis(lblAx,'off');
+            else
             end
         end
-         
+        
+        
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+    % CASE: NONE (Default number labels)
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    else
+        
+        disp('CASE: DEFAULT LABELS');
+        % Do NOTHING
+
+        
+        
     end
-     
     
-    set(gca,'xtick',[]);
-    set(gca,'ytick',[]);
-
-    hold on
-
+    hold on;
      
 end
 

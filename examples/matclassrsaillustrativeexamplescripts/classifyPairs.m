@@ -34,7 +34,7 @@ for cat1 = 1:5
       
       % Store the accuracy in the accMatrix
       [acc, accMatrix(cat2, cat1), predY, pVal, classifierInfo] = classifyEEG(...
-          X_3D(:, :, currUse), categoryLabels(currUse));
+          X_3D(:, :, currUse), categoryLabels(currUse), 'randomSeed', 'default');
    end
 end
 

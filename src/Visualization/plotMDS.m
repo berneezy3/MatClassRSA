@@ -90,7 +90,12 @@ function img = plotMDS(RDM, varargin)
     end
     
     img = figure;
-    [Y eigs] = cmdscale(RDM);
+    if (ip.Results.classical ~=0)
+        [Y eigs] = cmdscale(RDM);
+    else
+        [Y,stress] = mdscale(RDM, length(RDM));
+    end
+        
     [r c] = size(Y);
     
     % set dimensions
@@ -126,9 +131,21 @@ function img = plotMDS(RDM, varargin)
     ylabel(['Dimension ' num2str(ip.Results.dimensions(2))], 'FontWeight', 'bold'); 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % CASE: DEFAULT LABELS
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if isempty(ip.Results.nodeColors) && isempty(ip.Results.nodeLabels) ...
+            && isempty(ip.Results.iconPath)
+        disp('CASE: DEFAULT LABELS')
+        labels = [1:length(RDM)];
+        for i = 1:length(RDM)
+            text(Y(i,xDim), Y(i,yDim), num2str(labels(i)), ...
+                'FontSize', 30);
+        end
+  
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels) ...
+    else if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels) ...
             && isempty(ip.Results.iconPath)
     
         disp('CASE: COLOR AND NODE')

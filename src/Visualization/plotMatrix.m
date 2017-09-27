@@ -1,4 +1,4 @@
-function img = plotMatrix(matrix, varargin)
+function img = plotMatrix(RDM, varargin)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
@@ -49,47 +49,43 @@ function img = plotMatrix(matrix, varargin)
     ip.addParameter('iconPath', '');
     ip.addParameter('colormap', '');
     ip.addParameter('colorbar', '');
-    ip.addParameter('matrixLabels', '');
+    ip.addParameter('matrixLabels', 1);
     ip.addParameter('FontSize', 15, @(x) isnumeric(x));
-    ip.addParameter('Ticks', 5, @(x) (isnumeric(x) && X>0));
-    parse(ip, matrix,varargin{:});
+    ip.addParameter('ticks', 5, @(x) (isnumeric(x) && x>0));
+    ip.addParameter('textRotation', 0, @(x) assert(isnumeric(x), ...
+        'textRotation must be a numeric value'));
+    ip.addParameter('iconSize', 40);
+    parse(ip, RDM,varargin{:});
     
     img = figure;
-    imagesc(matrix);
+    imagesc(RDM);
     
     if ~isempty(ip.Results.colormap)
         colormap(ip.Results.colormap);
     end
     
-    if ~isempty(ip.Results.matrixLabels)
-        if ip.Results.matrixLabels
-            % Label the dendrogram with values
-            % 
-            textStrings = num2str(matrix(:),'%0.2f');  %# Create strings from the matrix values
-            textStrings = strtrim(cellstr(textStrings));  %# Remove any space padding
-            [x,y] = meshgrid(1:length(matrix));   %# Create x and y coordinates for the strings
-            text(x(:),y(:),textStrings(:),...      %# Plot the strings
-                        'HorizontalAlignment','center', ...
-                        'FontSize', ip.Results.FontSize);
-        end
+    if (ip.Results.matrixLabels==1)
+        % Label the dendrogram with values
+        % 
+        textStrings = num2str(RDM(:),'%0.2f');  %# Create strings from the matrix values
+        textStrings = strtrim(cellstr(textStrings));  %# Remove any space padding
+        [x,y] = meshgrid(1:length(RDM));   %# Create x and y coordinates for the strings
+        text(x(:),y(:),textStrings(:),...      %# Plot the strings
+                    'HorizontalAlignment','center', ...
+                    'FontSize', ip.Results.FontSize);
     end
     
     if ip.Results.colorbar > 0
         c = colorbar;
         c.FontSize = ip.Results.FontSize;
+        matMin = min(min(RDM));
+        matMax = max(max(RDM));
+        inc = (matMax - matMin)/(ip.Results.ticks-1);
+        c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.ticks-2] * inc + matMin  matMax]));
+        c.FontWeight = 'bold';
     end
     
-    matMin = min(min(matrix));
-    matMax = max(max(matrix));
-    inc = (matMax - matMin)/(ip.Results.Ticks-1);
-    %c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.Ticks-2] * inc + matMin  matMax]));
-    %c.FontWeight = 'bold';
-    
-    xticklabels('');
-    yticklabels('');
 
-    hold on;
-    
     
     % check which set of labels to use
     % alphanumeric labels
@@ -101,149 +97,216 @@ function img = plotMatrix(matrix, varargin)
     elseif isempty(ip.Results.axisLabels) && isempty(ip.Results.iconPath) && ~isempty(ip.Results.axisColors)
          labels = ip.Results.axisColors;
     else %no labels specified
-        set(gca,'xtick',[]);
-        set(gca,'ytick',[]);
+%         set(gca,'xtick',[]);
+%         set(gca,'ytick',[]);
         hold on;
         return;
     end
     
+    
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % CASE:  DEFAULT LABELS
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    if isempty(ip.Results.axisColors) && isempty(ip.Results.axisLabels) ...
+            && isempty(ip.Results.iconPath)
+    disp('CASE: DEAFULT LABELS')
+
    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE:  AXIS COLOR LABEL
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if ~isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
+    elseif ~isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
             && isempty(ip.Results.iconPath)
-    
-        hold off;
-        F = getframe(gcf);
-        CMimg = F.cdata;
-        imagesc(CMimg);
-        axis off;
+        
+        disp('CASE: AXIS COLOR LABELS')
+
+        [xTickCoords yTickCoords] = getTickCoord;
+        set(gca,'xTickLabel', '');
+        set(gca,'yTickLabel', '');
         numLabels = length(labels);
+        bottomYCoord =  numLabels + .5;
 
         
-        % Variables to determine color plotting coordinates
-        textLength = 15;
-        textHeight = 15;
-        tHeightInit = 72+685/numLabels/2-textHeight/2;
-        tWidthInit = 138+685/numLabels/2-textLength/2;
-        
-        disp(length(labels))
         for i = 1:length(labels)
-            hold on;
-            
-            % since space to fit icons is limited, we will need to adjust 
-            % the x coordinates of the icons
-            if numLabels < 30
-                 text(85 - textLength, 685/numLabels*(i-1) + tHeightInit,...
-                     ip.Results.axisLabels(i), 'FontWeight', 'bold', ...
-                      'Color', ip.Results.axisColors{i}, 'FontSize', textLength);
-                text(790/numLabels*(i-1)+tWidthInit, 770,...
-                    ip.Results.axisLabels(i), 'FontWeight', 'bold', ...
-                      'Color', ip.Results.axisColors{i}, 'FontSize', textLength);
-            else 
-                text(110 - textLength*(rem(i,3)+1)/2, 685/numLabels*(i-1) + tHeightInit,...
-                    ip.Results.axisLabels(i), 'FontWeight', 'bold', ...
-                      'Color', ip.Results.axisColors{i}, 'FontSize', textLength);
-                text(790/numLabels*(i-1) + tWidthInit, 760 + textLength/2*rem(i,3),...
-                     ip.Results.axisLabels(i), 'FontWeight', 'bold',...
-                     'Color', ip.Results.axisColors{i}, 'FontSize', textLength);
-            end
+                label = labels(i);
+                t = text(xTickCoords(i, 1), bottomYCoord, label, ...
+                    'HorizontalAlignment', 'center', ...
+                    'VerticalAlignment', 'top');
+                t.Rotation = ip.Results.textRotation;
+                t.Color = ip.Results.axisColors{i};
+                t(1).FontSize = 25;
+        end
         
-    end
+        for i = 1:length(labels)
+                label = labels(i);
+                t = text(yTickCoords(i, 1), yTickCoords(i, 2), label, ...
+                    'HorizontalAlignment', 'center');
+                t.Rotation = ip.Results.textRotation;
+                t.Color = ip.Results.axisColors{i};
+                t(1).FontSize = 25;
+
+        end
         
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: AXIS LABEL
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
             && isempty(ip.Results.iconPath)
-        disp('CASE: axis')
-        xticks(1:length(ip.Results.axisLabels))
-        yticks(1:length(ip.Results.axisLabels))
-        xticklabels(ip.Results.axisLabels)
-        yticklabels(ip.Results.axisLabels)
+        disp('CASE: LABEL')
+
+        set(gca,'xTickLabel', '');
+        set(gca,'yTickLabel', '');
+
+        set(gca,'xTickLabel', ip.Results.axisLabels, 'FontSize', ip.Results.FontSize);
+        set(gca,'yTickLabel', ip.Results.axisLabels, 'FontSize', ip.Results.FontSize);
+
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: IMAGE OR COLOR IMAGE
+    % CASE: IMAGE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif  ~isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.axisLabels)
         
-        F = getframe(gcf);
-        CMimg = im2double(F.cdata);
-        image(CMimg);
-        axis off;
+                
+        set(gca,'xTickLabel', '');
+        set(gca,'yTickLabel', '');
         
-        folder = dir(ip.Results.iconPath);
-        folder = folder(1).folder
-        disp([folder '/' labels(1)])
+        [xTickCoords yTickCoords] = getTickCoord;
+
+        pos = get(gca,'position');
+        leftMargin = pos(1);
+        bottomMargin = pos(2);
+        topMargin = pos(2) + pos(4);
+        xdlta = (pos(3)) / (length(xTickCoords));
+        xinit = xdlta/2;
+        figPos = get(gcf, 'position');
+        figWidth = figPos(3);
+        figHeight = figPos(4);
         
-        % Variables to determine plotting coordinates
-        numLabels = length(labels);
-        iconLength = 30;
-        iconHeight = 30;
-        heightInit = 64+685/numLabels/2-iconHeight/2;
-        widthInit = 142+685/numLabels/2-iconLength/2;
-        
-        % Variables to determine color plotting coordinates
-        colorLength = 35;
-        colorHeight = 35;
-        cHeightInit = 64+685/numLabels/2-colorHeight/2;
-        cWidthInit = 142+685/numLabels/2-colorLength/2;
-        
-        disp(length(labels))
         for i = 1:length(labels)
-            hold on;
-            [thisIcon map] = imread( [char(folder) '/' char(labels(i))] );
+            [thisIcon map] = imread([char(labels(i))]);
             [height width] = size(thisIcon);
             %convert thisIcon to scale 0~1
+            
             if ~isempty(map)
+                disp('converting to RGB')
+                %disp(map);
                 thisIcon = ind2rgb(thisIcon, map);
             else
-                thisIcon = double(thisIcon)/255;
+                thisIcon = thisIcon/255;
             end
+            
+            % Resize to 40*40 square
+            if height > width
+                thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
+            else
+                thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
+            end
+
+            % Add 3rd(color) dimension if there is none
             if length(size(thisIcon)) == 2
                 thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
             end
-            
-            % since space to fit icons is limited, we will need to adjust 
-            % the x coordinates of the icons
-            if numLabels < 30
-                if ~isempty(ip.Results.axisColors)
-                     rectangle('Position', [122 - colorLength, 685/numLabels*(i-1) + cHeightInit,...
-                         colorLength, colorHeight], ...
-                        'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
-                        ip.Results.axisColors{i});
-                    rectangle('Position', [790/numLabels*(i-1)+cWidthInit, 752,...
-                         colorLength, colorHeight], ...
-                        'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
-                        ip.Results.axisColors{i});
-                end
-                imagesc([120 - iconLength, 120], ...
-                    [ 685/numLabels*(i-1) + heightInit, 685/numLabels*(i-1)...
-                    + heightInit + iconHeight], thisIcon);
-                imagesc([ 790/numLabels*(i-1) + widthInit, 790/numLabels*(i-1)...
-                    + widthInit  + iconHeight], [755, 755 + iconLength], thisIcon);
-            % stacked labeling
-            else 
-                if ~isempty(ip.Results.axisColors)
-                    rectangle('Position', [117 - iconLength*(rem(i,3)+1), 685/numLabels*(i-1) + cHeightInit,...
-                        colorLength, colorHeight], ...
-                        'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
-                        ip.Results.axisColors{i});
-                    rectangle('Position', [ 790/numLabels*(i-1) + cWidthInit, 758 + iconLength*rem(i,3),...
-                         colorLength, colorHeight], ...
-                        'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
-                        ip.Results.axisColors{i});
-                end
-                imagesc([120 - iconLength*(rem(i,3)+1), 120 - iconLength*rem(i,3)], ...
-                    [ 685/numLabels*(i-1) + heightInit, 685/numLabels*(i-1) + ...
-                    heightInit + iconHeight], thisIcon);
-                imagesc([ 790/numLabels*(i-1) + widthInit, 790/numLabels*(i-1)...
-                    + widthInit  + iconHeight], [760 + iconLength*rem(i,3), 760 + iconLength*(rem(i,3)+1)], thisIcon);
+
+            if i <= length(labels)
+                % plot x axis labels
+                lblAx = axes('parent',gcf,'position', ...
+                    [leftMargin + xinit + xdlta * (i-1) - ip.Results.iconSize/2/figWidth ...
+                    ,bottomMargin-ip.Results.iconSize/figHeight, ...
+                    ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
+                imagesc(thisIcon,'parent',lblAx);
+                axis(lblAx,'off');
+                % plot y axis labels
+                lblAx = axes('parent',gcf,'position', ...
+                    [leftMargin - ip.Results.iconSize/figWidth ...
+                    ,topMargin-ip.Results.iconSize/figHeight, ...
+                    ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
+                imagesc(thisIcon,'parent',lblAx);
+                axis(lblAx,'off');
+            else
             end
-            
         end
+        
+        
+        
+%         F = getframe(gcf);
+%         CMimg = im2double(F.cdata);
+%         image(CMimg);
+%         axis off;
+%         
+%         folder = dir(ip.Results.iconPath);
+%         folder = folder(1).folder
+%         disp([folder '/' labels(1)])
+%         
+%         % Variables to determine plotting coordinates
+%         numLabels = length(labels);
+%         iconLength = 30;
+%         iconHeight = 30;
+%         heightInit = 64+685/numLabels/2-iconHeight/2;
+%         widthInit = 142+685/numLabels/2-iconLength/2;
+%         
+%         % Variables to determine color plotting coordinates
+%         colorLength = 35;
+%         colorHeight = 35;
+%         cHeightInit = 64+685/numLabels/2-colorHeight/2;
+%         cWidthInit = 142+685/numLabels/2-colorLength/2;
+%         
+%         disp(length(labels))
+%         for i = 1:length(labels)
+%             hold on;
+%             [thisIcon map] = imread( [char(folder) '/' char(labels(i))] );
+%             [height width] = size(thisIcon);
+%             %convert thisIcon to scale 0~1
+%             if ~isempty(map)
+%                 thisIcon = ind2rgb(thisIcon, map);
+%             else
+%                 thisIcon = double(thisIcon)/255;
+%             end
+%             if length(size(thisIcon)) == 2
+%                 thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
+%             end
+%             
+%             % since space to fit icons is limited, we will need to adjust 
+%             % the x coordinates of the icons
+%             if numLabels < 30
+%                 if ~isempty(ip.Results.axisColors)
+%                      rectangle('Position', [122 - colorLength, 685/numLabels*(i-1) + cHeightInit,...
+%                          colorLength, colorHeight], ...
+%                         'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
+%                         ip.Results.axisColors{i});
+%                     rectangle('Position', [790/numLabels*(i-1)+cWidthInit, 752,...
+%                          colorLength, colorHeight], ...
+%                         'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
+%                         ip.Results.axisColors{i});
+%                 end
+%                 imagesc([120 - iconLength, 120], ...
+%                     [ 685/numLabels*(i-1) + heightInit, 685/numLabels*(i-1)...
+%                     + heightInit + iconHeight], thisIcon);
+%                 imagesc([ 790/numLabels*(i-1) + widthInit, 790/numLabels*(i-1)...
+%                     + widthInit  + iconHeight], [755, 755 + iconLength], thisIcon);
+%             % stacked labeling
+%             else 
+%                 if ~isempty(ip.Results.axisColors)
+%                     rectangle('Position', [117 - iconLength*(rem(i,3)+1), 685/numLabels*(i-1) + cHeightInit,...
+%                         colorLength, colorHeight], ...
+%                         'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
+%                         ip.Results.axisColors{i});
+%                     rectangle('Position', [ 790/numLabels*(i-1) + cWidthInit, 758 + iconLength*rem(i,3),...
+%                          colorLength, colorHeight], ...
+%                         'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
+%                         ip.Results.axisColors{i});
+%                 end
+%                 imagesc([120 - iconLength*(rem(i,3)+1), 120 - iconLength*rem(i,3)], ...
+%                     [ 685/numLabels*(i-1) + heightInit, 685/numLabels*(i-1) + ...
+%                     heightInit + iconHeight], thisIcon);
+%                 imagesc([ 790/numLabels*(i-1) + widthInit, 790/numLabels*(i-1)...
+%                     + widthInit  + iconHeight], [760 + iconLength*rem(i,3), 760 + iconLength*(rem(i,3)+1)], thisIcon);
+%             end
+%             
+%         end
         
        
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
@@ -252,6 +315,9 @@ function img = plotMatrix(matrix, varargin)
     elseif ~isempty(ip.Results.axisColors) && isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.axisLabels)
         
+                
+        set(gca,'xTickLabel', '');
+        set(gca,'yTickLabel', '');
         F = getframe(gcf);
         CMimg = im2double(F.cdata);
         image(CMimg);
