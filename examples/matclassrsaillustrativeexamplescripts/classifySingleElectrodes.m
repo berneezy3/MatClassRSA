@@ -29,13 +29,12 @@ allElectrodeAccs = nan(124, 1);
 %%%% Iterate through all the electrodes and classify
 for i = 1:124
    [CM, allElectrodeAccs(i), predY, pVal, classifierInfo] = classifyEEG(...
-       X_3D(i,:,:), categoryLabels);
+       X_3D(i,:,:), categoryLabels, 'randomSeed', 'default');
 end
 
 %%
 
 %%%% Plot the accuracies on a scalp map
-% LET ME KNOW IF THIS DOESN'T WORK OR LOOKS WEIRD
 %l = getLocs124();
 %topoplot(allElectrodeAccs, l); 
 plotOnEgi([allElectrodeAccs;NaN;NaN;NaN;NaN])

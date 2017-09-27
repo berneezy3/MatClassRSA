@@ -46,8 +46,10 @@ function img = plotMST(RDM, varargin)
     ip.addParameter('iconPath', '');
     ip.addParameter('edgeLabelSize', 15, @(x) isnumeric(x));
     ip.addParameter('nodeLabelSize', 15, @(x) isnumeric(x));
-    ip.addParameter('nodeLabelRotation', 50, @(x) isnumeric(x));
+    ip.addParameter('nodeLabelRotation', 0, @(x) isnumeric(x));
     ip.addParameter('roundEdgeLabel', 4, @(x) isnumeric(x));
+    ip.addParameter('lineWidth', 2, @(x) assert(isnumeric(x)));
+    ip.addParameter('lineColor', [.5 .5 .5]);
 
     parse(ip, RDM, varargin{:});
     
@@ -85,9 +87,10 @@ function img = plotMST(RDM, varargin)
     [T,pred] = minspantree(G);
     disp(T.Edges);
     disp(T.Edges.Weight);
-    P = plot(T, 'EdgeLabel', T.Edges.Weight);
+    P = plot(T);
+    highlight(P, T, 'LineWidth',  ip.Results.lineWidth, 'EdgeColor', ip.Results.lineColor);
 
-    
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -98,6 +101,7 @@ function img = plotMST(RDM, varargin)
         plt = MSTplothelper(sourceNodes, destNodes, weights, ...
             ip.Results.nodeLabels, ip);
         MSTcolorhelper(ip.Results.nodeLabels, ip.Results.nodeColors, plt);
+%         highlight(P, T, 'LineWidth',  5, 'EdgeColor', ip.Results.lineColor);
 
 
         
@@ -110,7 +114,8 @@ function img = plotMST(RDM, varargin)
             && isempty(ip.Results.iconPath)
         
         disp('CASE: NODE')
-        MSTplothelper(sourceNodes, destNodes, weights, ip.Results.nodeLabels, ip)
+        MSTplothelper(sourceNodes, destNodes, weights, ip.Results.nodeLabels, ip);
+        
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR AND IMAGE
@@ -140,7 +145,6 @@ function img = plotMST(RDM, varargin)
         
     end
     
-    hold on;
     
 end
 
@@ -165,7 +169,7 @@ function plt = MSTplothelper(sourceNodes, destNodes, weights, nodeLabels, ip)
         [T,pred] = minspantree(G);
         disp(T.Edges);
         disp(T.Edges.Weight);
-        plt = plot(T);
+        plt = plot(T, 'LineWidth',  ip.Results.lineWidth, 'EdgeColor', ip.Results.lineColor);
         
         nl = plt.NodeLabel;
         plt.NodeLabel = '';
@@ -173,9 +177,9 @@ function plt = MSTplothelper(sourceNodes, destNodes, weights, nodeLabels, ip)
         yd = get(plt, 'YData');
         
         text(xd, yd, nl,  'FontSize',  ip.Results.nodeLabelSize,...
-            'HorizontalAlignment','left', 'VerticalAlignment','middle', ...
-            'HorizontalAlignment', 'left', ...
-            'Rotation', ip.Results.nodeLabelRotation);
+            'HorizontalAlignment','left', 'VerticalAlignment','top', ...
+            'Rotation', ip.Results.nodeLabelRotation, ...
+            'FontSize', ip.Results.nodeLabelSize);
         
         % make table of edges
         [edgeR edgeC] = size(T.Edges.EndNodes);

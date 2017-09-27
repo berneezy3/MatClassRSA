@@ -4,6 +4,10 @@ function F = mrC_EGInetFaces(includeRef)
 % F = mrC.EGInetFaces(includeRef)
 % if includeRef = true, uses reference electrode Cz at vertex 129
 %            otherwise, builds mesh only from 128 electrodes
+%
+% (c) Spero Nicholas with input from Justin Ales and Benoit Cottereau
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
 
 if includeRef
 	Finit = [ 129 7 31; 129 106 7; 129 80 106; 129 55 80; 129 31 55 ];

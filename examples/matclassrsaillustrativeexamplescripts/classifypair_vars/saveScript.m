@@ -1,8 +1,8 @@
-saveas(f1, 'RDM', 'eps');
+print(f1, 'RDM', '-depsc');
 saveas(f1, 'RDM', 'fig');
-saveas(f2, 'MDS', 'eps');
+print(f2, 'MDS', '-depsc');
 saveas(f2, 'MDS', 'fig');
-saveas(f3, 'Dendro', 'eps');
+print(f3, 'Dendro', '-depsc');
 saveas(f3, 'Dendro', 'fig');
-saveas(f4, 'MST', 'eps');
+print(f4, 'MST', '-depsc');
 saveas(f4, 'MST', 'fig');

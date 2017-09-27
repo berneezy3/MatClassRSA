@@ -25,13 +25,14 @@ inDir = uigetdir(pwd);
 cd(inDir)
 load S6.mat
 
+%%
 %%%%% Analysis 1: Classification of single trials.
 % X_3D is the electrodes x time x trial data matrix.
 % categoryLabels is the vector of labels (6 categories)
 
 % Call the classification function
 [CM, acc, predY, pVal, classifierInfo] = classifyEEG(X_3D, ...
-    categoryLabels);
+    categoryLabels, 'randomSeed', 'default');
 
 %%
 % Convert the confusion matrix to an RDM
@@ -39,7 +40,7 @@ RDM = computeRDM(CM);
 
 
 % Create the four visualizations
-f1 = plotMatrix(RDM, 'matrixLabels', 1, 'colormap', 'summer', ...
+f1 = plotMatrix(RDM, 'colormap', 'summer', ...
     'axisLabels', {'HB' 'HF' 'AB' 'AF' 'FV' 'IO'}, ...
      'axisColors', {[1 .5 .3] [.1 .5 1] 'r' 'g' 'c' 'm' });
 f2 = plotMDS(RDM, 'nodeLabels', {'HB' 'HF' 'AB' 'AF' 'FV' 'IO'}, ...
@@ -53,14 +54,14 @@ f4 = plotMST(RDM, 'nodeLabels', {'HB' 'HF' 'AB' 'AF' 'FV' 'IO'}, ...
 %%%%% Anaysis 2: Classification of group-averaged trials.
 % Call the classification function
 [CM5, acc5, predY5, pVal5, classifierInfo5] = classifyEEG(X_3D, ...
-categoryLabels, 'averageTrials', 5);
+categoryLabels, 'averageTrials', 5, 'randomSeed', 'default');
 
 %%
 % Convert the confusion matrix to an RDM
 RDM5 = computeRDM(CM5);
 
 % Create the four visualizations
-f5 = plotMatrix(RDM5, 'matrixLabels', 1, 'colormap', 'summer', ...
+f5 = plotMatrix(RDM5, 'colormap', 'summer', ...
     'axisLabels', {'HB' 'HF' 'AB' 'AF' 'FV' 'IO'}, ...
      'axisColors', {[1 .5 .3] [.1 .5 1] 'r' 'g' 'c' 'm' });
 f6 = plotMDS(RDM5, 'nodeLabels', {'HB' 'HF' 'AB' 'AF' 'FV' 'IO'}, ...

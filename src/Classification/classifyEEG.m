@@ -46,7 +46,7 @@
 %        --options--
 %       'SVM' (default)
 %       'LDA' 
-%       'RandomForest'
+%       'RF'
 %   classifyOptionStruct - This is an option vector specific to each classifier
 %       that comes in the form of a struct containing name-value pairs.
 %       Acceptable name-value pairs are dependent on which classifier is
@@ -58,7 +58,7 @@
 %       classifier: SVM
 %           name: 'kernel'
 %           value: {'linear', 'polynomial', 'rbf', 'sigmoid'}
-%       classifier: RF
+%       classifier: ip.Results.nodeColors{P(i)}
 %           name: 'numTrees'
 %           value: *some positive integer*
 %       pValueMethod: 
@@ -70,10 +70,7 @@
 
     % Make sure input vector Y is int vector, convert if it is string
     % vector, string cell array, char vectors  
-
-    addpath([pwd '/src/Classification/libsvm-3.21/matlab']);
-
-
+    
 
     % Initialize the input parser
     ip = inputParser;
@@ -91,7 +88,6 @@
     defaultPCAinFold = 1;
     defaultNFolds = 10;
     defaultClassify = 'SVM';
-    defaultClassifyOptionsStruct = struct([]);
     defaultPValueMethod = 'binomcdf';
     defaultPermutations = 0;
     defaultTimeUse = [];
@@ -99,6 +95,10 @@
     defaultFeatureUse = [];
     defaultVerbose = 0;
     defaultRandomSeed = 'shuffle';
+    defaultKernel = 'rbf';
+%   defaultDiscrimType = 'linear';
+    defaultNumTrees = 64;
+    defaultMinLeafSize = 1;
 
 
     %Specify expected values
@@ -107,10 +107,12 @@
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     expectedPermutationTest = 0;
     expectedPCAinFold = [0,1];
-    expectedClassify = {'SVM', 'LDA', 'RandomForest'};
+    expectedClassify = {'SVM', 'LDA', 'RF'};
     expectedPValueMethod = {'binomcdf', 'permuteLabels', 'permuteModel'};
     expectedVerbose = {0,1};
-    expectedRandomSeed = {'default', 'shuffle', 'shuffle'};
+    expectedRandomSeed = {'default', 'shuffle'};
+    expectedKernel = {'linear', 'sigmoid', 'rbf', 'polynomial'};
+    
     
     %Required inputs
     addRequired(ip, 'X', @is2Dor3DMatrix)
@@ -120,15 +122,13 @@
     %Optional positional inputs
     %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
     if verLessThan('matlab', '8.2')
-        addParamValue(ip, 'normalize', defaultNormalize,...
-            @(x) any(validatestring(x, expectedNormalize)));
         addParamValue(ip, 'shuffleData', defaultShuffleData, ...
             @(x) (x==1 || x==0));
         addParamValue(ip, 'averageTrials', defaultAverageTrials, ...
             @(x) assert(rem(x,1) == 0 ));
         addParamValue(ip, 'averageTrialsHandleRemainder', ...
             defaultAverageTrialsHandleRemainder, ...
-            @(x) assert(validatestring(x, expectedAverageTrialsHandleRemainder)));
+            @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParamValue(ip, 'permutationTest', defaultPermutationTest, ...
              @(x) any(validatestring(x, expectedPermutationTest)));
         addParamValue(ip, 'PCA', defaultPCA);
@@ -136,8 +136,7 @@
         addParamValue(ip, 'nFolds', defaultNFolds);
         addParamValue(ip, 'classify', defaultClassify, ...
              @(x) any(validatestring(x, expectedClassify)));
-        addParamValue(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
-            @(x) assert(isstruct(x)));
+
         addParamValue(ip, 'pValueMethod', defaultPValueMethod, ...
             @(x) any(validatestring(x, expectedPValueMethod)));
         % must be a positive integer
@@ -155,16 +154,17 @@
             @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
         addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
+        addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
+        addParamValue(ip, 'numTrees', 128);
+        addParamValue(ip, 'minLeafSize', 1);
     else
-        addParameter(ip, 'normalize', defaultNormalize,...
-            @(x) any(validatestring(x, expectedNormalize)));
         addParameter(ip, 'shuffleData', defaultShuffleData, ...
             @(x)  (x==1 || x==0));
         addParameter(ip, 'averageTrials', defaultAverageTrials, ...
             @(x) assert(rem(x,1) == 0 ));
         addParameter(ip, 'averageTrialsHandleRemainder', ...
             defaultAverageTrialsHandleRemainder, ...
-            @(x) assert(validatestring(x, expectedAverageTrialsHandleRemainder)));
+            @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParameter(ip, 'permutationTest', defaultPermutationTest, ...
              @(x) any(validatestring(x, expectedPermutationTest)));
         addParameter(ip, 'PCA', defaultPCA);
@@ -172,8 +172,7 @@
         addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'classify', defaultClassify, ...
              @(x) any(validatestring(x, expectedClassify)));
-        addParameter(ip, 'classifyOptionsStruct', defaultClassifyOptionsStruct, ...
-            @(x) assert(isstruct(x)));
+
         addParameter(ip,'pValueMethod', defaultPValueMethod, ...
              @(x) any(validatestring(x, expectedPValueMethod)));
         % must be a positive integer
@@ -189,6 +188,9 @@
             @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
         addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
+        addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
+        addParameter(ip, 'numTrees', 128);
+        addParameter(ip, 'minLeafSize', 1);
     end
     
     %Optional name-value pairs
@@ -200,8 +202,7 @@
     
     
     % Initilize info struct
-    classifierInfo = struct('normalize', ip.Results.normalize, ...
-                        'shuffleData', ip.Results.shuffleData, ...
+    classifierInfo = struct('shuffleData', ip.Results.shuffleData, ...
                         'averageTrials', ip.Results.averageTrials, ...
                         'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder,...
                         'permutationTest', ip.Results.permutationTest, ...
@@ -209,7 +210,6 @@
                         'PCAinFold', ip.Results.PCAinFold, ...
                         'nFolds', ip.Results.nFolds, ...
                         'classify', ip.Results.classify, ...
-                        'classifyOptionsStruct', ip.Results.classifyOptionsStruct, ...
                         'pValueMethod', ip.Results.pValueMethod, ...
                         'permutations', ip.Results.permutations);
     
@@ -402,7 +402,7 @@
         testY = cvDataObj.testYall{i};
 
             [funcOutput mdl] = evalc(['fitModel(trainX, trainY, ip.Results.classify,' ...
-                'ip.Results.classifyOptionsStruct)']);
+                'ip)']);
             predictions = modelPredict(testX, mdl);
         
         labelsConcat = [labelsConcat testY];

@@ -11,7 +11,7 @@ function predictions = modelPredict(X, mdl)
         case 'struct'  
             [r c] = size(X);
             Y = zeros(r,1);
-            [predictions, acc, prob_estimates] = svmpredict(Y, X, mdl);
+            [funcoutput predictions, acc, prob_estimates] = evalc('svmpredict(Y, X, mdl)');
             predictions = predictions';
         case 'ClassificationDiscriminant'
             predictions = predict(mdl,X);
