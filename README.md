@@ -7,9 +7,8 @@ See the EEGLAB tutorial and reference paper (URLs given below) for more informat
 
 Sub-directories:
 
-/src - All distributed EEGLAB functions (admin, sigproc, pop, misc)
-/examples  - Directory to place all downloaded EEGLAB plug-ins. dipfit (1.0)
-              is present by default
+/src - Location of all MatClassRSA functions and helper functions
+/examples  - Locations of examples and illustrative analyses
 
 Dependencies:
 
