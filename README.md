@@ -8,7 +8,8 @@ See the EEGLAB tutorial and reference paper (URLs given below) for more informat
 Sub-directories:
 
 /src - Location of all MatClassRSA functions and helper functions
-/examples  - Locations of examples and illustrative analyses
+
+/examples - Locations of examples and illustrative analyses
 
 Dependencies:
 
