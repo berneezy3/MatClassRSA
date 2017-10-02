@@ -24,9 +24,13 @@ Download the latest version of this package at https://github.com/berneezy3/MatC
 Upon startup of Matlab, run the following in the Matlab IDE to add the MatClassRSA functions into your search path:
 
 > downloadPath = <Your download directory here, in char array format>;
+
 > addpath([downloadPath 'src/Classification/libsvm-3.21/matlab']);
+
 > addpath([downloadPath 'src/Classification/']);
+
 > addpath([downloadPath 'src/RDM_Computation/');
+
 > addpath([downloadPath 'src/Visualization']);
 
 MatClassRSA functions will be runnable from this point.  To automatically import MatClassRSA upon Matlab startup, 
