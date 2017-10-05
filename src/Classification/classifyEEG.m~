@@ -1,11 +1,7 @@
  function [CM, accuracy, predY, pVal, classifierInfo, varargout] = classifyEEG(X, Y, varargin)
-%-------------------------------------------------------------------
- % (c) Bernard Wang and Blair Kaneshiro, 2017.
-% Published under a GNU General Public License (GPL)
-% Contact: bernardcwang@gmail.com
-%-------------------------------------------------------------------
+% -------------------------------------------------------------------------
 % [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
-% -------------------------------------------------------------
+% -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
 % The main function for sorting user inputs and calling classifier.
@@ -15,12 +11,30 @@
 %   Y - labels
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   normalize - method to normalize rows of X, 
-%       --options--
-%       'diagonal' (default)
-%       'sum'
-%       'none'
-%   shuffleData - 1 to shuffle trainig data along with labels (default), or
+%   timeUse - If X is a 3D, space-by-time-by-trials matrix, then this
+%       option will subset X along the time dimension.  The input
+%       argument should be passed in as a vector of indices that indicate the 
+%       time dimension indices that the user wants to subset.  This arugument 
+%       will not do anything if input matrix X is a 2D, trials-by-feature matrix.
+%   spaceUse - If X is a 3D, space-by-time-by-trials matrix, then this
+%       option will subset X along the space dimension.  The input
+%       argument should be passed in as a vector of indices that indicate the 
+%       space dimension indices that the user wants to subset.  This arugument 
+%       will not do anything if input matrix X is a 2D, trials-by-feature matrix.
+%   featureUse - If X is a 2D, trials-by-features matrix, then this
+%       option will subset X along the features dimension.  The input
+%       argument should be passed in as a vector of indices that indicate the 
+%       feature dimension indices that the user wants to subset.  This arugument 
+%       will not do anything if input matrix X is a 3D,
+%       space-by-time-by-trials matrix.
+%   randomSeed - This option determines whether the randomization is to produce
+%       varying or unvarying results each different execution.
+%        --options--
+%       'shuffle' (default)
+%       'default' (replicate results)
+%   shuffleData - determine whether to shuffle the order of trials within 
+%       training data matrix X (order of labels in the labels vector Y will be
+%       shuffled in the same order)
 %       --options--
 %       1 - shuffle (default)
 %       0 - do not shuffle
@@ -28,43 +42,96 @@
 %       --options--
 %       (negative value) - don't average
 %       (postitive int) - number of integers to average over
-%   permutationTest - TODO
-%       --options--
-%       TODO
-%   PCA - Principal Component analysis on data matrix X. Default is to
+%   averageTrialsHandleRemainder - Handle remainder trials (if any) from trial averaging (default ?discard?)
+
+%   PCA - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
-%       decimal <1 and >0.  To retrieve a certain number of most
-%       significant features, enter an integer >1.
+%       decimal between 1 and 0.  To retrieve a certain number of most
+%       significant features, enter an integer greater or equal to 1.
 %   PCAinFold - whether or not to conduct PCA in each fold
 %       --options--
-%       1 (default) - PCA within each fold
+%       1 (default) - conduct PCA within each fold
 %       0 - one PCA for entire training data matrix X
 %   nFolds - number of folds in cross validation.  Must be integer
-%       greater than 1. Default is 10.
-%   classify - parameter to select classifier. 
+%       greater than 1 and less than number of trials. Default is 10.
+%   classify - choose classifier. 
 %        --options--
 %       'SVM' (default)
 %       'LDA' 
-%       'RF'
-%   classifyOptionStruct - This is an option vector specific to each classifier
-%       that comes in the form of a struct containing name-value pairs.
-%       Acceptable name-value pairs are dependent on which classifier is
-%       chosen for the 'classify' parameter in the main function.  
-%       classifier: LDA
-%           name: 'DiscrimType'
-%           value: {'linear', 'quadratic', 'diagLinear', ... 
-%                           'diagQuadratic', 'pseudoLinear', 'pseudoLinear'} 
-%       classifier: SVM
-%           name: 'kernel'
-%           value: {'linear', 'polynomial', 'rbf', 'sigmoid'}
-%       classifier: ip.Results.nodeColors{P(i)}
-%           name: 'numTrees'
-%           value: *some positive integer*
-%       pValueMethod: 
-%       
+%       'RF' 
+%   pValueMethod - Choose the method to compute p-value.  
+%       --options--
+%       'binomcdf' (default)
+%           computes a binomial cdf at each of the values in x using number of permutations
+%           sepcified in 'permutations'in N and probability of success 
+%           for each trial in p
+%       'permuteLabels' 
+%       'permuteModel'
+%   permutations - 
+%   kernel - Choose the kernel for decision function for SVM.  This input will do
+%       nothing if a classifier other than SVM is selected.
+%        --options--
+%       'linear' 
+%       'polynomial' 
+%       'rbf' (default)
+%       'sigmoid' 
+%   numTrees - Choose the number of decision trees to grow.  Default is
+%   128.
+%   minLeafSize - Choose the inimum number of observations per tree leaf.
+%   Default is 1,
+%
+% OUTPUT ARGS 
+%   CM - Confusion matrix that summarizes the performance of the
+%       classification, in which rows represent actual labels and columns
+%       represent predicted labels.  Element i,j represents the number of 
+%       observations belonging to class i that the classifier labeled as
+%       belonging to class j.
+%   accuracy - Classification accuracy
+%   predY - predicted label vector
+%   pVal - p-value of the classification
+%       classifierInfo - A struct summarizing the options selected for the
+%       classification.
+%   accDist (verbose output) - Returns the distribution of N accuracies %
+%       calculated from the permutation test.  This argument will output 
+%       null is 'binomcdf' is passed into parameter 'pValueMethod'.
+%   modelsConcat (verbose output) - 
+%
+
 % TODO:
 %   Check when the folds = 1, what we should do 
+
+% This software is licensed under the 3-Clause BSD License (New BSD License), 
+% as follows:
+% -------------------------------------------------------------------------
+% Copyright 2017 Bernard C. Wang, Anthony M. Norcia, and Blair Kaneshiro
+% 
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+% 
+% 1. Redistributions of source code must retain the above copyright notice, 
+% this list of conditions and the following disclaimer.
+% 
+% 2. Redistributions in binary form must reproduce the above copyright notice, 
+% this list of conditions and the following disclaimer in the documentation 
+% and/or other materials provided with the distribution.
+% 
+% 3. Neither the name of the copyright holder nor the names of its 
+% contributors may be used to endorse or promote products derived from this 
+% software without specific prior written permission.
+% 
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+% POSSIBILITY OF SUCH DAMAGE.
+
 
     % convert Y to vector if its a cell array
 
@@ -79,16 +146,13 @@
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
     %Specify default values
-    defaultNormalize = 'diagonal';
     defaultShuffleData = 1;
     defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
-    defaultPermutationTest = 0;
     defaultPCA = .9;
     defaultPCAinFold = 1;
     defaultNFolds = 10;
     defaultClassify = 'SVM';
-    defaultClassifyOptionsStruct = struct([]);
     defaultPValueMethod = 'binomcdf';
     defaultPermutations = 0;
     defaultTimeUse = [];
@@ -103,15 +167,13 @@
 
 
     %Specify expected values
-    expectedNormalize = {'diagonal', 'sum', 'none'};
     expectedShuffleData = [0, 1];
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
-    expectedPermutationTest = 0;
     expectedPCAinFold = [0,1];
     expectedClassify = {'SVM', 'LDA', 'RF'};
     expectedPValueMethod = {'binomcdf', 'permuteLabels', 'permuteModel'};
     expectedVerbose = {0,1};
-    expectedRandomSeed = {'default', 'shuffle', 'shuffle'};
+    expectedRandomSeed = {'default', 'shuffle'};
     expectedKernel = {'linear', 'sigmoid', 'rbf', 'polynomial'};
     
     
@@ -129,9 +191,7 @@
             @(x) assert(rem(x,1) == 0 ));
         addParamValue(ip, 'averageTrialsHandleRemainder', ...
             defaultAverageTrialsHandleRemainder, ...
-            @(x) assert(validatestring(x, expectedAverageTrialsHandleRemainder)));
-        addParamValue(ip, 'permutationTest', defaultPermutationTest, ...
-             @(x) any(validatestring(x, expectedPermutationTest)));
+            @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParamValue(ip, 'PCA', defaultPCA);
         addParamValue(ip, 'PCAinFold', defaultPCAinFold);
         addParamValue(ip, 'nFolds', defaultNFolds);
@@ -165,9 +225,7 @@
             @(x) assert(rem(x,1) == 0 ));
         addParameter(ip, 'averageTrialsHandleRemainder', ...
             defaultAverageTrialsHandleRemainder, ...
-            @(x) assert(validatestring(x, expectedAverageTrialsHandleRemainder)));
-        addParameter(ip, 'permutationTest', defaultPermutationTest, ...
-             @(x) any(validatestring(x, expectedPermutationTest)));
+            @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParameter(ip, 'PCA', defaultPCA);
         addParameter(ip, 'PCAinFold', defaultPCAinFold);
         addParameter(ip, 'nFolds', defaultNFolds);
@@ -189,7 +247,7 @@
             @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
         addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-        addParameter(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
+        addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
         addParameter(ip, 'numTrees', 128);
         addParameter(ip, 'minLeafSize', 1);
     end
@@ -203,11 +261,9 @@
     
     
     % Initilize info struct
-    classifierInfo = struct('normalize', ip.Results.normalize, ...
-                        'shuffleData', ip.Results.shuffleData, ...
+    classifierInfo = struct('shuffleData', ip.Results.shuffleData, ...
                         'averageTrials', ip.Results.averageTrials, ...
-                        'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder,...
-                        'permutationTest', ip.Results.permutationTest, ...
+                        'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder, ...
                         'PCA', ip.Results.PCA, ...
                         'PCAinFold', ip.Results.PCAinFold, ...
                         'nFolds', ip.Results.nFolds, ...
@@ -404,7 +460,7 @@
         testY = cvDataObj.testYall{i};
 
             [funcOutput mdl] = evalc(['fitModel(trainX, trainY, ip.Results.classify,' ...
-                'ip.Results.classifyOptionsStruct)']);
+                'ip)']);
             predictions = modelPredict(testX, mdl);
         
         labelsConcat = [labelsConcat testY];
