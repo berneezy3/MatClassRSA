@@ -11,43 +11,43 @@
 %   Y - labels
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   timeUse - If X is a 3D, space-by-time-by-trials matrix, then this
+%   'timeUse' - If X is a 3D, space-by-time-by-trials matrix, then this
 %       option will subset X along the time dimension.  The input
 %       argument should be passed in as a vector of indices that indicate the 
 %       time dimension indices that the user wants to subset.  This arugument 
 %       will not do anything if input matrix X is a 2D, trials-by-feature matrix.
-%   spaceUse - If X is a 3D, space-by-time-by-trials matrix, then this
+%   'spaceUse' - If X is a 3D, space-by-time-by-trials matrix, then this
 %       option will subset X along the space dimension.  The input
 %       argument should be passed in as a vector of indices that indicate the 
 %       space dimension indices that the user wants to subset.  This arugument 
 %       will not do anything if input matrix X is a 2D, trials-by-feature matrix.
-%   featureUse - If X is a 2D, trials-by-features matrix, then this
+%   'featureUse' - If X is a 2D, trials-by-features matrix, then this
 %       option will subset X along the features dimension.  The input
 %       argument should be passed in as a vector of indices that indicate the 
 %       feature dimension indices that the user wants to subset.  This arugument 
 %       will not do anything if input matrix X is a 3D,
 %       space-by-time-by-trials matrix.
-%   randomSeed - This option determines whether the randomization is to produce
+%   'randomSeed' - This option determines whether the randomization is to produce
 %       varying or unvarying results each different execution.
 %        --options--
 %       'shuffle' (default)
 %       'default' (replicate results)
-%   shuffleData - determine whether to shuffle the order of trials within 
+%   'shuffleData' - determine whether to shuffle the order of trials within 
 %       training data matrix X (order of labels in the labels vector Y will be
 %       shuffled in the same order)
 %       --options--
 %       1 - shuffle (default)
 %       0 - do not shuffle
-%   averageTrials - how to compute averaging of trials in X to increase accuracy
+%   'averageTrials' - how to compute averaging of trials in X to increase accuracy
 %       --options--
 %       (negative value) - don't average
 %       (postitive int) - number of integers to average over
-%   averageTrialsHandleRemainder - Handle remainder trials (if any) from 
+%   'averageTrialsHandleRemainder' - Handle remainder trials (if any) from 
 %       trial averaging 
 %       --options--
 %
 %
-%   PCA - Conduct Principal Component analysis on data matrix X. Default is to
+%   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
 %       decimal between 1 and 0.  To retrieve a certain number of most
@@ -57,13 +57,13 @@
 %           explain N * 100% of the variance in input matrix X.
 %       (integer greater than or equal to 1, N) - Use N most important
 %       features of input matrix X.
-%   PCAinFold - whether or not to conduct PCA in each fold.
+%   'PCAinFold' - whether or not to conduct PCA in each fold.
 %       --options--
 %       1 (default) - conduct PCA within each fold.
 %       0 - one PCA for entire training data matrix X.
-%   nFolds - number of folds in cross validation.  Must be integer
+%   'nFolds' - number of folds in cross validation.  Must be integer
 %       greater than 1 and less than number of trials. Default is 10.
-%   classify - choose classifier. 
+%   'classify' - choose classifier. 
 %        --options--
 %       'SVM' (default)
 %       'LDA' 
@@ -74,20 +74,20 @@
 %           computes a binomial cdf at each of the values in x using number 
 %           of permutations sepcified in 'permutations'in N and probability 
 %           of success for each trial in p
-%       'permuteLabels' 
-%              
-%       'permuteModel'
-%   permutations - 
-%   kernel - Choose the kernel for decision function for SVM.  This input will do
+%       'permuteTestLabels' 
+%             
+%       'permuteFullModel'
+%   'permutations' - 
+%   'kernel' - Choose the kernel for decision function for SVM.  This input will do
 %       nothing if a classifier other than SVM is selected.
 %        --options--
 %       'linear' 
 %       'polynomial' 
 %       'rbf' (default)
 %       'sigmoid' 
-%   numTrees - Choose the number of decision trees to grow.  Default is
+%   'numTrees' - Choose the number of decision trees to grow.  Default is
 %   128.
-%   minLeafSize - Choose the inimum number of observations per tree leaf.
+%   'minLeafSize' - Choose the inimum number of observations per tree leaf.
 %   Default is 1,
 %
 % OUTPUT ARGS 
@@ -101,10 +101,12 @@
 %   pVal - p-value of the classification
 %       classifierInfo - A struct summarizing the options selected for the
 %       classification.
-%   accDist (verbose output) - Returns the distribution of N accuracies %
-%       calculated from the permutation test.  This argument will output 
-%       null is 'binomcdf' is passed into parameter 'pValueMethod'.
-%   modelsConcat (verbose output) - 
+%   accDist (verbose output) - The distribution of N accuracies
+%       calculated from the permutation test in vector form.  This argument will be 
+%       NaN is 'binomcdf' is passed into parameter 'pValueMethod', or else,
+%       it will return the accuracy vector.
+%   modelsConcat (verbose output) - Struct containing the N models used during cross
+%   validation.
 %
 
 % TODO:
@@ -167,7 +169,7 @@
     defaultNFolds = 10;
     defaultClassify = 'SVM';
     defaultPValueMethod = 'binomcdf';
-    defaultPermutations = 0;
+    defaultPermutations = 1000;
     defaultTimeUse = [];
     defaultSpaceUse = [];
     defaultFeatureUse = [];
@@ -184,7 +186,7 @@
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     expectedPCAinFold = [0,1];
     expectedClassify = {'SVM', 'LDA', 'RF'};
-    expectedPValueMethod = {'binomcdf', 'permuteLabels', 'permuteModel'};
+    expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
     expectedVerbose = {0,1};
     expectedRandomSeed = {'default', 'shuffle'};
     expectedKernel = {'linear', 'sigmoid', 'rbf', 'polynomial'};
@@ -433,14 +435,10 @@
             % case is handled at the end, when the accuracy of the
             % classifier is calculated
             accDist = NaN;
-        case 'permuteLabels'
-            accDist = permuteLabels(Y, cvDataObj, ip.Results.nFolds,   ...
-                ip.Results.permutations, ip.Results.classify, ...
-                ip.Results.classifyOptionsStruct );
-        case 'permuteModel'
-            accDist = permuteModel(cvDataObj, ip.Results.nFolds, ...
-                ip.Results.permutations, ip.Results.classify, ...
-                ip.Results.classifyOptionsStruct );
+        case 'permuteTestLabels'
+            accDist = permuteTestLabels(Y, cvDataObj, ip);
+        case 'permuteFullModel'
+            accDist = permuteFullModel(Y, cvDataObj, ip);
         case 'None'
     end
     toc
@@ -472,7 +470,7 @@
         testX = cvDataObj.testXall{i};
         testY = cvDataObj.testYall{i};
 
-            [funcOutput mdl] = evalc(['fitModel(trainX, trainY, ip.Results.classify,' ...
+            [funcOutput mdl] = evalc(['fitModel(trainX, trainY, ' ...
                 'ip)']);
             predictions = modelPredict(testX, mdl);
         
@@ -496,9 +494,9 @@
     switch ip.Results.pValueMethod
         case 'binomcdf'
             pVal = pbinom(Y, ip.Results.nFolds, accuracy);
-        case 'permuteLabels'
+        case 'permuteTestLabels'
             pVal = permTestPVal(accuracy, accDist);
-        case 'permuteModel'
+        case 'permuteFullModel'
             pVal = permTestPVal(accuracy, accDist);
         case 'None'
     end

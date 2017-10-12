@@ -89,6 +89,7 @@ function img = plotMDS(RDM, varargin)
         isequal(size(x), [1 2]),  'xlim must be length 2 vector'));
     ip.addParameter('yLim', [], @(x) assert(isequal(size(x), [2 1]) || ...
         isequal(size(x), [1 2]),  'ylim must be length 2 vector'));
+    ip.addParameter('iconSize', 40);
 
     parse(ip, RDM,varargin{:});
     
@@ -253,7 +254,7 @@ function img = plotMDS(RDM, varargin)
 
         for i = 1:length(labels)
             hold on;
-            [thisIcon map] = imread(fullfile(ip.Results.iconPath, labels{i}));
+            [thisIcon map] = imread(ip.Results.iconPath, );
             [height width] = size(thisIcon);
             %convert thisIcon to scale 0~1
             if ~isempty(map)
@@ -269,9 +270,9 @@ function img = plotMDS(RDM, varargin)
             
             % Resize to 40*40 square
             if height > width
-                thisIcon = imresize(thisIcon, [50 NaN]);
+                thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
             else
-                thisIcon = imresize(thisIcon, [NaN 50]);
+                thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
             end
             
             plotLength = (max(Y(:,xDim)) - min(Y(:,xDim)))/12;
@@ -289,18 +290,11 @@ function img = plotMDS(RDM, varargin)
     elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.nodeLabels)
         
-        
         for i = 1:r
             plot( Y(i,xDim) ,Y(i,yDim) , 'o', 'MarkerSize', 15, 'LineWidth', 4, ...
                 'MarkerEdgeColor', ip.Results.nodeColors{i}, ...
                 'MarkerFaceColor', ip.Results.nodeColors{i});
         end
-
-            xlim([xMin xMax]);
- 
-            ylim([yMin yMax]);
-
-
         
     end
     

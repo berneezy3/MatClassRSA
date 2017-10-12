@@ -94,7 +94,7 @@ function img = plotMatrix(RDM, varargin)
     ip.addParameter('textRotation', 0, @(x) assert(isnumeric(x), ...
         'textRotation must be a numeric value'));
     ip.addParameter('iconSize', 40);
-    parse(ip, RDM, varargin{:});
+    parse(ip, RDM,varargin{:});
     
     imagesc(RDM);
     img = gcf;
@@ -281,46 +281,50 @@ function img = plotMatrix(RDM, varargin)
             && isempty(ip.Results.axisLabels)
         
                 
-        
-          
-        set(gca,'xTick', [1:length(RDM)]);
-        set(gca,'yTick',  [1:length(RDM)]);
         set(gca,'xTickLabel', '');
         set(gca,'yTickLabel', '');
-        
-        [xTickCoords yTickCoords] = getTickCoord;
+        F = getframe(gcf);
+        CMimg = im2double(F.cdata);
+        image(CMimg);
+        axis off;
+        numLabels = length(labels);
 
-        pos = get(gca,'position');
-        leftMargin = pos(1);
-        bottomMargin = pos(2);
-        topMargin = pos(2) + pos(4);
-        xdlta = (pos(3)) / (length(xTickCoords));
-        ydlta = (pos(4)) / (length(yTickCoords));
-        xinit = xdlta/2;
-        yinit = ydlta/2;
-        figPos = get(gcf, 'position');
-        figWidth = figPos(3);
-        figHeight = figPos(4);
         
+        % Variables to determine color plotting coordinates
+        colorLength = 30;
+        colorHeight = 30;
+        cHeightInit = 64+685/numLabels/2-colorHeight/2;
+        cWidthInit = 142+685/numLabels/2-colorLength/2;
+        
+        disp(length(labels))
         for i = 1:length(labels)
+            hold on;
             
-            % plot x axis labels
-            lblAx = axes('parent',gcf,'position', ...
-                [leftMargin + xinit + xdlta * (i-1) - ip.Results.iconSize/2/figWidth ...
-                ,bottomMargin-ip.Results.iconSize/figHeight, ...
-                ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
-            rectangle('FaceColor', labels{i});
-            axis(lblAx,'off');
-            % plot y axis labels
-            lblAx = axes('parent',gcf,'position', ...
-                [leftMargin - ip.Results.iconSize/figWidth ...
-                ,topMargin - yinit - ydlta * (i-1) - ip.Results.iconSize/2/figHeight, ...
-                ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
-            rectangle('FaceColor', labels{i});
-            axis(lblAx,'off');
-
-        end
+            % since space to fit icons is limited, we will need to adjust 
+            % the x coordinates of the icons
+            if numLabels < 30
+                 rectangle('Position', [120 - colorLength, 685/numLabels*(i-1) + cHeightInit,...
+                     colorLength, colorHeight], ...
+                    'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
+                    ip.Results.axisColors{i});
+                rectangle('Position', [790/numLabels*(i-1)+cWidthInit, 755,...
+                     colorLength, colorHeight], ...
+                    'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
+                    ip.Results.axisColors{i});
+            else 
+                    rectangle('Position', [120 - iconLength*(rem(i,3)+1), 685/numLabels*(i-1) + cHeightInit,...
+                        colorLength, colorHeight], ...
+                        'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
+                        ip.Results.axisColors{i});
+                    rectangle('Position', [ 790/numLabels*(i-1) + cWidthInit, 760 + iconLength*rem(i,3),...
+                         colorLength, colorHeight], ...
+                        'faceColor', ip.Results.axisColors{i}, 'EdgeColor', ...
+                        ip.Results.axisColors{i});
+            end
         
+        end
+
+
     
     
 

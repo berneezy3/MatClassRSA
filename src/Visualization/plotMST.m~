@@ -166,7 +166,7 @@ function img = plotMST(RDM, varargin)
         
         nodeLabels = {};
         for i = 1:length(RDM)
-            nodeLabels = [nodeLabels  num2str(i)];
+            nodeLabels{i} = i;
         end
 %         nodeLabels = [1:length(RDM)];
 

@@ -1,4 +1,4 @@
-function mdl = fitModel(X, Y, classifier, ip)
+function mdl = fitModel(X, Y, ip)
 %-------------------------------------------------------------------
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
@@ -32,7 +32,7 @@ function mdl = fitModel(X, Y, classifier, ip)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-    switch classifier
+    switch ip.Results.classify
         case 'SVM'
             Y = Y';
             switch ip.Results.kernel
@@ -53,7 +53,7 @@ function mdl = fitModel(X, Y, classifier, ip)
             
         case 'LDA'
 
-            mdl = fitcdiscr(X, Y, 'DiscrimType', 'linaer'); 
+            mdl = fitcdiscr(X, Y, 'DiscrimType', 'linear'); 
             
             
         case 'RF'
