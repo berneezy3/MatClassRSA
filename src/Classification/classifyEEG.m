@@ -75,9 +75,28 @@
 %           of permutations sepcified in 'permutations'in N and probability 
 %           of success for each trial in p
 %       'permuteTestLabels' 
-%             
+%           with the 'permuteTestLabels' option, we perform k -fold cross 
+%           validation only once. In each fold, the classification model is   
+%           trained on the intact data and labels, but predictions are made
+%           on test observations whose labels have been shuffled. The prediction   
+%           is repeated N times, with the test labels re-randomized for each   
+%           attempt. The 'permuteTestLabels' option is the second fastest method,   
+%           since it requires training the k models only once, but a total of
+%           k * N  prediction operations are performed. So that there are enough
+%           test labels to randomize in each fold, here we also recommend having   
+%           at least 100 observations total, and no more than 10 cross-validation folds.
 %       'permuteFullModel'
-%   'permutations' - 
+%           With the ?permuteFullModel? option, we perform the entire 10-fold 
+%           cross validation N times. For each of the N permutation iterations, 
+%           the entire labels vector (training and test observations) is shuffled, 
+%           and in each fold, the classifier model is both trained and tested using 
+%           the shuffled labels. As the full classification procedure is performed 
+%           N times, the ?permuteFullModel? option is the slowest, but is suitable 
+%           to use with any classifier configuration, including settings with 
+%           unbalanced classes, few observations, and up to N-fold cross validation.
+%   'permutations' - Choose number of permutations to perform.  Default
+%           1000.  This option will only work if 'permuteFullModel' or 
+%           'permuteTestLabels' is chosen.
 %   'kernel' - Choose the kernel for decision function for SVM.  This input will do
 %       nothing if a classifier other than SVM is selected.
 %        --options--
