@@ -62,7 +62,7 @@ function [y, V, nPC] = getPCs(X, PCs)
         explThresh = PCs;
         cumsumDiagS = cumsum(diagS);
         nPC = find(cumsumDiagS>=explThresh, 1);
-    elseif (PCs>1)
+    elseif (PCs>=1)
         nPC = round(PCs);
     end
 

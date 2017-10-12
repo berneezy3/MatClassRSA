@@ -8,23 +8,45 @@ function img = plotDendrogram(RDM, varargin)
 % passed in.
 %
 % INPUT ARGS:
-% - RDM: A distance matrix.  Diagonals must be 0, and must be
+%   RDM: A distance matrix.  Diagonals must be 0, and must be
 %               symmetrical along the diagonal
 %
-% Optional name-value pairs:
-% - 'nodeColors': a vector of colors, ordered by the order of labels in the 
-%                   confusion matrix
-%                   e.g. ['y' 'm' 'c' 'r' 'g' 'b' 'w' 'k']
-%                   or ['yellow' 'magenta' 'cyan' 'red' 'green' 
-%                       'blue' 'white' 'black']            
-% - 'nodeLabels': a matrix of alphanumeric labels, ordered by same order of
-%                   labels in the confusion matrix
-%                   e.g. ['cat' 'dog' 'fish']
-% - 'iconPath': a directory containing imaAges used to label, in which the
-%                   image files must be ordered in the same order as the 
-%                   labels of the confusion matrix
+% INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
+%   'nodeColors': a vector of colors, ordered by the order of labels in the 
+%       confusion matrix e.g. {?y? ?m? ?c? ?r?} or {?yellow? ?magenta? ?cyan? ?red?}
+%       or {?[1 1 0]? ?[1 0 1]? ?[0 1 1]? ?[1 0 0]?}
+%       Can be used in conjuction with 'nodeLabels'.
+%   'nodeLabels': a matrix of alphanumeric labels, ordered by same order of
+%       labels in the confusion matrix e.g. ['cat' 'dog' 'fish'].  Can be
+%       used in conjunction with 'nodeColors'.
+%   'iconPath': a directory containing imaAges used to label, in which the
+%       image files must be ordered in the same order as the 
+%       labels of the confusion matrix
+%   ?orientation? - Dendrogram orientation.  This parameter lets the user 
+%       specify which direction to point the dendrogram (orientation defined 
+%       here as the side that contains the dendrogram leaves).
+%       --options--
+%       'down? (default) 
+%       'up' 
+%       'left'
+%       'right'
+%   ?reorder? - Specify order of classes in the dendrogram.  Must pass in
+%       as a length N vector, N being the number of classes in RDM.  Also,
+%       vector should contain values 1:N. 
+%   ?yLim? - Set range of the Y-axis.  Pass in as an array of length 2, 
+%       [yMin yMax].
+%   ?textRotation? - Set this parameter to an  amount in degrees to rotate 
+%       the text.  Default 0.
+%   ?lineWidth? - Line width  Use this parameter to set the width of the 
+%       lines in the dendrogram.  Default 2.
+%   ?lineColor? - Line color  Use this parameter to set the color of the 
+%       lines in the dendrogram.  Similar to ?nodeColors?, we can either 
+%       pass in color abbreviations, full-length color names, or RGB color triplets.
+%       Default 'black'.
+%   'iconSize' - if parameter 'iconPath' is passed in, then this parameter
+%       will determine the size of each image icon.  Default 40.
 %
-%
+
 % Notes:
 %   - linkage order - inorder w/crossing, best order w/o crossing, dist
 %   order
@@ -218,8 +240,6 @@ function img = plotDendrogram(RDM, varargin)
                 disp('converting to RGB')
                 %disp(map);
                 thisIcon = ind2rgb(thisIcon, map);
-            else
-                thisIcon = thisIcon/255;
             end
             
             % Resize to 40*40 square
