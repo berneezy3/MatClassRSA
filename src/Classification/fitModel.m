@@ -45,11 +45,11 @@ function mdl = fitModel(X, Y, ip)
                 case 'sigmoid'
                     kernelNum = 3;
             end
-            currpath = pwd;
-            [libsvmpath,name,ext] = fileparts(which('/libsvm-3.21/matlab/svmtrain.mexmaci64'));
-            cd(libsvmpath);
-            [funcOutput mdl] = evalc('svmtrain(Y, X, [''-t '' num2str(kernelNum)])');
-            cd(currpath);
+%             currpath = pwd;
+%             [libsvmpath,name,ext] = fileparts(which('/libsvm-3.21/matlab/svmtrain.mexmaci64'));
+%             addpath(libsvmpath);
+              mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum)]);
+%             cd(currpath);
             
         case 'LDA'
 

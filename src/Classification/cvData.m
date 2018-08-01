@@ -62,7 +62,7 @@ classdef cvData
             if (PCA >0)
                 % (outside of folds)
                 if (PCAinFold == 0)
-                    disp('Extracting principal components');
+                    %disp('Extracting principal components');
                     X = getPCs(X, PCA);
                     
                     for i = 1:cvPart.NumTestSets
@@ -135,7 +135,7 @@ classdef cvData
             obj.trainYall = trainYall;
             obj.testYall = testYall;
             
-            delete(gcp('nocreate'));
+            %delete(gcp('nocreate'));
      
       
       end
