@@ -187,7 +187,7 @@
     defaultPCAinFold = 1;
     defaultNFolds = 10;
     defaultClassify = 'SVM';
-    defaultPValueMethod = 'binomcdf';
+    defaultPValueMethod = '';
     defaultPermutations = 1000;
     defaultTimeUse = [];
     defaultSpaceUse = [];
@@ -205,15 +205,16 @@
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     expectedPCAinFold = [0,1];
     expectedClassify = {'SVM', 'LDA', 'RF'};
-    expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
+%     expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
+    expectedPValueMethod = {'permuteFullModel'};
     expectedVerbose = {0,1};
     expectedRandomSeed = {'default', 'shuffle'};
     expectedKernel = {'linear', 'sigmoid', 'rbf', 'polynomial'};
     
     
     %Required inputs
-    addRequired(ip, 'X', @is2Dor3DMatrix)
-    addRequired(ip, 'Y', @isvector)
+    addRequired(ip, 'X', @is2Dor3DMatrixOrCell)
+    addRequired(ip, 'Y', @isVectorOrCell)
     [r c] = size(X);
 
     %Optional positional inputs
@@ -291,8 +292,22 @@
 
 
     % Parse
-    parse(ip, X, Y, varargin{:});
+    try 
+        parse(ip, X, Y, varargin{:});
+    catch ME
+        disp(getReport(ME,'extended'));
+    end
     
+    % Here we check if the input types are correct, not if the input 
+%     classifyOrCV = '';
+%     if iscell(X) == 1 && iscell(Y) == 1
+%         classifyOrCV = 'classify';
+%     elseif ismatrix(X) == 1 && ismatrix(Y) == 1
+%         classifyOrCV = 'CV';
+%     else
+%         error(['To determine whehter to run classification or cross validation'
+%         'X and Y either must be both maticies or both cell arrays.'])
+%     end
     
     % Initilize info struct
     classifierInfo = struct('shuffleData', ip.Results.shuffleData, ...
@@ -440,9 +455,10 @@
      
     % PCA 
     % Split Data into fold (w/ or w/o PCA)
+    disp('Conducting Principle Component Analysis');
     partition = cvpart(r, ip.Results.nFolds);
     tic
-    cvDataObj = cvData(X,Y, partition,ip.Results.PCA, ip.Results.PCAinFold);
+    cvDataObj = cvData(X,Y, partition, ip.Results.PCA, ip.Results.PCAinFold);
     toc
     
     
@@ -450,20 +466,22 @@
     [r c] = size(X);
     tic
     switch ip.Results.pValueMethod
-        case 'binomcdf'
-            % case is handled at the end, when the accuracy of the
-            % classifier is calculated
-            accDist = NaN;
-        case 'permuteTestLabels'
-            accDist = permuteTestLabels(Y, cvDataObj, ip);
+         case 'binomcdf'
+             % case is handled at the end, when the accuracy of the
+             % classifier is calculated
+             accDist = NaN;
+%         case 'permuteTestLabels'
+%             accDist = permuteTestLabels(Y, cvDataObj, ip);
         case 'permuteFullModel'
             accDist = permuteFullModel(Y, cvDataObj, ip);
-        case 'None'
+        otherwise
+            ;
     end
     toc
     
+    % CROSS VALIDATION
+    disp("Cross Validating")
     
-
     % Just partition, as shuffling (or not) was handled in previous step
     % if nFolds == 1
     if ip.Results.nFolds == 1
@@ -484,14 +502,16 @@
 
     for i = 1:ip.Results.nFolds
         
+        disp(['Fold ' num2str(i) ' of ' num2str(ip.Results.nFolds)])
+        
         trainX = cvDataObj.trainXall{i};
         trainY = cvDataObj.trainYall{i};
         testX = cvDataObj.testXall{i};
         testY = cvDataObj.testYall{i};
 
-            [funcOutput mdl] = evalc(['fitModel(trainX, trainY, ' ...
-                'ip)']);
-            predictions = modelPredict(testX, mdl);
+        mdl = fitModel(trainX, trainY, ip);
+        
+        predictions = modelPredict(testX, mdl);
         
         labelsConcat = [labelsConcat testY];
         predictionsConcat = [predictionsConcat predictions];
@@ -511,13 +531,15 @@
     end
     
     switch ip.Results.pValueMethod
-        case 'binomcdf'
+         case 'binomcdf'
             pVal = pbinom(Y, ip.Results.nFolds, accuracy);
-        case 'permuteTestLabels'
-            pVal = permTestPVal(accuracy, accDist);
+%         case 'permuteTestLabels'
+%             pVal = permTestPVal(accuracy, accDist);
         case 'permuteFullModel'
             pVal = permTestPVal(accuracy, accDist);
-        case 'None'
+        otherwise
+            pVal = '';
+            
     end
     
     if ip.Results.verbose
@@ -528,14 +550,36 @@
  end
 
  
- function y = is2Dor3DMatrix(x)
+ function y = is2Dor3DMatrixOrCell(x)
+        % check if input is a cell with two matrices, each of the same width
+        if iscell(x)
+            if isequal(size(x), [1 2])
+                [r1 w1] = size(x{1});
+                [r2 w2] = size(x{2});
+                if w1 == w2
+                    y = 1;
+                else
+                    y = 0;
+                end
+            end
+        % check input is a 2D matrix
+        elseif ismatrix(x)
+            y = 1;
+        % checck if input is a 3D matrix
+        elseif isequal(size(size(x)), [1 3])
+            y = 1;
+        else
+            y = 0;
+        end
+ end
  
-    if ismatrix(x)
+ function y = isVectorOrCell(x)
+    if iscell(x)
         y = 1;
-    elseif isequal(size(size(x)), [1 3])
+    elseif isvector(x)
         y = 1;
     else
-        y=0;
+        y = 0;
     end
  end
     
