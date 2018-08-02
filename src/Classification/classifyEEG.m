@@ -442,6 +442,7 @@
         [X, Y, shuffledInd] = shuffleData(X, Y);
     else
         classifierInfo.shuffleData = 'off';
+        Y = Y';
     end
 
     % TRIAL AVERAGING (doing)
@@ -524,10 +525,14 @@
     accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
     
     
-    % unshuffle predictions vector to return to user
-    predY = NaN(1, r);
-    for i = 1:r
-        predY(shuffledInd(i)) = predictionsConcat(i);
+    % unshuffle predictions vector to return to user IF shuffle is on
+    if (ip.Results.shuffleData == 1)
+        predY = NaN(1, r);
+        for i = 1:r
+            predY(shuffledInd(i)) = predictionsConcat(i);
+        end
+    else
+        predY = predictionsConcat;
     end
     
     switch ip.Results.pValueMethod
