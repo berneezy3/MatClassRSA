@@ -62,8 +62,6 @@ end
 %%
 
 %%%% Plot the accuracies on a scalp map
-%l = getLocs124();
-%topoplot(allElectrodeAccs, l); 
 plotOnEgi([allElectrodeAccs;NaN;NaN;NaN;NaN])
 c = colorbar;
 minAll = min(allElectrodeAccs);
