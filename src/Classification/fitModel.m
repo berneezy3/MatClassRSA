@@ -48,7 +48,7 @@ function mdl = fitModel(X, Y, ip)
 %             currpath = pwd;
 %             [libsvmpath,name,ext] = fileparts(which('/libsvm-3.21/matlab/svmtrain.mexmaci64'));
 %             addpath(libsvmpath);
-              mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum)]);
+              mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q']);
 %             cd(currpath);
             
         case 'LDA'

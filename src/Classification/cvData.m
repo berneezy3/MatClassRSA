@@ -3,8 +3,7 @@ classdef cvData
 % --------------------------------
 % Bernard Wang, August 17, 2017
 % 
-% This class is an alternative to the matlab cvcvPart class.  It
-% cvParts cross validation folds without randomization.
+% Object that stores the data to be used for cross validation.
 % 
 % INPUT ARGS:
 %   - n: number of training samples
