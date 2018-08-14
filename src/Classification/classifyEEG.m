@@ -481,7 +481,7 @@
     toc
     
     % CROSS VALIDATION
-    disp("Cross Validating")
+    disp('Cross Validating')
     
     % Just partition, as shuffling (or not) was handled in previous step
     % if nFolds == 1
