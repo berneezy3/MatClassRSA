@@ -166,13 +166,8 @@
 % TODO : FINISH DOCSTRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-    % convert Y to vector if its a cell array
-
-    % Make sure input vector Y is int vector, convert if it is string
-    % vector, string cell array, char vectors  
+    tic
     
-
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = false;
@@ -298,17 +293,24 @@
         disp(getReport(ME,'extended'));
     end
     
-    % Here we check if the input types are correct, not if the input 
-%     classifyOrCV = '';
-%     if iscell(X) == 1 && iscell(Y) == 1
-%         classifyOrCV = 'classify';
-%     elseif ismatrix(X) == 1 && ismatrix(Y) == 1
-%         classifyOrCV = 'CV';
-%     else
-%         error(['To determine whehter to run classification or cross validation'
-%         'X and Y either must be both maticies or both cell arrays.'])
-%     end
+    classifyFlag = 0;
+    CVflag = 0;
     
+    % check input data 
+    if iscell(X) && iscell(Y)
+        classifyFlag = 1;
+    % check 1) X is either 2 by 1 or 3 by 1 matrix  2) Y is regular vector
+    % and 3) both X and Y are not cell arrays
+    elseif (ndims(X) == 3 || ismatrix(X)) && isvector(Y) == 1 ...
+            && ~iscell(X) && ~iscell(Y)
+        CVflag = 1;
+    else
+        error('X and Y must either both be cell arrays or both be matrices')
+    end
+    
+
+    
+        
     % Initilize info struct
     classifierInfo = struct('shuffleData', ip.Results.shuffleData, ...
                         'averageTrials', ip.Results.averageTrials, ...
@@ -320,111 +322,37 @@
                         'pValueMethod', ip.Results.pValueMethod, ...
                         'permutations', ip.Results.permutations);
     
-
-    %%%%% INPUT DATA CHECKING (doing)
-    %%% Check the input data matrix X
-    if ndims(X) == 3
-        [nSpace, nTime, nTrials] = size(X);
-        disp(['Input data matrix size: ' num2str(nSpace) ' space x ' ...
-            num2str(nTime) ' time x ' num2str(nTrials) ' trials'])
-    elseif ndims(X) == 2
-        [nTrials, nFeature] = size(X);
-        warning(['2D input data matrix. Assuming '...
-            num2str(nTrials) ' trials x ' num2str(nFeature) ' features.'])
-    else
-        error('Input data matrix should be 3D or 2D matrix.')
+    % If user wants to train model and classify on test matrices we must 
+    % test and subset data separately
+    if (classifyFlag)
+        disp('Train model and classify test set')
+        [accuracy, predY, pVal] = trainModelTestData(X, Y, ip);
+        CM = NaN;
+        classifierInfo.shuffleData = 'N/A';
+        classifierInfo.averageTrials = 'N/A';
+        classifierInfo.averageTrialsHandleRemainder = 'N/A';
+        classifierInfo.nFolds = 'N/A';
+        classifierInfo.pValueMethod = NaN;
+        classifierInfo.permutations = NaN;
+        
+        return;
+    % If user wants to cross validate on entire dataset, we subet
+    % data into folds
+    elseif (CVflag)
+       % check if data is double, convert to double if it isn't
+       if ~isa(X, 'double')
+           warning("X data matrix not in double format.  Converting X values to double.")
+           disp('Converting X matrix to double')
+           X = double(X); 
+       end
+       if ~isa(Y, 'Converting Y matrix to double')
+           warning("Y label vector not in double format.  Converting Y labels to double.")
+           Y = double(Y);
+       end
+        [X Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X,Y, ip);
     end
-    %%% Check the input labels vector Y
-    if ~isvector(Y)
-        error('Input labels vector must be a vector.')
-    elseif length(Y) ~= nTrials
-        error(['Length of input labels vector must correspond '...
-            'to number of trials (' num2str(nTrials) ').'])
-    end
-    % Convert to column vector if needed
-    if ~iscolumn(Y)
-       warning('Transposing input labels vector to column.') 
-       Y = Y(:);
-    end
-
-    %%%%% INPUT DATA SUBSETTING (doing)
-    % Default chanUse, timeUse, featureUse = [ ]
-    spaceUse = ip.Results.spaceUse;
-    timeUse = ip.Results.timeUse;
-    featureUse = ip.Results.featureUse;
     
-    %%% 3D input matrix
-    X_subset = X; % This will be the next output; currently 3D or 2D
-    if ndims(X) == 3
-        % Message about ignoring 'featureUse' input
-       if ~isempty(ip.Results.featureUse)
-           warning('Ignoring ''featureUse'' for 3D input data matrix.')
-           warning('Use ''spaceUse'' and ''timeUse'' for 3D input data matrix.')
-       end
-
-       % If the user did specify a spatial or temporal subset...
-       if ~isempty(spaceUse) || ~isempty(timeUse)
-           % Confirm that spaceUse and timeUse are vectors
-           if (~isempty(spaceUse) && ~isvector(spaceUse)) ||...
-                   (~isempty(timeUse) && ~isvector(timeUse))
-               error('Enter a vector to specify spatial and/or temporal subsets.')
-           end
-
-           % Confirm that spaceUse and timeUse fit dimensions of data matrix
-           if ~isempty(spaceUse) && ~all(ismember(spaceUse, 1:nSpace))
-               error('''spaceUse'' input is not contained in the input data matrix.')
-           elseif ~isempty(timeUse) && ~all(ismember(timeUse, 1:nTime))
-               error('''timeUse'' input is not contained in the input data matrix.')
-           end
-
-           % Do the subsetting
-           if ~isempty(spaceUse)
-               X_subset = X_subset(spaceUse, :, :);
-           end
-           if ~isempty(timeUse)
-               X_subset = X_subset(:, timeUse, :);
-           end
-
-           % Update nSpace and nTime
-           nSpace = size(X_subset, 1);
-           nTime = size(X_subset, 2);
-       end
-       % Reshape the X_subset matrix
-       X_subset = cube2trRows(X_subset); % NOW IT'S 2D
-
-    %%% 2D input matrix
-    elseif ndims(X) == 2
-        % Messages about ignoring 'spaceUse' and/or 'timeUse' inputs
-        if ~isempty(spaceUse) || ~isempty(timeUse)
-           if ~isempty(spaceUse)
-               warning('Ignoring ''spaceUse'' for 2D input data matrix.')
-           end
-           if ~isempty(timeUse)
-               warning('Ignoring ''timeUse'' for 2D input data matrix.')
-           end
-           warning('Use ''featureUse'' for 2D input data matrix.')
-        end
-
-        % If the user specified a featureUse subset...
-        if ~isempty(featureUse)
-            % Confirm it's a vector
-            if ~isvector(featureUse)
-               error('Enter a vector to specify feature subsets.') 
-            end
-
-           % Confirm that featureUse is contained in the data matrix
-           if ~all(ismember(featureUse, 1:nFeature))
-              error('''featureUse'' input is not contained in the input data matrix.') 
-           end
-
-           % Do the subsetting
-           X_subset = X_subset(:, featureUse);  % WAS ALREADY 2D
-
-           % Update nFeature
-           nFeature = size(X_subset, 2);
-        end  
-    end
-    X = X_subset;
+    
     % let r and c store size of 2D matrix
     [r c] = size(X);
     
@@ -456,7 +384,7 @@
      
     % PCA 
     % Split Data into fold (w/ or w/o PCA)
-    disp('Conducting Principle Component Analysis');
+    disp('Conducting Principal Component Analysis');
     partition = cvpart(r, ip.Results.nFolds);
     tic
     cvDataObj = cvData(X,Y, partition, ip.Results.PCA, ip.Results.PCAinFold);
@@ -551,6 +479,7 @@
         varargout{1} = accDist;
         varargout{2} = modelsConcat;
     end
+    toc
     
  end
 

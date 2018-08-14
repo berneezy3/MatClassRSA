@@ -1,4 +1,4 @@
-function accArr = permuteTestLabels(Y, cvPartObj, ip)
+function accArr = permuteTestLabelsCV(Y, cvPartObj, ip)
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -92,7 +92,7 @@ function accArr = permuteTestLabels(Y, cvPartObj, ip)
         
     end
     
-    %technically needs to change3d
+    %technically needs to changed
     for j=1:ip.Results.permutations
         accArr(j) = sum(corrMat(j,:))/sum(allMat(j,:));
     end
