@@ -341,12 +341,12 @@
     elseif (CVflag)
        % check if data is double, convert to double if it isn't
        if ~isa(X, 'double')
-           warning("X data matrix not in double format.  Converting X values to double.")
+           warning('X data matrix not in double format.  Converting X values to double.')
            disp('Converting X matrix to double')
            X = double(X); 
        end
        if ~isa(Y, 'Converting Y matrix to double')
-           warning("Y label vector not in double format.  Converting Y labels to double.")
+           warning('Y label vector not in double format.  Converting Y labels to double.')
            Y = double(Y);
        end
         [X Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X,Y, ip);
