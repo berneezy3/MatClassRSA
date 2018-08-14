@@ -1,5 +1,20 @@
-function predictions = modelPredict(X, mdl)
+function pVal = pbinomNoXVal(actualLabels, actualAcc, nClasses)
 %-------------------------------------------------------------------
+% pVal = pbinomNoXVal(Y, nFolds, accuracy)
+% -----------
+% Bernard Wang
+% January 30 2012
+%
+% This function computes the p-value via binomial CDF (cumutalive
+% Distribution Function)
+%
+% INPUT ARGS:
+%   - Y: the labels for the training data
+%   - nFolds: the number of folds 
+%   - accuracy: the actual accuracy of the classifier
+%
+% OUTPUT ARGS:
+%   - pVal: P-value
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -31,28 +46,23 @@ function predictions = modelPredict(X, mdl)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
-    classifier = class(mdl);
-    
-    switch classifier
-        case 'struct'  
-            [r c] = size(X);
-            Y = zeros(r,1);
-            [predictions, acc, prob_estimates] = svmpredict(Y, X, mdl, '-q');
-            predictions = predictions';
-        case 'ClassificationDiscriminant'
-            predictions = predict(mdl,X);
-            predictions = predictions(:,end);
-            predictions = predictions';
-        case 'TreeBagger'
-            predictions = predict(mdl,X);
-            [rows, cols] = size(predictions);
-            predictions = str2num(cell2mat(predictions));
-            if (rows>cols)
-                predictions = reshape(predictions,[cols rows]);
-            end
-        otherwise
-            error(['mdl must be of class TreeBagger, ClassificationDiscriminant' ...
-                'or TreeBagger']);
+
+classes = unique(actualLabels);
+classHist = histogram(actualLabels, 'BinMethod', 'integers');
+classHist = classHist.Values(:)'; 
+classCount = sum(actualLabels == classes(1));
+
+% check to make sure the amount of each class is equal
+for i = 1:length(classes)
+    if classCount ~= sum(actualLabels == classes(i))
+        warning(['Binomial Test p-value requires balanced classes.  ' ...
+            'Current distribution of observations by class is ' mat2str(classHist)]);
     end
-    
 end
+
+if (actualAcc > 1)
+    warning('Input ''actualAcc'' was greater than 1.  Dividing by 100 to normalize.');
+    actualAcc = actualAcc/100;
+end
+
+pVal = 1-binocdf(length(actualLabels)*actualAcc, length(actualLabels), 1/nClasses);

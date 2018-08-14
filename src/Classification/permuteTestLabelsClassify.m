@@ -1,5 +1,4 @@
-function predictions = modelPredict(X, mdl)
-%-------------------------------------------------------------------
+function accuracy = permuteTestLabelsClassify(testData, testLabels, mdl, ip)
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -31,28 +30,29 @@ function predictions = modelPredict(X, mdl)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
-    classifier = class(mdl);
-    
-    switch classifier
-        case 'struct'  
-            [r c] = size(X);
-            Y = zeros(r,1);
-            [predictions, acc, prob_estimates] = svmpredict(Y, X, mdl, '-q');
-            predictions = predictions';
-        case 'ClassificationDiscriminant'
-            predictions = predict(mdl,X);
-            predictions = predictions(:,end);
-            predictions = predictions';
-        case 'TreeBagger'
-            predictions = predict(mdl,X);
-            [rows, cols] = size(predictions);
-            predictions = str2num(cell2mat(predictions));
-            if (rows>cols)
-                predictions = reshape(predictions,[cols rows]);
+
+
+    for i = 1:ip.Results.permutations
+        
+        %permute the test labels
+        % (check if randperm is seeded every single time differently)
+        % (yes, it is)
+        disp(['calculating ' num2str(i) ' of '...
+            num2str(ip.Results.permutations) ' permutations']);
+        pTestY = testY(randperm(length(testY)));
+        %store accuracy
+        for k = 1:length(predictedY)
+            if predictedY(k) == pTestY(k)
+                correctPreds = correctPreds + 1;
+            else
+                incorrectPreds = incorrectPreds + 1;
             end
-        otherwise
-            error(['mdl must be of class TreeBagger, ClassificationDiscriminant' ...
-                'or TreeBagger']);
+        end
+        corrMat(j,i) = correctPreds;
+        allMat(j,i) = correctPreds + incorrectPreds;
+        correctPreds = 0;
+        incorrectPreds = 0;
+        
     end
-    
+
 end

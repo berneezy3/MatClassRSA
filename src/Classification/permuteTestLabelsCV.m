@@ -64,8 +64,7 @@ function accArr = permuteTestLabelsCV(Y, cvPartObj, ip)
             
         
         %get correctly predicted labels
-        [funcOutput mdl] = evalc( ['fitModel(trainX, trainY, ' ...
-        'ip)']);
+        mdl = fitModel(trainX, trainY, ip);
         predictedY = modelPredict(testX, mdl);
     
         for j = 1:ip.Results.permutations
