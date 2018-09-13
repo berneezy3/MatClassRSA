@@ -5,19 +5,49 @@ function RDM = computeRDM(CM, varargin)
 % Blair - January 31, 2017
 %
 % This function takes in a confusion matrix and converts
-% it to a distance matrix.
+% it to a distance matrix. The user can specify name-value pair inputs as
+% needed for normalizing the matrix, symmetrizing the matrix, converting
+% similarities to distances, and converting distances to ranks or
+% percentile ranks. If no name-value pairs are entered, the function
+% assumes a multi-category confusion matrix and will normalize to
+% self-similarity along the diagonal; symmetrize by taking the arithmetic
+% mean; compute distances as 1-similarity, and perform no ranking of
+% resulting distances.
 %
 % Required inputs:
-% - CM: A square confusion matrix
+% - CM: A square matrix (e.g., confusions, correlations, distances). Need
+%   not be symmetric.
 %
 % Optional inputs:
-% - distpower: Integer > 0 (if using 'power' or 'log' distance)
+% - distpower: Integer > 0 (if using 'power' or 'log' distance).
 %
 % Optional name-value pairs:
-% - 'normalize': 'diagonal' (default), 'sum', 'none'
-% - 'symmetrize': 'average' (default), 'geometric', 'harmonic', 'none'
+% -- 'normalize': 'diagonal' (default), 'sum', 'none'
+%   - 'diagonal' normalization divides each matrix entry by the
+%       respective diagonal entry of its row, bringing about
+%       self-similarity in diagonal entries.
+%   - 'sum' normalization divides each matrix entry by the sum of its row,
+%       so that each row sums to 1.
+%   - 'none' performs no normalization.
+% -- 'symmetrize': 'average' (default), 'geometric', 'harmonic', 'none'
+%   - 'average' returns the arithmetic mean of the matrix and its
+%       transpose.
+%   - 'geometric' returns the geometric mean of the matrix and its
+%       transpose.
+%   - 'harmonic' returns the harmonic mean of the matrix and its transpose.
+%   - 'none' skips the symmetrization step (recommended only if the input
+%       matrix is already symmetric).
 % - 'distance': 'linear' (default), 'power', 'logarithmic', 'none'
+%   - 'linear' computes D = 1 - S
+%   - 'power' computes D = 1 - S.^distpower
+%   - 'logarithmic' computes D = log2(distPower*CM + 1) ./ log2(distPower + 1);
+%   - 'none' skips distance computation (e.g., if the input matrix already
+%       contained distances).
 % - 'rankdistances': 'none' (default), 'rank', 'percentrank'
+%   - 'none' performs no ranking of the distances.
+%   - 'rank' returns the ranked distances, adjusted for ties.
+%   - 'percentrank' returns the ranked distances, adjusted for ties,
+%       divided by the number of unique pairs represented in the matrix.
 %
 % Outputs:
 % - DM: The distance matrix
