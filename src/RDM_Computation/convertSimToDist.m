@@ -4,20 +4,28 @@ function xOut = convertSimToDist(xIn, distType, distPower)
 % --------------------------------------------------------
 % Blair - February 22, 2017
 %
-% This function converts a proximity matrix to distances.
+% This function converts the values in a proximity matrix from similarities
+% to distances. Useful when a distance matrix (RDM) in particular is needed
+% (e.g., for visualizations or comparison to other RDMs).
+%
 % Inputs:
-% - xIn: The square confusion matrix, possibly normlized
-% - distType:
-%   - Linear ('linear', 'lin)
-%   - Power ('power', 'p')
-%   - Logarithmic ('logarithmic', 'log')
+% -- xIn: A square proximity matrix. Values are generally assumed to be
+%   between 0 and 1.
+% -- distType:
+%   - Linear ('linear', 'lin): D = 1-S
+%   - Power ('power', 'p'): D = 1 - S .^ distPower;
+%   - Logarithmic ('logarithmic', 'log'): 
+%     D = 1 - log2(distPower * S + 1) ./ log2(distPower + 1);
 %   - None ('none', 'n')
-% - distPower:
+% -- distPower:
 %   - Distance power (used in power and logarithmic computations)
 %
 % There is no default distance computation, as distance type is
 % assumed to be decided prior to calling this function. If none of the
 % above distType options are specified, the function returns an error.
+%
+% Output:
+% - xOut: The distance matrix.
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -49,6 +57,9 @@ function xOut = convertSimToDist(xIn, distType, distPower)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
+
+if nargin < 2
+    error('Function requires two inputs: Similarity matrix and distance type.'); end
 
 distType = lower(distType);
 
