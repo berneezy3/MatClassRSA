@@ -37,13 +37,13 @@ function RDM = computeRDM(CM, varargin)
 %   - 'harmonic' returns the harmonic mean of the matrix and its transpose.
 %   - 'none' skips the symmetrization step (recommended only if the input
 %       matrix is already symmetric).
-% - 'distance': 'linear' (default), 'power', 'logarithmic', 'none'
+% -- 'distance': 'linear' (default), 'power', 'logarithmic', 'none'
 %   - 'linear' computes D = 1 - S
 %   - 'power' computes D = 1 - S.^distpower
 %   - 'logarithmic' computes D = log2(distPower*CM + 1) ./ log2(distPower + 1);
 %   - 'none' skips distance computation (e.g., if the input matrix already
 %       contained distances).
-% - 'rankdistances': 'none' (default), 'rank', 'percentrank'
+% -- 'rankdistances': 'none' (default), 'rank', 'percentrank'
 %   - 'none' performs no ranking of the distances.
 %   - 'rank' returns the ranked distances, adjusted for ties.
 %   - 'percentrank' returns the ranked distances, adjusted for ties,
