@@ -4,21 +4,36 @@ function xOut = symmetrizeMatrix(xIn, symmType)
 % --------------------------------------------------------
 % Blair - February 22, 2017
 %
-% This function symmetrizes a matrix by operating on the matrix and its
-% transpose.
+% This function symmetrizes a matrix by computing different types of means
+% of the matrix and its transpose. See Shepard (1958) for further
+% discussion.
+% 
 % Inputs:
-% - xIn: The square confusion matrix, possibly normlized
-% - symmType:
-%   - Arithmetic ('arithmetic', 'a', 'mean')
-%   - Geometric ('geometric', 'geom', 'geo', 'g')
-%   - Harmonic ('harmonic', 'harm', 'h')
-%   - None ('none', 'n')
+% -- xIn: The square confusion matrix, possibly normlized (we suggest
+%   normalizing before symmetrizing so that self-similarity is computed
+%   directly from the confusions).
+% -- symmType:
+%   - Arithmetic ('arithmetic', 'a', 'mean'): Arithmetic mean of matrix and
+%   its transpose.
+%   - Geometric ('geometric', 'geom', 'geo', 'g'): Geometric mean of matrix
+%   and its transpose.
+%   - Harmonic ('harmonic', 'harm', 'h'): Harmonic mean of matrix and its
+%   transpose.
+%   - None ('none', 'n'): No symmetrization.
 %
 % There is no default symmetrization approach, as symmetrization type is
 % assumed to be decided prior to calling this function. If none of the
 % above symmType options are specified, the function returns an error.
 % Currently if the input matrix contains zeros on the diagonal and symmType
 % 'harmonic' is selected, a warning will be returned.
+%
+% Output:
+% - xOut: The symmetrized matrix (same size as the input matrix).
+%
+% References
+% Shepard RN. Stimulus and response generalization: Deduction of the 
+%   generalization gradient from a trace model. Psychological Review. 1958; 
+%   65(4):242?256. doi: 10.1037/h0043083 PMID: 13579092
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
