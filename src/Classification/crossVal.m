@@ -1,6 +1,9 @@
 
 function z = crossVal(X, Y, varargin)
 %-------------------------------------------------------------------
+% z = crossVal(X, Y, varargin)
+%
+% This function 
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -41,9 +44,6 @@ function z = crossVal(X, Y, varargin)
     ip.addParameter('nodeLabels', [], @(x) isvector(x));
     ip.addParameter('iconPath', '');
     parse(ip, distMat,varargin{:});
-
-
-
 
 
 end
