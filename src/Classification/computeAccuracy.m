@@ -1,6 +1,16 @@
 function acc = computeAccuracy(actualY, predictedY)
 %-------------------------------------------------------------------
+% This function computes classifier accuracy based on vectors of actual and
+% predicted class memberships. Accuracy is computed as number of correct
+% predictions divided by total number of predictions.
+% 
+% Inputs: 
+% - actualY: Vector of actual category labels.
+% - predictedY: Vector of predicted category labels. 
+% Vectors must be the same length.
 %
+% Output:
+% - acc: Accuracy.
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
