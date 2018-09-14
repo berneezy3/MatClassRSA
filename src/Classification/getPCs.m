@@ -2,16 +2,23 @@ function [y, V, nPC] = getPCs(X, PCs)
 %-------------------------------------------------------------------
 % y = getPCs(X, PCs)
 %-------------------------------------------------------------------
-% Function to extract principal componenets via singular value
-% decomposition
+% Function to compute principal componenets via singular value
+% decomposition. For input matrix of dimensions trial by feature, PCA is
+% computed along the feature dimensions (enabling reduction of the data
+% matrix along the column dimension).
 %
 % INPUT ARGS:
-%       X - training data matrix
-%       PCs - if value is a positive integer, either number of PCs to extract based on significance , or variance explained by PCs if value
-%       between 0 and 1
+%       X - full data matrix. Rows are trials, columns are features.
+%       PCs - specification of how many PCs to retain. 
+%           - if value is a positive integer, that number of PCs will be
+%           retained in theoutput matrix.
+%           - if value is greater than zero but less than one, the number
+%           of PCs needed to explain this proportion of variance will be
+%           retained in the output matrix.
 %
 % OUTPUT ARGS:
-%       y - training data matrix with only principal compenents
+%       y - Data matrix with only the specified number of PCs (columns)
+%       retained.
 %
 % EXAMPLES:
 
