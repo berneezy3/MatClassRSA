@@ -1,4 +1,5 @@
 function acc = computeAccuracy(actualY, predictedY)
+% acc = computeAccuracy(actualY, predictedY)
 %-------------------------------------------------------------------
 % This function computes classifier accuracy based on vectors of actual and
 % predicted class memberships. Accuracy is computed as number of correct
