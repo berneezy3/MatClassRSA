@@ -1,5 +1,24 @@
 function mdl = fitModel(X, Y, ip)
+% mdl = fitModel(X, Y, ip)
 %-------------------------------------------------------------------
+% This function fits the classifier model using the training data, training
+% labels, and specifications stored in the input parser from the
+% classifyEEG function. The following models are supported: SVM (with
+% linear, polynomial, rbf, or sigmoid kernel) using libsvm svmtrain; LDA
+% using fitcdiscr with DiscrimType linear; and Random Forest using
+% TreeBagger.
+%
+% Inputs:
+% - X: The training data matrix of size nTrials x nFeatures
+% - Y: The training labels matrix of length nTrials
+% - ip: The input parser created in the classifyEEG function (contains
+%   specifications about the model to be built).
+%
+% Outputs:
+% - mdl: The model, which is subsequently used to predict labels of test
+% data.
+%
+% See also classifyEEG
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
