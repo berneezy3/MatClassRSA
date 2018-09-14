@@ -31,11 +31,19 @@ function xOut = normalizeMatrix(xIn, normType)
 %       (1958b) for further discussion.
 %   - None ('none', 'n'): Perform no normalization of the matrix.
 %
-% There is no default normalization approach, as normalization type is
+% Notes:
+% - There is no default normalization approach, as normalization type is
 % assumed to be decided prior to calling this function. If none of the
 % above normType options are specified, the function returns an error. 
 % Currently if the divisor is zero, the function returns an error and it 
 % is up to the user to adjust the input matrix.
+% - If the 'diagonal' normalization is used and there are zeros on the
+% diagonal, the resulting matrix will contain Inf entries for that row.
+% Similarly, if any row sums to zero and 'sum' normalization is used, the
+% output will be nonnumeric. Currently an error will print in the console 
+% if either of these cases occurs; the user can elect to adjust the matrix 
+% manually (e.g., changing zeros on the diagonal to ones) but there is 
+% currently no standard workaround.
 %
 % Output: 
 % - xOut: The normalized matrix (same size as the input matrix).
