@@ -2,15 +2,17 @@ function [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
 %  [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
-% Bernard Wang - April. 30, 2017
+% Bernard Wang - April 30, 2017
 % 
-% Function to average trials for training data matrix X and corresponding
-% label vector Y
+% Function to average trials within class for training data matrix X and
+% compress corresponding labels vector Y. 
 % Input Args:
-%       X - training data matrix
-%       Y - label vector
-%       groupSize - number of trials you wish each group to average
-%       handleRemainder (optional) - method to handle remainder trials.  
+%   X - training data matrix. The size of X should be nTrials x
+%       nFeatures.
+%   Y - labels vector. The number of elements in Y should correspond in
+%       size to the row dimension of X.
+%   groupSize - number of trials you wish each group to average.
+%   handleRemainder (optional) - method to handle remainder trials.  
 %           For example if you have 21 rows with label 1, and set averaging 
 %           group size to 5, you would have 4 groups (20/5), and 1 remainder 
 %           row with label 1.
@@ -32,7 +34,8 @@ function [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
 %       averagedY - the label vector for the trials in averagedXh
 %       
 % Example:
-%             
+%        
+% TODO: Mention why we shuffle at the end.
 
 % TODO: more testing
 
