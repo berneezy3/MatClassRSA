@@ -37,7 +37,7 @@ function predictions = modelPredict(X, mdl)
         case 'struct'  
             [r c] = size(X);
             Y = zeros(r,1);
-            [predictions, acc, prob_estimates] = svmpredict(Y, X, mdl, '-q');
+            [predictions, acc, prob_estimates] = svmpredict(Y, X, mdl);
             predictions = predictions';
         case 'ClassificationDiscriminant'
             predictions = predict(mdl,X);
@@ -51,7 +51,7 @@ function predictions = modelPredict(X, mdl)
                 predictions = reshape(predictions,[cols rows]);
             end
         otherwise
-            error(['mdl must be of class TreeBagger, ClassificationDiscriminant' ...
+            error(['mdl must be of class TreeBagger, ClassificationDiscriminant ' ...
                 'or TreeBagger']);
     end
     

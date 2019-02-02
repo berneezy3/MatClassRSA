@@ -1,4 +1,4 @@
-function accuracy = permuteTestLabelsClassify(testData, testLabels, mdl, ip)
+function accuracy = permuteTestLabelsClassify(testLabels, ip)
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

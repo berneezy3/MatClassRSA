@@ -1,4 +1,4 @@
- function [accuracy, predY, pVal] = trainModelTestData(X, Y, ip)
+ function [CM, accuracy, predY, pVal] = trainModelTestData(X, Y, ip)
  
     % Here we check if the input types are correct, not if the input 
 %     addRequired(ip, 'X', @iscell)
@@ -13,6 +13,14 @@
     trainLabels = Y{1};
     testData = X{2};
     testLabels = Y{2};
+    
+    if (find(isnan(trainData(:))) |...
+        find(isnan(trainLabels(:))) |...
+        find(isnan(testData(:))) |...
+        find(isnan(testLabels(:))) ) 
+        error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
+    end
+
     
         
     % Convert to column vector if needed
@@ -38,6 +46,9 @@
     % Predict Labels for Test Data
     predY = modelPredict(testData, mdl);
     
+    % Get Confusion Matrix
+    CM = confusionmat(testLabels, predY);
+    
     % Get Accuracy
     accuracy = computeAccuracy(predY, testLabels); 
     
@@ -59,6 +70,20 @@
         ytrain = Y{1};
         ytest = Y{2};
         
+        if ~isvector(ytrain) || ~isvector(ytest)
+            error('The labels matrices must have a dimension 1');
+        end
+        
+        % Convert to column vector if needed
+        if ~iscolumn(ytrain)
+           warning('Transposing input labels vector to column.') 
+           ytrain = ytrain(:);
+        end
+        if ~iscolumn(ytest)
+           warning('Transposing input labels vector to column.') 
+           ytest = ytest(:);
+        end
+        
         [xtrainR xtrainC] = size(xtrain);
         [xtestR xtestC] = size(xtest);
         [ytrainR ytrainC] = size(ytrain);
@@ -73,5 +98,7 @@
         else
             y = 0;
         end 
+    else
+        error('X and Y must both be cell arrays of size [1 2]');
     end
  end
