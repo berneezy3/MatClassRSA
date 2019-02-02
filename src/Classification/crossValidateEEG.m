@@ -286,6 +286,11 @@
     
     %Optional name-value pairs
     %NOTE: Should use addParameter for R2013b and later.
+    
+%     if (find(isnan(X(:))))
+%         error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
+%     end
+% 
 
     % Parse
     try 
@@ -309,6 +314,8 @@
         error('X and Y must either both be cell arrays or both be matrices')
     end
     
+
+    
         
     % Initilize info struct
     classifierInfo = struct('shuffleData', ip.Results.shuffleData, ...
@@ -323,19 +330,163 @@
     
     % If user wants to train model and classify on test matrices we must 
     % test and subset data separately
+    if (classifyFlag)
+        disp('Train model and classify test set')
+        %[accuracy, predY, pVal] = trainModelTestData(X, Y, ip);
+        [accuracy, predY, pVal] = trainModelTestData(X{1}, Y, ip);
 
-    disp('Train model and classify test set')
-    %[accuracy, predY, pVal] = trainModelTestData(X, Y, ip);
-    [CM, accuracy, predY, pVal] = trainModelTestData(X, Y, ip);
+        CM = NaN;
+        classifierInfo.shuffleData = 'N/A';
+        classifierInfo.averageTrials = 'N/A';
+        classifierInfo.averageTrialsHandleRemainder = 'N/A';
+        classifierInfo.nFolds = 'N/A';
+        classifierInfo.pValueMethod = NaN;
+        classifierInfo.permutations = NaN;
+        
+        return;
+    % If user wants to cross validate on entire dataset, we subet
+    % data into folds
+    elseif (CVflag)
+       % check if data is double, convert to double if it isn't
+       if ~isa(X, 'double')
+           warning('X data matrix not in double format.  Converting X values to double.')
+           disp('Converting X matrix to double')
+           X = double(X); 
+       end
+       if ~isa(Y, 'Converting Y matrix to double')
+           warning('Y label vector not in double format.  Converting Y labels to double.')
+           Y = double(Y);
+       end
+        [X Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X,Y, ip);
+    end
+    
+    
+    % let r and c store size of 2D matrix
+    [r c] = size(X);
+    
+    %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
+    % moving forward.
 
-    classifierInfo.shuffleData = 'N/A';
-    classifierInfo.averageTrials = 'N/A';
-    classifierInfo.averageTrialsHandleRemainder = 'N/A';
-    classifierInfo.nFolds = 'N/A';
-    classifierInfo.pValueMethod = NaN;
-    classifierInfo.permutations = NaN;
+    % SET RANDOM SEED
+    % for data shuffling and permutation testing purposes
+    rng(ip.Results.randomSeed);
+    
+    % DATA SHUFFLING (doing)
+    % Default 1
+    if (ip.Results.shuffleData)
+        disp('Shuffling Trials');
+        [X, Y, shuffledInd] = shuffleData(X, Y);
+    else
+        classifierInfo.shuffleData = 'off';
+        Y = Y';maybe
+    end
 
-    return;
+    % TRIAL AVERAGING (doing)
+     if(ip.Results.averageTrials >= 1)
+        disp('Averaging Trials');
+        [X, Y] = averageTrials(X, Y, ip.Results.averageTrials, ...
+            'handleRemainder' ,ip.Results.averageTrialsHandleRemainder);
+        classifierInfo.averageTrials = 'on';
+        [r c] = size(X);
+     end
+     
+    % PCA 
+    % Split Data into fold (w/ or w/o PCA)
+    disp('Conducting Principal Component Analysis');
+    partition = cvpart(r, ip.Results.nFolds);
+    tic
+    cvDataObj = cvData(X,Y, partition, ip.Results.PCA, ip.Results.PCAinFold);
+    toc
+    
+    
+    %PERMUTATION TEST (assigning)
+    [r c] = size(X);
+    tic
+    switch ip.Results.pValueMethod
+         case 'binomcdf'
+             % case is handled at the end, when the accuracy of the
+             % classifier is calculated
+             accDist = NaN;
+%         case 'permuteTestLabels'
+%             accDist = permuteTestLabels(Y, cvDataObj, ip);
+        case 'permuteFullModel'
+            accDist = permuteFullModel(Y, cvDataObj, ip);
+        otherwise
+            ;
+    end
+    toc
+    
+    % CROSS VALIDATION
+    disp('Cross Validating')
+    
+    % Just partition, as shuffling (or not) was handled in previous step
+    % if nFolds == 1
+    if ip.Results.nFolds == 1
+        % Special case of fitting model with no test set (argh)
+        error('nFolds must be a integer value greater than 1');
+    end
+
+    % if nFolds < 0 | ceil(nFolds) ~= floor(nFolds) | nFolds > nTrials
+    %   error, nFolds must be an integer between 2 and nTrials to perform CV
+    assert(ip.Results.nFolds > 0 & ...
+        ceil(ip.Results.nFolds) == floor(ip.Results.nFolds) & ...
+        ip.Results.nFolds <= nTrials, ...
+        'nFolds must be an integer between 1 and nTrials to perform CV' );
+        
+        predictionsConcat = [];
+        labelsConcat = [];
+        modelsConcat = {1, ip.Results.nFolds};
+
+    for i = 1:ip.Results.nFolds
+        
+        disp(['Fold ' num2str(i) ' of ' num2str(ip.Results.nFolds)])
+        
+        trainX = cvDataObj.trainXall{i};
+        trainY = cvDataObj.trainYall{i};
+        testX = cvDataObj.testXall{i};
+        testY = cvDataObj.testYall{i};
+
+        mdl = fitModel(trainX, trainY, ip);
+        
+        predictions = modelPredict(testX, mdl);
+        
+        labelsConcat = [labelsConcat testY];
+        predictionsConcat = [predictionsConcat predictions];
+        modelsConcat{i} = mdl; 
+        
+        
+        %predictcedY(partition.test(i)) = predictions;
+    end
+    CM = confusionmat(labelsConcat, predictionsConcat);
+    accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
+    
+    
+    % unshuffle predictions vector to return to user IF shuffle is on
+    if (ip.Results.shuffleData == 1)
+        predY = NaN(1, r);
+        for i = 1:r
+            predY(shuffledInd(i)) = predictionsConcat(i);
+        end
+    else
+        predY = predictionsConcat;
+    end
+    
+    switch ip.Results.pValueMethod
+         case 'binomcdf'
+            pVal = pbinom(Y, ip.Results.nFolds, accuracy);
+%         case 'permuteTestLabels'
+%             pVal = permTestPVal(accuracy, accDist);
+        case 'permuteFullModel'
+            pVal = permTestPVal(accuracy, accDist);
+        otherwise
+            pVal = '';
+            
+    end
+    
+    if ip.Results.verbose
+        varargout{1} = accDist;
+        varargout{2} = modelsConcat;
+    end
     toc
     
  end

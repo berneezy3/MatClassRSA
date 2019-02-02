@@ -1,10 +1,11 @@
-function [W,Z,nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, Y, ip)
+function [W,Z,nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, Y, ip)
 
     if ndims(X) == 3
-        [nSpace, nTime, nTrials] = size(X);
+        [nSpace, nFeature, nTrials] = size(X);
         disp(['Input data matrix size: ' num2str(nSpace) ' space x ' ...
-                num2str(nTime) ' time x ' num2str(nTrials) ' trials'])
+                num2str(nFeature) ' time x ' num2str(nTrials) ' trials'])
     elseif ndims(X) == 2
+        nSpace = nan;
         [nTrials, nFeature] = size(X);
         warning(['2D input data matrix. Assuming '...
             num2str(nTrials) ' trials x ' num2str(nFeature) ' features.'])
@@ -50,7 +51,7 @@ function [W,Z,nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, Y, ip)
            % Confirm that spaceUse and timeUse fit dimensions of data matrix
            if ~isempty(spaceUse) && ~all(ismember(spaceUse, 1:nSpace))
                error('''spaceUse'' input is not contained in the input data matrix.')
-           elseif ~isempty(timeUse) && ~all(ismember(timeUse, 1:nTime))
+           elseif ~isempty(timeUse) && ~all(ismember(timeUse, 1:nFeature))
                error('''timeUse'' input is not contained in the input data matrix.')
            end
 
@@ -62,9 +63,9 @@ function [W,Z,nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, Y, ip)
                X_subset = X_subset(:, timeUse, :);
            end
 
-           % Update nSpace and nTime
+           % Update nSpace and nFeature
            nSpace = size(X_subset, 1);
-           nTime = size(X_subset, 2);
+           nFeature = size(X_subset, 2);
        end
        % Reshape the X_subset matrix
        X_subset = cube2trRows(X_subset); % NOW IT'S 2D

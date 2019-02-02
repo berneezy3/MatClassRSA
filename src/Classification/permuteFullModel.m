@@ -41,12 +41,15 @@ function accArr = permuteFullModel(Y, cvDataObj, ip)
     %loop same # of times as cross validation
 %     parpool;
     for i = 1:ip.Results.permutations
+        
+        disp("On permutation " num2str(i) " of " num2str(ip.Results.permutations));
         correctPreds = 0;
         incorrectPreds = 0;
+        
         for j = 1:ip.Results.nFolds
                         
-            disp(['calculating ' num2str((i-1)*ip.Results.nFolds + j) ' of '...
-            num2str(ip.Results.permutations*ip.Results.nFolds) ' fold-permutations']);
+%             disp(['calculating ' num2str((i-1)*ip.Results.nFolds + j) ' of '...
+%             num2str(ip.Results.permutations*ip.Results.nFolds) ' fold-permutations']);
             trainX = cvDataObj.trainXall{j};
             testX = cvDataObj.testXall{j};
             
