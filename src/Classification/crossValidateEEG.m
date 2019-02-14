@@ -1,4 +1,4 @@
- function [CM, accuracy, predY, pVal, classifierInfo, varargout] = classifyEEG(X, Y, varargin)
+ function [CM, accuracy, predY, pVal, classifierInfo, C, varargout] = classifyEEG(X, Y, varargin)
 % -------------------------------------------------------------------------
 % [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
 % -------------------------------------------------------------------------
@@ -412,7 +412,8 @@
         case 'permuteFullModel'
             accDist = permuteFullModel(Y, cvDataObj, ip);
         otherwise
-            ;
+            % permute Test Labels case
+            accDist = NaN;
     end
     toc
     
@@ -486,7 +487,15 @@
     if ip.Results.verbose
         varargout{1} = accDist;
         varargout{2} = modelsConcat;
+        C.accDist = accDist;
+        C.modelsConcat = modelsConcat;
     end
+    
+    C.CM = CM;
+    C.accuracy = accuracy;
+    C.predY = predY;
+    C.pVal = pVal;
+    C.classifierInfo = classifierInfo;
     toc
     
  end
