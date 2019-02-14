@@ -1,6 +1,6 @@
- function [CM, accuracy, predY, pVal, classifierInfo, C, varargout] = classifyEEG(X, Y, varargin)
+ function [C, varargout] = crossValidateEEG(X, Y, varargin)
 % -------------------------------------------------------------------------
-% [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
+% [CM, accuracy, classifierInfo] = crossValidateEEG(X, Y, shuffleData)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %

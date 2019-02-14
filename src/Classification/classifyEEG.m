@@ -1,4 +1,4 @@
- function [CM, accuracy, predY, pVal, classifierInfo, C, varargout] = classifyEEG(X, Y, varargin)
+ function [C, varargout] = classifyEEG(X, Y, varargin)
 % -------------------------------------------------------------------------
 % [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
 % -------------------------------------------------------------------------
