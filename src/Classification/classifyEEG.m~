@@ -1,4 +1,4 @@
- function [CM, accuracy, predY, pVal, classifierInfo, C, varargout] = classifyEEG(X, Y, varargin)
+ function [CM, accuracy, predY, pVal, classifierInfo, varargout, C] = classifyEEG(X, Y, varargin)
 % -------------------------------------------------------------------------
 % [CM, accuracy, classifierInfo] = classifyEEG(X, Y, shuffleData)
 % -------------------------------------------------------------------------
@@ -323,7 +323,6 @@
                         'classify', ip.Results.classify, ...
                         'pValueMethod', ip.Results.pValueMethod, ...
                         'permutations', ip.Results.permutations);
-
     
     % If user wants to train model and classify on test matrices we must 
     % test and subset data separately
@@ -335,7 +334,7 @@
     C.accuracy = accuracy;
     C.predY = predY;
     C.pVal = pVal;
-    
+    C.classifierInfo = classifierInfo
 
     classifierInfo.shuffleData = 'N/A';
     classifierInfo.averageTrials = 'N/A';
@@ -343,7 +342,6 @@
     classifierInfo.nFolds = 'N/A';
     classifierInfo.pValueMethod = NaN;
     classifierInfo.permutations = NaN;
-    C.classifierInfo = classifierInfo;
 
     return;
     toc

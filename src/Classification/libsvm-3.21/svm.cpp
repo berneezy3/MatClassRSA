@@ -7,6 +7,7 @@
 #include <stdarg.h>
 #include <limits.h>
 #include <locale.h>
+#include <iostream>
 #include "svm.h"
 int libsvm_version = LIBSVM_VERSION;
 typedef float Qfloat;
@@ -752,6 +753,24 @@ void Solver::Solve(int l, const QMatrix& Q, const double *p_, const schar *y_,
 			v += alpha[i] * (G[i] + p[i]);
 
 		si->obj = v/2;
+        
+        std::cout << "Added code block by Bernard for MatClassRSA...\n";
+        //
+        //The distance is |decision_value| / |w|
+        //
+        
+        // si->obj is the variable for the objective value
+        // Add a for loop to calculate the sum of alpha
+        double alpha_sum = 0;
+        double w_determ = 0;
+        for(i=0;i<l;i++)
+            alpha_sum += alpha[i];
+        //Calculate 2*(si->obj + sum of alpha) and print the square root of it. 
+        // You now get |w|. 
+        w_determ =  sqrt(2*(si->obj + alpha_sum));
+        std::cout << "|w|: " << w_determ << "\n";
+        //print decision values
+        
 	}
 
 	// put back the solution
