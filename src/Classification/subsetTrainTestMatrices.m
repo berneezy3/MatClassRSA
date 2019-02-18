@@ -1,4 +1,4 @@
-function [W,Z,nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, Y, ip)
+function [W,Z,nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, Y, spaceUse, timeUse, featureUse)
 
     if ndims(X) == 3
         [nSpace, nFeature, nTrials] = size(X);
@@ -27,15 +27,15 @@ function [W,Z,nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, Y, ip)
     
         %%%%% INPUT DATA SUBSETTING (doing)
     % Default chanUse, timeUse, featureUse = [ ]
-    spaceUse = ip.Results.spaceUse;
-    timeUse = ip.Results.timeUse;
-    featureUse = ip.Results.featureUse;
+%     spaceUse = ip.Results.spaceUse;
+%     timeUse = ip.Results.timeUse;
+%     featureUse = ip.Results.featureUse;
     
     %%% 3D input matrix
     X_subset = X; % This will be the next output; currently 3D or 2D
     if ndims(X) == 3
         % Message about ignoring 'featureUse' input
-       if ~isempty(ip.Results.featureUse)
+       if ~isempty(featureUse)
            warning('Ignoring ''featureUse'' for 3D input data matrix.')
            warning('Use ''spaceUse'' and ''timeUse'' for 3D input data matrix.')
        end
