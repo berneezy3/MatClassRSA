@@ -16,7 +16,7 @@ classdef cvpart
 %   - k: number of folds
 %
 % OUTPUT ARGS:
-%   - obj:  ann object of the cvpart class
+%   - obj:  an object of the cvpart class
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

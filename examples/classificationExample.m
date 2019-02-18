@@ -58,13 +58,13 @@ load S6.mat
 % categoryLabels is the vector of labels (6 categories)
 
 % Call the classification function
-[CM, acc, predY, pVal, classifierInfo] = classifyEEG(X_3D, ...
+[C] = classifyCrossValidate(X_3D, ...
     categoryLabels, 'randomSeed', 'default');
 
 %%
 % Convert the confusion matrix to an RDM
 RDM = computeRDM(CM);
-
+ 
 
 % Create the four visualizations
 f1 = plotMatrix(RDM, 'colormap', 'summer', ...
@@ -80,7 +80,7 @@ f4 = plotMST(RDM, 'nodeLabels', {'HB' 'HF' 'AB' 'AF' 'FV' 'IO'}, ...
 
 %%%%% Anaysis 2: Classification of group-averaged trials.
 % Call the classification function
-[CM5, acc5, predY5, pVal5, classifierInfo5] = classifyEEG(X_3D, ...
+[CM5, acc5, predY5, pVal5, classifierInfo5] = classifyCrossValidate(X_3D, ...
 categoryLabels, 'averageTrials', 5, 'randomSeed', 'default');
 
 %%

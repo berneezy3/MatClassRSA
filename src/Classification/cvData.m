@@ -86,15 +86,28 @@ classdef cvData
 
                     for i = 1:cvPart.NumTestSets
                         disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);
+                       % Here, we separate the training and testing
+                       % instances for each fold
+                        
+                        % Separaate test data from training data
+                        % trainX will now store training data for this fold
                         trainX = bsxfun(@times, cvPart.training{i}, X);
                         trainX = trainX(any(trainX~=0,2),:);
-                        trainY = bsxfun(@times, cvPart.training{i}', Y);
-                        trainY = trainY(trainY ~=0);
+                        % And testX will now store test data for this fold
                         testX = bsxfun(@times, cvPart.test{i}, X);
                         testX = testX(any(testX~=0, 2),:);
+                        
+                        % Separate test labels from training labels
+                        % trainY will now store training labels for this
+                        % fold
+                        trainY = bsxfun(@times, cvPart.training{i}', Y);
+                        trainY = trainY(trainY ~=0);
+                        % And testY will now store test labels for this
+                        % fold
                         testY = bsxfun(@times, cvPart.test{i}', Y);
                         testY = testY(testY ~=0);
 
+                        % 
                         if (PCAinFold == 1)
                             [trainX, V, nPC] = getPCs(trainX, PCA);
                             testX = testX*V;
