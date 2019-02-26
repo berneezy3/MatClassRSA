@@ -7,10 +7,12 @@ function [C, varargout] = classifyPredict(M, X, varargin)
 % The main function for fitting data to create a model.  
 %
 % INPUT ARGS (REQUIRED)
+%   M - EEG Model (output from classifyTrain)
 %   X - training data
 %   Y - labels
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
+%   'textLabels' - 
 %   'timeUse' - If X is a 3D, space-by-time-by-trials matrix, then this
 %       option will subset X along the time dimension.  The input
 %       argument should be passed in as a vector of indices that indicate the 
@@ -164,19 +166,37 @@ function [C, varargout] = classifyPredict(M, X, varargin)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
+    ip = inputParser;
+    ip.CaseSensitive = false;
+    
+    addRequired(ip, 'M', @isstruct);
+    addRequired(ip, 'X', @is2Dor3DMatrix);
+    
+    defaultY = NaN;
 
+    addOptional(ip, 'Y', defaultY, @(x) assert( isvector(x) && ~isequal(NaN, x)) );
+    
+    try 
+        parse(ip, M, X, varargin{:});
+    catch ME
+        disp(getReport(ME,'extended'));
+    end
+    
     % Predict Labels for Test Data
-    predY = modelPredict(testData, mdl);
+    C.predY = modelPredict(X, M.mdl);
+    
+    
+    
     
     % Get Confusion Matrix
-    CM = confusionmat(testLabels, predY);
+%     C.CM = confusionmat(testLabels, predY);
     
     % Get Accuracy
-    accuracy = computeAccuracy(predY, testLabels); 
+%     C.accuracy = computeAccuracy(predY, testLabels); 
     
     % Get p-Value
     %pVal = pbinom(Y, ip.Results.nFolds, accuracy);
-    pVal = pbinomNoXVal( testLabels, accuracy, length(unique(trainLabels)));
+    %pVal = pbinomNoXVal( testLabels, accuracy, length(unique(trainLabels)));
     
 
 
