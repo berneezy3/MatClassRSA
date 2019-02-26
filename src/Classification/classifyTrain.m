@@ -124,7 +124,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     %Specify default values
     defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
-    defaultPCA = .9;
+    defaultPCA = .99;
     defaultPCAinFold = 1;
     defaultNFolds = 10;
     defaultClassify = 'SVM';
