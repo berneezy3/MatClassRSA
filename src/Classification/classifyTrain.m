@@ -27,6 +27,17 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %       feature dimension indices that the user wants to subset.  This arugument 
 %       will not do anything if input matrix X is a 3D,
 %       space-by-time-by-trials matrix.
+%   'randomSeed' - This option determines whether the randomization is to produce
+%       varying or unvarying results each different execution.
+%        --options--
+%       'shuffle' (default)
+%       'default' (replicate results)
+%   'shuffleData' - determine whether to shuffle the order of trials within 
+%       training data matrix X (order of labels in the labels vector Y will be
+%       shuffled in the same order)
+%       --options--
+%       1 - shuffle (default)
+%       0 - do not shuffle
 %   'averageTrials' - how to compute averaging of trials in X to increase accuracy
 %       --options--
 %       (negative value) - don't average
@@ -34,6 +45,10 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %   'averageTrialsHandleRemainder' - Handle remainder trials (if any) from 
 %       trial averaging 
 %       --options--
+%       'discard'
+%       'newGroup'
+%       'append'
+%       'distribute'
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
@@ -122,11 +137,13 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
     %Specify default values
+    defaultShuffleData = 1;
+    defaultRandomSeed = 'shuffle';
     defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
     defaultPCA = .99;
-    defaultPCAinFold = 1;
-    defaultNFolds = 10;
+    %defaultPCAinFold = 1;
+    %defaultNFolds = 10;
     defaultClassify = 'SVM';
     defaultTimeUse = [];
     defaultSpaceUse = [];
@@ -152,17 +169,20 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     addRequired(ip, 'X', @(X) ndims(X)==3 || ismatrix(X)==1)
     addRequired(ip, 'Y', @isvector)
     [r c] = size(X);
+    dataSize = size(X);
 
     %Optional positional inputs
     %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
     if verLessThan('matlab', '8.2')
+        addParamValue(ip, 'shuffleData', defaultShuffleData, ...
+            @(x) (x==1 || x==0));
         addParamValue(ip, 'averageTrials', defaultAverageTrials, ...
             @(x) assert(rem(x,1) == 0 ));
         addParamValue(ip, 'averageTrialsHandleRemainder', ...
             defaultAverageTrialsHandleRemainder, ...
             @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParamValue(ip, 'PCA', defaultPCA);
-        addParamValue(ip, 'PCAinFold', defaultPCAinFold);
+        %addParamValue(ip, 'PCAinFold', defaultPCAinFold);
         addParamValue(ip, 'nFolds', defaultNFolds);
         addParamValue(ip, 'classify', defaultClassify, ...
              @(x) any(validatestring(x, expectedClassify)));
@@ -176,18 +196,20 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'verbose', defaultVerbose, ...
             @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
+        addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
     else
+        addParameter(ip, 'shuffleData', defaultShuffleData, ...
+            @(x)  (x==1 || x==0));
         addParameter(ip, 'averageTrials', defaultAverageTrials, ...
             @(x) assert(rem(x,1) == 0 ));
         addParameter(ip, 'averageTrialsHandleRemainder', ...
             defaultAverageTrialsHandleRemainder, ...
             @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParameter(ip, 'PCA', defaultPCA);
-        addParameter(ip, 'PCAinFold', defaultPCAinFold);
-        addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'classify', defaultClassify, ...
              @(x) any(validatestring(x, expectedClassify)));
         addParameter(ip, 'timeUse', defaultTimeUse, ...
@@ -198,6 +220,8 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
             @(x) (assert(isvector(x))));
         addParameter(ip, 'verbose', defaultVerbose, ...
             @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
+        addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
         addParameter(ip, 'numTrees', 128);
         addParameter(ip, 'minLeafSize', 1);
@@ -217,31 +241,48 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     CVflag = 0;
     
     % check input data 
-    if ~ismatrix(X) && ~isequal(size(size(X)), [1 3])
-        error('X must be 2D or 3D matrix');
-    end
+    checkInputData(X, Y);
     
-    [X Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X,Y, ...
+    % this function contains input checking functions
+    [X, Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X,Y, ...
                                                     ip.Results.spaceUse, ...
                                                     ip.Results.timeUse, ...
                                                     ip.Results.featureUse);
+
+                    
+    defaultShuffleData = 1;
+    defaultRandomSeed = 'shuffle';
+    defaultAverageTrials = -1;
+    defaultAverageTrialsHandleRemainder = 'discard';
+
+    % SET RANDOM SEED
+    % for data shuffling and permutation testing purposes
+    rng(ip.Results.randomSeed);
     
-        
-    % Initilize info struct
-    classifierInfo = struct('averageTrials', ip.Results.averageTrials, ...
-                        'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder, ...
-                        'PCA', ip.Results.PCA, ...
-                        'PCAinFold', ip.Results.PCAinFold, ...
-                        'nFolds', ip.Results.nFolds, ...
-                        'classify', ip.Results.classify);
+    % DATA SHUFFLING (doing)
+    % Default 1
+    if (ip.Results.shuffleData)
+        disp('Shuffling Trials...');
+        [X, Y, shuffledInd] = shuffleData(X, Y);
+    else
+        classifierInfo.shuffleData = 'off';
+        Y = Y';maybe
+    end
 
-
+    % TRIAL AVERAGING (doing)
+     if(ip.Results.averageTrials >= 1)
+        disp('Averaging Trials...');
+        [X, Y] = averageTrials(X, Y, ip.Results.averageTrials, ...
+            'handleRemainder' ,ip.Results.averageTrialsHandleRemainder);
+        classifierInfo.averageTrials = 'on';
+        [r c] = size(X);
+     end
 
     
     trainData = X;
     % PCA
     if (ip.Results.PCA > 0)
-        disp('Conducting Principal Component Analysis')
+        disp('Conducting Principal Component Analysis...')
         [trainData, V, nPC] = getPCs(trainData, ip.Results.PCA);
 %         testData = X*V;
 %         testData = testData(:,1:nPC); 
@@ -252,23 +293,32 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     end
     
     % Train Model
-    disp('Training Model')
+    disp('Training Model...')
     mdl = fitModel(trainData, Y', ip);
     
-   
-    classifierInfo.averageTrials = 'N/A';
-    classifierInfo.averageTrialsHandleRemainder = 'N/A';
-    classifierInfo.nFolds = 'N/A';
-    classifierInfo.pValueMethod = NaN;
-    classifierInfo.permutations = NaN;
+    % create classifier info struct
+    classifierInfo = struct('averageTrials', ip.Results.averageTrials, ...
+                        'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder, ...
+                        'PCA', ip.Results.PCA, ...
+                        'classify', ip.Results.classify, ...
+                        'spaceUse', ip.Results.spaceUse, ...
+                        'timeUse',ip.Results.timeUse, ...
+                        'featureUse', ip.Results.featureUse, ...
+                        'shuffleData', ip.Results.shuffleData,...
+                        'randomSeed', ip.Results.randomSeed,...
+                        'PCA_V', V,...
+                        'PCA_nPC', nPC,...
+                        'trainingDataSize', dataSize);
+
     M.mdl = mdl;
-    M.V = V;
-    M.nPC = nPC;
     M.classifierInfo = classifierInfo;
+    
 
-    return;
+    
+    disp('Training Finished...')
+    disp('Returning Model')
+
     toc    
-
-
+    return;
 
 end
