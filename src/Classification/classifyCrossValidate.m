@@ -302,17 +302,18 @@
     classifyFlag = 0;
     CVflag = 0;
     
-    % check input data 
-    if iscell(X) && iscell(Y)
-        classifyFlag = 1;
+    % check input data  for cell array input format
+%     if iscell(X) && iscell(Y)
+%         classifyFlag = 1;
     % check 1) X is either 2 by 1 or 3 by 1 matrix  2) Y is regular vector
     % and 3) both X and Y are not cell arrays
-    elseif (ndims(X) == 3 || ismatrix(X)) && isvector(Y) == 1 ...
-            && ~iscell(X) && ~iscell(Y)
-        CVflag = 1;
-    else
-        error('X and Y must either both be cell arrays or both be matrices')
-    end
+%     else
+%     if (ndims(X) == 3 || ismatrix(X)) && isvector(Y) == 1 ...
+%             && ~iscell(X) && ~iscell(Y)
+%         CVflag = 1;
+%     else
+%         error('X and Y must either both be cell arrays or both be matrices')
+%     end
     
 
     
@@ -330,23 +331,23 @@
     
     % If user wants to train model and classify on test matrices we must 
     % test and subset data separately
-    if (classifyFlag)
-        disp('Train model and classify test set')
-        %[accuracy, predY, pVal] = trainModelTestData(X, Y, ip);
-        [accuracy, predY, pVal] = trainModelTestData(X{1}, Y, ip);
-
-        CM = NaN;
-        classifierInfo.shuffleData = 'N/A';
-        classifierInfo.averageTrials = 'N/A';
-        classifierInfo.averageTrialsHandleRemainder = 'N/A';
-        classifierInfo.nFolds = 'N/A';
-        classifierInfo.pValueMethod = NaN;
-        classifierInfo.permutations = NaN;
-        
-        return;
+%     if (classifyFlag)
+%         disp('Train model and classify test set')
+%         %[accuracy, predY, pVal] = trainModelTestData(X, Y, ip);
+%         [accuracy, predY, pVal] = trainModelTestData(X{1}, Y, ip);
+% 
+%         CM = NaN;
+%         classifierInfo.shuffleData = 'N/A';
+%         classifierInfo.averageTrials = 'N/A';
+%         classifierInfo.averageTrialsHandleRemainder = 'N/A';
+%         classifierInfo.nFolds = 'N/A';
+%         classifierInfo.pValueMethod = NaN;
+%         classifierInfo.permutations = NaN;
+%         
+%         return;
     % If user wants to cross validate on entire dataset, we subet
     % data into folds
-    elseif (CVflag)
+% %     elseif (CVflag)
        % check if data is double, convert to double if it isn't
        if ~isa(X, 'double')
            warning('X data matrix not in double format.  Converting X values to double.')
@@ -357,11 +358,11 @@
            warning('Y label vector not in double format.  Converting Y labels to double.')
            Y = double(Y);
        end
-       [X Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X,Y, ...
+       [X, Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X,Y, ...
                                                     ip.Results.spaceUse, ...
                                                     ip.Results.timeUse, ...
                                                     ip.Results.featureUse);
-    end
+%     end
     
     
     % let r and c store size of 2D matrix

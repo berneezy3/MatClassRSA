@@ -754,7 +754,7 @@ void Solver::Solve(int l, const QMatrix& Q, const double *p_, const schar *y_,
 
 		si->obj = v/2;
         
-        std::cout << "Added code block by Bernard for MatClassRSA...\n";
+        //std::cout << "Added code block by Bernard for MatClassRSA...\n";
         //
         //The distance is |decision_value| / |w|
         //
@@ -768,7 +768,7 @@ void Solver::Solve(int l, const QMatrix& Q, const double *p_, const schar *y_,
         //Calculate 2*(si->obj + sum of alpha) and print the square root of it. 
         // You now get |w|. 
         w_determ =  sqrt(2*(si->obj + alpha_sum));
-        std::cout << "|w|: " << w_determ << "\n";
+        //std::cout << "|w|: " << w_determ << "\n";
         //print decision values
         
 	}

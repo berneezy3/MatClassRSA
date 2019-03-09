@@ -1,4 +1,4 @@
-function [C, varargout] = classifyPredict(M, X, varargin)
+function [P, varargout] = classifyPredict(M, X, varargin)
 % -------------------------------------------------------------------------
 % [CM, accuracy, classifierInfo] = classifyPredict(X, Y, shuffleData)
 % -------------------------------------------------------------------------
@@ -9,10 +9,10 @@ function [C, varargout] = classifyPredict(M, X, varargin)
 % INPUT ARGS (REQUIRED)
 %   M - EEG Model (output from classifyTrain)
 %   X - training data
-%   Y - labels
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   'textLabels' - 
+%   'actualLabels' - actual labels of test data X.  Length of this vector
+%   must equal the number of trials in X.
 %   'timeUse' - If X is a 3D, space-by-time-by-trials matrix, then this
 %       option will subset X along the time dimension.  The input
 %       argument should be passed in as a vector of indices that indicate the 
@@ -47,8 +47,10 @@ function [C, varargout] = classifyPredict(M, X, varargin)
 %   'averageTrialsHandleRemainder' - Handle remainder trials (if any) from 
 %       trial averaging 
 %       --options--
-%
-%
+%       'discard'
+%       'newGroup'
+%       'append'
+%       'distribute'
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
@@ -173,8 +175,25 @@ function [C, varargout] = classifyPredict(M, X, varargin)
     addRequired(ip, 'X', @is2Dor3DMatrix);
     
     defaultY = NaN;
+    defaultRandomSeed = 'shuffle';
+    defaultShuffleData = 1;
+    defaultAverageTrials = -1;
+    defaultAverageTrialsHandleRemainder = 'discard';
+    
+    expectedRandomSeed = {'default', 'shuffle'};
+    expectedShuffleData = [0, 1];
+    expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
 
-    addOptional(ip, 'Y', defaultY, @(x) assert( isvector(x) && ~isequal(NaN, x)) );
+    addParameter(ip, 'actualLabels', defaultY, @(x) assert( isvector(x) ));
+    addParameter(ip, 'shuffleData', defaultShuffleData, ...
+        @(x)  (x==1 || x==0));
+	addParameter(ip, 'averageTrials', defaultAverageTrials, ...
+        @(x) assert(rem(x,1) == 0 ));
+    addParameter(ip, 'averageTrialsHandleRemainder', ...
+        defaultAverageTrialsHandleRemainder, ...
+        @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
+    addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+        || isequal('shuffle', x) || (isnumeric(x) && x > 0));
     
     try 
         parse(ip, M, X, varargin{:});
@@ -182,22 +201,95 @@ function [C, varargout] = classifyPredict(M, X, varargin)
         disp(getReport(ME,'extended'));
     end
     
+    % Check input data
+    testDataSize = size(X);
+    if ( ~isnan(ip.Results.actualLabels) ) 
+        checkInputData(X, ip.Results.actualLabels);
+    end
+    if (length(M.classifierInfo.trainingDataSize == 2))
+        assert(M.classifierInfo.trainingDataSize(2) == testDataSize(2), ...
+            "Dimension 2 (feature) of test data does not match Dimension 2 of training data used in classifyTrain().");
+    elseif (length(M.classifierInfo.trainingDataSize == 3))
+        assert(M.classifierInfo.trainingDataSize(1) == testDataSize(1), ...
+            "Dimension 1 (space) of test data does not match Dimension 1 of training data used in classifyTrain().");
+        assert(M.classifierInfo.trainingDataSize(2) == testDataSize(2), ...
+            "Dimension 2 (time) of test data does not match Dimension 2 of training data used in classifyTrain().");
+
+    else
+        error("Data formatting issue.  Check input data matrix to classifyTrain and to classifyPredict");
+    end
+    
+    % Subset data 
+    [X, Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+                                                ip.Results.actualLabels, ...
+                                                M.classifierInfo.spaceUse, ...
+                                                M.classifierInfo.timeUse, ...
+                                                M.classifierInfo.featureUse);
+                                     
+    
+    % SET RANDOM SEED
+    % for data shuffling and permutation testing purposes
+    rng(ip.Results.randomSeed);                                        
+                                         
+    % DATA SHUFFLING (doing)
+    % Default 1
+    if (ip.Results.shuffleData)
+        disp('Shuffling Trials...');
+        [X, Y, shuffledInd] = shuffleData(X, Y);
+    else
+        classifierInfo.shuffleData = 'off';
+        Y = Y';maybe
+    end
+
+    % TRIAL AVERAGING (doing)
+     if(ip.Results.averageTrials > 0)
+        disp('Averaging Trials...');
+        [X, Y] = averageTrials(X, Y, ip.Results.averageTrials, ...
+            'handleRemainder' ,ip.Results.averageTrialsHandleRemainder);
+        classifierInfo.averageTrials = 'on';
+        [r c] = size(X);
+     end
+
+    
+    % If PCA was turned on for training, we will select principal
+    % compoenents for prediciton as well
+    if (M.classifierInfo.PCA > 0) 
+        testData = X*M.classifierInfo.PCA_V;
+        testData = testData(:,1:M.classifierInfo.PCA_nPC);
+    end
+    
     % Predict Labels for Test Data
-    C.predY = modelPredict(X, M.mdl);
-    
-    
-    
+    disp('Predicting Model...')
+    P.predY = modelPredict(testData, M.mdl);
     
     % Get Confusion Matrix
 %     C.CM = confusionmat(testLabels, predY);
     
-    % Get Accuracy
-%     C.accuracy = computeAccuracy(predY, testLabels); 
+    % Get Accuracy and confusion matrix
+    if ( ~isnan(ip.Results.actualLabels) )
+        P.accuracy = computeAccuracy(P.predY, Y); 
+        P.CM = confusionmat(Y, P.predY);
+    end
+    
+    predictionInfo = struct('actualLabels', ip.Results.actualLabels, ...
+                    'averageTrials', ip.Results.averageTrials, ...
+                    'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder, ...
+                    'PCA', 1, ...
+                    'PCA_V', M.classifierInfo.PCA_V, ...
+                    'PCA_nPC', M.classifierInfo.PCA_nPC, ...
+                    'spaceUse', M.classifierInfo.spaceUse, ...
+                    'timeUse', M.classifierInfo.timeUse, ...
+                    'featureUse', M.classifierInfo.featureUse, ...
+                    'shuffleData', ip.Results.shuffleData,...
+                    'randomSeed', ip.Results.randomSeed);
+    
+    P.predictionInfo = predictionInfo;
     
     % Get p-Value
     %pVal = pbinom(Y, ip.Results.nFolds, accuracy);
     %pVal = pbinomNoXVal( testLabels, accuracy, length(unique(trainLabels)));
-    
+    disp('Prediction Finished')
+    disp('Returning Prediction Results')
 
 
 
