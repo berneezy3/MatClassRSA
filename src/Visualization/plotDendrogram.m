@@ -99,6 +99,7 @@ function img = plotDendrogram(RDM, varargin)
         expectedDistMethod)));
     ip.addParameter('nodeColors', [], @(x) isvector(x)); 
     ip.addParameter('nodeLabels', [], @(x) isvector(x));
+    ip.addParameter('fontSize', 25, @(x) isnumeric(x));
     ip.addParameter('iconPath', '');
     ip.addParameter('orientation', 'down', @(x) any(validatestring(x, ...
         expectedOrientation)));
@@ -136,7 +137,7 @@ function img = plotDendrogram(RDM, varargin)
     end
     
 
-    set(gca,'FontSize',20);
+    set(gca,'FontSize',ip.Results.fontSize);
     %set(gca,'xtick',[]);
     set(gcf,'color',[1 1 1]);
     
@@ -192,7 +193,7 @@ function img = plotDendrogram(RDM, varargin)
                     'HorizontalAlignment', 'center');
                 t.Rotation = ip.Results.textRotation;
                 t.Color = ip.Results.nodeColors{P(i)};
-                t(1).FontSize = 25;
+                t(1).FontSize = ip.Results.fontSize;
             else
 
             end
