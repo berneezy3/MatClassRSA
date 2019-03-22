@@ -63,17 +63,13 @@
 %       0 - one PCA for entire training data matrix X.
 %   'nFolds' - number of folds in cross validation.  Must be integer
 %       greater than 1 and less than number of trials. Default is 10.
-%   'classify' - choose classifier. 
+%   'classifier' - choose classifier. 
 %        --options--
 %       'SVM' (default)
 %       'LDA' 
 %       'RF' 
 %   pValueMethod - Choose the method to compute p-value.  
 %       --options--
-%       'binomcdf' (default)
-%           computes a binomial cdf at each of the values in x using number 
-%           of permutations sepcified in 'permutations'in N and probability 
-%           of success for each trial in p
 %       'permuteTestLabels' 
 %           with the 'permuteTestLabels' option, we perform k -fold cross 
 %           validation only once. In each fold, the classification model is   
@@ -85,15 +81,6 @@
 %           k * N  prediction operations are performed. So that there are enough
 %           test labels to randomize in each fold, here we also recommend having   
 %           at least 100 observations total, and no more than 10 cross-validation folds.
-%       'permuteFullModel'
-%           With the ?permuteFullModel? option, we perform the entire 10-fold 
-%           cross validation N times. For each of the N permutation iterations, 
-%           the entire labels vector (training and test observations) is shuffled, 
-%           and in each fold, the classifier model is both trained and tested using 
-%           the shuffled labels. As the full classification procedure is performed 
-%           N times, the ?permuteFullModel? option is the slowest, but is suitable 
-%           to use with any classifier configuration, including settings with 
-%           unbalanced classes, few observations, and up to N-fold cross validation.
 %   'permutations' - Choose number of permutations to perform.  Default
 %           1000.  This option will only work if 'permuteFullModel' or 
 %           'permuteTestLabels' is chosen.
@@ -183,7 +170,7 @@
     defaultPCA = .9;
     defaultPCAinFold = 1;
     defaultNFolds = 10;
-    defaultClassify = 'SVM';
+    defaultClassifier = 'SVM';
     defaultPValueMethod = '';
     defaultPermutations = 1000;
     defaultTimeUse = [];
@@ -201,7 +188,7 @@
     expectedShuffleData = [0, 1];
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     expectedPCAinFold = [0,1];
-    expectedClassify = {'SVM', 'LDA', 'RF'};
+    expectedClassifier = {'SVM', 'LDA', 'RF'};
 %     expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
     expectedPValueMethod = {'permuteFullModel'};
     expectedVerbose = {0,1};
@@ -227,8 +214,8 @@
         addParamValue(ip, 'PCA', defaultPCA);
         addParamValue(ip, 'PCAinFold', defaultPCAinFold);
         addParamValue(ip, 'nFolds', defaultNFolds);
-        addParamValue(ip, 'classify', defaultClassify, ...
-             @(x) any(validatestring(x, expectedClassify)));
+        addParamValue(ip, 'classifier', defaultClassifier, ...
+             @(x) any(validatestring(x, expectedClassifier)));
 
         addParamValue(ip, 'pValueMethod', defaultPValueMethod, ...
             @(x) any(validatestring(x, expectedPValueMethod)));
@@ -261,8 +248,8 @@
         addParameter(ip, 'PCA', defaultPCA);
         addParameter(ip, 'PCAinFold', defaultPCAinFold);
         addParameter(ip, 'nFolds', defaultNFolds);
-        addParameter(ip, 'classify', defaultClassify, ...
-             @(x) any(validatestring(x, expectedClassify)));
+        addParameter(ip, 'classifier', defaultClassifier, ...
+             @(x) any(validatestring(x, expectedClassifier)));
 
         addParameter(ip,'pValueMethod', defaultPValueMethod, ...
              @(x) any(validatestring(x, expectedPValueMethod)));
@@ -298,25 +285,6 @@
     catch ME
         disp(getReport(ME,'extended'));
     end
-    
-    classifyFlag = 0;
-    CVflag = 0;
-    
-    % check input data  for cell array input format
-%     if iscell(X) && iscell(Y)
-%         classifyFlag = 1;
-    % check 1) X is either 2 by 1 or 3 by 1 matrix  2) Y is regular vector
-    % and 3) both X and Y are not cell arrays
-%     else
-%     if (ndims(X) == 3 || ismatrix(X)) && isvector(Y) == 1 ...
-%             && ~iscell(X) && ~iscell(Y)
-%         CVflag = 1;
-%     else
-%         error('X and Y must either both be cell arrays or both be matrices')
-%     end
-    
-
-    
         
     % Initilize info struct
     classifierInfo = struct('shuffleData', ip.Results.shuffleData, ...
@@ -325,29 +293,10 @@
                         'PCA', ip.Results.PCA, ...
                         'PCAinFold', ip.Results.PCAinFold, ...
                         'nFolds', ip.Results.nFolds, ...
-                        'classify', ip.Results.classify, ...
+                        'classifier', ip.Results.classifier, ...
                         'pValueMethod', ip.Results.pValueMethod, ...
                         'permutations', ip.Results.permutations);
     
-    % If user wants to train model and classify on test matrices we must 
-    % test and subset data separately
-%     if (classifyFlag)
-%         disp('Train model and classify test set')
-%         %[accuracy, predY, pVal] = trainModelTestData(X, Y, ip);
-%         [accuracy, predY, pVal] = trainModelTestData(X{1}, Y, ip);
-% 
-%         CM = NaN;
-%         classifierInfo.shuffleData = 'N/A';
-%         classifierInfo.averageTrials = 'N/A';
-%         classifierInfo.averageTrialsHandleRemainder = 'N/A';
-%         classifierInfo.nFolds = 'N/A';
-%         classifierInfo.pValueMethod = NaN;
-%         classifierInfo.permutations = NaN;
-%         
-%         return;
-    % If user wants to cross validate on entire dataset, we subet
-    % data into folds
-% %     elseif (CVflag)
        % check if data is double, convert to double if it isn't
        if ~isa(X, 'double')
            warning('X data matrix not in double format.  Converting X values to double.')
@@ -362,7 +311,6 @@
                                                     ip.Results.spaceUse, ...
                                                     ip.Results.timeUse, ...
                                                     ip.Results.featureUse);
-%     end
     
     
     % let r and c store size of 2D matrix
@@ -444,7 +392,7 @@
 
     for i = 1:ip.Results.nFolds
         
-        disp(['Fold ' num2str(i) ' of ' num2str(ip.Results.nFolds)])
+        disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
         
         trainX = cvDataObj.trainXall{i};
         trainY = cvDataObj.trainYall{i};
@@ -477,8 +425,8 @@
     end
     
     switch ip.Results.pValueMethod
-         case 'binomcdf'
-            pVal = pbinom(Y, ip.Results.nFolds, accuracy);
+%          case 'binomcdf'
+%             pVal = pbinom(Y, ip.Results.nFolds, accuracy);
 %         case 'permuteTestLabels'
 %             pVal = permTestPVal(accuracy, accDist);
         case 'permuteFullModel'
@@ -500,6 +448,7 @@
     C.predY = predY;
     C.pVal = pVal;
     C.classifierInfo = classifierInfo;
+    disp('classifyCrossValidate() Finished!')
     toc
     
  end

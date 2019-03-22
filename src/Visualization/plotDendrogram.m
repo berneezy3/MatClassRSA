@@ -22,6 +22,8 @@ function img = plotDendrogram(RDM, varargin)
 %   'iconPath': a directory containing imaAges used to label, in which the
 %       image files must be ordered in the same order as the 
 %       labels of the confusion matrix
+%   'fontSize': a number to specify the size of fonts when plotting colored
+%   labels.
 %   ?orientation? - Dendrogram orientation.  This parameter lets the user 
 %       specify which direction to point the dendrogram (orientation defined 
 %       here as the side that contains the dendrogram leaves).
@@ -181,7 +183,7 @@ function img = plotDendrogram(RDM, varargin)
     % CASE: COLOR AND NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
-        disp('CASE: COLOR NODE');
+        disp('Potting Colored Labels');
         %
         xTickCoords = getTickCoord;
         set(gca,'xTickLabel', '');
@@ -221,7 +223,7 @@ function img = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.nodeLabels) && ~isempty(ip.Results.iconPath)
         
-        disp('CASE: IMAGE');
+        disp('Plotting Icons');
         xTickCoords = getTickCoord;
         set(gca,'xTickLabel', '');
         pos = get(gca,'position');
@@ -269,7 +271,7 @@ function img = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.nodeLabels)
-        disp('CASE: COLOR');
+        disp('Plotting Colors');
         
         set(gca,'xTickLabel', '');
         xTickCoords = getTickCoord;
@@ -301,7 +303,7 @@ function img = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     else
         
-        disp('CASE: DEFAULT LABELS');
+        disp('Plotting default numeric labels');
         % Do NOTHING
 
         

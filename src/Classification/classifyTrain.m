@@ -28,7 +28,8 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %       will not do anything if input matrix X is a 3D,
 %       space-by-time-by-trials matrix.
 %   'randomSeed' - This option determines whether the randomization is to produce
-%       varying or unvarying results each different execution.
+%       varying or unvarying results each different execution.  The value
+%       of this parameter is passed into the Matlab rng() function.
 %        --options--
 %       'shuffle' (default)
 %       'default' (replicate results)
@@ -59,7 +60,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %           explain N * 100% of the variance in input matrix X.
 %       (integer greater than or equal to 1, N) - Use N most important
 %       features of input matrix X.
-%   'classify' - choose classifier. 
+%   'classifier' - choose classifier. 
 %        --options--
 %       'SVM' (default)
 %       'LDA' 
@@ -75,20 +76,15 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %   128.
 %   'minLeafSize' - Choose the inimum number of observations per tree leaf.
 %   Default is 1,
-%   'verbose' - Include the distribution of accuracies from the
-%   permutations test and also a concatednated struct of all the models
 %
 % OUTPUT ARGS 
-%   M - Classification model fit by classifyTrain.  Pass this argument to
-%   classifyPredict to predict new data.  
-%   V - 
-%   nPC -
-%   classifierInfo - A struct summarizing the options selected for the
-%       classification.
-%
+%   M - Classification output produced by classifyTrain.  This contains two 
+%   structs: M.mdl, which contains the model, and M.classifierInfo. which 
+%   contains classifier related info.  Must pass M to classifyPredict() to
+%   predict new data.
 
 % TODO:
-%   Check when the folds = 1, what we should do 
+%   
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -142,13 +138,10 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
     defaultPCA = .99;
-    %defaultPCAinFold = 1;
-    %defaultNFolds = 10;
-    defaultClassify = 'SVM';
+    defaultClassifier = 'SVM';
     defaultTimeUse = [];
     defaultSpaceUse = [];
     defaultFeatureUse = [];
-    defaultVerbose = 0;
     defaultKernel = 'rbf';
 %   defaultDiscrimType = 'linear';
     defaultNumTrees = 64;
@@ -158,10 +151,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     %Specify expected values
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     expectedPCAinFold = [0,1];
-    expectedClassify = {'SVM', 'LDA', 'RF'};
-%     expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
-    expectedPValueMethod = {'permuteFullModel'};
-    expectedVerbose = {0,1};
+    expectedClassifier = {'SVM', 'LDA', 'RF'};
     expectedKernel = {'linear', 'sigmoid', 'rbf', 'polynomial'};
     
     
@@ -184,8 +174,8 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
         addParamValue(ip, 'PCA', defaultPCA);
         %addParamValue(ip, 'PCAinFold', defaultPCAinFold);
         addParamValue(ip, 'nFolds', defaultNFolds);
-        addParamValue(ip, 'classify', defaultClassify, ...
-             @(x) any(validatestring(x, expectedClassify)));
+        addParamValue(ip, 'classifier', defaultClassifier, ...
+             @(x) any(validatestring(x, expectedClassifier)));
         addParamValue(ip, 'timeUse', defaultTimeUse, ...
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'spaceUse', defaultSpaceUse, ...
@@ -194,8 +184,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
-        addParamValue(ip, 'verbose', defaultVerbose, ...
-            @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
         addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
@@ -210,16 +198,14 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
             defaultAverageTrialsHandleRemainder, ...
             @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
         addParameter(ip, 'PCA', defaultPCA);
-        addParameter(ip, 'classify', defaultClassify, ...
-             @(x) any(validatestring(x, expectedClassify)));
+        addParameter(ip, 'classifier', defaultClassifier, ...
+             @(x) any(validatestring(x, expectedClassifier)));
         addParameter(ip, 'timeUse', defaultTimeUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'spaceUse', defaultSpaceUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
-        addParameter(ip, 'verbose', defaultVerbose, ...
-            @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
         addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
@@ -236,9 +222,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     catch ME
         disp(getReport(ME,'extended'));
     end
-    
-    classifyFlag = 0;
-    CVflag = 0;
     
     % check input data 
     checkInputData(X, Y);
@@ -266,7 +249,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
         [X, Y, shuffledInd] = shuffleData(X, Y);
     else
         classifierInfo.shuffleData = 'off';
-        Y = Y';maybe
+        Y = Y';
     end
 
     % TRIAL AVERAGING (doing)
@@ -300,7 +283,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     classifierInfo = struct('averageTrials', ip.Results.averageTrials, ...
                         'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder, ...
                         'PCA', ip.Results.PCA, ...
-                        'classify', ip.Results.classify, ...
+                        'classifier', ip.Results.classifier, ...
                         'spaceUse', ip.Results.spaceUse, ...
                         'timeUse',ip.Results.timeUse, ...
                         'featureUse', ip.Results.featureUse, ...
