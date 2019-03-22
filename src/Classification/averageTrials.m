@@ -223,6 +223,6 @@ function [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
 
     end
     
-    [averagedX, averagedY] = shuffleData(averagedX, averagedY);
+%     [averagedX, averagedY] = shuffleData(averagedX, averagedY);
 
 end

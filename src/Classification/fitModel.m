@@ -32,7 +32,7 @@ function mdl = fitModel(X, Y, ip)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-    switch ip.Results.classify
+    switch ip.Results.classifier
         case 'SVM'
             Y = Y';
             switch ip.Results.kernel
@@ -45,11 +45,7 @@ function mdl = fitModel(X, Y, ip)
                 case 'sigmoid'
                     kernelNum = 3;
             end
-%             currpath = pwd;
-%             [libsvmpath,name,ext] = fileparts(which('/libsvm-3.21/matlab/svmtrain.mexmaci64'));
-%             addpath(libsvmpath);
               mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q']);
-%             cd(currpath);
             
         case 'LDA'
 
@@ -57,23 +53,6 @@ function mdl = fitModel(X, Y, ip)
             
             
         case 'RF'
-%             for i=1:structLength
-%                 switch char(params(i))
-%                     case 'numTrees'
-%                         assert(isnumeric(cell2mat(values(i))) & ...
-%                             ceil(cell2mat(values(i))) == floor(cell2mat(values(i))), ...
-%                             'numTrees must be a numeric integer');
-%                         assert(cell2mat(values(i))>0, 'numTrees must be positive');
-%                         numTrees = cell2mat(values(i));
-%                     case 'minLeafSize'
-%                         assert(isnumeric(cell2mat(values(i))) & ...
-%                             ceil(cell2mat(values(i))) == floor(cell2mat(values(i))), ...
-%                             'minLeafSize must be a numeric integer');
-%                         assert(cell2mat(values(i))>0, 'minLeafSize must be positive');
-%                     otherwise
-%                         error([char(params(i)) ' not a real input parameter to Random Forest Function. '])
-%                 end
-%             end
             mdl = TreeBagger(ip.Results.numTrees, X, Y, ...
                 'OOBPrediction', 'on', 'minLeafSize', ip.Results.minLeafSize);
     end
