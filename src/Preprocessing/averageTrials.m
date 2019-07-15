@@ -1,11 +1,11 @@
 function [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
-%  [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
+%  [avgX, avgY] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
 % Bernard Wang - April. 30, 2017
 % 
-% Function to average trials for training data matrix X and corresponding
-% label vector Y
+% [avgX, avgY] = averageTrials(X, Y, groupSize) average trials for training 
+% data matrix X and corresponding label vector Y
 % Input Args:
 %       X - training data matrix
 %       Y - label vector
