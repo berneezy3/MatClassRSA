@@ -1,4 +1,4 @@
-function RDM = cm2rdm(CM, varargin)
+function RDM = computeCM_RDM(CM, varargin)
 %-------------------------------------------------------------------
 % RDM = cm2rdm(CM, varargin)
 % ------------------------------------------------
