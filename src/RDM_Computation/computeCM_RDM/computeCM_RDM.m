@@ -1,10 +1,11 @@
-function RDM = computeCM_RDM(CM, varargin)
+function [RDM, params] = computeCM_RDM(CM, varargin)
 %-------------------------------------------------------------------
-% RDM = cm2rdm(CM, varargin)
+% [RDM, params] = computeCM_RDM(CM, varargin)
 % ------------------------------------------------
-% Blair - January 31, 2017
+% Blair - January 31, 2017, revised July 2019
 %
-% RDM = cm2rdm(CM) converts confusion matrix CM into distance matrix RDM.
+% [RDM, params] = computeCM_RDM(CM, varargin) converts confusion matrix CM 
+% into distance matrix RDM.
 %
 % Required inputs:
 % - CM: A square confusion matrix
@@ -19,12 +20,17 @@ function RDM = computeCM_RDM(CM, varargin)
 % - 'rankdistances': 'none' (default), 'rank', 'percentrank'
 %
 % Outputs:
-% - DM: The distance matrix
+% - RDM: The Representational Dissimilarity (distance) Matrix. RDM is a
+%   square matrix of the same size as the input variable CM.
+% - params: RDM computation parameters. It is a struct whose fields specify
+%   normalization, symmetrization, distance computation, and distance
+%   ranking.
 %
 % Notes
 % - Computing ranks (with ties): tiedrank
 % - Computing inverse percentile: http://bit.ly/2koMsAn
-% - Harmonic mean with two numbers: https://en.wikipedia.org/wiki/Harmonic_mean#Two_numbers
+% - Harmonic mean with two numbers: 
+%   https://en.wikipedia.org/wiki/Harmonic_mean#Two_numbers
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -125,3 +131,10 @@ DM = convertSimToDist(SM, ip.Results.distance, ip.Results.distpower);
 
 % RANKDISTANCES
 RDM = rankDistances(DM, ip.Results.rankdistances);
+
+% params
+params.normaliize = ip.Results.normalize;
+params.symmetrize = ip.Results.symmetrize;
+params.distance = ip.Results.distance;
+params.distpower = ip.Results.distpower;
+params.rankdistances = ip.Results.rankdistances;
