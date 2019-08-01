@@ -10,9 +10,9 @@ function [reliabilities] = computeSampleSizeReliability(eeg_data, labels, timepo
 % into this function.
 %
 % Input Args:
-%   eeg_data - data matrix. The size of eeg_data should be nComponents x (nTrials*nImages) x 
-%              nTimepoints. If the size of eeg_data is: (nTrials*nImages) x nTimepoints, the
-%              function automatically adds a singleton dimension at the beginning.
+%   eeg_data - data matrix. The eeg_data is a 3D matrix, it is assumed to 
+%           be of size nSpace x nTime x nTrial. If eeg_data is a 2D
+%           matrix, it is assumed to be of size nTrial x nFeature.
 %   labels - labels vector. The size of labels should be (nTrials*nImages)
 %   timepoint_idx - timepoint to use in computing reliability for a subset of trials
 %   num_trials_per_half (optional) - a vector of how many trials in a split half to
