@@ -1,11 +1,16 @@
+% The functions in this file are used in conjunction with:
+%   - computeSampleSizeReliability.m
+%   - computeSpaceTimeReliability.m
 function [rels] = computeReliability(data, labels, num_permutations)
-% data is of shape: (num_trials, num_components)
-% Should return reliabilities of shape (num_permutations, num_components)
-    num_components = size(data, 2);
+% data is of shape: (num_components, num_trials)
+% The length of labels should be the same as the second dimension of the data
+% Returns reliabilities of shape: (num_permutations, num_components)
+    assert(size(data, 2) == length(labels));
+    num_components = size(data, 1);
     rels = zeros(num_components, num_permutations);
     for e=1:num_components
         e_rels = zeros(1,num_permutations);
-        e_data = convertToSquareMatrix(squeeze(data(:,e)), labels);
+        e_data = convertToSquareMatrix(squeeze(data(e,:)), labels);
         % Data shape: (num_images, num_trials)
         num_trials = size(e_data, 2);
         half_idx = num_trials / 2;
@@ -44,7 +49,8 @@ function [data_matrix] = convertToSquareMatrix(data, labels)
     end
     data_matrix = zeros(num_images, min_trials);
     for i=1:num_images
-        data_matrix(i,:) = data(labels==i);
+        curr_data = data(labels==i);
+        data_matrix(i,:) = curr_data(1:min_trials);
     end
 end
 
