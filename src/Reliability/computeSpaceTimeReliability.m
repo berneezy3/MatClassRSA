@@ -10,17 +10,16 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
 % one will be able to see how reliable each component is across time (on average).
 %
 % Input Args:
-%   eeg_data - data matrix. The size of eeg_data should be nComponents x 
-%              (nTrials*nImages) x nTimepoints.  If the size of eeg_data is:
-%              (nTrials*nImages) x nTimepoints, the function automatically adds
-%              a singleton dimension at the beginning.
-%   labels - labels vector. The size of labels should be (nTrials*nImages)
+%   eeg_data - data matrix. 3D eeg_data matrices are assumed to be nSpace x 
+%              nTime x nTrial.  If the size of eeg_data is 2D, it is 
+%              assumed to be nTrial x nFeature.
+%   labels - labels vector. The length of labels should be nTrials.
 %   num_permutations (optional) - how many permutations to split the trials for
-%                                 split half reliability
+%              split half reliability. If not entered, defaults to 10.
 %
 % Output Args:
 %   reliabilities - reliability for each electrode across time. The dimensions of
-%                   this matrix is: nTimepoints x nPermutations x nComponents.
+%                   this matrix is: nTime x nPermutations x nSpace.
 %                   You would typically average across the permutations dimension.
 
     if nargin < 3 || isempty(num_permutations)
