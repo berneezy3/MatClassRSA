@@ -21,6 +21,7 @@ function [rels] = computeReliability(data, labels, num_permutations)
         half_idx = num_trials / 2;
         full_idx = num_trials;
         for p=1:num_permutations
+%             rng(p);
             random_indices = randperm(num_trials);
             shuffled_data = e_data(:,random_indices);
             half_1 = mean(shuffled_data(:,1:half_idx), 2);
