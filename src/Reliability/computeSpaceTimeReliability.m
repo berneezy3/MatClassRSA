@@ -25,7 +25,8 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
     if nargin < 3 || isempty(num_permutations)
         num_permutations = 10;
     end
-
+    
+    
     % Add singleton third dimension if 2D data are input
     if length(size(eeg_data)) == 2
         [dim1, dim2] = size(eeg_data);

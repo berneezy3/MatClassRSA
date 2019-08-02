@@ -32,12 +32,9 @@ function [reliabilities] = computeSampleSizeReliability(eeg_data, labels, timepo
 %                                   nSpace. IF INPUT MATRIX WAS 2D, dimensions are: num_trial_permutations x length(num_trials_per_half)
 
 
-% TODO: Clean up above documentation
-
 % TODO: If 3D matrix is entered, assume it's space x time x trial and
 % permute dimensions as needed. If 2D matrix is entered, assume it's trial
-% x time, so could transpose to time x trial and then add 1st singleton
-% dimension so that it's same dimensions as 3D input.
+% x time, so could transpose to time x trial and then a
 
 if length(size(eeg_data)) == 2
     dim1 = size(eeg_data,1);
