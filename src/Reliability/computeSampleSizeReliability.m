@@ -39,6 +39,10 @@ function [reliabilities] = computeSampleSizeReliability(eeg_data, labels, timepo
 % x time, so could transpose to time x trial and then add 1st singleton
 % dimension so that it's same dimensions as 3D input.
 
+% TODO: Add 7th optional input for rngSeed. If not entered or empty, set it
+% to 'shuffle'
+rngSeed = 2;
+
 if length(size(eeg_data)) == 2
     dim1 = size(eeg_data,1);
     dim2 = size(eeg_data,2);
@@ -67,7 +71,7 @@ reliabilities = zeros(num_trial_permutations, num_trial_subsets, num_components)
 time_data = squeeze(eeg_data(:,:,timepoint_idx));
 for k=1:num_trial_permutations
     % Shuffle data and labels
-    rng(k);
+    rng(rngSeed); % <--- TODO: confirm this makes sense
     random_indices = randperm(total_trials);
     shuffled_data = time_data(:,random_indices);
     shuffled_labels = labels(random_indices);
