@@ -13,13 +13,25 @@ function [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutati
 %
 % Input Args:
 %   eeg_data - data matrix. The size of eeg_data should be nFeatures x 
-%              (nTrials*nImages)
-%   labels - labels vector. The size of labels should be (nTrials*nImages)
+%              nTrials. Users working with 3D data matrices should already
+%              have subset the data along a single sensor (along the space
+%              dimension) or time sample (along the time dimension).
+%   labels - labels vector. The length of labels should be nTrials.
 %   num_permutations (optional) - how many permutations to randomly select
-%                                 train and test data matrix.
+%                train and test data matrix. If not entered, defaults to
+%                10.
 % Output Args:
 %   dissimilarities - the dissimilarity matrix, dimensions: num_permutations
 %                     x num_images x num_images
+
+% TODO: ^ Can we change the dimensions of the output so it's nLabels x
+% nLabels x nPermutations?
+
+% TODO: Make compatible with non-continuous labels in labels vector.
+
+% TODO: Add optional input of rngSeed (see reliability functions). Default
+% to 'shuffle'. Add info to docstring.
+rngSeed('shuffle');
 
     num_dim = length(size(eeg_data));
     assert(num_dim == 2);
@@ -33,8 +45,7 @@ function [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutati
     num_features = size(eeg_data,1);
     dissimilarities = zeros(num_permutations, num_images, num_images);
     for p=1:num_permutations
-        % Reproducibility
-        rng(p);
+
         for i=1:num_images
 
             img1_data = squeeze(eeg_data(:,labels==i));
