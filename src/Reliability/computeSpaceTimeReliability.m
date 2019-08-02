@@ -29,6 +29,10 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
 % dimensions. 3D input --> space x time x permutations. 2D input --> time x
 % permutations.
 
+% TODO: Add 4th optional input for rngSeed. If not entered or empty, set it
+% to 'shuffle'. If entered, replace rng line below.
+rngSeed = 2;
+
 if nargin < 3 || isempty(num_permutations)
     num_permutations = 10;
 end
@@ -42,6 +46,8 @@ end
 
 num_timepoints = size(eeg_data, 3);
 num_components = size(eeg_data, 1);
+
+rng(rngSeed) % <--- TODO: fix/check this!
 
 reliabilities = zeros(num_timepoints, num_permutations, num_components);
 for t=1:num_timepoints
