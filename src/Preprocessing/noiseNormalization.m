@@ -8,12 +8,17 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(eeg_data, labels)
 % It depends on an external function 'cov1para', which needs to be in the same
 % directory as this function.
 % Input Args:
-%   eeg_data - data matrix. The size of eeg_data should be nComponents x nTimepoints
-%              x (nTrials*nImages)
+%   eeg_data - IF 3D, THE MATRIX eeg_data should be nSpace x nTime
+%              x nTrials
 %   labels - labels vector. The size of labels should be (nTrials*nImages)
 % Output Args:
 %   norm_eeg_data - the data matrix after noise normalization is applied.
 %   sigma_inv - inverse of the square root of the covariance matrix.
+
+% TODO: Address non-continuous values in labels vector
+
+% TODO: Extend functionality to handle a 2D trials x time input matrix
+% (treat as singleton space dimension).
 
     num_components = size(eeg_data, 1);
     num_images = max(labels);
