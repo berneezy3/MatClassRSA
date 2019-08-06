@@ -182,6 +182,7 @@
 %   defaultDiscrimType = 'linear';
     defaultNumTrees = 64;
     defaultMinLeafSize = 1;
+    defaultPairwise = 0;
 
 
     %Specify expected values
@@ -194,7 +195,7 @@
     expectedVerbose = {0,1};
     expectedRandomSeed = {'default', 'shuffle'};
     expectedKernel = {'linear', 'sigmoid', 'rbf', 'polynomial'};
-    
+    expectedPairwise = {0,1};
     
     %Required inputs
     addRequired(ip, 'X', @is2Dor3DMatrixOrCell)
