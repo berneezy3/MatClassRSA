@@ -45,12 +45,16 @@ function mdl = fitModel(X, Y, ip)
                 case 'sigmoid'
                     kernelNum = 3;
             end
-              mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q']);
+              mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ']);
+        case 'SVM2'
+            
+            temp = templateSVM('KernelFunction','rbf', 'Standardize',true);
+            classOrder = 1:length(unique(Y));
+            
+            mdl = fitcecoc(X,Y','Learners', temp, 'Coding', 'onevsone', 'ClassNames', classOrder);
             
         case 'LDA'
-
             mdl = fitcdiscr(X, Y, 'DiscrimType', 'linear'); 
-            
             
         case 'RF'
             mdl = TreeBagger(ip.Results.numTrees, X, Y, ...

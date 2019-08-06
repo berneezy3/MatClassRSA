@@ -60,8 +60,15 @@ for cat1 = 1:5
       currUse = ismember(categoryLabels, [cat1 cat2]);
       
       % Store the accuracy in the accMatrix
-      [acc, accMatrix(cat2, cat1), predY, pVal, classifierInfo] = classifyEEG(...
+      C = classifyCrossValidate(...
           X_3D(:, :, currUse), categoryLabels(currUse), 'randomSeed', 'default');
+      
+      acc = C.accuracy;
+      accMatrix(cat2, cat1) = acc;
+      predY = C.predY;
+      pVal = C.pVal;
+      classifierInfo = C.classifierInfo;
+      
    end
 end
 
