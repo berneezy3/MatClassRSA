@@ -63,7 +63,7 @@ load S6.mat
 
 %%
 % Convert the confusion matrix to an RDM
-RDM = computeRDM(CM);
+RDM = computeRDM(C.CM);
  
 
 % Create the four visualizations

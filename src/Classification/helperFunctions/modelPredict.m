@@ -38,6 +38,19 @@ function predictions = modelPredict(X, mdl)
             [r c] = size(X);
             Y = zeros(r,1);
             [predictions, acc, decision_values] = svmpredict(Y, X, mdl, ['-q']);
+            
+            for i=1:r
+                [indOfWinner tallies tie] = SVMhandleties(decision_values(i, :), mdl.Label');
+                if (tie ~= 0)
+%                     disp(['libsvm''s winner: ' num2str(predictions(i)) ', bernard''s tie broken winner: ' num2str(mdl.Label(indOfWinner))]);
+%                     disp(['label order: ' num2str(mdl.Label')]);
+                    predictions(i) = mdl.Label(indOfWinner);
+                end
+            end
+            predictions = predictions';
+        case 'ClassificationECOC' % multi-class SVM
+            [r c] = size(X);
+            [predictions, score] = predict(mdl, X);
             predictions = predictions';
         case 'ClassificationDiscriminant'
             predictions = predict(mdl,X);

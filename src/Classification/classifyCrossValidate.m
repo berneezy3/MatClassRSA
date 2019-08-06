@@ -188,7 +188,7 @@
     expectedShuffleData = [0, 1];
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     expectedPCAinFold = [0,1];
-    expectedClassifier = {'SVM', 'LDA', 'RF'};
+    expectedClassifier = {'SVM', 'LDA', 'RF', 'SVM2'};
 %     expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
     expectedPValueMethod = {'permuteFullModel'};
     expectedVerbose = {0,1};
