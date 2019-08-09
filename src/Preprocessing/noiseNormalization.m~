@@ -13,9 +13,8 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(eeg_data, labels)
 %   labels - Labels vector. The length of this vector should correspond to
 %       the length, along the trial dimension, of the input data.
 % Output Args:
-%   norm_eeg_data - Data matrix after noise normalization is applied. It
-%       will be the same size as the input data matrix.
-%   sigma_inv - Inverse of the square root of the covariance matrix.
+%   norm_eeg_data - the data matrix after noise normalization is applied.
+%   sigma_inv - inverse of the square root of the covariance matrix.
 
 % TODO: Make sure labels input is a vector
 % TODO: Make sure input data frame is a 2D or 3D matrix. 
@@ -24,12 +23,9 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(eeg_data, labels)
 % be treated the same as a 3D input?)
 % TODO: Make sure the length of labels corresponds to the length of the
 % trial dimension of the input data.
-% TODO: If data were entered as a 2D matrix, reshape the output to 2D (I
-% guess you could do this by permuting the data so that the singleton
-% dimension goes to the end and therefore goes away).
+% TODO: If data were entered as a 2D matrix, 
 
-% TODO: Address non-continuous values in labels vector -->
-% length(unique(labels)) and fix looping/indexing/storage as needed.
+% TODO: Address non-continuous values in labels vector
 
 
 
