@@ -16,8 +16,10 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
 %   labels - labels vector. The length of labels should be equal to nTrials.
 %   num_permutations (optional) - how many permutations to split the trials for split-half
 %                                 reliability. If not entered, this defaults to 10.
-%   rand_seed (optional) - random seed for reproducibility. If not entered,
-%                          this defaults to 'shuffle'.
+%   rand_seed (optional) - Random number generator specification. If not entered, defaults to
+%       'shuffle'. If specifying a dual-argument random number generator
+%       (e.g., ('shuffle', 'twister'), it should be entered as elements of
+%       a cell array (e.g., {'shuffle', 'twister'}).
 %
 % Output Args:
 %   reliabilities - reliability for each electrode across time. The dimensions of
@@ -46,10 +48,11 @@ if nargin < 3 || isempty(num_permutations)
 end
 
 % Set random seed
-if nargin < 4 || isempty(rand_seed)
-    rand_seed = 'shuffle';
+if nargin < 4 || isempty(rand_seed), rng('shuffle');
+elseif length(rand_seed) == 2, rng(rand_seed{1}, rand_seed{2});
+elseif ischar(rand_seed) || length(rand_seed) == 1, rng(rand_seed);
+else, error('Input rand_seed should be a single value or cell array of length 2.');
 end
-rng(rand_seed);
 
 num_components = size(eeg_data, 1);
 num_timepoints = size(eeg_data, 3);
