@@ -14,7 +14,7 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
 %              nTrial.  If the data matrix is 2D, it is assumed to be nTrial x 
 %              nFeature.
 %   labels - labels vector. The length of labels should be equal to nTrials.
-%   num_permutations (optional) - how many permutations to split the trials for split half
+%   num_permutations (optional) - how many permutations to split the trials for split-half
 %                                 reliability. If not entered, this defaults to 10.
 %   rand_seed (optional) - random seed for reproducibility. If not entered,
 %                          this defaults to 'shuffle'.
@@ -30,15 +30,15 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
 % We will permute so that it becomes space x trial x time
 if length(size(eeg_data)) == 3
     eeg_data = permute(eeg_data, [1,3,2]);
-end
-
 % If 2D matrix entered, dimensions are: trial x time
 % We will permute so that it becomes time x trial and add
 % a singleton dimension in the front for space.
-if length(size(eeg_data)) == 2
+elseif length(size(eeg_data)) == 2
     eeg_data = permute(eeg_data, [2,1]);
     [dim1, dim2] = size(eeg_data);
     eeg_data = reshape(eeg_data, [1,dim1,dim2]);
+else
+    error('Input data should be a 2D or 3D matrix.');
 end
 
 if nargin < 3 || isempty(num_permutations)
