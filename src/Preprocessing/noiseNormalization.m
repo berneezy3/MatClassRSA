@@ -18,7 +18,6 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(eeg_data, labels)
 %   sigma_inv - Inverse of the square root of the covariance matrix.
 
     assert(isvector(labels), '`labels` is not a vector.');
-    assert(size(eeg_data, 3) == length(labels), 'Length of labels vector does not match number of trials in the data.');
     assert(length(size(eeg_data)) == 3 || length(size(eeg_data)) == 2, 'Invalid number of dimensions in the data.');
 
     % If 2D matrix entered, dimensions are: trial x time
@@ -30,10 +29,12 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(eeg_data, labels)
         dim1 = size(eeg_data,1);
         dim2 = size(eeg_data,2);
         eeg_data = reshape(eeg_data, [1,dim1,dim2]);
-    else
+    elseif ndims(eeg_data)
         num_dim = 3;
     end
-
+    assert(size(eeg_data, 3) == length(labels), 'Length of labels vector does not match number of trials in the data.');
+    keyboard
+    
     num_components = size(eeg_data, 1);
     num_timepoints = size(eeg_data, 2);
     total_trials = size(eeg_data, 3);
