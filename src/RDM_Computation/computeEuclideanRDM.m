@@ -28,7 +28,7 @@ function [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutati
 %                     x num_images x num_permutations
 
     num_dim = length(size(eeg_data));
-    assert(num_dim == 2);
+    assert(num_dim == 2, 'Data of this size are not supported. See documentation.');
     assert(size(eeg_data,2) == length(labels), 'Mismatch in number of trials in data and length of labels vector.');
     
     if nargin < 3 || isempty(num_permutations)

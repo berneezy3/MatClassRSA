@@ -10,9 +10,9 @@ function [reliabilities] = computeSampleSizeReliability(eeg_data, labels, timepo
 % aggregated data as input into this function.
 %
 % Input Args:
-%   eeg_data - data matrix. The eeg_data is a 3D matrix, it is assumed to
-%              be of size nSpace x nTime x nTrial. If eeg_data is a 2D
-%              matrix, it is assumed to be of size nTrial x nFeature.
+%   eeg_data - data matrix. The eeg_data is a 3D matrix, it is assumed to be of size 
+%              nSpace x nTime x nTrial. If eeg_data is a 2D matrix, it is assumed to be of 
+%              size nTrial x nFeature.
 %   labels - labels vector. The length of labels should be nTrial.
 %   timepoint_idx - Time (feature) sample index to use in computing reliability for a subset
 %                   of trials.
@@ -29,13 +29,15 @@ function [reliabilities] = computeSampleSizeReliability(eeg_data, labels, timepo
 %                                       This is useful if we wanted to compute the variance
 %                                       of the reliability across random draws of the trials.
 %                                       If not entered, this defaults to 10.
-%   rand_seed (optional) - random seed for reproducibility. If not entered,
-%                          this defaults to 'shuffle'.
+%   rand_seed (optional) - random seed for reproducibility. If not entered, this defaults to 
+%                          'shuffle'.
 %
 % Output Args:
 %   reliabilities - If input matrix was 3D, dimensions are: num_trial_permutations x 
 %                   length(num_trials_per_half) x nSpace. If input matrix was 2D, dimensions 
 %                   are: num_trial_permutations x length(num_trials_per_half)
+
+assert(length(size(eeg_data)) == 3 || length(size(eeg_data)) == 2, 'Invalid number of dimensions in the data.');
 
 % If 3D matrix entered, dimensions are: space x time x trial
 % We will permute so that it becomes space x trial x time
