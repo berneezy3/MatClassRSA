@@ -32,8 +32,13 @@ function [xTickVec yTickVec] = getTickCoord()
 % POSSIBILITY OF SUCH DAMAGE.
 
     % use vertical align to plot images/text easily
-    yCoords = yticks;
-    xCoords = xticks;
+%{  only works on 2016b and after
+    %yCoords = yticks;
+    %xCoords = xticks;
+%}
+    yCoords = get(gca, 'ytick');
+    xCoords = get(gca, 'xtick');
+    
     yl = ylim;
     yOffset = (yl(2) - yl(1))/25;
     xl = xlim;
