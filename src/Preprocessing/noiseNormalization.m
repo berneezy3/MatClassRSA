@@ -33,7 +33,6 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(eeg_data, labels)
         num_dim = 3;
     end
     assert(size(eeg_data, 3) == length(labels), 'Length of labels vector does not match number of trials in the data.');
-    keyboard
     
     num_components = size(eeg_data, 1);
     num_timepoints = size(eeg_data, 2);
