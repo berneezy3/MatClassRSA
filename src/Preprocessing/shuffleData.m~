@@ -18,14 +18,12 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
 %   Y: Labels vector. The length of Y must correspond to the length of the
 %       trial dimension of X.
 %   P: Participant vector (optional). The length of P must correspond to
-%       the length of Y and the length of the trial dimension of X. If P
+%       the length of Y and the length of the trial dimension of X. If P 
 %       is not entered, the function will return NaN as randomized P. P can
 %       be a numeric vector, string array, or cell array.
 %   r: Random number generator (rng) specification. If not entered, defaults to
-%       'shuffle'. It can be a single acceptable input (e.g., 1, 'default')
-%       or, for dual-argument specifications, either a 2-element cell
-%       array (e.g., {'shuffle', 'twister'}) or string array (e.g.,
-%       ["shuffle", "twister"].
+%       'shuffle'. It can be a single character array input (eg as elements of
+%       a cell array (e.g., r = {'shuffle', 'twister'}) for dual-argument specifications.
 %
 % OUTPUT ARGS:
 %   randX: Data matrix with its trials reordered (same size as X).
@@ -62,7 +60,7 @@ randIdx = randperm(nTrial);
 
 % Randomize data and labels
 if ndims(X) == 3, randX = X(:, :, randIdx);
-else, randX = X(randIdx,:);
+else randX = X(randIdx,:); 
 end
 randY = Y(randIdx);
 
