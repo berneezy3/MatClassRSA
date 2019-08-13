@@ -38,12 +38,11 @@ function [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, vara
 % Example:
 %
 
-% TODO: more testing
-
 % This software is licensed under the 3-Clause BSD License (New BSD License),
 % as follows:
 % -------------------------------------------------------------------------
-% Copyright 2017 Bernard C. Wang, Anthony M. Norcia, and Blair Kaneshiro
+% Copyright 2019 Bernard C. Wang, Nathan C. L. Kong, Anthony M. Norcia, 
+% and Blair Kaneshiro
 %
 % Redistribution and use in source and binary forms, with or without
 % modification, are permitted provided that the following conditions are met:
