@@ -1,14 +1,15 @@
-function [RDM, params] = computeCM_RDM(CM, varargin)
+function [RDM, params] = computeClassificationRDM(CM, varargin)
 %-------------------------------------------------------------------
-% [RDM, params] = computeCM_RDM(CM, varargin)
+% [RDM, params] = computeClassification_RDM(CM, varargin)
 % ------------------------------------------------
 % Blair - January 31, 2017, revised July 2019
 %
-% [RDM, params] = computeCM_RDM(CM, varargin) converts confusion matrix CM 
-% into distance matrix RDM.
+% [RDM, params] = computeClassification_RDM(CM, varargin) converts
+% classifier output (multicategory confusion matrix or matrix of pairwise
+% accuracies) into an RDM.
 %
 % Required inputs:
-% - CM: A square confusion matrix
+% - CM: A square confusion matrix or matrix of pairwise accuracies.
 %
 % Optional inputs:
 % - distpower: Integer > 0 (if using 'power' or 'log' distance)

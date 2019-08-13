@@ -1,7 +1,7 @@
-function [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutations)
-%-------------------------------------------------------------------
+function [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutations, rand_seed)
+%----------------------------------------------------------------------------------
 %  [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutations)
-%-------------------------------------------------------------------
+%----------------------------------------------------------------------------------
 %
 % Returns pairwise dissimilarities with respect to cross-validated Pearson
 % correlation.  A possible data input to this function would have dimensions:
@@ -17,35 +17,37 @@ function [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutation
 %   labels - labels vector. The size of labels should be (nTrials*nImages)
 %   num_permutations (optional) - how many permutations to randomly select
 %                                 train and test data matrix.
+%   rand_seed (optional) - random seed for reproducibility. If not entered,
+%                          this defaults to 'shuffle'.
+%
 % Output Args:
-%   dissimilarities - the dissimilarity matrix, dimensions: num_permutations
-%                     x num_images x num_images
-
-% TODO: ^ Can we change the dimensions of the output so it's nLabels x
-% nLabels x nPermutations?
-
-% TODO: Make compatible with non-continuous labels in labels vector.
-
-% TODO: Add optional input of rngSeed (see reliability functions). Default
-% to 'shuffle'. Add info to docstring.
-rngSeed('shuffle');
+%   dissimilarities - the dissimilarity matrix, dimensions: num_images
+%                     x num_images x num_permutations
 
     num_dim = length(size(eeg_data));
-    assert(num_dim == 2);
-    assert(size(eeg_data,2) == length(labels));
+    assert(num_dim == 2, 'Data of this size are not supported. See documentation.');
+    assert(size(eeg_data,2) == length(labels), 'Mismatch in number of trials in data and length of labels vector.');
     
     if nargin < 3 || isempty(num_permutations)
         num_permutations = 10;
     end
+
+    % Set random seed
+    if nargin < 4 || isempty(rand_seed)
+        rand_seed = 'shuffle';
+    end
+    rng(rand_seed);
     
-    num_images = max(labels);
+    unique_labels = unique(labels);
+    num_images = length(unique_labels);
     num_features = size(eeg_data,1);
     dissimilarities = zeros(num_permutations, num_images, num_images);
     for p=1:num_permutations
 
         for i=1:num_images
+            curr_label_i = unique_labels(i);
 
-            img1_data = squeeze(eeg_data(:,labels==i));
+            img1_data = squeeze(eeg_data(:,labels==curr_label_i));
             % Split trials into two partitions (i.e. train/test)
             img1_trials = size(img1_data, 2);
             % Randomly permute data
@@ -58,8 +60,9 @@ rngSeed('shuffle');
             img1_test = squeeze(mean(img1_test,2));
 
             for j=i+1:num_images
+                curr_label_j = unique_labels(j);
     
-                img2_data = squeeze(eeg_data(:,labels==j));
+                img2_data = squeeze(eeg_data(:,labels==curr_label_j));
                 % Split trials into two partitions (i.e. train/test)
                 img2_trials = size(img2_data, 2);
                 % Randomly permute data
@@ -78,6 +81,10 @@ rngSeed('shuffle');
             end % second image
         end % first image
     end % permutations
+
+    %  Permute so that the dimensions are: nLabels x nLabels x nPerms
+    dissimilarities = permute(dissimilarities, [2,3,1]);
+
 end % function
 
 
