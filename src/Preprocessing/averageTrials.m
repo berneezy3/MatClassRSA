@@ -1,23 +1,37 @@
 function [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
-% [averagedX, averagedY] = averageTrials(X, Y, groupSize, varargin)
+% [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
-% Bernard Wang - April. 30, 2017
+% Bernard Wang - April 30, 2017
+% Revised by Blair Kaneshiro - August 2019
 %
-% [avgX, avgY] = averageTrials(X, Y, groupSize) average trials for training
-% data matrix X and corresponding label vector Y
-% Input Args:
-%       X - training data matrix (2D or 3D)
-%       Y - labels vector (length should match trials dimension of X)
-%       P - optional participants vector (should be same length as Y)
+% [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, varargin) 
+% average trials for training data matrix X, labels vector Y, and,
+% optionally, participants vector P. If the user wishes to shuffle the
+% ordering of data prior to averaging (while preserving labeling of data
+% observations), they should call the shuffleData function prior to calling
+% this function.
+%
+% Required inputs:
+%       X - training data matrix. Can be either a 2D (trial x feature) or
+%           3D (space x time x trial) matrix.
+%       Y - labels vector. Length should match the length of the trials
+%           dimension of X.
 %       groupSize - number of trials you wish each group to average
-%       handleRemainder (optional) - method to handle remainder trials.
+%
+% Optional inputs: 
+%       P - optional participants vector. Must be the same length as Y.
+%           Can be numeric or a string array. If not entered or is empty, 
+%           a vector of zeros (same size as Y) will be returned.
+% 
+% Optional name-value inputs: 
+%       'handleRemainder' - method to handle remainder trials.
 %           For example if you have 21 rows with label 1, and set averaging
 %           group size to 5, you would have 4 groups (20/5), and 1 remainder
-%           row with label 1.
+%           row with label 1. If not specified, defaults to 'discard'.
 %           --- options ---
 %               'discard'
-%                   disregard the remaining data.
+%                   disregard the remaining data (default).
 %               'newGroup'
 %                   Creates a new averaged row with the remainder trials,
 %                   despite the rows not fulfilling the group size.
@@ -27,13 +41,33 @@ function [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, vara
 %               'distribute'
 %                   Distributes the remaining data to the different groups
 %                   of the same label.
+%       'endShuffle' - whether to shuffle the data after averaging. This
+%           shuffling process preserves the mapping of data to
+%           corresponding labels and participants. This step is recommended 
+%           as the main function loops through participants (if input) and 
+%           stimulus labels during computation of averages, so this step
+%           redistributes observations from each stimulus category (e.g.,
+%           as input to cross-validated classification). If not specified,
+%           defaults to 1.
+%           --- options ---
+%               0, 'false': Do not perform end shuffling
+%               1, 'true': Perform end shuffling (default)
+%       'rngType' - specify random number generator (rng) if end shuffling
+%           is being performed. If not entered, defaults to 'shuffle'. This
+%           input can be a single acceptable input (e.g., 1, 'default')
+%           or, for dual-argument specifications, either a 2-element cell
+%           array (e.g., {'shuffle', 'twister'}) or string array (e.g.,
+%           ["shuffle", "twister"].
+%           --- options ---
+%               Non-negative integer, 'shuffle', or 'default'.
+%               {seed, generator} or [seed, generator]
 %
 % Output Args:
 %       averagedX - the data matrix after trial averaging. Will match the
-%           shape (2D or 3D) of the input data matrix
-%       averagedY - the label vector for the trials in averagedX
+%           shape (2D or 3D) of the input data matrix.
+%       averagedY - the label vector for the trials in averagedX.
 %       averagedP - the participants vector corresponding to trials in
-%           averagedY
+%           averagedY.
 %
 % Example:
 %
@@ -91,12 +125,15 @@ defaultHandleRemainder = 'discard';
 validHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
 checkHandleRemainder = @(x) any(validatestring(x, validHandleRemainder));
 defaultEndShuffle = 1;
+defaultRngType = 'shuffle'; 
 if verLessThan('matlab', '8.2')
     addParamValue(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder);
     addParamValue(ip, 'endShuffle', defaultEndShuffle);
+    addParamValue(ip, 'rngType', defaultRngType);
 else
     addParameter(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder);
     addParameter(ip, 'endShuffle', defaultEndShuffle);
+    addParameter(ip, 'rngType', defaultRngType);
 end
 
 parse(ip, X, Y, groupSize, varargin{:});
@@ -105,8 +142,10 @@ parse(ip, X, Y, groupSize, varargin{:});
 % end parse inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Assign P based on input parser
-if ~exist('P'), P = ip.Results.P; end
+% Assign P based on input parser or convert to zeros if empty input
+if isempty(ip.Results.P), P = zeros(size(Y));
+else, P = ip.Results.P;
+end
 
 % THROW ERROR if length of P does not equal length of Y
 assert(length(P) == length(Y), ...
@@ -115,7 +154,7 @@ assert(length(P) == length(Y), ...
 % THROW ERROR if X has more than 3 dimensions.
 if length(size(X)) > 3
     error('Input data matrix may have no more than 3 dimensions.')
-    % If X is entered in 3D form, flag it and convert to 2D.
+% If X is entered in 3D form, flag it and convert to 2D.
 elseif length(size(X)) == 3
     xTransform = 1;
     [~,trialTime,~] = size(X);
@@ -173,7 +212,7 @@ for pp = 1:nP % Iterate through the participants
     % label
     for i=1:length(k)
         assert(nnz(Y==str2num(k{i})) >= groupSize, ...
-            'label %s has less trials than specified group size', k{i});
+            'Label %s has fewer trials than specified group size.', k{i});
     end
     
     % create dictionary to store labels and their corresponding number of
@@ -284,6 +323,19 @@ end
 
 % Shuffle all the data if requested
 if ip.Results.endShuffle
+    %%%% Set the random number generator %%%%
+    thisRng = ip.Results.rngType;
+    if length(thisRng) == 2, rng(thisRng{1}, thisRng{2});
+    elseif ischar(thisRng) || length(thisRng) == 1, rng(thisRng);
+    else, error('Rng specification should be a single value or cell/string array of length 2.');
+    end
+    % Display a message stating what type of rng we are using.
+    try, disp(['Shuffling averaged data using rng=' mat2str(thisRng) '.']);
+    catch, disp(['Shuffling averaged data using rng={''' thisRng{1} ''', ''' thisRng{2} '''}.' ]);
+    end
+    %%%% End set random number generator %%%%
+    
+    % Do the randomization
     randIdx = randperm(length(averagedY));
     averagedX = averagedX(randIdx,:);
     averagedY = averagedY(randIdx);
