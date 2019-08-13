@@ -73,7 +73,7 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
 if nargin < 4 || isempty(r), rng('shuffle');
 elseif length(r) == 2, rng(r{1}, r{2});
 elseif ischar(r) || length(r) == 1, rng(r);
-else, error('Input r should be a single value or cell array of length 2.');
+else, error('Input r should be a single value or cell/string array of length 2.');
 end
 
 % Make sure data matrix X is a 2D or 3D matrix
