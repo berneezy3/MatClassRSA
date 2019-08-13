@@ -14,17 +14,23 @@ ec_rdms = ec_rdms.euclidean_rdms;
 ec_rdms = squeeze(mean(ec_rdms, 1));
 ec_rdms = squeeze(mean(ec_rdms, 3));
 
+% Change as needed
+iconpath = '/Users/babylab/NKong/MatClassRSA/MatClassRSA/UnitTests/stimuli/';
+
 %% Plot RDM with basic options -- font and colormap
+% Looks good
+
 plotMatrix(ec_rdms, 'colormap', 'jet', 'FontSize', 5, 'textRotation', 45);
 
 %% Plot RDM without any entry labels and colour bar
+% Looks good
+
 plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'colorbar', 1);
 
 %% Plot RDM with icons
-% "Undefined function or variable 'yticks' error"
+% Looks good. Need to check icon ordering!
 
-iconpath = 'stimuli/';
-plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 40);
+plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 10);
 
 %% Plot RDM with custom axis labels
 % Unexpected behaviour. I provide 72 labels, but the xticklabels do not

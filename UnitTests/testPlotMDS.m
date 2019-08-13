@@ -19,26 +19,40 @@ for i=1:size(ec_rdms, 1)
     ec_rdms(i,i) = 0.0;
 end
 
+iconpath = '/Users/babylab/NKong/MatClassRSA/MatClassRSA/UnitTests/stimuli/';
+
 %% Plot MDS with no options
 % Looks good -- we get a human face cluster
 
+figure;
 plotMDS(ec_rdms, 'dimensions', [1 2]);
 
 %% Plot MDS with >2 dimensions (should break)
 % Looks good, breaks as expected
 
-plotMDS(ec_rdms, 'dimensions', [1 2 3]);
+figure;
+plotMDS(ec_rdms, 'dimensions', [1 2 3]);    
 
 %% Plot MDS with icons
-% Displaying icon doesn't seem to work.
+% Looks good. Need to check icon ordering!
 
 nodecolors = cell(1,size(ec_rdms,1));
 for i=1:size(ec_rdms,1)
     nodecolors{i} = 'b';
 end
-iconpath = 'stimuli/';
+figure;
 plotMDS(ec_rdms, 'iconPath', iconpath, 'nodeColors', nodecolors);
 
+%% Plot MDS with nodeLabels
+% Looks good. Need to check label ordering!
+
+figure;
+nodelabels = cell(1,72);
+labels = {'cat', 'dog', 'fish', 'rabbit', 'turtle', 'snail'};
+for i=1:72
+    nodelabels{i} = labels{randi(length(labels))};
+end
+plotMDS(ec_rdms, 'nodeLabels', nodelabels);
 
 
 
