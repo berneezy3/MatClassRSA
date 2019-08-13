@@ -210,7 +210,7 @@ function img = plotMDS(RDM, varargin)
         
         for i = 1:length(labels)
             hold on;
-            [thisIcon map] = fullfile(ip.Results.iconPath, labels{i});
+            [thisIcon map] = imread(fullfile(ip.Results.iconPath, labels{i}));
             [height width] = size(thisIcon);
             %convert thisIcon to scale 0~1
             if ~isempty(map)
