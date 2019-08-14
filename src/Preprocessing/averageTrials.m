@@ -57,7 +57,8 @@ function [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, vara
 %           input can be a single acceptable input (e.g., 1, 'default')
 %           or, for dual-argument specifications, either a 2-element cell
 %           array (e.g., {'shuffle', 'twister'}) or string array (e.g.,
-%           ["shuffle", "twister"].
+%           ["shuffle", "twister"]. If a single input (seed) is provided, 
+%           the function will set the generator to 'twister'.
 %           --- options ---
 %               Non-negative integer, 'shuffle', or 'default'.
 %               {seed, generator} or [seed, generator]
