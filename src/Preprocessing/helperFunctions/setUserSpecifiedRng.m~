@@ -17,27 +17,52 @@ function setUserSpecifiedRng(r)
 %
 % If r is empty, NaN, or not specified, the function will print a warning
 % and set rng to {'shuffle', 'twister'}.
+% Handle edge case of single input as string array
+if nargin >= 1 && length(r)==1 && isstring(r), r = r{1}; end
 
-if nargin < 1 || isempty(r) || (if length(r)==1 && isnan(r); end)
+if nargin < 1 || isempty(r) || (length(r) == 1 && isnan(r))
     warning('Nothing input to ''setUserSpecifiedRng'' function. Setting rng=(''shuffle'', ''twister'').');
     rng('shuffle', 'twister');
     return
 end
 
 rng('default'); % making sure the generator is 'twister'
-
 if length(r) == 2
-    rng(r{1}, r{2});
-    % Display a message stating what type of rng we are using.
-    try
-        disp(['Shuffling averaged data using rng=' mat2str(r) '.']);
-    catch
-        disp(['Shuffling averaged data using rng={''' r{1} ''', ''' r{2} '''}.' ]);
+    if isequal(r{1}, 'default')
+        error('Dual-input rng specification is not allowed with ''default''.')
     end
+    
+    if isstring(r) % Assignment and formatting for string array input
+        if isnumeric(str2double(r{1})) && ~isnan(str2double(r{1}))
+            rng(str2double(r{1}), r{2});
+            disp('debug 1')
+            disp(['Shuffling averaged data using rng=(' num2str(str2double(r{1})) ',' r{2} ').']);
+        else
+            rng(r{1}, r{2});
+            disp('debug 2')
+            disp(['Shuffling averaged data using rng={''' r{1} ''', ''' r{2} '''}.' ]);
+        end
+    elseif iscell(r) % Assignment and formatting for cell array input
+        rng(r{1}, r{2});
+        disp('debug 3')
+        disp(['Shuffling averaged data using rng={''' r{1} ''', ''' r{2} '''}.' ]);
+    else
+        error('Two-argument rng specifications should be as string array or cell array.');
+    end
+    
 elseif ischar(r) || length(r) == 1
-    rng(r);
-    disp(['Shuffling averaged data using rng=(' mat2str(r) ', ''twister'').']);
+    try
+        rng(r);
+        disp('debug 4')
+        if isequal(r, 'default')
+            disp(['Shuffling averaged data using rng=(' mat2str(r) ').']);
+        else
+            disp(['Single-input rng specification: Setting generator to ''twister''.'])
+            disp(['Shuffling averaged data using rng=(' mat2str(r) ', ''twister'').']);
+        end
+    catch
+        error('Rng specification should be a single value or cell/string array of length 2.');
+    end
 else
     error('Rng specification should be a single value or cell/string array of length 2.');
 end
-rng

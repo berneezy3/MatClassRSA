@@ -18,31 +18,68 @@ function setUserSpecifiedRng(r)
 % If r is empty, NaN, or not specified, the function will print a warning
 % and set rng to {'shuffle', 'twister'}.
 
+% If the input is a struct containing settings of a random number
+% generator, assign it and return.
+if nargin == 1 && isstruct(r)
+    try
+        rng(r);
+        disp('Assigning user-specified rng struct:')
+        rng
+        return;
+    catch
+        error('If rng specification input is a struct, it must be a struct containing the settings of a random number generator.');
+    end
+end
+
+% Handle edge case of single input (incorrectly) as string array.
+if nargin >= 1 && length(r)==1 && isstring(r), r = r{1}; end
+
+% If input is not specified, default to ('shuffle', 'twister').
 if nargin < 1 || isempty(r) || (length(r) == 1 && isnan(r))
     warning('Nothing input to ''setUserSpecifiedRng'' function. Setting rng=(''shuffle'', ''twister'').');
     rng('shuffle', 'twister');
     return
 end
 
-rng('default'); % making sure the generator is 'twister'
+% Revert to 'default' since 'twister' is the default generator
+rng('default');
 
 if length(r) == 2
-    if isnumeric(str2double(r{1}))
-        rng(str2double(r{1}), r{2});
-    else
-        rng(r{1}, r{2});
+    if isequal(r{1}, 'default')
+        error('Dual-input rng specification is not allowed with ''default''.')
     end
     
-    % Display a message stating what type of rng we are using.
-    try
-        disp(['Shuffling averaged data using rng=' mat2str(r) '.']);
-    catch
+    if isstring(r) % Assignment and formatting for string array input
+        if isnumeric(str2double(r{1})) && ~isnan(str2double(r{1}))
+            rng(str2double(r{1}), r{2});
+            disp('debug 1')
+            disp(['Shuffling averaged data using rng=(' num2str(str2double(r{1})) ',' r{2} ').']);
+        else
+            rng(r{1}, r{2});
+            disp('debug 2')
+            disp(['Shuffling averaged data using rng={''' r{1} ''', ''' r{2} '''}.' ]);
+        end
+    elseif iscell(r) % Assignment and formatting for cell array input
+        rng(r{1}, r{2});
+        disp('debug 3')
         disp(['Shuffling averaged data using rng={''' r{1} ''', ''' r{2} '''}.' ]);
+    else
+        error('Two-argument rng specifications should be as string array or cell array.');
     end
+    
 elseif ischar(r) || length(r) == 1
-    rng(r);
-    disp(['Shuffling averaged data using rng=(' mat2str(r) ', ''twister'').']);
+    try
+        rng(r);
+        disp('debug 4')
+        if isequal(r, 'default')
+            disp(['Shuffling averaged data using rng=(' mat2str(r) ').']);
+        else
+            disp('Single-input rng specification: Setting generator to ''twister''.')
+            disp(['Shuffling averaged data using rng=(' mat2str(r) ', ''twister'').']);
+        end
+    catch
+        error('Rng specification should be a single value, or cell/string array of length 2, containing acceptable rng parameters.');
+    end
 else
-    error('Rng specification should be a single value or cell/string array of length 2.');
+    error('Rng specification should be a single value, or cell/string array of length 2, containing acceptable rng parameters.');
 end
-rng
