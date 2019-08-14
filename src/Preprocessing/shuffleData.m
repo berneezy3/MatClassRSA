@@ -25,7 +25,8 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
 %       'shuffle'. It can be a single acceptable input (e.g., 1, 'default')
 %       or, for dual-argument specifications, either a 2-element cell
 %       array (e.g., {'shuffle', 'twister'}) or string array (e.g.,
-%       ["shuffle", "twister"].
+%       ["shuffle", "twister"]. If a single input (seed) is provided, the
+%       function will set the generator to 'twister'.
 %
 % OUTPUT ARGS:
 %   randX: Data matrix with its trials reordered (same size as X).
