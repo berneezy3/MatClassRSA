@@ -3,8 +3,7 @@
 % Blair - August 14, 2019
 
 clear all; close all; clc
-% Be sure to run the helper functions at the bottom before running other
-% cells
+% Be sure to run the helper functions at the bottom
 
 %% Case: Empty input: Should set to rng=('shuffle', 'twister')
 clc
@@ -21,27 +20,6 @@ clc
 disp('--------- Empty input ---------')
 testUserSpecifiedRng([])
 
-%% Case: Single RNG STRUCT input (acceptable)
-
-clc
-disp('--------- Single input (numeric) ---------')
-rng(12345, 'combRecursive')
-disp('--- User-specified rng to be entered: ---')
-thisRng = rng
-disp('-----------------------------------------')
-testUserSpecifiedRng(thisRng)
-clear thisRng
-
-%% Case: Single RNG STRUCT input (unacceptable)
-
-clc
-disp('--------- Single input (numeric) ---------')
-thisBadStruct.X = 1:10;
-thisBadStruct.Y = 11:20;
-thisBadStruct
-testUserSpecifiedRng(thisBadStruct)
-clear thisBadStruct
-
 %% Case: Single input (acceptable)
 
 clc
@@ -56,7 +34,7 @@ testUserSpecifiedRng('shuffle')
 %%
 clc
 disp('--------- Single input (default) ---------')
-testUserSpecifiedRng('default')
+testUserSpecifiedRng('shuffle')
 
 %%
 clc
@@ -147,12 +125,7 @@ testUserSpecifiedRng({0, 'blah'})
 %%
 clc
 disp('--------- Dual input (bad second argument) ---------')
-testUserSpecifiedRng({'shuffle', 'blah'})
-
-%%
-clc
-disp('--------- Dual input (entering number as string) ---------')
-testUserSpecifiedRng({'20', 'philox'})
+testUserSpecifiedRng(["shuffle", "blah"])
 
 %% Helper functions
 function testUserSpecifiedRng(input)
