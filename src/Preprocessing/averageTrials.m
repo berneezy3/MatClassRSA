@@ -53,15 +53,16 @@ function [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, vara
 %               0, 'false': Do not perform end shuffling
 %               1, 'true': Perform end shuffling (default)
 %       'rngType' - specify random number generator (rng) if end shuffling
-%           is being performed. If not entered, defaults to 'shuffle'. This
-%           input can be a single acceptable input (e.g., 1, 'default')
-%           or, for dual-argument specifications, either a 2-element cell
-%           array (e.g., {'shuffle', 'twister'}) or string array (e.g.,
-%           ["shuffle", "twister"]. If a single input (seed) is provided, 
-%           the function will set the generator to 'twister'.
+%           is being performed. If not entered, rng will be assigned as
+%           ('shuffle', 'twister').
 %           --- options ---
-%               Non-negative integer, 'shuffle', or 'default'.
-%               {seed, generator} or [seed, generator]
+%               Single acceptable rng specification input (e.g., 1, 
+%                   'default', 'shuffle'); in these cases, the generator 
+%                   will be set to 'twister'.
+%               Dual-argument specifications as either a 2-element cell 
+%                   array (e.g., {'shuffle', 'twister'}) or string array 
+%                   (e.g., ["shuffle", "twister"].
+%               rng struct as assigned by r = rng.
 %
 % Output Args:
 %       averagedX - the data matrix after trial averaging. Will match the
@@ -126,7 +127,7 @@ defaultHandleRemainder = 'discard';
 validHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
 checkHandleRemainder = @(x) any(validatestring(x, validHandleRemainder));
 defaultEndShuffle = 1;
-defaultRngType = 'shuffle'; 
+defaultRngType = {'shuffle', 'twister'}; 
 if verLessThan('matlab', '8.2')
     addParamValue(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder);
     addParamValue(ip, 'endShuffle', defaultEndShuffle);
@@ -324,16 +325,10 @@ end
 
 % Shuffle all the data if requested
 if ip.Results.endShuffle
+    disp('averageTrials: Shuffling order of averaged data.')
     %%%% Set the random number generator %%%%
     thisRng = ip.Results.rngType;
-    if length(thisRng) == 2, rng(thisRng{1}, thisRng{2});
-    elseif ischar(thisRng) || length(thisRng) == 1, rng(thisRng);
-    else, error('Rng specification should be a single value or cell/string array of length 2.');
-    end
-    % Display a message stating what type of rng we are using.
-    try, disp(['Shuffling averaged data using rng=' mat2str(thisRng) '.']);
-    catch, disp(['Shuffling averaged data using rng={''' thisRng{1} ''', ''' thisRng{2} '''}.' ]);
-    end
+    setUserSpecifiedRng(thisRng);
     %%%% End set random number generator %%%%
     
     % Do the randomization
