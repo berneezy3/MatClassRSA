@@ -52,16 +52,16 @@ if length(r) == 2
     if isstring(r) % Assignment and formatting for string array input
         if isnumeric(str2double(r{1})) && ~isnan(str2double(r{1}))
             rng(str2double(r{1}), r{2});
-            disp('debug 1')
+%             disp('debug 1')
             disp(['Shuffling averaged data using rng=(' num2str(str2double(r{1})) ',' r{2} ').']);
         else
             rng(r{1}, r{2});
-            disp('debug 2')
+%             disp('debug 2')
             disp(['Shuffling averaged data using rng=(''' r{1} ''', ''' r{2} ''').' ]);
         end
     elseif iscell(r) % Assignment and formatting for cell array input
         rng(r{1}, r{2});
-        disp('debug 3')
+%         disp('debug 3')
         if isnumeric(r{1})
             disp(['Shuffling averaged data using rng=(' num2str(r{1}) ', ''' r{2} ''').' ]);
         else
@@ -74,7 +74,7 @@ if length(r) == 2
 elseif ischar(r) || length(r) == 1
     try
         rng(r);
-        disp('debug 4')
+%         disp('debug 4')
         if isequal(r, 'default')
             disp(['Shuffling averaged data using rng=(' mat2str(r) ').']);
         else
