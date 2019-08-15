@@ -27,7 +27,7 @@ if nargin == 1 && isstruct(r)
         rng
         return;
     catch
-        error('If rng specification input is a struct, it must be a struct containing the settings of a random number generator.');
+        error('If user-specified rng input is a struct, it must be an rng specification.');
     end
 end
 
@@ -57,12 +57,16 @@ if length(r) == 2
         else
             rng(r{1}, r{2});
             disp('debug 2')
-            disp(['Shuffling averaged data using rng={''' r{1} ''', ''' r{2} '''}.' ]);
+            disp(['Shuffling averaged data using rng=(''' r{1} ''', ''' r{2} ''').' ]);
         end
     elseif iscell(r) % Assignment and formatting for cell array input
         rng(r{1}, r{2});
         disp('debug 3')
-        disp(['Shuffling averaged data using rng={''' r{1} ''', ''' r{2} '''}.' ]);
+        if isnumeric(r{1})
+            disp(['Shuffling averaged data using rng=(' num2str(r{1}) ', ''' r{2} ''').' ]);
+        else
+            disp(['Shuffling averaged data using rng=(''' r{1} ''', ''' r{2} ''').' ]);
+        end
     else
         error('Two-argument rng specifications should be as string array or cell array.');
     end
