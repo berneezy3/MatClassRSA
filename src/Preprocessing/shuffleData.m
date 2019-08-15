@@ -1,7 +1,7 @@
 function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
 %-------------------------------------------------------------------
 % [randX, randY, randP, randIdx] = shuffleData(X,Y,P,r)
-% -------------------------------------------------------------
+%-------------------------------------------------------------------
 % Bernard Wang - April 30, 2017
 % Revised by Blair Kaneshiro, August 2019
 %
