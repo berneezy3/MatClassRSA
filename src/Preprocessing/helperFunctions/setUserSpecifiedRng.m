@@ -36,7 +36,7 @@ if nargin >= 1 && length(r)==1 && isstring(r), r = r{1}; end
 
 % If input is not specified, default to ('shuffle', 'twister').
 if nargin < 1 || isempty(r) || (length(r) == 1 && isnan(r))
-    warning('Nothing input to ''setUserSpecifiedRng'' function. Setting rng=(''shuffle'', ''twister'').');
+    warning('Random number generator not specified. Setting rng=(''shuffle'', ''twister'').');
     rng('shuffle', 'twister');
     return
 end
