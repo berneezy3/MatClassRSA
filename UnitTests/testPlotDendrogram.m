@@ -2,7 +2,7 @@
 % ---------------------
 % Nathan - Aug 13, 2019
 %
-% Testing expected successful and unsuccessful calls to plotMST.m.
+% Testing expected successful and unsuccessful calls to plotDendrogram.m.
 
 clear all; close all; clc
 
