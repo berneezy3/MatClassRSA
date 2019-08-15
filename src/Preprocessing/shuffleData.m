@@ -3,7 +3,7 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
 % [randX, randY, randP, randIdx] = shuffleData(X,Y,P,r)
 % -------------------------------------------------------------
 % Bernard Wang - April 30, 2017
-% Revised by Blair Kaneshiro, August 9 2019
+% Revised by Blair Kaneshiro, August 2019
 %
 % This function randomizes, in tandem, ordering of trials in data matrix X,
 % labels vector Y, and, optionally, participants vector P. Therefore,
