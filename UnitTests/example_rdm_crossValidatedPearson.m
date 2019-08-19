@@ -80,8 +80,8 @@ avg_rdm = squeeze(mean(avg_rdm, 1));
 figure;
 plotMatrix(avg_rdm, 'matrixLabels', 0, 'colorMap', 'jet')
 
-%% Compute 72 class RDMs without random seed and with noise normalization
-fprintf('Compute 72 class RDMs without random seed and with noise normalization.\n');
+%% Compute 6 class RDMs without random seed and with noise normalization
+fprintf('Compute 6 class RDMs without random seed and with noise normalization.\n');
 time_resolved_rdms = zeros(n_time, n_label6, n_label6, n_perm);
 
 % Noise normalize the data
