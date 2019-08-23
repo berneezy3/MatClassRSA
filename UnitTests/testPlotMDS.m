@@ -19,7 +19,7 @@ for i=1:size(ec_rdms, 1)
     ec_rdms(i,i) = 0.0;
 end
 
-iconpath = '/Users/babylab/NKong/MatClassRSA/MatClassRSA/UnitTests/stimuli/';
+iconpath = './stimuli/';
 
 %% Plot MDS with no options
 % Looks good -- we get a human face cluster
@@ -49,10 +49,14 @@ plotMDS(ec_rdms, 'iconPath', iconpath, 'nodeColors', nodecolors);
 figure;
 nodelabels = cell(1,72);
 labels = {'cat', 'dog', 'fish', 'rabbit', 'turtle', 'snail'};
+nodecolors = cell(1,size(ec_rdms,1));
+for i=1:size(ec_rdms,1)
+    nodecolors{i} = 'cyan';
+end
 for i=1:72
     nodelabels{i} = labels{randi(length(labels))};
 end
-plotMDS(ec_rdms, 'nodeLabels', nodelabels);
+plotMDS(ec_rdms, 'nodeLabels', nodelabels, 'nodeColors', nodecolors);
 
 
 

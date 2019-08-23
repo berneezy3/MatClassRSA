@@ -4,7 +4,7 @@
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
-% The main function for sorting user inputs and calling classifier.
+% The main function for cross-validating data.  
 %
 % INPUT ARGS (REQUIRED)
 %   X - training data
@@ -32,21 +32,6 @@
 %        --options--
 %       'shuffle' (default)
 %       'default' (replicate results)
-%   'shuffleData' - determine whether to shuffle the order of trials within 
-%       training data matrix X (order of labels in the labels vector Y will be
-%       shuffled in the same order)
-%       --options--
-%       1 - shuffle (default)
-%       0 - do not shuffle
-%   'averageTrials' - how to compute averaging of trials in X to increase accuracy
-%       --options--
-%       (negative value) - don't average
-%       (postitive int) - number of integers to average over
-%   'averageTrialsHandleRemainder' - Handle remainder trials (if any) from 
-%       trial averaging 
-%       --options--
-%
-%
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
@@ -68,22 +53,6 @@
 %       'SVM' (default)
 %       'LDA' 
 %       'RF' 
-%   pValueMethod - Choose the method to compute p-value.  
-%       --options--
-%       'permuteTestLabels' 
-%           with the 'permuteTestLabels' option, we perform k -fold cross 
-%           validation only once. In each fold, the classification model is   
-%           trained on the intact data and labels, but predictions are made
-%           on test observations whose labels have been shuffled. The prediction   
-%           is repeated N times, with the test labels re-randomized for each   
-%           attempt. The 'permuteTestLabels' option is the second fastest method,   
-%           since it requires training the k models only once, but a total of
-%           k * N  prediction operations are performed. So that there are enough
-%           test labels to randomize in each fold, here we also recommend having   
-%           at least 100 observations total, and no more than 10 cross-validation folds.
-%   'permutations' - Choose number of permutations to perform.  Default
-%           1000.  This option will only work if 'permuteFullModel' or 
-%           'permuteTestLabels' is chosen.
 %   'kernel' - Choose the kernel for decision function for SVM.  This input will do
 %       nothing if a classifier other than SVM is selected.
 %        --options--
@@ -93,7 +62,7 @@
 %       'sigmoid' 
 %   'numTrees' - Choose the number of decision trees to grow.  Default is
 %   128.
-%   'minLeafSize' - Choose the inimum number of observations per tree leaf.
+%   'minLeafSize' - Choose the minimum number of observations per tree leaf.
 %   Default is 1,
 %   'verbose' - Include the distribution of accuracies from the
 %   permutations test and also a concatednated struct of all the models
@@ -109,13 +78,8 @@
 %   pVal - p-value of the classification
 %       classifierInfo - A struct summarizing the options selected for the
 %       classification.
-%   accDist (verbose output) - The distribution of N accuracies
-%       calculated from the permutation test in vector form.  This argument will be 
-%       NaN is 'binomcdf' is passed into parameter 'pValueMethod', or else,
-%       it will return the accuracy vector.
 %   modelsConcat (verbose output) - Struct containing the N models used during cross
 %   validation.
-%
 
 % TODO:
 %   Check when the folds = 1, what we should do 
@@ -205,6 +169,7 @@
     %Optional positional inputs
     %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
     if verLessThan('matlab', '8.2')
+%{        
         addParamValue(ip, 'shuffleData', defaultShuffleData, ...
             @(x) (x==1 || x==0));
         addParamValue(ip, 'averageTrials', defaultAverageTrials, ...
@@ -212,6 +177,10 @@
         addParamValue(ip, 'averageTrialsHandleRemainder', ...
             defaultAverageTrialsHandleRemainder, ...
             @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
+
+%}
+        addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParamValue(ip, 'PCA', defaultPCA);
         addParamValue(ip, 'PCAinFold', defaultPCAinFold);
         addParamValue(ip, 'nFolds', defaultNFolds);
@@ -229,16 +198,14 @@
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
-        addParamValue(ip, 'featureUse', defaultFeatureUse, ...
-            @(x) (assert(isvector(x))));
         addParamValue(ip, 'verbose', defaultVerbose, ...
             @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
-        addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
     else
+
+%{        
         addParameter(ip, 'shuffleData', defaultShuffleData, ...
             @(x)  (x==1 || x==0));
         addParameter(ip, 'averageTrials', defaultAverageTrials, ...
@@ -246,6 +213,9 @@
         addParameter(ip, 'averageTrialsHandleRemainder', ...
             defaultAverageTrialsHandleRemainder, ...
             @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
+%}
+        addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParameter(ip, 'PCA', defaultPCA);
         addParameter(ip, 'PCAinFold', defaultPCAinFold);
         addParameter(ip, 'nFolds', defaultNFolds);
@@ -265,20 +235,20 @@
             @(x) (assert(isvector(x))));
         addParameter(ip, 'verbose', defaultVerbose, ...
             @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
-        addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
+
         addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
         addParameter(ip, 'numTrees', 128);
         addParameter(ip, 'minLeafSize', 1);
+        addParameter(ip, 'pairwise', 0);
     end
     
     %Optional name-value pairs
     %NOTE: Should use addParameter for R2013b and later.
     
-%     if (find(isnan(X(:))))
-%         error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
-%     end
-% 
+    if (find(isnan(X(:))))
+        error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
+    end
+
 
     % Parse
     try 
@@ -288,9 +258,12 @@
     end
         
     % Initilize info struct
-    classifierInfo = struct('shuffleData', ip.Results.shuffleData, ...
-                        'averageTrials', ip.Results.averageTrials, ...
-                        'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder, ...
+    classifierInfo = struct(   ...
+%{
+%                         'shuffleData', ip.Results.shuffleData, ...
+%                         'averageTrials', ip.Results.averageTrials, ...
+%                         'averageTrialsHandleRemainder', ip.Results.averageTrialsHandleRemainder, ...
+%}
                         'PCA', ip.Results.PCA, ...
                         'PCAinFold', ip.Results.PCAinFold, ...
                         'nFolds', ip.Results.nFolds, ...
@@ -319,16 +292,18 @@
     
     %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
     % moving forward.
-
+    
+    
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
     rng(ip.Results.randomSeed);
-    
+
+%{
     % DATA SHUFFLING (doing)
     % Default 1
     if (ip.Results.shuffleData)
         disp('Shuffling Trials');
-        [X, Y, shuffledInd] = shuffleData(X, Y);
+        [X, Y, ~, shuffledInd] = shuffleData(X, Y);
     else
         classifierInfo.shuffleData = 'off';
         Y = Y';maybe
@@ -342,6 +317,7 @@
         classifierInfo.averageTrials = 'on';
         [r c] = size(X);
      end
+%}
      
     % PCA 
     % Split Data into fold (w/ or w/o PCA)
@@ -351,7 +327,7 @@
     cvDataObj = cvData(X,Y, partition, ip.Results.PCA, ip.Results.PCAinFold);
     toc
     
-    
+%{    
     %PERMUTATION TEST (assigning)
     [r c] = size(X);
     tic
@@ -369,12 +345,12 @@
             accDist = NaN;
     end
     toc
+%}
     
     % CROSS VALIDATION
     disp('Cross Validating')
     
     % Just partition, as shuffling (or not) was handled in previous step
-    % if nFolds == 1
     if ip.Results.nFolds == 1
         % Special case of fitting model with no test set (argh)
         error('nFolds must be a integer value greater than 1');
@@ -390,32 +366,136 @@
         predictionsConcat = [];
         labelsConcat = [];
         modelsConcat = {1, ip.Results.nFolds};
-
-    for i = 1:ip.Results.nFolds
-        
-        disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
-        
-        trainX = cvDataObj.trainXall{i};
-        trainY = cvDataObj.trainYall{i};
-        testX = cvDataObj.testXall{i};
-        testY = cvDataObj.testYall{i};
-
-        mdl = fitModel(trainX, trainY, ip);
-        
-        predictions = modelPredict(testX, mdl);
-        
-        labelsConcat = [labelsConcat testY];
-        predictionsConcat = [predictionsConcat predictions];
-        modelsConcat{i} = mdl; 
-        
-        
-        %predictcedY(partition.test(i)) = predictions;
+       
+    numClasses = length(unique(Y));
+    numDecBounds = nchoosek(numClasses ,2);
+    pairwiseMat3D = zeros(2,2, numDecBounds);
+    pairwiseCell = cell(numClasses);
+    for i = 1:numClasses
+         spairwiseCell{i,i} = NaN;
     end
-    CM = confusionmat(labelsConcat, predictionsConcat);
-    accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
     
+    CM = NaN;
+   
+    % PAIRWISE LDA/RF
+    if (ip.Results.pairwise) && ...
+        (strcmp(ip.Results.classifier, 'LDA') || ...
+        strcmp(ip.Results.classifier, 'RF'))
     
+        decision_values = NaN(length(Y), numDecBounds);
+        
+    
+        for cat1 = 1:numClasses-1
+            for cat2 = (cat1+1):numClasses
+                disp([num2str(cat1) ' vs ' num2str(cat2)]) 
+                currUse = ismember(Y, [cat1 cat2]);
+      
+                tempX = X(currUse, :);
+                tempY = Y(currUse);
+                tempStruct = struct();
+                % Store the accuracy in the accMatrix
+                [~, tempC] = evalc([' classifyCrossValidate(tempX, tempY, ' ...
+                    ' ''classifier'', ip.Results.classifier, ''randomSeed'',' ...
+                    ' ''default'', ''PCAinFold'', ip.Results.PCAinFold) ' ]);
+                tempStruct.CM = tempC.CM;
+                
+                tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
+                tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
+                tempStruct.dataPoints = find(currUse);
+                tempStruct.predictions = tempC.predY;
+                
+                %tempStruct.decision
+                pairwiseCell{cat1, cat2} = tempStruct;
+                pairwiseCell{cat2, cat1} = tempStruct;
+                
+                decInd = classTuple2Nchoose2Ind([cat1 cat2], numClasses);
+                if (tempC.predY)
+                    
+                end
+                
+            end
+        end
+        
+
+        C = pairwiseCell;
+        disp('classifyCrossValidate() Finished!')
+        return
+    % END PAIRWISE LDA/RF
+    % START PAIRWISE SVM 
+    elseif  (ip.Results.pairwise) && ... 
+            strcmp(ip.Results.classifier, 'SVM')
+        
+        for i = 1:ip.Results.nFolds
+
+            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+
+            trainX = cvDataObj.trainXall{i};
+            trainY = cvDataObj.trainYall{i};
+            testX = cvDataObj.testXall{i};
+            testY = cvDataObj.testYall{i};
+
+            mdl = fitModel(trainX, trainY, ip);
+
+            [predictions decision_values] = modelPredict(testX, mdl);
+
+            labelsConcat = [labelsConcat testY];
+            predictionsConcat = [predictionsConcat predictions];
+            modelsConcat{i} = mdl; 
+
+            if (ip.Results.pairwise) 
+                if strcmp(ip.Results.classifier, 'SVM')
+                    [pairwiseAccuracies, pairwiseMat3D] = ...
+                        decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell );
+                end
+            end
+        end
+        
+        %convert pairwiseMat3D to diagonal matrix
+        
+        C = pairwiseCell
+        
+        
+    % END PAIRWISE SVM
+    else % NORMAL SVM/LDA/RF
+        
+        for i = 1:ip.Results.nFolds
+
+            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+
+            trainX = cvDataObj.trainXall{i};
+            trainY = cvDataObj.trainYall{i};
+            testX = cvDataObj.testXall{i};
+            testY = cvDataObj.testYall{i};
+
+            mdl = fitModel(trainX, trainY, ip);
+
+            [predictions decision_values] = modelPredict(testX, mdl);
+
+            labelsConcat = [labelsConcat testY];
+            predictionsConcat = [predictionsConcat predictions];
+            modelsConcat{i} = mdl; 
+
+            % PAIRWISE SVM
+            if (ip.Results.pairwise) 
+                if strcmp(ip.Results.classifier, 'SVM')
+                    [pairwiseAccuracies, pairwiseMat3D] = ...
+                        decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell );
+                end
+            % END PAIRWISE SVM
+            else
+                CM = confusionmat(labelsConcat, predictionsConcat);
+                accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
+            end
+        end
+        % END NORMAL SVM/LDA/RF
+        
+    end
+
+    predY = predictionsConcat;
+
+%{
     % unshuffle predictions vector to return to user IF shuffle is on
+    predY = NaN;
     if (ip.Results.shuffleData == 1)
         predY = NaN(1, r);
         for i = 1:r
@@ -424,19 +504,16 @@
     else
         predY = predictionsConcat;
     end
+%}
     
+%{    
     switch ip.Results.pValueMethod
-%          case 'binomcdf'
-%             pVal = pbinom(Y, ip.Results.nFolds, accuracy);
-%         case 'permuteTestLabels'
-%             pVal = permTestPVal(accuracy, accDist);
         case 'permuteFullModel'
             pVal = permTestPVal(accuracy, accDist);
         otherwise
-            pVal = '';
-            
+            pVal = '';    
     end
-    
+%}
     if ip.Results.verbose
         varargout{1} = accDist;
         varargout{2} = modelsConcat;
@@ -447,7 +524,6 @@
     C.CM = CM;
     C.accuracy = accuracy;
     C.predY = predY;
-    C.pVal = pVal;
     C.classifierInfo = classifierInfo;
     disp('classifyCrossValidate() Finished!')
     toc

@@ -215,6 +215,7 @@ function plt = MSTplothelper(sourceNodes, destNodes, weights, nodeLabels, ip)
         edgeCoord = NaN(edgeR, edgeC);
         format shortg;
         T.Edges.Weight = round(T.Edges.Weight, 3);
+
         for i = 1:edgeR
             startNode = findNodeWithLabel(nl, T.Edges.EndNodes(i,1));
             endNode = findNodeWithLabel(nl, T.Edges.EndNodes(i,2));
@@ -318,7 +319,9 @@ function MSTcolorhelper(nodeLabels, nodeColors, graph)
 end
 
 function y = findNodeWithLabel(labels, label)
-    y = find(not(cellfun('isempty',strfind(labels,label))));
+    %y = find(not(cellfun('isempty',strfind(labels,label))));
+    y = find(strcmp(labels,label));
+    assert(length(y) == 1 , 'labels need to be unique')
 end
 
 function y = findAngle(x1, y1, x2, y2)

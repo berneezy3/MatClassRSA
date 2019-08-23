@@ -10,10 +10,10 @@ cd(currDir)
 % M = classifyTrain( X_2D(1:end-10, :) , categoryLabels(1:end-10), 'classify', 'LDA', 'PCA', 0);
 
 %%
-% M = classifyTrain(X_2D(1:end-10, :), categoryLabels(1:end-10), 'classify', 'LDA', 'PCA', .5);
+M = classifyTrain(X_2D(1:end-10, :), categoryLabels(1:end-10), 'classify', 'LDA', 'PCA', .5);
 
 %%
-% C = classifyPredict( M, X_2D(end-10:end, :) );
+C = classifyPredict( M, X_2D(end-10:end, :) );
 
 %% TEST FOR AVERAGE TRIALS IN classifyTrain and classifyPredict!
 
@@ -52,7 +52,7 @@ cd(currDir)
 %%
 
 [C] = classifyCrossValidate(X_3D, ...
-    categoryLabels, 'randomSeed', 'default', "PCAinFold", 0);
+    categoryLabels, 'randomSeed', 'default', 'PCAinFold', 0, 'pairwise', 1);
 %%
 
 
