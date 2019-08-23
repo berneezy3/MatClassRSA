@@ -33,23 +33,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %        --options--
 %       'shuffle' (default)
 %       'default' (replicate results)
-%   'shuffleData' - determine whether to shuffle the order of trials within 
-%       training data matrix X (order of labels in the labels vector Y will be
-%       shuffled in the same order)
-%       --options--
-%       1 - shuffle (default)
-%       0 - do not shuffle
-%   'averageTrials' - how to compute averaging of trials in X to increase accuracy
-%       --options--
-%       (negative value) - don't average
-%       (postitive int) - number of integers to average over
-%   'averageTrialsHandleRemainder' - Handle remainder trials (if any) from 
-%       trial averaging 
-%       --options--
-%       'discard'
-%       'newGroup'
-%       'append'
-%       'distribute'
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
@@ -146,7 +129,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %   defaultDiscrimType = 'linear';
     defaultNumTrees = 64;
     defaultMinLeafSize = 1;
-
 
     %Specify expected values
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};

@@ -20,7 +20,7 @@ for i=1:size(ec_rdms, 1)
 end
 
 % Change as needed
-iconpath = '/Users/babylab/NKong/MatClassRSA/MatClassRSA/UnitTests/stimuli/';
+iconpath = './stimuli/';
 
 %% Plot MST with no options
 % Looks good
@@ -51,9 +51,13 @@ figure;
 nodelabels = cell(1,72);
 labels = {'cat', 'dog', 'fish', 'rabbit', 'turtle', 'snail'};
 for i=1:72
-    nodelabels{i} = labels{randi(length(labels))};
+    nodelabels{i} = [labels{randi(length(labels))}  num2str(i)];
 end
-plotMST(ec_rdms, 'nodeLabels', nodelabels);
+nodecolors = cell(1,size(ec_rdms,1));
+for i=1:size(ec_rdms,1)
+    nodecolors{i} = 'cyan';
+end
+plotMST(ec_rdms, 'nodeLabels', nodelabels, 'nodeColors', nodecolors);
 
 
 
