@@ -27,24 +27,24 @@ function [pairwiseAccuracies, pairwiseCMs, pairwiseCell] = decValues2PairwiseAcc
 
                 % convert 2 class Ind to n choose 2 index
                 tallyCoordZ = classTuple2Nchoose2Ind(thisBoundClasses, length(labels));
-                this2x2cm = pairwiseCell(thisBoundClasses(1), thisBoundClasses(2));
+                this2x2cm = pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.CM;
                 this2x2cm(tallyCoordX, tallyCoordY) =  this2x2cm(tallyCoordX, tallyCoordY) + 1;
-                pairwiseCell(thisBoundClasses(1), thisBoundClasses(2)) = this2x2cm;
-                pairwiseCell(thisBoundClasses(1), thisBoundClasses(2)) = ...
-                    pairwiseCell(thisBoundClasses(2), thisBoundClasses(1))
+                pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.CM = this2x2cm;
+                pairwiseCell{thisBoundClasses(2), thisBoundClasses(1)}.CM = this2x2cm;
+
                 
                 % increment
                 pairwiseCMs(tallyCoordX, tallyCoordY, tallyCoordZ) = ...
                      pairwiseCMs(tallyCoordX, tallyCoordY, tallyCoordZ) + 1;
                 
-                disp('%%')
-                disp(['current actual Label: ' num2str(actualLabel)]);
-                disp(['current predicted Label: ' num2str(predictedLabel())]);
-                disp(['current classifier splits classes: ' num2str(thisBoundClasses)]);
-                disp(['decision boundary loop k: ' num2str(k)]);
-                disp(['index of the 2-by-2 pairwise mat dervied from dec boundary: ' num2str(tallyCoordZ)]);
-                disp(['2-by-2 pairwise mat after increment: ' ]);
-                disp(num2str(pairwiseCMs(:,:, tallyCoordZ)));
+%                 disp('%%')
+%                 disp(['current actual Label: ' num2str(actualLabel)]);
+%                 disp(['current predicted Label: ' num2str(predictedLabel())]);
+%                 disp(['current classifier splits classes: ' num2str(thisBoundClasses)]);
+%                 disp(['decision boundary loop k: ' num2str(k)]);
+%                 disp(['index of the 2-by-2 pairwise mat dervied from dec boundary: ' num2str(tallyCoordZ)]);
+%                 disp(['2-by-2 pairwise mat after increment: ' ]);
+%                 disp(num2str(pairwiseCMs(:,:, tallyCoordZ)));
 
             %elseif (secondInds(k) == actualLabel)
             end

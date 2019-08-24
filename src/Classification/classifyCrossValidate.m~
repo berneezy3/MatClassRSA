@@ -68,13 +68,9 @@
 %   permutations test and also a concatednated struct of all the models
 %
 % OUTPUT ARGS 
-%   C - output object containing all cross validation related
+%   C - C is the output object containing all cross validation related
 %   information, including confucion matrix, accuracy, prediction results
-%   etc.  The structure of C will differ depending on the value of the 
-%   input value 'pairwise', which is set to 0 by default.  If pairwise is
-%   0, then C is a struct containing values:
-%   if 'pairwise' is set to 1, then C will be a cell matrix of structs,
-%   symmetrical along the diagonal.  
+%   etc.  
 %   CM - Confusion matrix that summarizes the performance of the
 %       classification, in which rows represent actual labels and columns
 %       represent predicted labels.  Element i,j represents the number of 
@@ -409,7 +405,7 @@
                 tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
                 tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
                 tempStruct.dataPoints = find(currUse);
-                tempStruct.predY = tempC.predY;
+                tempStruct.predictions = tempC.predY;
                 
                 %tempStruct.decision
                 pairwiseCell{cat1, cat2} = tempStruct;
@@ -460,9 +456,8 @@
         %convert pairwiseMat3D to diagonal matrix
         
         C = pairwiseCell;
-        disp('classifyCrossValidate() Finished!')
-        return;
-       
+        
+        
     % END PAIRWISE SVM
     else % NORMAL SVM/LDA/RF
         
@@ -490,6 +485,8 @@
         % END NORMAL SVM/LDA/RF
         
     end
+
+    predY = predictionsConcat;
 
 %{
     % unshuffle predictions vector to return to user IF shuffle is on
@@ -519,8 +516,9 @@
         C.modelsConcat = modelsConcat;
     end
     
-
-    C.predY = predictionsConcat;
+    C.CM = CM;
+    C.accuracy = accuracy;
+    C.predY = predY;
     C.classifierInfo = classifierInfo;
     disp('classifyCrossValidate() Finished!')
     toc
