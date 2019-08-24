@@ -7,7 +7,7 @@ currDir = pwd;
 cd(inDir)
 load S6.mat
 cd(currDir)
-%
+%%
 
 M = classifyTrain( X_2D(1:floor(end/5), :) , categoryLabels(1:floor(end/5)), 'classifier', 'LDA', 'PCA', 0);
 
