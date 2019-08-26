@@ -1,0 +1,12 @@
+function y = initPairwiseCellMat(numClasses)
+
+    
+    pairwise = cell(numClasses);
+
+    for i = 1:numClasses
+         spairwiseCell{i,i} = NaN;
+    end
+
+
+
+end
