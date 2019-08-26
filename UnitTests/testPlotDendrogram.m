@@ -20,7 +20,7 @@ for i=1:size(ec_rdms, 1)
 end
 
 % Change as needed
-iconpath = '/Users/babylab/NKong/MatClassRSA/MatClassRSA/UnitTests/stimuli/';
+iconpath = './stimuli/';
 
 %% Plot dendrogram with no options
 % Issue: changing orientation does not seem to do anything.
@@ -57,7 +57,8 @@ labels = {'cat', 'dog', 'fish', 'rabbit', 'turtle', 'snail'};
 for i=1:72
     nodelabels{i} = labels{randi(length(labels))};
 end
-plotDendrogram(ec_rdms, 'nodeLabels', nodelabels);
+plotDendrogram(ec_rdms, 'nodeLabels', nodelabels, 'fontSize', 8);
+set(gca,'xTickLabelRotation', 45);
 
 
 

@@ -1,4 +1,4 @@
-function img = plotMatrix(RDM, varargin)
+function [img, fig] = plotMatrix(RDM, varargin)
 %-------------------------------------------------------------------
 % plotMatrix(matrix, varargin)
 % ------------------------------------------------
@@ -88,7 +88,7 @@ function img = plotMatrix(RDM, varargin)
     ip.addParameter('iconPath', '');
     ip.addParameter('colormap', '');
     ip.addParameter('colorbar', '');
-    ip.addParameter('matrixLabels', 1);
+    ip.addParameter('matrixLabels', 0);
     ip.addParameter('FontSize', 15, @(x) isnumeric(x));
     ip.addParameter('ticks', 5, @(x) (isnumeric(x) && x>0));
     ip.addParameter('textRotation', 0, @(x) assert(isnumeric(x), ...
@@ -96,8 +96,8 @@ function img = plotMatrix(RDM, varargin)
     ip.addParameter('iconSize', 40);
     parse(ip, RDM, varargin{:});
     
-    imagesc(RDM);
-    img = gcf;
+    img = imagesc(RDM);
+    fig = gcf;
 
     
     if ~isempty(ip.Results.colormap)
@@ -122,7 +122,8 @@ function img = plotMatrix(RDM, varargin)
         matMax = max(max(RDM));
         %truncMax = fix(matMax * 10^2)/10^2;
         inc = (matMax - matMin)/(ip.Results.ticks-1);
-        c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.ticks-2] * inc + matMin  matMax]));
+        %c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.ticks-2] * inc + matMin  matMax]));
+        c.Ticks = linspace(matMin, matMax, 4);
         c.FontWeight = 'bold';
     end
     
@@ -140,7 +141,7 @@ function img = plotMatrix(RDM, varargin)
     else %no labels specified
 %         set(gca,'xtick',[]);
 %         set(gca,'ytick',[]);
-        return;
+        %return;
     end
     
     
@@ -151,7 +152,9 @@ function img = plotMatrix(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if isempty(ip.Results.axisColors) && isempty(ip.Results.axisLabels) ...
             && isempty(ip.Results.iconPath)
-    disp('CASE: DEAFULT LABELS')
+        disp('CASE: DEFAULT LABELS')
+        set(gca,'xTickLabelRotation', ip.Results.textRotation);
+        set(gca,'yTickLabelRotation', ip.Results.textRotation);
 
    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -200,8 +203,13 @@ function img = plotMatrix(RDM, varargin)
         set(gca,'xTickLabel', '');
         set(gca,'yTickLabel', '');
 
+        set(gca,'xTick', 1:length(ip.Results.axisLabels));
+        set(gca,'yTick', 1:length(ip.Results.axisLabels));
+
         set(gca,'xTickLabel', ip.Results.axisLabels, 'FontSize', ip.Results.FontSize);
         set(gca,'yTickLabel', ip.Results.axisLabels, 'FontSize', ip.Results.FontSize);
+        set(gca,'xTickLabelRotation', ip.Results.textRotation);
+        set(gca,'yTickLabelRotation', ip.Results.textRotation);
 
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
@@ -246,7 +254,7 @@ function img = plotMatrix(RDM, varargin)
             if height > width
                 thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
             else
-                thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
+                thisIcon = imresize(thisIcon, .5);
             end
 
             % Add 3rd(color) dimension if there is none
@@ -320,6 +328,7 @@ function img = plotMatrix(RDM, varargin)
             axis(lblAx,'off');
 
         end
+    end
         
     
     

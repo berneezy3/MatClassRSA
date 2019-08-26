@@ -1,4 +1,4 @@
-function predictions = modelPredict(X, mdl)
+function [predictions decision_values] = modelPredict(X, mdl)
 %-------------------------------------------------------------------
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
@@ -32,13 +32,15 @@ function predictions = modelPredict(X, mdl)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
     classifier = class(mdl);
+    decision_values = NaN;
     
     switch classifier
-        case 'struct'  
+        case 'struct'  %libsvm
             [r c] = size(X);
             Y = zeros(r,1);
             [predictions, acc, decision_values] = svmpredict(Y, X, mdl, ['-q']);
             
+            % handle ties
             for i=1:r
                 [indOfWinner tallies tie] = SVMhandleties(decision_values(i, :), mdl.Label');
                 if (tie ~= 0)
@@ -47,6 +49,12 @@ function predictions = modelPredict(X, mdl)
                     predictions(i) = mdl.Label(indOfWinner);
                 end
             end
+            
+            % implement pairwise
+            %pairwiseMat = cell(1, length(decision_values));
+            pairwiseMat = zeros(2,2, length(decision_values));
+            
+            
             predictions = predictions';
         case 'ClassificationECOC' % multi-class SVM
             [r c] = size(X);

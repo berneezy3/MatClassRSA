@@ -44,7 +44,7 @@ function [winnerIndex, tallies, tieFlag] = SVMhandleties(dec_vals, labels)
     % if there is a tie, we randomly select the class
     if length(winnerIndex) > 1
         tieFlag = 1;
-        disp(['Ties between classes: ' num2str(labels([winnerIndex])) '.  Randomizing winner']);
+        %disp(['Ties between classes: ' num2str(labels([winnerIndex])) '.  Randomizing winner']);
         randIdx=randperm(length(winnerIndex),1);
         winnerIndex = winnerIndex(randIdx);
     end
