@@ -1,7 +1,7 @@
 function [winnerIndex, tallies, tieFlag] = SVMhandleties(dec_vals, labels)
 
     if length(dec_vals) ~= length(labels) * (length(labels) -1) /2
-        error("Number of decision values must equal nLabels * (nLabels-1) /m2");
+        error('Number of decision values must equal nLabels * (nLabels-1) /m2');
     end
 
     tallies = zeros(1, length(labels));
