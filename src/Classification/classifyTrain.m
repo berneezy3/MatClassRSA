@@ -59,12 +59,21 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %   128.
 %   'minLeafSize' - Choose the inimum number of observations per tree leaf.
 %   Default is 1,
+%   'pairwise' - When set to 1, this creates models for pairwise 
+%   classification (one vs. one).  This returns n choose 2 number of 
+%   decision boundaries.  When using classify predict, this returns a
+%   prediction for each decision boundary.  Set to 0 to turn off.  This 
+%   parameter does not need to be passed to classifyPredict().  
 %
 % OUTPUT ARGS 
 %   M - Classification output produced by classifyTrain.  This contains two 
 %   structs: M.mdl, which contains the model, and M.classifierInfo. which 
 %   contains classifier related info.  Must pass M to classifyPredict() to
 %   predict new data.
+%   
+%   When 'pairwise' is set to 1, then this may return a length n choose 2
+%   cell array of structs, each one containing a classification struct M
+%   foreach decision boundary.  
 
 % TODO:
 %   
@@ -204,7 +213,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     checkInputData(X, Y);
     
     % this function contains input checking functions
-    [X, Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X,Y, ...
+    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
                                                     ip.Results.spaceUse, ...
                                                     ip.Results.timeUse, ...
                                                     ip.Results.featureUse);
@@ -218,17 +227,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
     rng(ip.Results.randomSeed);
-%{
-    % DATA SHUFFLING (doing)
-    % Default 1
-    if (ip.Results.shuffleData)
-        disp('Shuffling Trials...');
-        [X, Y, shuffledInd] = shuffleData(X, Y);
-    else
-        classifierInfo.shuffleData = 'off';
-        Y = Y';
-    end
-%}
     
     trainData = X;
     % PCA
@@ -246,9 +244,10 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     % Train Model
     disp('Training Model...')
     
-    if (ip.Results.pairwise == 0)
+    if (ip.Results.pairwise == 0) || ...
+       ((ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM'))
         
-        mdl = fitModel(trainData, Y', ip);
+        mdl = fitModel(trainData, Y, ip);
 
         % create classifier info struct
         classifierInfo = struct('PCA', ip.Results.PCA, ...
@@ -259,20 +258,65 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
                             'randomSeed', ip.Results.randomSeed,...
                             'PCA_V', V,...
                             'PCA_nPC', nPC,...
-                            'trainingDataSize', dataSize);
+                            'trainingDataSize', dataSize, ...
+                            'numClasses', length(unique(Y)), ...
+                            'pairwise', ip.Results.pairwise);
 
         M.mdl = mdl;
         M.classifierInfo = classifierInfo;
     
-    elseif (ip.Results.pairwise == 0)
+%     elseif (ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM')
+%         
+%         numClasses = length(unique(Y));
+%         numDecBounds = nchoosek(numClasses, 2);
+%         M = zeros(1, numDecBounds);
+% 
+%         mdl = fitModel(trainData, Y', ip);
+        
+
+        
+    elseif (ip.Results.pairwise == 1) && ...
+            (strcmp(ip.Results.classifier, 'LDA') || strcmp(ip.Results.classifier, 'RF'))
         
         numClasses = length(unique(Y));
         numDecBounds = nchoosek(numClasses, 2);
-        M = zeros(1, numDecBounds);
-        for i = 1:numDecBounds
-            
-            
-            
+        M = cell(1, numDecBounds);
+
+        mdl = fitModel(trainData, Y', ip);
+        j = 0;
+        for cat1 = 1:numClasses-1
+            for cat2 = (cat1+1):numClasses
+                j = j+1;
+                disp([num2str(cat1) ' vs ' num2str(cat2)]) 
+                currUse = ismember(Y, [cat1 cat2]);
+      
+                tempX = X(currUse, :);
+                tempY = Y(currUse);
+                tempStruct = struct();
+                % Store the accuracy in the accMatrix
+                [~, tempM] = evalc([' classifyTrain(tempX, tempY, ' ...
+                    ' ''classifier'', ip.Results.classifier, ''randomSeed'',' ...
+                    ' ''default'' ) ' ]);
+                tempStruct.CM = tempM;
+                tempM.classifierInfo.numClasses = numClasses;
+                
+                M{j} = tempM;
+                
+%                 tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
+%                 tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
+%                 tempStruct.dataPoints = find(currUse);
+%                 tempStruct.predY = tempM.predY;
+%                 
+%                 %tempStruct.decision
+%                 pairwiseCell{cat1, cat2} = tempStruct;
+%                 pairwiseCell{cat2, cat1} = tempStruct;
+                
+%                 decInd = classTuple2Nchoose2Ind([cat1 cat2], numClasses);
+%                 if (tempC.predY)
+%                     
+%                 end
+                
+            end
         end
         
     end
