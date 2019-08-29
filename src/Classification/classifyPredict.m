@@ -68,7 +68,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-    disp("Running classifyPredict()")
+    disp('Running classifyPredict()')
 
     ip = inputParser;
     ip.CaseSensitive = false;
@@ -113,6 +113,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     
     % Check input data
     testDataSize = size(X);
+    
 %     if ( ~isnan(ip.Results.actualLabels) ) 
 %         checkInputData(X, ip.Results.actualLabels);
 %     end
@@ -126,7 +127,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
             "Dimension 2 (time) of test data does not match Dimension 2 of training data used in classifyTrain().");
 
     else
-        error("Data formatting issue.  Check input data matrix to classifyTrain and to classifyPredict");
+        error('Data formatting issue.  Check input data matrix to classifyTrain and to classifyPredict');
     end
     
     % Subset data 
