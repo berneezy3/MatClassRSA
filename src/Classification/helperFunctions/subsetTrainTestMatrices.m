@@ -1,4 +1,4 @@
-function [W,Z,nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, Y, spaceUse, timeUse, featureUse)
+function [W, nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, spaceUse, timeUse, featureUse)
 
     if ndims(X) == 3
         [nSpace, nFeature, nTrials] = size(X);
@@ -103,6 +103,5 @@ function [W,Z,nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, Y, spaceUs
         end  
     end
     W = X_subset;
-    Z = Y;
 
 end

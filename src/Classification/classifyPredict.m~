@@ -24,15 +24,10 @@ function [P, varargout] = classifyPredict(M, X, varargin)
 %   few fields: 
 %       - P.predY, or the predicted labels for the input data
 %       - P.accuracy, accuracy of predicted values compared to actual labels
-%       - P.CM matrix of predicted values vs actual labels
+%       - P.confusion matrix of predicted values vs actual labels
 %       - P.predictionInfo contians classification related information
 %   Note that unless optional input 'actualLabels' is set, P.accuracy and 
 %   P.confusionMatrix will be NaN.
-%
-%   If 'pairwise' was turned on for classifyTrain(), then the output will
-%   be a cell array of prediction outputs P.  P will additionally include
-%   the field "classBoundary", which contains length 2 array of which
-%   classes are being comapred in the said boundary.  
 
 % TODO:
 %   Check when the folds = 1, what we should do 
@@ -73,7 +68,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     ip = inputParser;
     ip.CaseSensitive = false;
     
-    addRequired(ip, 'M');
+    addRequired(ip, 'M', @isstruct);
     addRequired(ip, 'X', @is2Dor3DMatrix);
     
     defaultY = NaN;
@@ -85,7 +80,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
 
     %addParameter(ip, 'actualLabels', defaultY, @(x) assert( isvector(x) ));
-    %addOptional(ip, 'actualLabels', defaultY, @isvector);
+    addOptional(ip, 'actualLabels', defaultY, @isvector);
 
     %{
 	addParameter(ip, 'averageTrials', defaultAverageTrials, ...
@@ -96,8 +91,6 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     %}
     addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
         || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-%     addParameter(ip, 'pairwise', defaultRandomSeed,  @(x) isequal('default', x)...
-%         || isequal('shuffle', x) || (isnumeric(x) && x > 0));
     
     try 
         parse(ip, M, X, varargin{:});
@@ -105,24 +98,18 @@ function [P, varargout] = classifyPredict(M, X, varargin)
         disp(getReport(ME,'extended'));
     end
     
-    tempM = M;
-    if length(M) > 1 && iscell(M)
-        tempM = M{1};
-    end
-    pairwise = tempM.classifierInfo.pairwise;
-    
     % Check input data
     testDataSize = size(X);
-%     if ( ~isnan(ip.Results.actualLabels) ) 
-%         checkInputData(X, ip.Results.actualLabels);
-%     end
-    if (length(tempM.classifierInfo.trainingDataSize == 2))
-        assert(tempM.classifierInfo.trainingDataSize(2) == testDataSize(2), ...
+    if ( ~isnan(ip.Results.actualLabels) ) 
+        checkInputData(X, ip.Results.actualLabels);
+    end
+    if (length(M.classifierInfo.trainingDataSize == 2))
+        assert(M.classifierInfo.trainingDataSize(2) == testDataSize(2), ...
             "Dimension 2 (feature) of test data does not match Dimension 2 of training data used in classifyTrain().");
-    elseif (length(tempM.classifierInfo.trainingDataSize == 3))
-        assert(tempM.classifierInfo.trainingDataSize(1) == testDataSize(1), ...
+    elseif (length(M.classifierInfo.trainingDataSize == 3))
+        assert(M.classifierInfo.trainingDataSize(1) == testDataSize(1), ...
             "Dimension 1 (space) of test data does not match Dimension 1 of training data used in classifyTrain().");
-        assert(tempM.classifierInfo.trainingDataSize(2) == testDataSize(2), ...
+        assert(M.classifierInfo.trainingDataSize(2) == testDataSize(2), ...
             "Dimension 2 (time) of test data does not match Dimension 2 of training data used in classifyTrain().");
 
     else
@@ -130,10 +117,11 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     end
     
     % Subset data 
-    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
-                                                tempM.classifierInfo.spaceUse, ...
-                                                tempM.classifierInfo.timeUse, ...
-                                                tempM.classifierInfo.featureUse);
+    [X, Y, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+                                                ip.Results.actualLabels, ...
+                                                M.classifierInfo.spaceUse, ...
+                                                M.classifierInfo.timeUse, ...
+                                                M.classifierInfo.featureUse);
                                      
     
     % SET RANDOM SEED
@@ -143,9 +131,9 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     
     % If PCA was turned on for training, we will select principal
     % compoenents for prediciton as well
-    if (tempM.classifierInfo.PCA > 0) 
-        testData = X*tempM.classifierInfo.PCA_V;
-        testData = testData(:,1:tempM.classifierInfo.PCA_nPC);
+    if (M.classifierInfo.PCA > 0) 
+        testData = X*M.classifierInfo.PCA_V;
+        testData = testData(:,1:M.classifierInfo.PCA_nPC);
     else
         testData = X;
     end
@@ -157,26 +145,25 @@ function [P, varargout] = classifyPredict(M, X, varargin)
         classifier = M.classifierInfo.classifier;
     end
     
-    P = struct();
+    P = NaN;
     
     % Predict Labels for Test Data
     disp('Predicting Model...')
         
-    if (length(M) == 1) && ...
-       (strcmp(classifier, 'LDA') || strcmp(classifier, 'RF'))
+    if (length(M) == 1) 
         
         P.predY = modelPredict(testData, M.mdl);
     
         % Get Accuracy and confusion matrix
-%         if ( ~isnan(ip.Results.actualLabels) )
-%             P.accuracy = computeAccuracy(P.predY, Y); 
-%             P.CM = confusionmat(Y, P.predY);
-%         else
-%             P.accuracy = NaN; 
-%             P.CM = NaN;
-%         end
+        if ( ~isnan(ip.Results.actualLabels) )
+            P.accuracy = computeAccuracy(P.predY, Y); 
+            P.CM = confusionmat(Y, P.predY);
+        else
+            P.accuracy = NaN; 
+            P.CM = NaN;
+        end
 
-        predictionInfo = struct(...
+        predictionInfo = struct('actualLabels', ip.Results.actualLabels, ...    
                         'PCA', 1, ...
                         'PCA_V', M.classifierInfo.PCA_V, ...
                         'PCA_nPC', M.classifierInfo.PCA_nPC, ...
@@ -190,63 +177,24 @@ function [P, varargout] = classifyPredict(M, X, varargin)
         disp('Prediction Finished')
         disp('classifyPredict() Finished!')
         
-    elseif (pairwise == 1 ) && strcmp(classifier, 'SVM')
+    elseif (length(M) > 1) && strcmp(classifier, 'SVM')
         
         numClasses = M.classifierInfo.numClasses;
         numDecBounds = nchoosek(numClasses, 2);
         pairwiseCell = initPairwiseCellMat(numClasses);
         pairwiseMat3D = zeros(2,2, numDecBounds);
-        decMatchups = nchoosek(1:numClasses, 2);
         
-        [predictions decision_values] = modelPredict(testData, M.mdl);           
+        [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
+            decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
         
-%         [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
-%             decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
-        [r c] = size(decision_values);
-        allPredictions = zeros(size(decision_values));
-        for i = 1:r
-            for j = 1:c
-                decSign = sign(decision_values(i, j));
-                if decSign > 0
-                    allPredictions(i, j) = decMatchups(j,1);
-                else
-                    allPredictions(i, j) = decMatchups(j,2);
-                end
-            end
-        end
-
-        % convert decision values matrix into predictions
-        P = cell(1, numDecBounds);
-        predictionInfo = struct(...
-                'PCA', 1, ...
-                'PCA_V', M.classifierInfo.PCA_V, ...
-                'PCA_nPC', M.classifierInfo.PCA_nPC, ...
-                'spaceUse', M.classifierInfo.spaceUse, ...
-                'timeUse', M.classifierInfo.timeUse, ...
-                'featureUse', M.classifierInfo.featureUse, ...
-                'randomSeed', ip.Results.randomSeed);
-            
-        for i = 1:numDecBounds
-            P{i}.predY = allPredictions(:, i);  
-            P{i}.predictionInfo = predictionInfo;
-            P{i}.predictionInfo.classBoundary = decMatchups(i,:);
-        end
-        
-        disp('Prediction Finished')
-        disp('classifyPredict() Finished!')
     
     elseif (length(M) > 1) && ...
             (strcmp(classifier, 'LDA') || strcmp(classifier, 'RF'))
         
-        numClasses = tempM.classifierInfo.numClasses;
         numDecBounds = length(M);
-        P = cell(1, numDecBounds);
-        decMatchups = nchoosek(1:numClasses, 2);
-
+        P = cell(1, numDecBOunds);
         for i = 1:numDecBounds
-            [~, P{i}] = evalc(' classifyPredict(M{i}, X) ' );
-            P{i}.predictionInfo.classBoundary = decMatchups(i, :);
-            %P{i} = classifyPredict(M{i}, X);            
+            P{i} = classifyPredict(M{i}, X);            
         end
         
     
