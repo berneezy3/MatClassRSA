@@ -45,8 +45,10 @@ M = classifyTrain( X(:, :, 1:floor(dim3/5)) , labels6(1:floor(dim3/5)), 'spaceUs
 
 %% Run classification for 2D data using SVM and RBF kernel
 % Issues:
-%   - Error using classifyTrain (line 198)
+%   - Error using classifyTrain (line 207)
 %       The value of 'kernel' is invalid. Undefined function or variable 'expectedKernels'.
+%       (I think you need to fix line 147 in classifyTrain to
+%       'expectedKernels'. Once this is fixed, PCA stops getting run.)
 %
 %   - Although {'PCA', 0} is set, PCA is still run:
 %       Conducting Principal Component Analysis...
@@ -74,6 +76,14 @@ M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), ...
         'minLeafSize', 4 ...
     );
 
+%% Run classification for 2D data using SVM and PCA with 100 components without setting kernel and pairwise
+% Runs successfully (doing PCA)
+% Issue:
+%    - Pairwise classifcation is not being run even though the parameter is
+%      set (maybe look at line 248 in classifyTrain.m? how come pairwise isn't run for SVM?)
+%    - M.mdl has a value of []
+
+M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'SVM', 'PCA', 100, 'pairwise', 1);
 
 
 

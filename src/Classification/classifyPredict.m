@@ -119,12 +119,12 @@ function [P, varargout] = classifyPredict(M, X, varargin)
 %     end
     if (length(tempM.classifierInfo.trainingDataSize == 2))
         assert(tempM.classifierInfo.trainingDataSize(2) == testDataSize(2), ...
-            "Dimension 2 (feature) of test data does not match Dimension 2 of training data used in classifyTrain().");
+            'Dimension 2 (feature) of test data does not match Dimension 2 of training data used in classifyTrain().');
     elseif (length(tempM.classifierInfo.trainingDataSize == 3))
         assert(tempM.classifierInfo.trainingDataSize(1) == testDataSize(1), ...
-            "Dimension 1 (space) of test data does not match Dimension 1 of training data used in classifyTrain().");
+            'Dimension 1 (space) of test data does not match Dimension 1 of training data used in classifyTrain().');
         assert(tempM.classifierInfo.trainingDataSize(2) == testDataSize(2), ...
-            "Dimension 2 (time) of test data does not match Dimension 2 of training data used in classifyTrain().");
+            'Dimension 2 (time) of test data does not match Dimension 2 of training data used in classifyTrain().');
 
     else
         error('Data formatting issue.  Check input data matrix to classifyTrain and to classifyPredict');
