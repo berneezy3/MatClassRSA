@@ -145,13 +145,13 @@ parse(ip, X, Y, groupSize, varargin{:});
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Flag to return row vectors if vector inputs are rows.
-rowInputY = isrow(Y);
-rowInputP = isrow(P);
+rowOutputs = isrow(Y);
 
 % Assign P based on input parser or convert to zeros if empty input
 if isempty(ip.Results.P), P = zeros(size(Y));
 else, P = ip.Results.P;
 end
+keyboard
 
 % THROW ERROR if length of P does not equal length of Y
 assert(length(P) == length(Y), ...
@@ -346,9 +346,4 @@ end
 if xTransform
     averagedX = trRows2cube(averagedX, trialTime);
 end
-
-% If the vector inputs were rows to begin with, return them as rows.
-if rowInputY, averagedY = transpose(averagedY); end
-if rowInputP, averagedP = transpose(averagedP); end
-
 end

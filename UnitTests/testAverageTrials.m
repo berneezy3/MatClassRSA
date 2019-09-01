@@ -5,8 +5,15 @@
 % Testing expected successful and unsuccessful calls to averageTrials.m.
 
 % TODO: How do you add P into the input of function call?
+%   You should be able to add it as a 4th input, before any name-value
+%   pairs
 % TODO: Not sure how to test the averaging yet.
+%   This one still needs work
 % TODO: The outputted Y vector is a column vector (input Y is row vector)
+%   The function now checks if Y and P are rows or columns (P is
+%   initialized to be the same shape as Y if it is not specified) and to
+%   return each vector in the same shape as input. Please check for each of
+%   those variables independently.
 
 clear all; close all; clc
 
