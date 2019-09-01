@@ -55,7 +55,7 @@ switch rankType
         xOut = xIn;
     case {'rank', 'r', 'percentrank', 'p'}
         if sum(unique(xIn - xIn') == 0) ~= numel(unique(xIn - xIn'))
-            warning('Input matrix is not symmetric. Ranking values on lower diagonal only.')
+            warning('Input matrix is not symmetric. Returning symmetric matrix based on lower-triangle ranks only.')
         end
         trilM = tril(ones(size(xIn)), -1);
         distV = xIn(trilM == 1);
