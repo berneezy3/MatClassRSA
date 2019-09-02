@@ -7,6 +7,7 @@
 % TODO: Add a bit more info in the docstring as to which implementation
 % described in Guggenmos is used (is it MNN (not UNN) with the epoch
 % method?)
+%
 % TODO: I get an error at line 52 if a 2D matrix is input. Does it even
 % make sense to attempt noise normalization when we have only 1 channel of
 % data, where there is no "error covariance between different sensors" to
