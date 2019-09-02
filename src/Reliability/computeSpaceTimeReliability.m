@@ -25,7 +25,7 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %   reliabilities - reliability for each electrode across time. The dimensions of
 %                   this matrix are: nSpace x nTime x nPermutations if a 3D matrix was
 %                   provided.  If a 2D matrix was provided, the dimensions of the results
-%                   are: nTime x nSpace. You would typically average across the permutations 
+%                   are: nTime x nPermutations. You would typically average across the permutations 
 %                   dimension.
 
 % If 3D matrix entered, dimensions are: space x time x trial
