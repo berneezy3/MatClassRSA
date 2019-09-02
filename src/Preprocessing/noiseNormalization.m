@@ -49,8 +49,13 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(eeg_data, labels)
         all_time_covs = nan(num_timepoints, num_components, num_components);
         for j=1:num_timepoints
             curr_label = unique_labels(i);
-%             keyboard
-            all_time_covs(j,:,:) = cov1para(squeeze(eeg_data(:,j,labels==curr_label))');
+            if num_components > 1
+                all_time_covs(j,:,:) = cov1para(squeeze(eeg_data(:,j,labels==curr_label))');
+            elseif num_components == 1
+                all_time_covs(j,:,:) = cov1para(squeeze(eeg_data(:,j,labels==curr_label)));
+            else
+                assert(0, 'Condition should not be reached.');
+            end
         end
         % Average covariances across time
         all_image_covs(i,:,:) = squeeze(mean(all_time_covs,1));
