@@ -1,12 +1,12 @@
-function [RDM, params] = computeClassificationRDM(M, varargin)
+function [RDM, params] = computeClassificationRDM(M, matrixType, varargin)
 %-------------------------------------------------------------------
-% [RDM, params] = computeClassification_RDM(M, varargin)
-% ------------------------------------------------
-% Blair - January 31, 2017, revised July 2019
+% [RDM, params] = computeClassification_RDM(M, matrixType, varargin)
+% ------------------------------------------------------------------
+% Blair - January 31, 2017, revised July-September 2019
 %
-% [RDM, params] = computeClassification_RDM(M, varargin) converts
-% classifier output (multicategory confusion matrix or matrix of pairwise
-% accuracies) into an RDM.
+% [RDM, params] = computeClassification_RDM(M, matrixType, varargin) 
+% converts classifier output (multicategory confusion matrix or matrix of 
+% pairwise accuracies) into an RDM.
 %
 % Required inputs:
 % - M: A square confusion matrix or matrix of pairwise accuracies.
@@ -14,20 +14,36 @@ function [RDM, params] = computeClassificationRDM(M, varargin)
 %   - Enter 'p', 'pair', 'pairs', or 'pairwise' if inputting a matrix of 
 %     pairwise accuracies (values between 0 and 1.0).
 %   - Enter 'm', 'multi', 'multiclass', or 'multicategory' if inputting a
-%     confusion matrix from multicategory classification.
+%     confusion matrix from multicategory classification (typically a 
+%     matrix of counts).
 %
 % Optional name-value pairs:
 % - 'normalize': 'diagonal', 'sum', 'none'
 %   - For 'multiclass' input matrix M, the default is 'diagonal', but any
 %     of the three options may be specified.
 %   - For 'pairwise' input matrix M, the default and only specification is 
-%     'none'. If 'diagonal' and 'sum' is specified with this input type,
+%     'none'. If 'diagonal' or 'sum' is specified with this input type,
 %     the function will override it with 'none' and print a warning.
 % - 'symmetrize': 'arithmetic', 'geometric', 'harmonic', 'none'
-%   - For 'multiclass' input matrix M, the default is 
-% - 'distance': 'linear' (default), 'power', 'logarithmic', 'none'
+%   - For 'multiclass' input matrix M, the default is 'arithmetic', but any
+%     of the four options may be specified. 
+%   - For 'pairwise' input matrix M, the default and only specification is
+%     'none'. Any of the four options may be specified, but should not
+%     affect an input matrix that is symmetric to begin with.
+% - 'distance': 'linear', 'power', 'logarithmic', 'none'
 % - 'distpower': Integer > 0 (if using 'power' or 'log' distance)
+%   - For 'multiclass' input matrix M, the default 'distance' is 'linear', 
+%     but any of the four options may be specified. The default 'distpower'
+%     is 1 and applies only to 'power' and 'logarithmic' specifications
+%     of 'distance'.
+%   - For 'pairwise' input matrix M, the default and only specification is
+%     'none'. If any other specification is given, the function will
+%     override it with 'none' and print a warning.
 % - 'rankdistances': 'none' (default), 'rank', 'percentrank'
+%   - For all input matrices M, the default is 'none'. If 'rank' or 
+%     'percentrank' are called but the input matrix is not symmetric,
+%     the subfunction will issue a warning and operate only on the lower 
+%     triangle of the matrix, returning a symmetric matrix.
 %
 % Outputs:
 % - RDM: The Representational Dissimilarity (distance) Matrix. RDM is a
@@ -73,18 +89,35 @@ function [RDM, params] = computeClassificationRDM(M, varargin)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
+%%%%%%%%%%%%%%%%%%%%%%% Input parser %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Initialize the input parser
 ip = inputParser;
 ip.CaseSensitive = false;
 
-% Specify default values
-defaultDistpower = 1;
-defaultNormalize = 'diagonal';
-defaultSymmetrize = 'arithmetic';
-defaultDistance = 'linear';
-defaultRankdistances = 'none';
+% Specify input parser parameters based in pairwise or multiclass
+if nargin < 2
+    error('Must input at least a matrix M and pairs/multiclass specification.');
+end
+matrixType = lower(matrixType); % Convert to lowercase
+
+
+% Specify default values - multiclass
+defaultMulti.Distpower = 1;
+defaultMulti.Normalize = 'diagonal';
+defaultMulti.Symmetrize = 'arithmetic';
+defaultMulti.Distance = 'linear';
+defaultMulti.Rankdistances = 'none';
+
+% Specify default values - pairwise
+defaultPairwise.Distpower = 1;
+defaultPairwise.Normalize = 'none';
+defaultPairwise.Symmetrize = 'none';
+defaultPairwise.Distance = 'none';
+defaultPairwise.Rankdistances = 'none';
 
 % Specify expected values
+expectedMatrixType = {'p', 'pair', 'pairs', 'pairwise',... 
+    'm', 'multi', 'multiclass', 'multicategory'};
 expectedNormalize = {'diagonal', 'sum', 'none'};
 expectedSymmetrize = {'arithmetic', 'mean',...
     'geometric', 'harmonic', 'none'};
@@ -92,36 +125,44 @@ expectedDistance = {'linear', 'power', 'logarithmic', 'none'};
 expectedRankdistances = {'none', 'rank', 'percentrank'};
 
 % Required inputs
-addRequired(ip, 'CM', @isnumeric)
+addRequired(ip, 'M', @isnumeric)
+addRequired(ip, 'matrixType',... 
+    @(x) any(validatestring(x, expectedMatrixType)))
+parse(ip, M, matrixType)
 
-% Optional inputs
-addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
+
 
 % Optional name-value pairs
 % NOTE: Should use addParameter for R2013b and later.
 if verLessThan('matlab', '8.2')
-    addParamValue(ip, 'normalize', defaultNormalize,...
+    addParamValue(ip, 'normalize', defaultMultiNormalize,...
         @(x) any(validatestring(x, expectedNormalize)));
-    addParamValue(ip, 'symmetrize', defaultSymmetrize,...
+    addParamValue(ip, 'symmetrize', defaultMultiSymmetrize,...
         @(x) any(validatestring(x, expectedSymmetrize)));
-    addParamValue(ip, 'distance', defaultDistance,...
+    addParamValue(ip, 'distance', defaultMultiDistance,...
         @(x) any(validatestring(x, expectedDistance)));
-    addParamValue(ip, 'rankdistances', defaultRankdistances,...
+    addParamValue(ip, 'rankdistances', defaultMultiRankdistances,...
         @(x) any(validatestring(x, expectedRankdistances)));
+    addParamValue(ip, 'distpower', defaultDistpower,...
+        @(x) floor(x)==x);
 else
-    addParameter(ip, 'normalize', defaultNormalize,...
+    addParameter(ip, 'normalize', defaultMultiNormalize,...
         @(x) any(validatestring(x, expectedNormalize)));
-    addParameter(ip, 'symmetrize', defaultSymmetrize,...
+    addParameter(ip, 'symmetrize', defaultMultiSymmetrize,...
         @(x) any(validatestring(x, expectedSymmetrize)));
-    addParameter(ip, 'distance', defaultDistance,...
+    addParameter(ip, 'distance', defaultMultiDistance,...
         @(x) any(validatestring(x, expectedDistance)));
-    addParameter(ip, 'rankdistances', defaultRankdistances,...
+    addParameter(ip, 'rankdistances', defaultMultiRankdistances,...
         @(x) any(validatestring(x, expectedRankdistances)));
+    addParameter(ip, 'distpower', defaultDistpower,...
+        @(x) floor(x)==x);
 end
 
 
 % Parse
 parse(ip, M, varargin{:});
+
+%%%%%%%%%%%% End input parser %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Verify the confusion matrix is square
 if size(M, 1) ~= size (M, 2)
