@@ -16,10 +16,16 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %   Y - labels vector. The length of labels should be equal to nTrials.
 %   num_permutations (optional) - how many permutations to split the trials for split-half
 %                                 reliability. If not entered, this defaults to 10.
-%   rand_seed (optional) - Random number generator specification. If not entered, defaults to
-%       'shuffle'. If specifying a dual-argument random number generator
-%       (e.g., ('shuffle', 'twister'), it should be entered as elements of
-%       a cell array (e.g., {'shuffle', 'twister'}).
+%   rand_seed (optional) - Random number generator specification. If not entered, rng
+%       will be assigned as ('shuffle', 'twister'). 
+%       --- Acceptable specifications for rand_seed ---
+%           - Single acceptable rng specification input (e.g., 1, 
+%               'default', 'shuffle'); in these cases, the generator will 
+%               be set to 'twister'.
+%           - Dual-argument specifications as either a 2-element cell 
+%               array (e.g., {'shuffle', 'twister'}) or string array 
+%               (e.g., ["shuffle", "twister"].
+%           - rng struct as assigned by rand_seed = rng.
 %
 % Output Args:
 %   reliabilities - reliability for each electrode across time. The dimensions of
@@ -47,11 +53,9 @@ if nargin < 3 || isempty(num_permutations)
     num_permutations = 10;
 end
 
-% Set random seed
-if nargin < 4 || isempty(rand_seed), rng('shuffle');
-elseif length(rand_seed) == 2, rng(rand_seed{1}, rand_seed{2});
-elseif ischar(rand_seed) || length(rand_seed) == 1, rng(rand_seed);
-else, error('Input rand_seed should be a single value or cell array of length 2.');
+% Set random number generator
+if nargin < 4 || isempty(rand_seed), setUserSpecifiedRng();
+else, setUserSpecifiedRng(rand_seed);
 end
 
 num_components = size(X, 1);
