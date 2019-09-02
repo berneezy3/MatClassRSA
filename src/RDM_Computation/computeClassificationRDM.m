@@ -18,11 +18,13 @@ function [RDM, params] = computeClassificationRDM(M, varargin)
 %
 % Optional name-value pairs:
 % - 'normalize': 'diagonal', 'sum', 'none'
-%   - For 'multiclass' input matrix M, the default is 'diagonal'.
-%   - For 'pairwise' input matrix M, the default is 'none'. Moreover, the
-%    function will override 'diagonal' and 'sum' specifications with 'none'
-%    and print a warning. <---START HERE
-% - 'symmetrize': 'average' (default), 'geometric', 'harmonic', 'none'
+%   - For 'multiclass' input matrix M, the default is 'diagonal', but any
+%     of the three options may be specified.
+%   - For 'pairwise' input matrix M, the default and only specification is 
+%     'none'. If 'diagonal' and 'sum' is specified with this input type,
+%     the function will override it with 'none' and print a warning.
+% - 'symmetrize': 'arithmetic', 'geometric', 'harmonic', 'none'
+%   - For 'multiclass' input matrix M, the default is 
 % - 'distance': 'linear' (default), 'power', 'logarithmic', 'none'
 % - 'distpower': Integer > 0 (if using 'power' or 'log' distance)
 % - 'rankdistances': 'none' (default), 'rank', 'percentrank'
