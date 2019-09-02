@@ -1,6 +1,6 @@
-function [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutations, rand_seed)
+function [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------
-%  [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutations)
+%  [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations)
 %------------------------------------------------------------------------------------
 %
 % Returns pairwise similarities with respect to cross-validated Euclidean
@@ -12,11 +12,11 @@ function [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutati
 % computed using the time point values for a particular electrode as features.
 %
 % Input Args:
-%   eeg_data - data matrix. The size of eeg_data should be nFeatures x 
+%   X - data matrix. The size of X should be nFeatures x 
 %              nTrials. Users working with 3D data matrices should already
 %              have subset the data along a single sensor (along the space
 %              dimension) or time sample (along the time dimension).
-%   labels - labels vector. The length of labels should be nTrials.
+%   Y - labels vector. The length of Y should be nTrials.
 %   num_permutations (optional) - how many permutations to randomly select
 %                                 train and test data matrix. If not entered,
 %                                 this defaults to 10.
@@ -27,9 +27,9 @@ function [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutati
 %   dissimilarities - the dissimilarity matrix, dimensions: num_images 
 %                     x num_images x num_permutations
 
-    num_dim = length(size(eeg_data));
+    num_dim = length(size(X));
     assert(num_dim == 2, 'Data of this size are not supported. See documentation.');
-    assert(size(eeg_data,2) == length(labels), 'Mismatch in number of trials in data and length of labels vector.');
+    assert(size(X,2) == length(Y), 'Mismatch in number of trials in data and length of labels vector.');
     
     if nargin < 3 || isempty(num_permutations)
         num_permutations = 10;
@@ -41,16 +41,16 @@ function [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutati
     end
     rng(rand_seed);
     
-    unique_labels = unique(labels);
+    unique_labels = unique(Y);
     num_images = length(unique_labels);
-    num_features = size(eeg_data,1);
+    num_features = size(X,1);
     dissimilarities = zeros(num_permutations, num_images, num_images);
     for p=1:num_permutations
 
         for i=1:num_images
             curr_label_i = unique_labels(i);
 
-            img1_data = squeeze(eeg_data(:,labels==curr_label_i));
+            img1_data = squeeze(X(:,Y==curr_label_i));
             % Split trials into two partitions (i.e. train/test)
             img1_trials = size(img1_data, 2);
             % Randomly permute data
@@ -65,7 +65,7 @@ function [dissimilarities] = computeEuclideanRDM(eeg_data, labels, num_permutati
             for j=i+1:num_images
                 curr_label_j = unique_labels(j);
     
-                img2_data = squeeze(eeg_data(:,labels==curr_label_j));
+                img2_data = squeeze(X(:,Y==curr_label_j));
                 % Split trials into two partitions (i.e. train/test)
                 img2_trials = size(img2_data, 2);
                 % Randomly permute data
