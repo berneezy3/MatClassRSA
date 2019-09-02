@@ -144,14 +144,14 @@ parse(ip, X, Y, groupSize, varargin{:});
 % end parse inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Flag to return row vectors if vector inputs are rows.
-rowInputY = isrow(Y);
-rowInputP = isrow(P);
-
 % Assign P based on input parser or convert to zeros if empty input
 if isempty(ip.Results.P), P = zeros(size(Y));
 else, P = ip.Results.P;
 end
+
+% Flag to return row vectors if vector inputs are rows.
+rowInputY = isrow(Y);
+rowInputP = isrow(P);
 
 % THROW ERROR if length of P does not equal length of Y
 assert(length(P) == length(Y), ...
