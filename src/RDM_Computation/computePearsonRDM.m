@@ -1,6 +1,6 @@
-function [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutations, rand_seed)
+function [dissimilarities] = computePearsonRDM(X, Y, num_permutations, rand_seed)
 %----------------------------------------------------------------------------------
-%  [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutations)
+%  [dissimilarities] = computePearsonRDM(X, Y, num_permutations)
 %----------------------------------------------------------------------------------
 %
 % Returns pairwise dissimilarities with respect to cross-validated Pearson
@@ -12,9 +12,9 @@ function [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutation
 % computed using the time point values for a particular electrode as features.
 %
 % Input Args:
-%   eeg_data - data matrix. The size of eeg_data should be nFeatures x 
+%   X - data matrix. The size of X should be nFeatures x 
 %              (nTrials*nImages)
-%   labels - labels vector. The size of labels should be (nTrials*nImages)
+%   Y - labels vector. The size of Y should be (nTrials*nImages)
 %   num_permutations (optional) - how many permutations to randomly select
 %                                 train and test data matrix.
 %   rand_seed (optional) - random seed for reproducibility. If not entered,
@@ -24,9 +24,9 @@ function [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutation
 %   dissimilarities - the dissimilarity matrix, dimensions: num_images
 %                     x num_images x num_permutations
 
-    num_dim = length(size(eeg_data));
+    num_dim = length(size(X));
     assert(num_dim == 2, 'Data of this size are not supported. See documentation.');
-    assert(size(eeg_data,2) == length(labels), 'Mismatch in number of trials in data and length of labels vector.');
+    assert(size(X,2) == length(Y), 'Mismatch in number of trials in data and length of labels vector.');
     
     if nargin < 3 || isempty(num_permutations)
         num_permutations = 10;
@@ -38,16 +38,16 @@ function [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutation
     end
     rng(rand_seed);
     
-    unique_labels = unique(labels);
+    unique_labels = unique(Y);
     num_images = length(unique_labels);
-    num_features = size(eeg_data,1);
+    num_features = size(X,1);
     dissimilarities = zeros(num_permutations, num_images, num_images);
     for p=1:num_permutations
 
         for i=1:num_images
             curr_label_i = unique_labels(i);
 
-            img1_data = squeeze(eeg_data(:,labels==curr_label_i));
+            img1_data = squeeze(X(:,Y==curr_label_i));
             % Split trials into two partitions (i.e. train/test)
             img1_trials = size(img1_data, 2);
             % Randomly permute data
@@ -62,7 +62,7 @@ function [dissimilarities] = computePearsonRDM(eeg_data, labels, num_permutation
             for j=i+1:num_images
                 curr_label_j = unique_labels(j);
     
-                img2_data = squeeze(eeg_data(:,labels==curr_label_j));
+                img2_data = squeeze(X(:,Y==curr_label_j));
                 % Split trials into two partitions (i.e. train/test)
                 img2_trials = size(img2_data, 2);
                 % Randomly permute data
