@@ -1,6 +1,6 @@
-function [norm_eeg_data, sigma_inv] = noiseNormalization(X, Y)
+function [norm_data, sigma_inv] = noiseNormalization(X, Y)
 %---------------------------------------------------------------------------
-%  [norm_eeg_data, sigma_inv] = noiseNormalization(X, Y)
+%  [norm_data, sigma_inv] = noiseNormalization(X, Y)
 %---------------------------------------------------------------------------
 %
 % Function to perform multivariate noise normalization on time varying data.
@@ -13,7 +13,7 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(X, Y)
 %   Y - Labels vector. The length of this vector should correspond to
 %       the length, along the trial dimension, of the input data.
 % Output Args:
-%   norm_eeg_data - Data matrix after noise normalization is applied. It
+%   norm_data - Data matrix after noise normalization is applied. It
 %       will be the same size as the input data matrix.
 %   sigma_inv - Inverse of the square root of the covariance matrix.
 
@@ -42,7 +42,7 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(X, Y)
     num_images = length(unique_labels);
 
     % This is probably not the best in terms of memory
-    norm_eeg_data = nan(num_components, num_timepoints, total_trials);
+    norm_data = nan(num_components, num_timepoints, total_trials);
 
     all_image_covs = nan(num_images, num_components, num_components);
     for i=1:num_images
@@ -67,12 +67,12 @@ function [norm_eeg_data, sigma_inv] = noiseNormalization(X, Y)
 
     for t=1:num_timepoints
         weighted_data = sigma_inv * squeeze(X(:,t,:));
-        norm_eeg_data(:,t,:) = weighted_data;
+        norm_data(:,t,:) = weighted_data;
     end
 
     % If the 2D data were provided, permute back to original dimensions
     if num_dim == 2
-        norm_eeg_data = permute(norm_eeg_data, [3,2,1]);
+        norm_data = permute(norm_data, [3,2,1]);
     end
 
 end
