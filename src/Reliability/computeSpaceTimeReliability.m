@@ -1,6 +1,6 @@
-function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_permutations, rand_seed)
+function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------------
-%  [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_permutations)
+%  [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------------
 %
 % Returns reliabilities computed for each component across time. With the resulting
@@ -10,10 +10,10 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
 % one will be able to see how reliable each component is across time (on average).
 %
 % Input Args:
-%   eeg_data - data matrix. 3D data matrices are assumed to be nSpace x nTime x
+%   X - data matrix. 3D data matrices are assumed to be nSpace x nTime x
 %              nTrial.  If the data matrix is 2D, it is assumed to be nTrial x 
 %              nFeature.
-%   labels - labels vector. The length of labels should be equal to nTrials.
+%   Y - labels vector. The length of labels should be equal to nTrials.
 %   num_permutations (optional) - how many permutations to split the trials for split-half
 %                                 reliability. If not entered, this defaults to 10.
 %   rand_seed (optional) - Random number generator specification. If not entered, defaults to
@@ -30,15 +30,15 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
 
 % If 3D matrix entered, dimensions are: space x time x trial
 % We will permute so that it becomes space x trial x time
-if length(size(eeg_data)) == 3
-    eeg_data = permute(eeg_data, [1,3,2]);
+if length(size(X)) == 3
+    X = permute(X, [1,3,2]);
 % If 2D matrix entered, dimensions are: trial x time
 % We will permute so that it becomes time x trial and add
 % a singleton dimension in the front for space.
-elseif length(size(eeg_data)) == 2
-    eeg_data = permute(eeg_data, [2,1]);
-    [dim1, dim2] = size(eeg_data);
-    eeg_data = reshape(eeg_data, [1,dim1,dim2]);
+elseif length(size(X)) == 2
+    X = permute(X, [2,1]);
+    [dim1, dim2] = size(X);
+    X = reshape(X, [1,dim1,dim2]);
 else
     error('Input data should be a 2D or 3D matrix.');
 end
@@ -54,14 +54,14 @@ elseif ischar(rand_seed) || length(rand_seed) == 1, rng(rand_seed);
 else, error('Input rand_seed should be a single value or cell array of length 2.');
 end
 
-num_components = size(eeg_data, 1);
-num_timepoints = size(eeg_data, 3);
+num_components = size(X, 1);
+num_timepoints = size(X, 3);
 
 reliabilities = zeros(num_timepoints, num_permutations, num_components);
 for t=1:num_timepoints
     fprintf('Timepoint %d\n', t);
-    curr_data = squeeze(eeg_data(:,:,t));
-    rels = computeReliability(curr_data, labels, num_permutations);
+    curr_data = squeeze(X(:,:,t));
+    rels = computeReliability(curr_data, Y, num_permutations);
     assert(isequal(size(rels), [num_permutations, num_components]));
     reliabilities(t,:,:) = rels;
 end
