@@ -116,7 +116,6 @@ else
 end
 defaultDistpower = 1;
 defaultRankdistances = 'none';
-keyboard
 
 % Specify expected values
 expectedMatrixType = {'p', 'pair', 'pairs', 'pairwise',...
@@ -159,32 +158,49 @@ else
 end
 
 % Parse
-parse(ip, M, varargin{:});
-
+parse(ip, M, matrixType, varargin{:});
 %%%%%%%%%%%% End input parser %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Verify the confusion matrix is square
 if size(M, 1) ~= size (M, 2)
-    error('The input confusion matrix should be square.')
+    error('The input matrix M should be square.')
 end
 
 disp('Computing distance matrix...')
 
-% NORMALIZE
-NM = normalizeMatrix(M, ip.Results.normalize);
-
-% SYMMETRIZE
-SM = symmetrizeMatrix(NM, ip.Results.symmetrize);
-
-% DISTANCE
-DM = convertSimToDist(SM, ip.Results.distance, ip.Results.distpower);
-
-% RANKDISTANCES
-RDM = rankDistances(DM, ip.Results.rankdistances);
-
-% params
-params.normaliize = ip.Results.normalize;
+% Initialize the 'params' output
+params.normalize = ip.Results.normalize;
 params.symmetrize = ip.Results.symmetrize;
 params.distance = ip.Results.distance;
 params.distpower = ip.Results.distpower;
 params.rankdistances = ip.Results.rankdistances;
+
+% Verify inappropriate parms not specified with pairwise input matrix
+if any(strcmp(matrixType, {'p', 'pair', 'pairs', 'pairwise'}))
+   if ~strcmp(params.normalize, 'none')
+       warning(['Normalize was specified as ''' params.normalize ''' but '...
+           'must be set to ''none'' for pairwise input matrix. Overriding '...
+           'user input and setting to ''none''.'])
+       params.normalize = 'none';
+   end
+   if ~strcmp(params.distance, 'none')
+       warning(['Distance was specified as ''' params.distance ''' but '...
+           'must be set to ''none'' for pairwise input matrix. Overriding '...
+           'user input and setting to ''none''.'])
+       params.distance = 'none';
+   end
+end
+
+% NORMALIZE
+NM = normalizeMatrix(M, params.normalize);
+
+% SYMMETRIZE
+SM = symmetrizeMatrix(NM, params.symmetrize);
+
+% DISTANCE
+DM = convertSimToDist(SM, params.distance, params.distpower);
+
+% RANKDISTANCES
+RDM = rankDistances(DM, params.rankdistances);
+
+
