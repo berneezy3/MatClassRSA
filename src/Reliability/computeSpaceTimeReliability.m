@@ -37,13 +37,13 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 % If 3D matrix entered, dimensions are: space x time x trial
 % We will permute so that it becomes space x trial x time
 if length(size(X)) == 3
-    X = permute(X, [1,3,2]);
+    X = permute(X, [1,3,2]); % space x trial x time
 % If 2D matrix entered, dimensions are: trial x time
 % We add
 % a singleton dimension in the front for space.
 elseif length(size(X)) == 2
     temp = X; clear X; % X is trial x feature
-    X(1,:,:) = temp; clear temp;
+    X(1,:,:) = temp; clear temp; % space (1) x trial x feature
 else
     error('Input data should be a 2D or 3D matrix.');
 end
