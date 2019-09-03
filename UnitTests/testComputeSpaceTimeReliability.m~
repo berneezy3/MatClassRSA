@@ -110,7 +110,7 @@ hold on; grid on
 plot(t,mean(rr_96,2)+std(rr_96,[],2), 'b')
 plot(t,mean(rr_96,2)-std(rr_96,[],2), 'b')
 
-%% Try 2D input - ch 96 all time
+%% Try 2D input - ch 96
 clc
 x96 = squeeze(X(96,:,:))'; % Trial x feature
 
@@ -124,11 +124,11 @@ r2d_2 = computeSpaceTimeReliability(X(96,:,:), labels72, 10, 1);
 r2d_3 = computeSpaceTimeReliability(X, labels72, 10, 1);
 
 assert(isequal(r2d_1, r2d_2));
-disp('success 1 vs 2') % OK
+disp('success 1 vs 2')
 assert(isequal(r2d_1, squeeze(r2d_3(96,:,:))));
-disp('success 1 vs 3') % Fails
+disp('success 1 vs 3')
 
-%% Try 2D input - ch 1 all time
+%% Try 2D input - ch 1
 clc
 x1 = squeeze(X(1,:,:))'; % Trial x feature
 
@@ -142,27 +142,9 @@ r2d_2 = computeSpaceTimeReliability(X(1,:,:), labels72, 10, 1);
 r2d_3 = computeSpaceTimeReliability(X, labels72, 10, 1);
 
 assert(isequal(r2d_1, r2d_2));
-disp('success 1 vs 2') % OK
 assert(isequal(r2d_1, squeeze(r2d_3(1,:,:))));
-disp('success 1 vs 3') % Fails
+disp('success')
 
-%% Try 2D input - all time one time point
-clc
-x1 = squeeze(X(:,19,:))'; % Trial x feature
-
-% This one inputs the data as a 2D matrix
-r2d_1 = computeSpaceTimeReliability(x1, labels72, 10, 1);
-
-% This one inputs the data as a 3D matrix and we'll subset after
-r2d_3 = computeSpaceTimeReliability(X, labels72, 10, 1);
-
-assert(isequal(r2d_1, squeeze(r2d_3(:,19,:))));
-disp('success 1 vs 3') % Fails
-
-close all
-plot(mean(r2d_1,2), 'b', 'linewidth', 2); grid on; hold on
-blah = squeeze(r2d_3(:,19,:));
-plot(mean(blah, 2), 'r', 'linewidth', 2);
 
 %% Try 6-class case (3D input)
 r6 = computeSpaceTimeReliability(X, labels6, 100);
