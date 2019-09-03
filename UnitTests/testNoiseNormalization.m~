@@ -60,7 +60,3 @@ X2d = squeeze(X(96,:,:))';
 [a2d1, b2d1] = noiseNormalization(X2d, labels72);
 assert(isequal(squeeze(a3d1), a2d1'))
 disp('success! 3d single-channel input equals 2d input')
-
-%% Comparing values in 2D case
-
-unique(X2d ./ a2d1)
