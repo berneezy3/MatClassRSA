@@ -19,7 +19,7 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
 %   num_trials_per_half (optional) - a vector of how many trials in a split half to
 %                                    use for reliability computation. (e.g. [1,2,3] would
 %                                    correspond to using 2, 4 and 6 trials in the reliability
-%                                    computation). If not entererd, defaults to [1], meaning
+%                                    computation). If not entered, defaults to [1], meaning
 %                                    that it uses 2 trials in total.
 %   num_permutations (optional) - how many permutations to split the trials for split half
 %                                 reliability? This is for inner loop to compute reliability.
