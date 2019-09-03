@@ -56,11 +56,9 @@ end
 % If 2D matrix entered, dimensions are: trial x time
 % We will permute so that it becomes time x trial and add
 % a singleton dimension in the front for space.
-if length(size(X)) == 2
-    X = permute(X, [2,1]);
-    dim1 = size(X,1);
-    dim2 = size(X,2);
-    X = reshape(X, [1,dim1,dim2]);
+if length(size(X)) == 2 % Trial by time
+    temp = X; clear X
+    X(1,:,:) = temp; clear temp
 end
 
 assert(size(X, 2) == length(Y), 'Length of labels vector does not match number of trials in the data.');
