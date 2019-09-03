@@ -44,21 +44,13 @@ title('Euclidean all electrode, time 19, 72-class, with NN')
 
 %% Input single electrode, all time, 6 class, with NN
 
-[X_nn, ~] = noiseNormalization(X, labels6);
+[X_nn, ~] = noiseNormalization(X, labels7);
 
 clear this*
 thisX = squeeze(X_nn(96,:,:)); % 40 x 5184
-thisD = computeEuclideanRDM(thisX, labels6, [], 1);
+thisD = computeEuclideanRDM(thisX, labels72, [], 1);
 thisMeanD = mean(thisD, 3);
 thisRDM = computeClassificationRDM(thisMeanD, 'p', 'rankdistances', 'percentrank');
 figure()
 imagesc(thisRDM); colorbar
-title('Euclidean electrode 96, all time, 6-class, with NN')
-
-%% Fail: Input full 3D matrix
-close all; clc
-d = computeEuclideanRDM(X, labels6)
-
-%% Fail: Input transposed 2D matrix
-X2d = squeeze(X(96,:,:))';
-d = computeEuclideanRDM(X2d, labels6)
+title('Euclidean electrode 96, all time, 72-class, with NN')
