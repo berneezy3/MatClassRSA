@@ -55,6 +55,28 @@ rMean = mean(r, 1);
 close all
 plot(rMean, 'linewidth', 2); grid on
 
+%% Testing rng - looks good
+
+close; clc
+rng(42, 'philox')
+rng
+r = computeSampleSizeReliability(X(96,:,:), labels72, 19, [], [], [], 1);
+rng
+
+rng(42, 'philox')
+rng
+r = computeSampleSizeReliability(X(96,:,:), labels72, 19, [], [], [], 'default');
+rng
+
+rng(42, 'philox')
+rng
+r = computeSampleSizeReliability(X(96,:,:), labels72, 19, [], [], [], {'shuffle', 'twister'});
+rng
+
+rng(42, 'philox')
+rng
+r = computeSampleSizeReliability(X(96,:,:), labels72, 19, [], [], [], ["shuffle", "twister"]);
+rng
 
 %% 3D input with ntrials in split too large -- ** feature request **
 r = computeSampleSizeReliability(X, labels72, 19, 1000);
