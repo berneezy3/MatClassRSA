@@ -36,7 +36,7 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_se
 %                     x num_images x num_permutations
 
 num_dim = length(size(X));
-assert(num_dim == 2, 'Data of this size are not supported. See documentation.');
+assert(num_dim == 2, 'Input data must be a 2D matrix. See documentation.');
 assert(size(X,2) == length(Y), 'Mismatch in number of trials in data and length of labels vector.');
 
 if nargin < 3 || isempty(num_permutations)
