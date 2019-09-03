@@ -88,13 +88,34 @@ close
 figure(1)
 plotOnEgi([r1Mean(:,t0); nan(4,1)])
 set(gca, 'clim', [-1 1])
+colorbar; title('time = 0 msec')
+
+figure(2)
+plotOnEgi([r1Mean(:,t80); nan(4,1)])
+set(gca, 'clim', [-1 1])
+colorbar; title('time = 80 msec')
+
+figure(3)
+plotOnEgi([r1Mean(:,t176); nan(4,1)])
+set(gca, 'clim', [-1 1])
+colorbar; title('time = 176 msec')
 
 %% Try randomizing the labels
 
 rr = computeSpaceTimeReliability(X, labels72(randperm(length(labels72))), 100);
 rr_96 = squeeze(rr(96,:,:));
-close
+close all
 plot(t,mean(rr_96,2), 'b', 'linewidth', 2);
 hold on; grid on
 plot(t,mean(rr_96,2)+std(rr_96,[],2), 'b')
 plot(t,mean(rr_96,2)-std(rr_96,[],2), 'b')
+
+%% Try 6-class case
+r6 = computeSpaceTimeReliability(X, labels6, 100);
+r1_96 = squeeze(r6(96,:,:));
+
+close
+plot(t,mean(r1_96,2), 'b', 'linewidth', 2);
+hold on; grid on
+plot(t,mean(r1_96,2)+std(r1_96,[],2), 'b')
+plot(t,mean(r1_96,2)-std(r1_96,[],2), 'b')
