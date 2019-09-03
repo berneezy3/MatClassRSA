@@ -54,8 +54,8 @@ if length(size(X)) == 3
 end
 
 % If 2D matrix entered, dimensions are: trial x time
-% We will permute so that it becomes time x trial and add
-% a singleton dimension in the front for space.
+% We will add a singleton dimension in the front for space so it
+% becomes space x trial x time.
 if length(size(X)) == 2 % Trial by time
     temp = X; clear X
     X(1,:,:) = temp; clear temp

@@ -1,0 +1,25 @@
+% testComputeSampleSizeReliability.m
+% -------------------------------------------
+% Blair - Sep 02, 2019
+
+clear all; close all; clc
+load('/user/b/blairbo/Codebase/MatClassRSA/UnitTests/S06.mat')
+
+X2d = squeeze(X(96,:,:))';
+
+%% 3D input
+r = computeSampleSizeReliability(X, labels72, 19, 1:11);
+rMean = squeeze(mean(r,1));
+close all
+plot(rMean(:,96), 'linewidth', 2); grid on
+
+%% 3D input, single electrode
+r3d_1chan = computeSampleSizeReliability(X(96,:,:), labels72, 19, 1:20);
+
+% r3d is 10 perm x 20 trials in split
+r3dMean = mean(r3d_1chan, 1);
+close all
+plot(r3dMean, 'linewidth', 2); grid on
+
+%% 3D input with ntrials in split too large
+r = computeSampleSizeReliability(X, labels72, 19, 1000);
