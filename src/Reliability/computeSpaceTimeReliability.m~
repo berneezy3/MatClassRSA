@@ -16,10 +16,16 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %   Y - labels vector. The length of labels should be equal to nTrials.
 %   num_permutations (optional) - how many permutations to split the trials for split-half
 %                                 reliability. If not entered, this defaults to 10.
-%   rand_seed (optional) - Random number generator specification. If not entered, defaults to
-%       'shuffle'. If specifying a dual-argument random number generator
-%       (e.g., ('shuffle', 'twister'), it should be entered as elements of
-%       a cell array (e.g., {'shuffle', 'twister'}).
+%   rand_seed (optional) - Random number generator specification. If not entered, rng
+%       will be assigned as ('shuffle', 'twister'). 
+%       --- Acceptable specifications for rand_seed ---
+%           - Single acceptable rng specification input (e.g., 1, 
+%               'default', 'shuffle'); in these cases, the generator will 
+%               be set to 'twister'.
+%           - Dual-argument specifications as either a 2-element cell 
+%               array (e.g., {'shuffle', 'twister'}) or string array 
+%               (e.g., ["shuffle", "twister"].
+%           - rng struct as assigned by rand_seed = rng.
 %
 % Output Args:
 %   reliabilities - reliability for each electrode across time. The dimensions of
@@ -36,9 +42,10 @@ if length(size(X)) == 3
 % We will permute so that it becomes time x trial and add
 % a singleton dimension in the front for space.
 elseif length(size(X)) == 2
-    X = permute(X, [2,1]);
-    [dim1, dim2] = size(X);
-    X = reshape(X, [1,dim1,dim2]);
+%     X = permute(X, [2,1]);
+%     [dim1, dim2] = size(X);
+%     X = reshape(X, [1,dim1,dim2]);
+    X(1,:,:) = X'
 else
     error('Input data should be a 2D or 3D matrix.');
 end
