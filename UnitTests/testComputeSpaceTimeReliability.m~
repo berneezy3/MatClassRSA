@@ -87,7 +87,7 @@ r1Mean = mean(r1,3);
 close
 figure(1)
 plotOnEgi([r1Mean(:,t0); nan(4,1)])
-set(gca, 'clim', [-1 1])
+set(gca, 'clim', [-1 1]); colorbar
 
 %% Try randomizing the labels
 
