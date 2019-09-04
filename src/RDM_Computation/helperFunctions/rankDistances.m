@@ -12,6 +12,11 @@ function xOut = rankDistances(xIn, rankType)
 %   - Percent rank ('percentrank', 'p')
 %   - None ('none', 'n')
 %
+% Ranking is based on the values in the lower triangle (under the diagonal)
+% of the matrix only. If a non-symmetric matrix is input, the function
+% issues a warning and proceeds to compute ranks only on the lower-triangle
+% values, returning a symmetric matrix.
+%
 % There is no default rank type, as rank type is assumed to be decided
 % prior to calling this function. If none of the above rankType options
 % are specified, the function returns an error.
@@ -55,7 +60,7 @@ switch rankType
         xOut = xIn;
     case {'rank', 'r', 'percentrank', 'p'}
         if sum(unique(xIn - xIn') == 0) ~= numel(unique(xIn - xIn'))
-            warning('Input matrix is not symmetric. Ranking values on lower diagonal only.')
+            warning('Input matrix is not symmetric. Returning symmetric matrix based on lower-triangle ranks only.')
         end
         trilM = tril(ones(size(xIn)), -1);
         distV = xIn(trilM == 1);

@@ -1,6 +1,6 @@
-function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_permutations, rand_seed)
+function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------------
-%  [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_permutations)
+%  [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------------
 %
 % Returns reliabilities computed for each component across time. With the resulting
@@ -10,35 +10,40 @@ function [reliabilities] = computeSpaceTimeReliability(eeg_data, labels, num_per
 % one will be able to see how reliable each component is across time (on average).
 %
 % Input Args:
-%   eeg_data - data matrix. 3D data matrices are assumed to be nSpace x nTime x
+%   X - data matrix. 3D data matrices are assumed to be nSpace x nTime x
 %              nTrial.  If the data matrix is 2D, it is assumed to be nTrial x 
 %              nFeature.
-%   labels - labels vector. The length of labels should be equal to nTrials.
+%   Y - labels vector. The length of labels should be equal to nTrials.
 %   num_permutations (optional) - how many permutations to split the trials for split-half
 %                                 reliability. If not entered, this defaults to 10.
-%   rand_seed (optional) - Random number generator specification. If not entered, defaults to
-%       'shuffle'. If specifying a dual-argument random number generator
-%       (e.g., ('shuffle', 'twister'), it should be entered as elements of
-%       a cell array (e.g., {'shuffle', 'twister'}).
+%   rand_seed (optional) - Random number generator specification. If not entered, rng
+%       will be assigned as ('shuffle', 'twister'). 
+%       --- Acceptable specifications for rand_seed ---
+%           - Single acceptable rng specification input (e.g., 1, 
+%               'default', 'shuffle'); in these cases, the generator will 
+%               be set to 'twister'.
+%           - Dual-argument specifications as either a 2-element cell 
+%               array (e.g., {'shuffle', 'twister'}) or string array 
+%               (e.g., ["shuffle", "twister"].
+%           - rng struct as assigned by rand_seed = rng.
 %
 % Output Args:
 %   reliabilities - reliability for each electrode across time. The dimensions of
 %                   this matrix are: nSpace x nTime x nPermutations if a 3D matrix was
 %                   provided.  If a 2D matrix was provided, the dimensions of the results
-%                   are: nTime x nSpace. You would typically average across the permutations 
+%                   are: nTime x nPermutations. You would typically average across the permutations 
 %                   dimension.
 
 % If 3D matrix entered, dimensions are: space x time x trial
 % We will permute so that it becomes space x trial x time
-if length(size(eeg_data)) == 3
-    eeg_data = permute(eeg_data, [1,3,2]);
+if length(size(X)) == 3
+    X = permute(X, [1,3,2]); % space x trial x time
 % If 2D matrix entered, dimensions are: trial x time
-% We will permute so that it becomes time x trial and add
+% We add
 % a singleton dimension in the front for space.
-elseif length(size(eeg_data)) == 2
-    eeg_data = permute(eeg_data, [2,1]);
-    [dim1, dim2] = size(eeg_data);
-    eeg_data = reshape(eeg_data, [1,dim1,dim2]);
+elseif length(size(X)) == 2
+    temp = X; clear X; % X is trial x feature
+    X(1,:,:) = temp; clear temp; % space (1) x trial x feature
 else
     error('Input data should be a 2D or 3D matrix.');
 end
@@ -47,21 +52,19 @@ if nargin < 3 || isempty(num_permutations)
     num_permutations = 10;
 end
 
-% Set random seed
-if nargin < 4 || isempty(rand_seed), rng('shuffle');
-elseif length(rand_seed) == 2, rng(rand_seed{1}, rand_seed{2});
-elseif ischar(rand_seed) || length(rand_seed) == 1, rng(rand_seed);
-else, error('Input rand_seed should be a single value or cell array of length 2.');
+% Set random number generator
+if nargin < 4 || isempty(rand_seed), setUserSpecifiedRng();
+else, setUserSpecifiedRng(rand_seed);
 end
 
-num_components = size(eeg_data, 1);
-num_timepoints = size(eeg_data, 3);
+num_components = size(X, 1);
+num_timepoints = size(X, 3);
 
 reliabilities = zeros(num_timepoints, num_permutations, num_components);
 for t=1:num_timepoints
     fprintf('Timepoint %d\n', t);
-    curr_data = squeeze(eeg_data(:,:,t));
-    rels = computeReliability(curr_data, labels, num_permutations);
+    curr_data = squeeze(X(:,:,t));
+    rels = computeReliability(curr_data, Y, num_permutations);
     assert(isequal(size(rels), [num_permutations, num_components]));
     reliabilities(t,:,:) = rels;
 end

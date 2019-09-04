@@ -31,6 +31,10 @@ trainLabels = labels6(1:floor(dim3/5));
 testData = X_2D(floor(dim3/5)+1:dim3, :);
 testLabels = labels6(floor(dim3/5)+1:dim3);
 
+%% Classification and prediction with 2D data using LDA and random seed
+% Run successfully, predictions are the same in both models
+% Issue:
+%    - CM is no longer in the struct
 
 M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1);
 C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3), 'randomSeed', 1);
@@ -43,9 +47,11 @@ figure; plotMatrix(C1.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 %% Classification and prediction with 2D data using random forest
 % Runs successfully, and CM looks OK.
 % Issue:
+
 %    - Why is PCA being run here? 
 %   ### Bernard: PCA is turned to .99 by default ###
-%   
+%    - Error using classifyPredict (line 103)
+%      Expected a string for the parameter name, instead the input type was 'double'.
 
 M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'RF', 'numTrees', 200, 'minLeafSize', 1);
 C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3));
@@ -58,6 +64,8 @@ figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 %    - Already stated in testClassifyTrain.m, but even though {'PCA', 0} is
 %      set, PCA is being run.  However, if we do not input the kernel
 %      name-value pair, PCA is not run (which is expected). (FIXED)
+%    - Error using classifyPredict (line 103)
+%      Expected a string for the parameter name, instead the input type was 'double'.
 
 M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'SVM', 'PCA', 0, 'kernel', 'rbf');
 C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3));
@@ -72,7 +80,11 @@ M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classif
 C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3));
 figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 
+%% Classification and prediction with 2D data using pairwise and LDA
+% Runs successfully
 
+M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1, 'pairwise', 1);
+C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3), 'randomSeed', 1);
 
 
 
