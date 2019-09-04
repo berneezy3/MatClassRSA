@@ -27,12 +27,16 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %       feature dimension indices that the user wants to subset.  This arugument 
 %       will not do anything if input matrix X is a 3D,
 %       space-by-time-by-trials matrix.
-%   'randomSeed' - This option determines whether the randomization is to produce
-%       varying or unvarying results each different execution.  The value
-%       of this parameter is passed into the Matlab rng() function.
-%        --options--
-%       'shuffle' (default)
-%       'default' (replicate results)
+%   'randomSeed' - random seed for reproducibility. If not entered, rng
+%       will be assigned as ('shuffle', 'twister').
+%       --- Acceptable specifications for rand_seed ---
+%       - Single acceptable rng specification input (e.g., 1,
+%           'default', 'shuffle'); in these cases, the generator will
+%           be set to 'twister'.
+%       - Dual-argument specifications as either a 2-element cell
+%           array (e.g., {'shuffle', 'twister'}) or string array
+%           (e.g., ["shuffle", "twister"].
+% - rng struct as assigned by rand_seed = rng.
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
@@ -152,7 +156,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     addRequired(ip, 'X', @(X) ndims(X)==3 || ismatrix(X)==1)
     addRequired(ip, 'Y', @isvector)
     [r c] = size(X);
-    dataSize = size(X);
 
     %Optional positional inputs
     %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
@@ -174,7 +177,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-        addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
+        addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernel)));
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
         addParamValue(ip, 'pairwise', defaultPairwise);
@@ -193,7 +196,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
             @(x) (assert(isvector(x))));
         addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-        addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
+        addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernel)));
         addParameter(ip, 'numTrees', 128);
         addParameter(ip, 'minLeafSize', 1);
         addParameter(ip, 'pairwise', defaultPairwise);
@@ -209,15 +212,30 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
         disp(getReport(ME,'extended'));
     end
     
+    
+    
     % check input data 
     checkInputData(X, Y);
+    dataSize = size(X);
+    if(ip.Results.spaceUse)
+        dataSize(1) = length(ip.Results.spaceUse);
+    end
+    if(ip.Results.timeUse)
+        dataSize(2) = length(ip.Results.timeUse);
+    end
+    if(ip.Results.featureUse)
+        dataSize(2) = length(ip.Results.featureUse);
+    end
+
     
     % this function contains input checking functions
     [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
                                                     ip.Results.spaceUse, ...
                                                     ip.Results.timeUse, ...
                                                     ip.Results.featureUse);
-
+    
+                                           
+                                     
                      
     defaultShuffleData = 1;
     defaultRandomSeed = 'shuffle';
@@ -226,7 +244,9 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
-    rng(ip.Results.randomSeed);
+    %rng(ip.Results.randomSeed);
+    setUserSpecifiedRng(ip.Results.randomSeed);
+
     
     trainData = X;
     % PCA
@@ -244,35 +264,41 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     % Train Model
     disp('Training Model...')
     
+    % create classifier info struct
+    classifierInfo = struct();
+    classifierInfo.PCA = ip.Results.PCA;
+    classifierInfo.classifier = ip.Results.classifier;
+    classifierInfo.spaceUse = ip.Results.spaceUse;
+    classifierInfo.timeUse = ip.Results.timeUse;
+    classifierInfo.featureUse = ip.Results.featureUse; %'shuffleData', ip.Results.shuffleData, ...
+    classifierInfo.randomSeed = ip.Results.randomSeed;
+    classifierInfo.PCA_V = V;
+    classifierInfo.PCA_nPC = nPC;
+    classifierInfo.trainingDataSize = dataSize;
+    classifierInfo.numClasses = length(unique(Y));
+    classifierInfo.pairwise = ip.Results.pairwise;
+    
+    switch classifierInfo.classifier
+        case 'SVM'
+            classifierInfo.kernel = ip.Results.kernel;
+        case 'LDA'
+        case 'RF'
+            classifierInfo.numTrees = ip.Results.numTrees;
+            classifierInfo.minLeafSize =  ip.Results.minLeafSize;
+    end
+    
+    
+
     if (ip.Results.pairwise == 0) || ...
        ((ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM'))
         
         mdl = fitModel(trainData, Y, ip);
+        M.classifierInfo = classifierInfo;
 
-        % create classifier info struct
-        classifierInfo = struct('PCA', ip.Results.PCA, ...
-                            'classifier', ip.Results.classifier, ...
-                            'spaceUse', ip.Results.spaceUse, ...
-                            'timeUse',ip.Results.timeUse, ...
-                            'featureUse', ip.Results.featureUse, ... %'shuffleData', ip.Results.shuffleData, ...
-                            'randomSeed', ip.Results.randomSeed,...
-                            'PCA_V', V,...
-                            'PCA_nPC', nPC,...
-                            'trainingDataSize', dataSize, ...
-                            'numClasses', length(unique(Y)), ...
-                            'pairwise', ip.Results.pairwise);
+
 
         M.mdl = mdl;
-        M.classifierInfo = classifierInfo;
-    
-%     elseif (ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM')
-%         
-%         numClasses = length(unique(Y));
-%         numDecBounds = nchoosek(numClasses, 2);
-%         M = zeros(1, numDecBounds);
-% 
-%         mdl = fitModel(trainData, Y', ip);
-        
+
 
         
     elseif (ip.Results.pairwise == 1) && ...
@@ -322,6 +348,8 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     end
     
 
+
+    
     
     disp('Training Finished...')
     disp('Returning Model')

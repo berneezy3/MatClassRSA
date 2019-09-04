@@ -34,7 +34,10 @@ function mdl = fitModel(X, Y, ip)
 
     switch ip.Results.classifier
         case 'SVM'
-            Y = Y';
+            [ry cy] = size(Y);
+            if (cy> ry)
+                Y = Y';
+            end
             switch ip.Results.kernel
                 case 'linear'
                     kernelNum = 0;

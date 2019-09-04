@@ -9,7 +9,7 @@ cd(currDir)
 
 
 [svmC] = classifyCrossValidate(X_3D, ...
-    categoryLabels, 'classifier', 'SVM', 'randomSeed', 'default', 'PCAinFold', 0, 'pairwise', 1);
+    categoryLabels, 'classifier', 'SVM', 'randomSeed', 'default', 'PCAinFold', 0);
 
 %% test LDA pairwise classification
 
