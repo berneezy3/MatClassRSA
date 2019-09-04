@@ -20,27 +20,35 @@ P = randi(3, [1 nTrial]);
 
 %% SUCCESS: 3D input data matrix
 Y = randi(10, [1 nTrial]);
-[x3, y3, p3] = averageTrials(X_3D, Y, 5, P);
+[x3, y3, p3, o3] = averageTrials(X_3D, Y, 5, P);
+
+% Test that averaged data are as expected
+assert(length(y3) == size(o3,1))
+for i=1:length(y3)
+    averaged = x3(:,:,i);
+    to_average = X_3D(:,:,find(ismember(Y,o3(i,:))==1))
+    assert(isequal(averaged, mean(to_average,3)));
+end
 
 %% SUCCESS: 3D input data matrix, only 1 trial per label and averaging across one trial
 % Also testing the same Y dimensions for both input and output. Success.
 
 Y = 1:nTrial; Y = Y';
-[x3, y3, ~] = averageTrials(X_3D, Y, 1, 'endShuffle', 0);
+[x3, y3, ~, o3] = averageTrials(X_3D, Y, 1, 'endShuffle', 0);
 assert(isequal(X_3D, x3));
 assert(isequal(y3, Y));
 
 %% SUCCESS: Testing different Y dimensions
 
 Y = 1:nTrial;
-[x3, y3, ~] = averageTrials(X_3D, Y', 1, 'endShuffle', 0);
+[x3, y3, ~, ~] = averageTrials(X_3D, Y', 1, 'endShuffle', 0);
 assert(isequal(X_3D, x3));
 assert(isequal(y3, Y'));
 
 %% SUCCESS: Testing End Shuffling
 
 Y = 1:nTrial;
-[x3, y3, ~] = averageTrials(X_3D, Y, 1, 'endShuffle', 1, 'rngType', 0);
+[x3, y3, ~, ~] = averageTrials(X_3D, Y, 1, 'endShuffle', 1, 'rngType', 0);
 assert(isequal(size(X_3D), size(x3)));
 assert(isequal(size(y3), size(Y)));
 
@@ -53,17 +61,17 @@ end
 
 %% SUCCESS: 2D input data matrix with participants vector
 Y = randi(10, [1 nTrial]);
-[x2, y2, p2] = averageTrials(X_2D, Y, 5, P);
+[x2, y2, p2, ~] = averageTrials(X_2D, Y, 5, P);
 
 %% SUCCESS: 2D input data matrix, only 1 trial per label and averaging across one trial
 Y = 1:nTrial;
-[x2, y2, ~] = averageTrials(X_2D, Y, 1, 'endShuffle', 0);
+[x2, y2, ~, ~] = averageTrials(X_2D, Y, 1, 'endShuffle', 0);
 assert(isequal(X_2D, x2));
 assert(isequal(y2, Y));
 
 %% SUCCESS: Testing End Shuffling
 Y = 1:nTrial;
-[x2, y2, ~] = averageTrials(X_2D, Y, 1, 'endShuffle', 1, 'rngType', 0);
+[x2, y2, ~, ~] = averageTrials(X_2D, Y, 1, 'endShuffle', 1, 'rngType', 0);
 assert(isequal(size(X_2D), size(x2)));
 assert(isequal(size(y2), size(Y)));
 
@@ -73,7 +81,8 @@ for i=1:nTrial
     idx = y2(i);
     assert(isequal(X_2D(idx,:), x2(i,:)));
 end
-%% check average across participants, also check index vector (BY BERNARD)
+
+%% Check average across participants, also check index vector (BY BERNARD)
 
 nObs = 1000;
 nfeat = 1000;
