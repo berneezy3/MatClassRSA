@@ -27,7 +27,7 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %               on the current time.
 %           - Dual-argument specifications as either a 2-element cell 
 %               array (e.g., {'shuffle', 'twister'}) or string array 
-%               (e.g., ["shuffle", "twister"].
+%               (e.g., ["shuffle", "twister"]).
 %           - rng struct as assigned by rand_seed = rng.
 %
 % Output Args:
