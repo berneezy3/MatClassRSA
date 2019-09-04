@@ -183,8 +183,7 @@ function img = plotDendrogram(RDM, varargin)
     % CASE: COLOR AND NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
-        disp('Potting Colored Labels');
-        %
+        disp('Plotting with user defined colored labels...')
         xTickCoords = getTickCoord;
         set(gca,'xTickLabel', '');
 
@@ -207,7 +206,7 @@ function img = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.nodeColors) &&  ~isempty(ip.Results.nodeLabels)
 
-        disp('CASE: LABEL');
+        disp('Plotting with user defined labels...')
         set(gca,'xTickLabel', '');
 
 
@@ -223,7 +222,7 @@ function img = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.nodeLabels) && ~isempty(ip.Results.iconPath)
         
-        disp('Plotting Icons');
+         disp('Plotting with user specified directory of image icons...')
         xTickCoords = getTickCoord;
         set(gca,'xTickLabel', '');
         pos = get(gca,'position');
@@ -246,11 +245,11 @@ function img = plotDendrogram(RDM, varargin)
             end
             
             % Resize to 40*40 square
-            if height > width
-                thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
-            else
-                thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
-            end
+%             if height > width
+%                 thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
+%             else
+%                 thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
+%             end
 
             % Add 3rd(color) dimension if there is none
             if length(size(thisIcon)) == 2
@@ -271,7 +270,7 @@ function img = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.nodeLabels)
-        disp('Plotting Colors');
+        disp('Plotting with user defined colored blocks...')
         
         set(gca,'xTickLabel', '');
         xTickCoords = getTickCoord;
@@ -303,7 +302,7 @@ function img = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     else
         
-        disp('Plotting default numeric labels');
+        disp('Plotting with default number labels...')
         % Do NOTHING
 
         

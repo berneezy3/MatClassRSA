@@ -30,12 +30,11 @@ plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'colorbar', 1);
 %% Plot RDM with icons
 % Looks good. Need to check icon ordering!
 
-plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 20);
+plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 8);
 
 %% 
 
-plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 20, 'textRotation', 45);
-
+plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 15, 'textRotation', 45);
 
 %% Plot RDM with custom axis labels
 % Unexpected behaviour. I provide 72 labels, but the xticklabels do not

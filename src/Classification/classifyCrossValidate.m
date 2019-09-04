@@ -31,11 +31,11 @@
 %       will be assigned as ('shuffle', 'twister').
 %       --- Acceptable specifications for rand_seed ---
 %       - Single acceptable rng specification input (e.g., 1,
-%       'default', 'shuffle'); in these cases, the generator will
-%       be set to 'twister'.
+%           'default', 'shuffle'); in these cases, the generator will
+%           be set to 'twister'.
 %       - Dual-argument specifications as either a 2-element cell
-%       array (e.g., {'shuffle', 'twister'}) or string array
-%       (e.g., ["shuffle", "twister"].
+%           array (e.g., {'shuffle', 'twister'}) or string array
+%       (   e.g., ["shuffle", "twister"].
 %       - rng struct as assigned by rand_seed = rng.
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve

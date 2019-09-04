@@ -152,7 +152,7 @@ function [img, fig] = plotMatrix(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if isempty(ip.Results.axisColors) && isempty(ip.Results.axisLabels) ...
             && isempty(ip.Results.iconPath)
-        disp('Plotting with default number labels...')
+        disp('Plotting with default number labels.')
         set(gca,'xTickLabelRotation', ip.Results.textRotation);
         set(gca,'yTickLabelRotation', ip.Results.textRotation);
 
@@ -163,7 +163,7 @@ function [img, fig] = plotMatrix(RDM, varargin)
     elseif ~isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
             && isempty(ip.Results.iconPath)
         
-        disp('Plotting with user defined colored labels...')
+        disp('CASE: AXIS COLOR LABELS')
 
         [xTickCoords yTickCoords] = getTickCoord;
         set(gca,'xTickLabel', '');
@@ -198,7 +198,7 @@ function [img, fig] = plotMatrix(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
             && isempty(ip.Results.iconPath)
-        disp('Plotting with user defined labels...')
+        disp('CASE: LABEL')
 
         set(gca,'xTickLabel', '');
         set(gca,'yTickLabel', '');
@@ -217,7 +217,7 @@ function [img, fig] = plotMatrix(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif  ~isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.axisLabels)
-         disp('Plotting with user specified directory of image icons...')
+        
           
         set(gca,'xTick', [1:length(RDM)]);
         set(gca,'yTick',  [1:length(RDM)]);
@@ -250,12 +250,12 @@ function [img, fig] = plotMatrix(RDM, varargin)
 
             end
             
-%             % Resize to 40*40 square
-%             if height > width
-%                 thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
-%             else
-%                 thisIcon = imresize(thisIcon, 1);
-%             end
+            % Resize to 40*40 square
+            if height > width
+                thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
+            else
+                thisIcon = imresize(thisIcon, .5);
+            end
 
             % Add 3rd(color) dimension if there is none
             if length(size(thisIcon)) == 2
@@ -289,7 +289,6 @@ function [img, fig] = plotMatrix(RDM, varargin)
             && isempty(ip.Results.axisLabels)
         
                 
-        disp('Plotting with user defined colored blocks...')
         
           
         set(gca,'xTick', [1:length(RDM)]);

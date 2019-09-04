@@ -286,11 +286,11 @@ function plt = MSTimagehelper(sourceNodes, destNodes, weights, nodeLabels, ip)
             end
             
             % Resize to 40*40 square
-            if height > width
-                thisIcon = imresize(thisIcon, [50 NaN]);
-            else
-                thisIcon = imresize(thisIcon, [NaN 50]);
-            end
+%             if height > width
+%                 thisIcon = imresize(thisIcon, [50 NaN]);
+%             else
+%                 thisIcon = imresize(thisIcon, [NaN 50]);
+%             end
 
             % Add 3rd(color) dimension if there is none
             if length(size(thisIcon)) == 2
