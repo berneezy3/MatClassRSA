@@ -27,11 +27,16 @@
 %       feature dimension indices that the user wants to subset.  This arugument 
 %       will not do anything if input matrix X is a 3D,
 %       space-by-time-by-trials matrix.
-%   'randomSeed' - This option determines whether the randomization is to produce
-%       varying or unvarying results each different execution.
-%        --options--
-%       'shuffle' (default)
-%       'default' (replicate results)
+%   'randomSeed' - random seed for reproducibility. If not entered, rng
+%       will be assigned as ('shuffle', 'twister').
+%       --- Acceptable specifications for rand_seed ---
+%       - Single acceptable rng specification input (e.g., 1,
+%       'default', 'shuffle'); in these cases, the generator will
+%       be set to 'twister'.
+%       - Dual-argument specifications as either a 2-element cell
+%       array (e.g., {'shuffle', 'twister'}) or string array
+%       (e.g., ["shuffle", "twister"].
+%       - rng struct as assigned by rand_seed = rng.
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
 %       keep components that explan 90% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
@@ -303,7 +308,8 @@
     
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
-    rng(ip.Results.randomSeed);
+    %rng(ip.Results.randomSeed);
+    setUserSpecifiedRng(ip.Results.randomSeed);
 
 %{
     % DATA SHUFFLING (doing)

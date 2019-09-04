@@ -72,7 +72,7 @@ function [predictions decision_values] = modelPredict(X, mdl)
                 predictions = reshape(predictions,[cols rows]);
             end
         otherwise
-            error(['mdl must be of class TreeBagger, ClassificationDiscriminant ' ...
+            error(['mdl must be of class struct, ClassificationDiscriminant ' ...
                 'or TreeBagger']);
     end
     
