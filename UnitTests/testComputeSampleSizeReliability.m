@@ -79,4 +79,14 @@ r = computeSampleSizeReliability(X(96,:,:), labels72, 19, [], [], [], ["shuffle"
 rng
 
 %% 3D input with ntrials in split too large -- ** feature request **
-r = computeSampleSizeReliability(X, labels72, 19, 1000);
+r = computeSampleSizeReliability(X, labels72, 19, [1000 1]);
+
+split1 = squeeze(r(:,1,:));
+split2 = squeeze(r(:,2,:));
+n = numel(split1);
+
+assert(isequal(n, sum(isnan(split1(:)))));
+disp('success: first split output is all nan.')
+
+assert(isequal(sum(isnan(split2(:))), 0));
+disp('success: second split output contains no nans.')
