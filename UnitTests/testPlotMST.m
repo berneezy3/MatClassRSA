@@ -32,7 +32,7 @@ plotMST(ec_rdms);
 % Looks good. Need to check icon ordering!
 
 figure;
-plotMST(ec_rdms, 'iconPath', iconpath);
+plotMST(ec_rdms, 'iconPath', iconpath, 'iconSize', 8);
 
 %% Plot MST with nodeColors
 % This breaks.

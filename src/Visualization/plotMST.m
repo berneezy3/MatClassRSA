@@ -78,6 +78,7 @@ function img = plotMST(RDM, varargin)
     ip.addParameter('nodeColors', [], @(x) isvector(x)); 
     ip.addParameter('nodeLabels', [], @(x) isvector(x));
     ip.addParameter('iconPath', '');
+    ip.addParameter('iconSize', 40);
     ip.addParameter('edgeLabelSize', 15, @(x) isnumeric(x));
     ip.addParameter('nodeLabelSize', 15, @(x) isnumeric(x));
     ip.addParameter('nodeLabelRotation', 0, @(x) isnumeric(x));
@@ -286,11 +287,11 @@ function plt = MSTimagehelper(sourceNodes, destNodes, weights, nodeLabels, ip)
             end
             
             % Resize to 40*40 square
-%             if height > width
-%                 thisIcon = imresize(thisIcon, [50 NaN]);
-%             else
-%                 thisIcon = imresize(thisIcon, [NaN 50]);
-%             end
+            if height > width
+                thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
+            else
+                thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
+            end
 
             % Add 3rd(color) dimension if there is none
             if length(size(thisIcon)) == 2
@@ -330,9 +331,9 @@ function y = findAngle(x1, y1, x2, y2)
     y = atan(m) * 180 / pi;
     if rem(y,90) ~= 0
         if y > 0
-            y = 90 - y;
+            %y = 90 - y;
         else
-            y = 270- y;
+            %y = 270- y;
         end
     elseif (y > 90 && y <= 270) | (y >= -270 && y < -90)
         y = y + 180;
