@@ -22,7 +22,9 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %       --- Acceptable specifications for rand_seed ---
 %           - Single acceptable rng specification input (e.g., 1, 
 %               'default', 'shuffle'); in these cases, the generator will 
-%               be set to 'twister'.
+%               be set to 'twister'. If 'default' is entered, the seed will
+%               be set to 0. If 'shuffle' is entered, the seed will based
+%               on the current time.
 %           - Dual-argument specifications as either a 2-element cell 
 %               array (e.g., {'shuffle', 'twister'}) or string array 
 %               (e.g., ["shuffle", "twister"].
