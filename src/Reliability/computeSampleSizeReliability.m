@@ -19,7 +19,7 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
 %   num_trials_per_half (optional) - a vector of how many trials in a split half to
 %                                    use for reliability computation. (e.g. [1,2,3] would
 %                                    correspond to using 2, 4 and 6 trials in the reliability
-%                                    computation). If not entered, defaults to [1], meaning
+%                                    computation). If not entererd, defaults to [1], meaning
 %                                    that it uses 2 trials in total.
 %   num_permutations (optional) - how many permutations to split the trials for split half
 %                                 reliability? This is for inner loop to compute reliability.
@@ -29,16 +29,8 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
 %                                       This is useful if we wanted to compute the variance
 %                                       of the reliability across random draws of the trials.
 %                                       If not entered, this defaults to 10.
-%   rand_seed (optional) - random seed for reproducibility. If not entered, rng
-%       will be assigned as ('shuffle', 'twister'). 
-%       --- Acceptable specifications for rand_seed ---
-%           - Single acceptable rng specification input (e.g., 1, 
-%               'default', 'shuffle'); in these cases, the generator will 
-%               be set to 'twister'.
-%           - Dual-argument specifications as either a 2-element cell 
-%               array (e.g., {'shuffle', 'twister'}) or string array 
-%               (e.g., ["shuffle", "twister"].
-%           - rng struct as assigned by rand_seed = rng.
+%   rand_seed (optional) - random seed for reproducibility. If not entered, this defaults to 
+%                          'shuffle'.
 %
 % Output Args:
 %   reliabilities - If input matrix was 3D, dimensions are: num_trial_permutations x 
@@ -54,11 +46,13 @@ if length(size(X)) == 3
 end
 
 % If 2D matrix entered, dimensions are: trial x time
-% We will add a singleton dimension in the front for space so it
-% becomes space x trial x time.
-if length(size(X)) == 2 % Trial by time
-    temp = X; clear X
-    X(1,:,:) = temp; clear temp
+% We will permute so that it becomes time x trial and add
+% a singleton dimension in the front for space.
+if length(size(X)) == 2
+    X = permute(X, [2,1]);
+    dim1 = size(X,1);
+    dim2 = size(X,2);
+    X = reshape(X, [1,dim1,dim2]);
 end
 
 assert(size(X, 2) == length(Y), 'Length of labels vector does not match number of trials in the data.');
@@ -74,17 +68,18 @@ if nargin < 6 || isempty(num_trial_permutations)
     num_trial_permutations = 10;
 end
 
-% Set random number generator
-if nargin < 7 || isempty(rand_seed), setUserSpecifiedRng();
-else, setUserSpecifiedRng(rand_seed);
+% Set random seed
+if nargin < 7 || isempty(rand_seed)
+    rand_seed = 'shuffle';
 end
+rng(rand_seed);
 
 num_components = size(X, 1);
 total_trials = size(X, 2);
 num_trial_subsets = length(num_trials_per_half);
 num_images = length(unique(Y));
 
-reliabilities = zeros(num_trial_permutations, num_trial_subsets, num_components);
+reliabilities = nan(num_trial_permutations, num_trial_subsets, num_components);
 time_data = squeeze(X(:,:,timepoint_idx));
 for k=1:num_trial_permutations
 
@@ -104,6 +99,9 @@ for k=1:num_trial_permutations
             num_trials_to_use, ...
             num_images ...
         );
+        if sum(isnan(curr_data_labels)) == (num_trials_to_use * num_images)
+            continue;
+        end
         rel = computeReliability(curr_data, curr_data_labels, num_permutations);
         reliabilities(k,i,:) = mean(rel, 1);
     end % Trial subsets
@@ -121,12 +119,15 @@ unique_labels = unique(Y);
 assert(length(unique_labels) == num_images, 'Mismatch in number of unique images number of unique labels.')
 
 num_components = size(X, 1);
-new_data = zeros(num_components, num_trials_to_use*num_images);
-new_labels = zeros(num_trials_to_use*num_images,1);
+new_data = nan(num_components, num_trials_to_use*num_images);
+new_labels = nan(num_trials_to_use*num_images,1);
 
 for i=1:num_images
     curr_label = unique_labels(i);
     idx_to_use = find(Y==curr_label);
+    if length(idx_to_use) < num_trials_to_use
+        return
+    end
     idx_to_use = idx_to_use(1:num_trials_to_use);
     
     start_idx = (i-1) * num_trials_to_use + 1;
