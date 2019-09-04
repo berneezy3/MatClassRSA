@@ -75,7 +75,15 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 %       averagedX.  The size of whichObs should be length(averagedY) by
 %       groupSize.
 %
-% Example:
+% Bernard TODO: Add a fourth output, trialIdx, to show which trials are
+% averaged into each output averaged trial. Since the remainder handling
+% options mean that some averaged trials could comprise more single trials
+% than others, I think the best way to format the output would be as a cell
+% array of size averagedY, where each element i is a vector specifying
+% which trial (indices) of the input data were averaged in order to produce
+% averagedX(:, :, i) for 3D or averagedX(i,:) for 2D. So if the first
+% averaged trial represents the average of trials 1, 6, 10, 29, 35, then
+% trialIdx{1} = [1 6 10 29 35].
 %
 
 % This software is licensed under the 3-Clause BSD License (New BSD License),
@@ -152,6 +160,10 @@ parse(ip, X, Y, groupSize, varargin{:});
 if isempty(ip.Results.P), P = zeros(size(Y));
 else, P = ip.Results.P;
 end
+
+% Flag to return row vectors if vector inputs are rows.
+rowInputY = isrow(Y);
+rowInputP = isrow(P);
 
 % THROW ERROR if length of P does not equal length of Y
 assert(length(P) == length(Y), ...
@@ -367,4 +379,9 @@ end
 if xTransform
     averagedX = trRows2cube(averagedX, trialTime);
 end
+
+% If the vector inputs were rows to begin with, return them as rows.
+if rowInputY, averagedY = transpose(averagedY); end
+if rowInputP, averagedP = transpose(averagedP); end
+
 end
