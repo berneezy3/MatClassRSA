@@ -224,11 +224,11 @@ function img = plotMDS(RDM, varargin)
             end
             
             % Resize to 40*40 square
-            if height > width
-                thisIcon = imresize(thisIcon, [30 NaN]);
-            else
-                thisIcon = imresize(thisIcon, [NaN 30]);
-            end
+%             if height > width
+%                 thisIcon = imresize(thisIcon, [30 NaN]);
+%             else
+%                 thisIcon = imresize(thisIcon, [NaN 30]);
+%             end
             
             plotLength = (max(Y(:,xDim)) - min(Y(:,xDim)))/12;
             plotHeight = (max(Y(:,yDim)) - min(Y(:,yDim)))/12;
