@@ -5,7 +5,7 @@ uiwait(msgbox('In the next window, select the directory containing the .mat file
 inDir = uigetdir(pwd);
 currDir = pwd;
 cd(inDir)
-load S6.mat
+load S06.mat
 cd(currDir)
 %%
 
