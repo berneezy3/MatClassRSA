@@ -85,7 +85,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
 
     %addParameter(ip, 'actualLabels', defaultY, @(x) assert( isvector(x) ));
-    %addOptional(ip, 'actualLabels', defaultY, @isvector);
+    addOptional(ip, 'actualLabels', defaultY, @isvector);
 
     %{
 	addParameter(ip, 'averageTrials', defaultAverageTrials, ...
@@ -164,18 +164,21 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     disp('Predicting Model...')
         
     if (length(M) == 1) && ...
-       (strcmp(classifier, 'LDA') || strcmp(classifier, 'RF'))
+       (strcmp(classifier, 'LDA') || strcmp(classifier, 'RF')) || ...
+       ((pairwise == 0) && strcmp(classifier, 'SVM'))
+   
         
         P.predY = modelPredict(testData, M.mdl);
     
         % Get Accuracy and confusion matrix
-%         if ( ~isnan(ip.Results.actualLabels) )
-%             P.accuracy = computeAccuracy(P.predY, Y); 
-%             P.CM = confusionmat(Y, P.predY);
-%         else
-%             P.accuracy = NaN; 
-%             P.CM = NaN;
-%         end
+        if ( ~isnan(ip.Results.actualLabels) )
+            Y = ip.Results.actualLabels;
+            P.accuracy = computeAccuracy(P.predY, Y); 
+            P.CM = confusionmat(Y, P.predY);
+        else
+            P.accuracy = NaN; 
+            P.CM = NaN;
+        end
 
         predictionInfo = struct(...
                         'PCA', 1, ...
@@ -190,6 +193,31 @@ function [P, varargout] = classifyPredict(M, X, varargin)
 
         disp('Prediction Finished')
         disp('classifyPredict() Finished!')
+        
+    elseif (length(M) > 1) && ...
+            (strcmp(classifier, 'LDA') || strcmp(classifier, 'RF'))
+        
+        % Get Accuracy and confusion matrix
+        if ( ~isnan(ip.Results.actualLabels) )
+            Y = ip.Results.actualLabels;
+            P.accuracy = computeAccuracy(P.predY, Y); 
+            P.CM = confusionmat(Y, P.predY);
+        else
+            P.accuracy = NaN; 
+            P.CM = NaN;
+        end
+
+        
+        numClasses = tempM.classifierInfo.numClasses;
+        numDecBounds = length(M);
+        P = cell(1, numDecBounds);
+        decMatchups = nchoosek(1:numClasses, 2);
+
+        for i = 1:numDecBounds
+            [~, P{i}] = evalc(' classifyPredict(M{i}, X) ' );
+            P{i}.predictionInfo.classBoundary = decMatchups(i, :);
+            %P{i} = classifyPredict(M{i}, X);            
+        end
         
     elseif (pairwise == 1 ) && strcmp(classifier, 'SVM')
         
@@ -235,20 +263,6 @@ function [P, varargout] = classifyPredict(M, X, varargin)
         
         disp('Prediction Finished')
         disp('classifyPredict() Finished!')
-    
-    elseif (length(M) > 1) && ...
-            (strcmp(classifier, 'LDA') || strcmp(classifier, 'RF'))
-        
-        numClasses = tempM.classifierInfo.numClasses;
-        numDecBounds = length(M);
-        P = cell(1, numDecBounds);
-        decMatchups = nchoosek(1:numClasses, 2);
-
-        for i = 1:numDecBounds
-            [~, P{i}] = evalc(' classifyPredict(M{i}, X) ' );
-            P{i}.predictionInfo.classBoundary = decMatchups(i, :);
-            %P{i} = classifyPredict(M{i}, X);            
-        end
         
     
     end

@@ -30,7 +30,7 @@ M = classifyTrain( X(:, :, 1:floor(dim3/5)) , labels6(1:floor(dim3/5)), 'classif
 % Issue:
 %    Minor: why is M.trainingDataSize = [124,40,1036]. Technically, if I
 %    set 'timeUse' to 1:30, the trainingDataSize = [124,30,1036] right?
-%    Implementation looks fine though, I think.
+%    Implementation looks fine though, I think. ###FIXED##
 
 M = classifyTrain( X(:, :, 1:floor(dim3/5)) , labels6(1:floor(dim3/5)), 'timeUse', 1:30, 'classifier', 'LDA', 'PCA', 0);
 
@@ -39,7 +39,7 @@ M = classifyTrain( X(:, :, 1:floor(dim3/5)) , labels6(1:floor(dim3/5)), 'timeUse
 % Issue:
 %    Minor: why is M.trainingDataSize = [124,40,1036]. Technically, if I
 %    set 'spaceUse' to 1:120, the trainingDataSize = [120,40,1036] right?
-%    Implementation looks fine though, I think.
+%    Implementation looks fine though, I think.  ###FIXED##
 
 M = classifyTrain( X(:, :, 1:floor(dim3/5)) , labels6(1:floor(dim3/5)), 'spaceUse', 1:120, 'classifier', 'LDA', 'PCA', 0);
 
@@ -47,10 +47,11 @@ M = classifyTrain( X(:, :, 1:floor(dim3/5)) , labels6(1:floor(dim3/5)), 'spaceUs
 % Issues:
 %   - Error using classifyTrain (line 198)
 %       The value of 'kernel' is invalid. Undefined function or variable 'expectedKernels'.
+%       ### FIXED ###
 %
 %   - Although {'PCA', 0} is set, PCA is still run:
 %       Conducting Principal Component Analysis...
-%       got 681 PCs
+%       got 681 PCs ### FIXED ###
 
 M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 0);
 
@@ -64,10 +65,10 @@ M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classif
 % Issue:
 %    - Minor: Should we add numTrees and minLeafSize to the classifierInfo
 %      struct, so users know what hyperparameters were set?  I guess the
-%      same goes for the LDA and SVM.
+%      same goes for the LDA and SVM. ### FIXED ###
 
 M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'RF', 'PCA', 0);
-M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), ...
+M1 = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), ...
         'classifier', 'RF', ...
         'PCA', 0, ...
         'numTrees', 100, ...
