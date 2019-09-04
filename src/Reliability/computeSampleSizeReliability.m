@@ -44,7 +44,9 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
 % Output Args:
 %   reliabilities - If input matrix was 3D, dimensions are: num_trial_permutations x 
 %                   length(num_trials_per_half) x nSpace. If input matrix was 2D, dimensions 
-%                   are: num_trial_permutations x length(num_trials_per_half)
+%                   are: num_trial_permutations x length(num_trials_per_half). Note that the
+%                   permutations used to split the trials in half for the inner loop reliability
+%                   computation is averaged out.
 
 assert(length(size(X)) == 3 || length(size(X)) == 2, 'Invalid number of dimensions in the data.');
 
