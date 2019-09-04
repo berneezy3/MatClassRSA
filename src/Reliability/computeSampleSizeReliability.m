@@ -29,8 +29,16 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
 %                                       This is useful if we wanted to compute the variance
 %                                       of the reliability across random draws of the trials.
 %                                       If not entered, this defaults to 10.
-%   rand_seed (optional) - random seed for reproducibility. If not entered, this defaults to 
-%                          'shuffle'.
+%   rand_seed (optional) - Random number generator specification. If not entered, rng
+%       will be assigned as ('shuffle', 'twister'). 
+%       --- Acceptable specifications for rand_seed ---
+%           - Single acceptable rng specification input (e.g., 1, 
+%               'default', 'shuffle'); in these cases, the generator will 
+%               be set to 'twister'.
+%           - Dual-argument specifications as either a 2-element cell 
+%               array (e.g., {'shuffle', 'twister'}) or string array 
+%               (e.g., ["shuffle", "twister"].
+%           - rng struct as assigned by rand_seed = rng.
 %
 % Output Args:
 %   reliabilities - If input matrix was 3D, dimensions are: num_trial_permutations x 
@@ -46,13 +54,10 @@ if length(size(X)) == 3
 end
 
 % If 2D matrix entered, dimensions are: trial x time
-% We will permute so that it becomes time x trial and add
-% a singleton dimension in the front for space.
+% We add a singleton dimension in the front for space.
 if length(size(X)) == 2
-    X = permute(X, [2,1]);
-    dim1 = size(X,1);
-    dim2 = size(X,2);
-    X = reshape(X, [1,dim1,dim2]);
+    temp = X; clear X
+    X(1,:,:) = temp; clear temp
 end
 
 assert(size(X, 2) == length(Y), 'Length of labels vector does not match number of trials in the data.');
@@ -68,11 +73,10 @@ if nargin < 6 || isempty(num_trial_permutations)
     num_trial_permutations = 10;
 end
 
-% Set random seed
-if nargin < 7 || isempty(rand_seed)
-    rand_seed = 'shuffle';
+% Set random number generator
+if nargin < 7 || isempty(rand_seed), setUserSpecifiedRng();
+else, setUserSpecifiedRng(rand_seed);
 end
-rng(rand_seed);
 
 num_components = size(X, 1);
 total_trials = size(X, 2);
