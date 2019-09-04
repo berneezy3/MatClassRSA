@@ -1,6 +1,6 @@
 function [dissimilarities] = computePearsonRDM(X, Y, num_permutations, rand_seed)
 %----------------------------------------------------------------------------------
-%  [dissimilarities] = computePearsonRDM(X, Y, num_permutations)
+%  [dissimilarities] = computePearsonRDM(X, Y, num_permutations, rand_seed)
 %----------------------------------------------------------------------------------
 %
 % Returns pairwise dissimilarities with respect to cross-validated Pearson
