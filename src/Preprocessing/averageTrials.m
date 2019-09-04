@@ -1,4 +1,4 @@
-function [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, varargin)
+function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
 % [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
@@ -70,6 +70,10 @@ function [averagedX, averagedY, averagedP] = averageTrials(X, Y, groupSize, vara
 %       averagedY - the label vector for the trials in averagedX.
 %       averagedP - the participants vector corresponding to trials in
 %           averagedY.
+%       whichObs - a matrix that contains information on which trials in
+%       the input matrix X were used to create trial in
+%       averagedX.  The size of whichObs should be length(averagedY) by
+%       groupSize.
 %
 % Example:
 %
@@ -182,6 +186,7 @@ averagedP = [];
 XALL = X;
 YALL = Y;
 PALL = P;
+whichObs = {};
 clear X Y P
 
 % Get participant information
@@ -200,6 +205,14 @@ for pp = 1:nP % Iterate through the participants
     thisIdx = find(PALL == thisParticip);
     X = (XALL(thisIdx,:));
     Y = YALL(thisIdx);
+    
+    % the original data set with data from other participants set as zero,
+    % to preserve original data indexing
+    notThisInd = find(PALL ~= thisParticip);
+    Xalt = XALL;
+    Xalt(notThisInd, :) = 0;
+    Yalt = YALL;
+    Yalt(notThisInd) = 0;
     
     % create dictionary to store labels and their corresponding counts
     uniqueLabels = unique(Y);
@@ -233,15 +246,19 @@ for pp = 1:nP % Iterate through the participants
     for i = 1:length(uniqueLabels)
         %refresh temp index vector
         tempInd = [];
-        tempInd = find(Y==uniqueLabels(i));
+        tempInd = find(Yalt==uniqueLabels(i));
         % iterate on each group with the same label
         for j=1:labelNumGroups(num2str(uniqueLabels(i)))
             % iterate on each index within a group of the same label
             summedRow = zeros(1,c);
+            thisAvgObs = zeros(1, groupSize);
             for k=1:groupSize
-                summedRow = summedRow + X(tempInd(k + (j-1)*groupSize), :);
+                summedRow = summedRow + Xalt(tempInd(k + (j-1)*groupSize), :);
+                thisAvgObs(k) = tempInd(k + (j-1)*groupSize);
             end
             averagedRow = summedRow/groupSize;
+%             whichObs = [whichObs; thisAvgObs];
+            whichObs{end + 1} =thisAvgObs ;
             averagedX = [averagedX ; averagedRow];
             averagedY = [averagedY; uniqueLabels(i)];
             averagedP = [averagedP; thisParticip];
@@ -258,6 +275,8 @@ for pp = 1:nP % Iterate through the participants
             remInd = find(Y==uniqueLabels(i), ...
                 labelNumRemains(num2str(uniqueLabels(i))),...
                 'last');
+            
+            
             
             % Initialize return parameters remX, remY
             remX = [];
@@ -284,6 +303,9 @@ for pp = 1:nP % Iterate through the participants
                     averagedY = [averagedY; uniqueLabels(i)];
                     averagedP = [averagedP; thisParticip];
                     
+                    whichObs{end + 1} = remInd;
+
+                    
                     % CASE: APPEND TO LAST GROUP W/ REMAINDER
                 elseif (strcmp(ip.Results.handleRemainder, 'append'))
                     % sum remainder rows with the same label
@@ -300,6 +322,7 @@ for pp = 1:nP % Iterate through the participants
                     remAveragedRow = remSummedRow/(groupSize + ...
                         labelNumRemains(num2str(uniqueLabels(i))));
                     averagedX = [averagedX; remAveragedRow];
+                    whichObs{end} = [whichObs{end} remInd];
                     
                     % CASE: DISTRIBUTE REMAINDER TO GROUPS W/ SAME LABEL
                 elseif (strcmp(ip.Results.handleRemainder, 'distribute'))
@@ -310,9 +333,11 @@ for pp = 1:nP % Iterate through the participants
                     for k = 1:length(remInd)
                         remTempRow = X(remInd(k), :) + averagedX(averagedInd(k),:) * groupSize;
                         X(averagedInd(k), :) = remTempRow/(groupSize+1);
+                        whichObs{averagedInd(k)} = [whichObs{end} remInd(k)]
                     end
                 end
             end
+            
         end
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

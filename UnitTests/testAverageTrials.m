@@ -64,6 +64,31 @@ for i=1:nTrial
     idx = y2(i);
     assert(isequal(X_2D(idx,:), x2(i,:)));
 end
+%% check average across participants, also check index vector (BY BERNARD)
+
+nObs = 1000;
+nfeat = 1000;
+X_2D = rand(nObs, nfeat);
+X_2D = [X_2D; rand(1, nfeat)];
+
+% 5 classes
+Y = zeros(1, nObs);
+Y(1:200) = 1;
+Y(201:400) = 2;
+Y(401:600) = 3;
+Y(601:800) = 4;
+Y(801:1000) = 5;
+Y = [Y 1];
+
+% 2 participants
+P = zeros(1, nObs);
+P([1:100, 201:300, 401:500, 601:700, 801:900]) = 1;
+P([101:200, 301:400, 501:600, 701:800, 901:1000]) = 2;
+P = [P 1]
+
+[x2, y2, p2, whichObs] = averageTrials(X_2D, Y, 20, P, 'endShuffle', 0, 'handleRemainder', 'distribute');
+assert(isequal(X_2D, x2));
+
 
 
 
