@@ -5,9 +5,10 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
 %                       num_trials_per_half, num_permutations, num_trial_permutations)
 %---------------------------------------------------------------------------------------------
 %
-% Computes reliabilities of data over subsets of trials for each component for a specific
-% time point. Typically, one would aggregate the trials across participants and provide the
-% aggregated data as input into this function.
+% Computes split-half reliabilities of data over subsets of trials for each component for a 
+% specific time point. Typically, one would aggregate the trials across participants and provide
+% the aggregated data as input into this function. Since split-half reliability is computed, 
+% Spearman-Brown correction is applied.
 %
 % Input Args:
 %   X - data matrix. X is a 3D matrix, it is assumed to be of size 

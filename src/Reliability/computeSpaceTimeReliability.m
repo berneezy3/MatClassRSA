@@ -3,11 +3,12 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %  [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------------
 %
-% Returns reliabilities computed for each component across time. With the resulting
-% data matrix, one can take the mean along the third dimension (the components axis)
-% and this will tell you the average reliability across components at each time point.
+% Returns split-half reliabilities computed for each component across time. With the 
+% resulting data matrix, one can take the mean along the third dimension (the components 
+% axis) and this will tell you the average reliability across components at each time point.
 % On the other hand, if one takes the mean across the first dimension (the time axis),
-% one will be able to see how reliable each component is across time (on average).
+% one will be able to see how reliable each component is across time (on average). Since
+% split-half reliability is computed, Spearman-Brown correction is applied.
 %
 % Input Args:
 %   X - data matrix. 3D data matrices are assumed to be nSpace x nTime x
