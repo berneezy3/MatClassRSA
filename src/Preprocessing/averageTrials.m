@@ -373,6 +373,7 @@ if ip.Results.endShuffle
     averagedX = averagedX(randIdx,:);
     averagedY = averagedY(randIdx);
     averagedP = averagedP(randIdx);
+    whichObs = whichObs(randIdx);
 end
 
 % If the input data was 3D to begin with, convert it back to 3D
