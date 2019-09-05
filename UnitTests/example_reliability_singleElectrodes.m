@@ -5,8 +5,6 @@
 % Example code for compute reliability across space using
 % computeSpaceTimeReliability.m.
 
-% TODO: Add plot of scalp map
-
 clear all; close all; clc
 
 rng('shuffle');
@@ -35,6 +33,7 @@ xlim([0,nSpace+1]);
 xlabel('Electrode Index');
 ylabel('Reliability');
 
+% Plot average reliability across time on scalp map
 figure;
 cBarMin = min(mean(avg_space_reliability_space, 2));
 cBarMax = max(mean(avg_space_reliability_space, 2));
