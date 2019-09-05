@@ -34,3 +34,10 @@ plot(1:nSpace, mean(avg_space_reliability_space, 2)-std(avg_space_reliability_sp
 xlim([0,nSpace+1]);
 xlabel('Electrode Index');
 ylabel('Reliability');
+
+figure;
+cBarMin = min(mean(avg_space_reliability_space, 2));
+cBarMax = max(mean(avg_space_reliability_space, 2));
+plotOnEgi([mean(avg_space_reliability_space, 2); nan(4,1)], [cBarMin cBarMax], true);
+
+
