@@ -51,11 +51,16 @@ function xOut = convertSimToDist(xIn, distType, distPower)
 % POSSIBILITY OF SUCH DAMAGE.
 
 distType = lower(distType);
+if exist('distPower')
+    if distPower <= 0 || floor(distPower) ~= distPower
+        error('Input ''distPower'' must be a positive integer.');
+    end
+end
 
 switch distType
     case {'linear', 'lin'}
         disp('Distance: linear')
-        if nargin > 2 & distPower ~= 1
+        if nargin > 2 && distPower ~= 1
            warning('Ignoring non-unity distance power for Linear computation.') 
         end
         xOut = 1 - xIn;
