@@ -84,10 +84,9 @@ function [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
 %     distance computations can be performed.
 % 
 % 'rankdistances' -- 'none', 'rank', 'percentrank'
-%   The distances of an RDM are sometimes transformed to ranks or
-%   percentile ranks for visualizing the data. 
+%   The distances of an RDM are sometimes transformed to ranks f
 %   - For 'similarity' AND 'distance' input matrices M, the default is 
-%     'none'. If 'rank' or 'percentrank' are specified but the input matrix 
+%     'none'. If 'rank' or 'percentrank' are called but the input matrix 
 %     is not symmetric, the subfunction will issue a warning and operate 
 %     only on the lower triangle of the matrix, returning a symmetric 
 %     matrix.
@@ -99,7 +98,7 @@ function [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
 % params -- RDM computation parameters. It is a struct whose fields specify
 %   normalization, symmetrization, distance measure, distance power, and 
 %   ranking of distances.
-
+%
 % Notes
 % - Computing ranks (with ties): tiedrank
 % - Computing inverse percentile: http://bit.ly/2koMsAn
