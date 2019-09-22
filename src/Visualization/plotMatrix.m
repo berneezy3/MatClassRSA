@@ -89,6 +89,7 @@ function [img, fig] = plotMatrix(RDM, varargin)
     ip.addParameter('colormap', '');
     ip.addParameter('colorbar', '');
     ip.addParameter('matrixLabels', 0);
+    ip.addParameter('matrixLabelColor', 'black');
     ip.addParameter('FontSize', 15, @(x) isnumeric(x));
     ip.addParameter('ticks', 5, @(x) (isnumeric(x) && x>0));
     ip.addParameter('textRotation', 0, @(x) assert(isnumeric(x), ...
@@ -112,7 +113,8 @@ function [img, fig] = plotMatrix(RDM, varargin)
         [x,y] = meshgrid(1:length(RDM));   %# Create x and y coordinates for the strings
         text(x(:),y(:),textStrings(:),...      %# Plot the strings
                     'HorizontalAlignment','center', ...
-                    'FontSize', ip.Results.FontSize);
+                    'FontSize', ip.Results.FontSize, ...
+                    'Color', ip.Results.matrixLabelColor);
     end
     
     if ip.Results.colorbar > 0

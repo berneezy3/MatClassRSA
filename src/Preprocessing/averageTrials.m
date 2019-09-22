@@ -270,7 +270,7 @@ for pp = 1:nP % Iterate through the participants
             end
             averagedRow = summedRow/groupSize;
 %             whichObs = [whichObs; thisAvgObs];
-            whichObs{end + 1} =thisAvgObs ;
+            whichObs{end + 1} = thisAvgObs;
             averagedX = [averagedX ; averagedRow];
             averagedY = [averagedY; uniqueLabels(i)];
             averagedP = [averagedP; thisParticip];
@@ -284,11 +284,13 @@ for pp = 1:nP % Iterate through the participants
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if (labelNumRemains(num2str(uniqueLabels(i))) > 0)
             
-            remInd = find(Y==uniqueLabels(i), ...
+            % what is this???
+            %
+            remInd = find(Yalt==uniqueLabels(i), ...
                 labelNumRemains(num2str(uniqueLabels(i))),...
                 'last');
             
-            
+%             disp(Y(remInd));
             
             % Initialize return parameters remX, remY
             remX = [];
@@ -306,8 +308,9 @@ for pp = 1:nP % Iterate through the participants
                     % CASE: CREATE NEW GROUP W/ REMAINDER
                 elseif (strcmp(ip.Results.handleRemainder, 'newGroup'))
                     % sum remainder rows with the same label
+                    remSummedRow = zeros(1,c);
                     for k = 1:length(remInd)
-                        remSummedRow = remSummedRow + X(remInd(k), :);
+                        remSummedRow = remSummedRow + Xalt(remInd(k), :);
                     end
                     % create a new group for them
                     remAveragedRow = remSummedRow/length(remInd);
@@ -316,23 +319,25 @@ for pp = 1:nP % Iterate through the participants
                     averagedP = [averagedP; thisParticip];
                     
                     whichObs{end + 1} = remInd;
+                    
+                    disp(YALL(whichObs{end}))
 
                     
                     % CASE: APPEND TO LAST GROUP W/ REMAINDER
                 elseif (strcmp(ip.Results.handleRemainder, 'append'))
                     % sum remainder rows with the same label
+                    remSummedRow = zeros(1,c);
                     for k = 1:length(remInd)
-                        remSummedRow = remSummedRow + X(remInd(k), :);
+                        remSummedRow = remSummedRow + Xalt(remInd(k), :);
                     end
                     % remove the last row, so we can re-add it with the
                     % remainder values in the calculation
                     averagedX = averagedX(1:end-1,:);
                     
                     % append them to the last group with same label
-                    remSummedRow = summedRow * groupSize + ...
-                        remSummedRow * labelNumRemains(num2str(uniqueLabels(i)));
+                    remSummedRow = summedRow + remSummedRow;
                     remAveragedRow = remSummedRow/(groupSize + ...
-                        labelNumRemains(num2str(uniqueLabels(i))));
+                        length(remInd));
                     averagedX = [averagedX; remAveragedRow];
                     whichObs{end} = [whichObs{end} remInd];
                     
@@ -343,8 +348,8 @@ for pp = 1:nP % Iterate through the participants
                     averagedInd = find(averagedY==uniqueLabels(i));
                     
                     for k = 1:length(remInd)
-                        remTempRow = X(remInd(k), :) + averagedX(averagedInd(k),:) * groupSize;
-                        X(averagedInd(k), :) = remTempRow/(groupSize+1);
+                        remTempRow = Xalt(remInd(k), :) + averagedX(averagedInd(k),:) * groupSize;
+                        Xalt(averagedInd(k), :) = remTempRow/(groupSize+1);
                         whichObs{averagedInd(k)} = [whichObs{end} remInd(k)]
                     end
                 end

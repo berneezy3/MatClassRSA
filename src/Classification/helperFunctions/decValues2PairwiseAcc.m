@@ -29,10 +29,12 @@ function [pairwiseAccuracies, pairwiseCMs, pairwiseCell] = decValues2PairwiseAcc
                 tallyCoordZ = classTuple2Nchoose2Ind(thisBoundClasses, length(labels));
                 this2x2cm = pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.CM;
                 this2x2cm(tallyCoordX, tallyCoordY) =  this2x2cm(tallyCoordX, tallyCoordY) + 1;
+                thisAcc = (this2x2cm(1,1) + this2x2cm(2,2)) / sum(sum(this2x2cm));
                 pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.CM = this2x2cm;
+                pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.accuracy = thisAcc;
                 pairwiseCell{thisBoundClasses(2), thisBoundClasses(1)}.CM = this2x2cm;
-
-                
+                pairwiseCell{thisBoundClasses(2), thisBoundClasses(1)}.accuracy = thisAcc;
+                                
                 % increment
                 pairwiseCMs(tallyCoordX, tallyCoordY, tallyCoordZ) = ...
                      pairwiseCMs(tallyCoordX, tallyCoordY, tallyCoordZ) + 1;
@@ -46,14 +48,30 @@ function [pairwiseAccuracies, pairwiseCMs, pairwiseCell] = decValues2PairwiseAcc
 %                 disp(['2-by-2 pairwise mat after increment: ' ]);
 %                 disp(num2str(pairwiseCMs(:,:, tallyCoordZ)));
 
-            %elseif (secondInds(k) == actualLabel)
             end
 
         end
-    %                 disp('%%%%%%%%%%%%%%%%%%%%%%%%')
-    %                 disp('End decision boundary analysis for current observation.  There should have been 5 analyses for current obs')
+%                 disp('%%%%%%%%%%%%%%%%%%%%%%%%')
+%                 disp('End decision boundary analysis for current observation.  There should have been 5 analyses for current obs')
     end
     
-    pairwiseAccuracies = 0;
+    
+    [d1 d2 d3] = size(pairwiseCMs);
+    [r c] = size(pairwiseCell);
+    AM = NaN(r,c);
+    denom = 0;
+    numer = 0;
+    indPairs = nchoosek([1 2 3 4 5 6],2);
+    tempCM = [];
+    for i = 1:d3
+        ind = indPairs(i, :);
+        tempCM = pairwiseCell{ind(1), ind(2)}.CM;
+        numer = tempCM(1,1) + tempCM(2,2);
+        denom = sum(sum(tempCM));
+        AM(ind(1), ind(2)) = numer / denom;
+        AM(ind(2), ind(1)) = numer / denom;
+    end
+    
+    pairwiseAccuracies = AM;
     
 end

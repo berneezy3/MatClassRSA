@@ -69,17 +69,15 @@
 %   128.
 %   'minLeafSize' - Choose the minimum number of observations per tree leaf.
 %   Default is 1,
-%   'verbose' - Include the distribution of accuracies from the
-%   permutations test and also a concatednated struct of all the models
 %
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
 %   information, including confucion matrix, accuracy, prediction results
 %   etc.  The structure of C will differ depending on the value of the 
-%   input value 'pairwise', which is set to 0 by default.  If pairwise is
-%   0, then C is a struct containing values:
-%   if 'pairwise' is set to 1, then C will be a cell matrix of structs,
-%   symmetrical along the diagonal.  
+%   input value 'pairwise', which is set to 0 by default.  if 'pairwise' 
+%   is set to 1, then C will be a cell matrix of structs, symmetrical along 
+%   the diagonal.  If pairwise is 0, then C is a struct containing values:
+%   
 %   CM - Confusion matrix that summarizes the performance of the
 %       classification, in which rows represent actual labels and columns
 %       represent predicted labels.  Element i,j represents the number of 
@@ -87,10 +85,7 @@
 %       belonging to class j.
 %   accuracy - Classification accuracy
 %   predY - predicted label vector
-%   pVal - p-value of the classification
-%       classifierInfo - A struct summarizing the options selected for the
-%       classification.
-%   modelsConcat (verbose output) - Struct containing the N models used during cross
+%   modelsConcat - Struct containing the N models used during cross
 %   validation.
 
 % TODO:
@@ -152,7 +147,6 @@
     defaultTimeUse = [];
     defaultSpaceUse = [];
     defaultFeatureUse = [];
-    defaultVerbose = 0;
     defaultRandomSeed = 'shuffle';
     defaultKernel = 'rbf';
 %   defaultDiscrimType = 'linear';
@@ -168,7 +162,6 @@
     expectedClassifier = {'SVM', 'LDA', 'RF', 'SVM2'};
 %     expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
     expectedPValueMethod = {'permuteFullModel'};
-    expectedVerbose = {0,1};
     expectedRandomSeed = {'default', 'shuffle'};
     expectedKernel = {'linear', 'sigmoid', 'rbf', 'polynomial'};
     expectedPairwise = {0,1};
@@ -210,8 +203,6 @@
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
-        addParamValue(ip, 'verbose', defaultVerbose, ...
-            @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
@@ -245,8 +236,6 @@
             @(x) (assert(isvector(x))));
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
-        addParameter(ip, 'verbose', defaultVerbose, ...
-            @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
 
         addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
         addParameter(ip, 'numTrees', 128);
@@ -396,7 +385,7 @@
         strcmp(ip.Results.classifier, 'RF'))
     
         decision_values = NaN(length(Y), numDecBounds);
-        
+        AM = NaN(numClasses, numClasses);
     
         for cat1 = 1:numClasses-1
             for cat2 = (cat1+1):numClasses
@@ -417,7 +406,10 @@
                 tempStruct.dataPoints = find(currUse);
                 tempStruct.predY = tempC.predY;
                 
+                
                 %tempStruct.decision
+                AM(cat1, cat2) = tempStruct.accuracy;
+                AM(cat2, cat1) = tempStruct.accuracy;
                 pairwiseCell{cat1, cat2} = tempStruct;
                 pairwiseCell{cat2, cat1} = tempStruct;
                 
@@ -430,7 +422,8 @@
         end
         
 
-        C = pairwiseCell;
+        C.pairwiseInfo = pairwiseCell;
+        C.AM = AM;
         disp('classifyCrossValidate() Finished!')
         return
     % END PAIRWISE LDA/RF
@@ -465,7 +458,8 @@
         
         %convert pairwiseMat3D to diagonal matrix
         
-        C = pairwiseCell;
+        C.pairwiseInfo = pairwiseCell;
+        C.AM = pairwiseAccuracies;
         disp('classifyCrossValidate() Finished!')
         return;
        
@@ -518,14 +512,8 @@
             pVal = '';    
     end
 %}
-    if ip.Results.verbose
-        varargout{1} = accDist;
-        varargout{2} = modelsConcat;
-        C.accDist = accDist;
-        C.modelsConcat = modelsConcat;
-    end
-    
 
+    C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.classifierInfo = classifierInfo;
     disp('classifyCrossValidate() Finished!')
