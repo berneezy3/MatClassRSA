@@ -20,7 +20,7 @@ iconpath = './stimuli/';
 %% Plot RDM with basic options -- font and colormap
 % Looks good
 
-plotMatrix(ec_rdms, 'colormap', 'jet', 'FontSize', 5, 'textRotation', 45, 'matrixLabels', 0);
+plotMatrix(ec_rdms, 'colormap', 'jet', 'FontSize', 5, 'textRotation', 45, 'matrixLabels', 0, 'matrixLabelColor', 'white');
 
 %% Plot RDM without any entry labels and colour bar
 % Looks good
