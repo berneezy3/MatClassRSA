@@ -76,7 +76,7 @@ end
 %% SUCCESS: 3D input data matrix with endShuffle and averaging the remaining trials to a new pseudo-trial
 
 Y = randi(10, [1 nTrial]);
-[x3, y3, p3, o3] = averageTrials(X_3D, Y, 5, P, 'endShuffle', 1, 'handleRemainder', 'newGroup');
+[x3, y3, p3, o3] = averageTrials(X_3D, Y, 5, P, 'endShuffle', 0, 'handleRemainder', 'newGroup');
 
 % Test that averaged data are as expected
 assert(length(y3) == length(o3), 'Lengths of output labels and pseudotrials unequal');

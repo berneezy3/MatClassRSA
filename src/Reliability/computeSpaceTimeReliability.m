@@ -18,14 +18,16 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %   num_permutations (optional) - how many permutations to split the trials for split-half
 %                                 reliability. If not entered, this defaults to 10.
 %   rand_seed (optional) - Random number generator specification. If not entered, rng
-%       will be assigned as ('shuffle', 'twister'). 
+%       will be assigned as {'shuffle', 'twister'}. 
 %       --- Acceptable specifications for rand_seed ---
 %           - Single acceptable rng specification input (e.g., 1, 
 %               'default', 'shuffle'); in these cases, the generator will 
-%               be set to 'twister'.
+%               be set to 'twister'. If 'default' is entered, the seed will
+%               be set to 0. If 'shuffle' is entered, the seed will based
+%               on the current time.
 %           - Dual-argument specifications as either a 2-element cell 
 %               array (e.g., {'shuffle', 'twister'}) or string array 
-%               (e.g., ["shuffle", "twister"].
+%               (e.g., ["shuffle", "twister"]).
 %           - rng struct as assigned by rand_seed = rng.
 %
 % Output Args:
