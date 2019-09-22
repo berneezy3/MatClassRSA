@@ -2,7 +2,7 @@ function [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
 %-------------------------------------------------------------------
 % [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
 % ------------------------------------------------------------------
-% Blair - January 31, 2017, revised July-September 2019
+% Blair - January 31, 2017, revised September 2019
 %
 % [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
 % transforms and scales generalized proximity matrices (e.g., multicategory
@@ -94,7 +94,7 @@ function [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
 %
 % OUTPUTS
 % RDM -- The Representational Dissimilarity (distance) Matrix. RDM is a
-%   square matrix of the same size as the input variable M.
+%   square matrix of the same size as the input matrix M.
 %
 % params -- RDM computation parameters. It is a struct whose fields specify
 %   normalization, symmetrization, distance measure, distance power, and 
@@ -146,18 +146,18 @@ ip = inputParser;
 ip.CaseSensitive = false;
 
 if nargin < 2
-    error('Must input at least a matrix M and pairs/multiclass specification.');
+    error('Must input at least a matrix M and similarity/distance specification.');
 end
 matrixType = lower(matrixType); % Convert to lowercase
 
-% Specify input parser parameters based in pairwise or multiclass
-if any(strcmp(matrixType, {'p', 'pair', 'pairs', 'pairwise'}))
-    disp('Operating on pairwise input matrix.')
-    defaultNormalize = 'none';
-    defaultSymmetrize = 'none';
+% Specify input parser parameters based in similarity or distance
+if any(strcmp(matrixType, {'d', 'dist', 'distance'}))
+    disp('Operating on input distance matrix.')
+    defaultNormalize = 'zeroToOne';
+    defaultSymmetrize = 'arithmetic';
     defaultDistance = 'none';
-elseif any(strcmp(matrixType, {'m', 'multi', 'multiclass', 'multicategory'}))
-    disp('Operating on multiclass input matrix.')
+elseif any(strcmp(matrixType, {'s', 'sim', 'similarity'}))
+    disp('Operating on input similarity matrix.')
     defaultNormalize = 'diagonal';
     defaultSymmetrize = 'arithmetic';
     defaultDistance = 'linear';
@@ -165,13 +165,14 @@ else
     error(['Specified matrix type is not in the allowable set of values. '...
         'See function documentation for more information.'])
 end
+% Here are the parameters that are the same for similarity and distance
 defaultDistpower = 1;
 defaultRankdistances = 'none';
 
 % Specify expected values
-expectedMatrixType = {'p', 'pair', 'pairs', 'pairwise',...
-    'm', 'multi', 'multiclass', 'multicategory'};
-expectedNormalize = {'diagonal', 'sum', 'none'};
+expectedMatrixType = {'d', 'dist', 'distance',...
+   's', 'sim', 'similarity'};
+expectedNormalize = {'diagonal', 'sum', 'zeroToOne', 'none'};
 expectedSymmetrize = {'arithmetic', 'mean',...
     'geometric', 'harmonic', 'none'};
 expectedDistance = {'linear', 'power', 'logarithmic', 'none'};
