@@ -229,6 +229,7 @@ params.distance = ip.Results.distance;
 params.distpower = ip.Results.distpower;
 params.rankdistances = ip.Results.rankdistances;
 
+% START HERE TODO
 % Verify inappropriate parms not specified with pairwise input matrix
 if any(strcmp(matrixType, {'p', 'pair', 'pairs', 'pairwise'}))
    if ~strcmp(params.normalize, 'none')
