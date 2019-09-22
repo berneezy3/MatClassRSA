@@ -12,6 +12,7 @@ function xOut = normalizeMatrix(xIn, normType)
 %   - Diagonal ('diagonal', 'diag', 'd')
 %   - Sum ('sum', 's')
 %   - None ('none', 'n')
+%   - Subtract 0.5 and then divide by 0.5 ('zeroToOne', 'z')
 %
 % There is no default normalization approach, as normalization type is
 % assumed to be decided prior to calling this function. If none of the
@@ -70,6 +71,9 @@ switch normType
     case {'none', 'n'}
         disp('Normalize: none')
         xOut = xIn;
+    case {'zeroToOne', 'z'}
+        disp('Normalize: zeroToOne')
+        xOut = (xIn - 0.5) / 0.5;
     otherwise
         error('Normalize type not recognized.')
 end
