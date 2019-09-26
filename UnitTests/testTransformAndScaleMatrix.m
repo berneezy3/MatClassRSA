@@ -1,4 +1,8 @@
 % testTransformAndScaleMatrix.m
+% ---------------------
+% Nathan - Sep 25, 2019
+%
+% Testing expected successful and unsuccessful calls to transformAndScaleMatrix.m.
 
 % General checks: Try out different parameter configurations when inputting
 % a confusion-type matrix and a pairwise accuracy-type matrix
@@ -16,3 +20,18 @@
 % - when specifying distance input, try inputting a non-symmetric matrix
 % and asking the function to rank distances, and see if the output is
 % symmetric and ranked based on the lower triangle only
+
+close all; clear all; clc
+
+% Make random classification accuracy matrix
+C = [0 0.5 0.5; 0.5 0 0.3; 0.5 0.3 0];
+
+%% Testing basic usage
+% Error:
+%   Error using normalizeMatrix (line 60)
+%   Cannot divide by zero on the diagonal.
+% 
+%   Error in transformAndScaleMatrix (line 261)
+%   NM = normalizeMatrix(M, params.normalize);
+
+[RDM, params] = transformAndScaleMatrix(C, 's');
