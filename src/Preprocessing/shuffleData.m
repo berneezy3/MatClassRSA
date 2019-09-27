@@ -73,6 +73,8 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: setUserSpecifiedRng
 
 % Set random number generator
 if nargin < 4 || isempty(r), setUserSpecifiedRng();
