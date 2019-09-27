@@ -10,28 +10,33 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, ...
 % the aggregated data as input into this function. Since split-half reliability is computed,
 % Spearman-Brown correction is applied.
 %
-% Input Args:
+% Required inputs:
 %   X - data matrix. X is a 3D matrix, it is assumed to be of size
-%              nSpace x nTime x nTrial. If X is a 2D matrix, it is assumed to be of
-%              size nTrial x nFeature.
+%       nSpace x nTime x nTrial. If X is a 2D matrix, it is assumed to be of
+%       size nTrial x nFeature.
 %   Y - labels vector. The length of Y should be nTrial.
-%   featureIdx - Feature (e.g., time) sample index to use in computing reliability for a subset
-%                   of trials.
+%   featureIdx - Feature (e.g., time) sample index to use in computing 
+%       reliability for a subset of trials.
+%
+% Optional inputs:
 %   numTrialsPerHalf (optional) - a vector of how many trials in a split half to
-%                                    use for reliability computation. (e.g. [1,2,3] would
-%                                    correspond to using 2, 4 and 6 trials in the reliability
-%                                    computation). If not entererd, defaults to [1], meaning
-%                                    that it uses 2 trials in total.
-%   numPermutations (optional) - how many permutations to split the trials for split half
-%                                 reliability? This is for inner loop to compute reliability.
-%                                 If not entered, this defaults to 10.
-%   numTrialPermutations (optional) - how many times to choose trials in the data set
-%                                       to compute reliability? This is for the outer loop.
-%                                       This is useful if we wanted to compute the variance
-%                                       of the reliability across random draws of the trials.
-%                                       If not entered, this defaults to 10.
-%   rngType (optional) - Random number generator specification. If not entered, rng
-%       will be assigned as ('shuffle', 'twister').
+%       use for reliability computation. (e.g. [1,2,3] would 
+%       correspond to using 2, 4 and 6 trials in the reliability 
+%       computation). If numTrialsPerHalf is not entered or is empty, this
+%       defaults to [1], meaning that it uses 2 trials in total.
+%   numPermutations (optional) - how many permutations to split the trials 
+%       for split half reliability? This is for inner loop to compute 
+%       reliability. If numPermutations is not entered or is empty, this 
+%       defaults to 10.
+%   numTrialPermutations (optional) - how many times to choose trials in 
+%       the data set to compute reliability? This is for the outer loop.
+%       This is useful if we wanted to compute the variance of the 
+%       reliability across random draws of the trials. If 
+%       numTrialPermutations is not entered or is empty, this defaults to 
+%       10.
+%   rngType (optional) - Random number generator specification. If rngType
+%       is not entered or is empty, rng will be assigned as 
+%       ('shuffle', 'twister').
 %       --- Acceptable specifications for rngType ---
 %           - Single acceptable rng specification input (e.g., 1,
 %               'default', 'shuffle'); in these cases, the generator will
@@ -41,12 +46,12 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, ...
 %               (e.g., ["shuffle", "twister"].
 %           - rng struct as assigned by rngType = rng.
 %
-% Output Args:
-%   reliabilities - If input matrix was 3D, dimensions are: numTrialPermutations x
-%                   length(numTrialsPerHalf) x nSpace. If input matrix was 2D, dimensions
-%                   are: numTrialPermutations x length(numTrialsPerHalf). Note that the
-%                   permutations used to split the trials in half for the inner loop reliability
-%                   computation is averaged out.
+% Outputs:
+%   reliabilities - If input matrix was 3D, dimensions are 
+%       numTrialPermutations x length(numTrialsPerHalf) x nSpace. If input 
+%       matrix was 2D, dimensions are numTrialPermutations x length(numTrialsPerHalf). 
+%       Note that the permutations used to split the trials in half for the 
+%       inner loop reliability computation is averaged out.
 %
 % MatClassRSA dependencies: setUserSpecifiedRng computeReliability
 % See also computeSpaceTimeReliability
