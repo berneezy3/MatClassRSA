@@ -47,6 +47,9 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, feature_idx, ...
 %                   are: num_trial_permutations x length(num_trials_per_half). Note that the
 %                   permutations used to split the trials in half for the inner loop reliability
 %                   computation is averaged out.
+%
+% MatClassRSA dependencies: setUserSpecifiedRng computeReliability
+% See also computeSpaceTimeReliability
 
 assert(length(size(X)) == 3 || length(size(X)) == 2, 'Invalid number of dimensions in the data.');
 
