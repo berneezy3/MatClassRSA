@@ -1,6 +1,6 @@
-function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, rand_seed)
+function [reliabilities] = computeSpaceTimeReliability(X, Y, numPermutations, rngType)
 %------------------------------------------------------------------------------------------
-%  [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, rand_seed)
+%  [reliabilities] = computeSpaceTimeReliability(X, Y, numPermutations, rngType)
 %------------------------------------------------------------------------------------------
 %
 % Returns split-half reliabilities computed for each component across time. With the 
@@ -15,11 +15,11 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %              nTrial.  If the data matrix is 2D, it is assumed to be nTrial x 
 %              nFeature.
 %   Y - labels vector. The length of labels should be equal to nTrials.
-%   num_permutations (optional) - how many permutations to split the trials for split-half
+%   numPermutations (optional) - how many permutations to split the trials for split-half
 %                                 reliability. If not entered, this defaults to 10.
-%   rand_seed (optional) - Random number generator specification. If not entered, rng
+%   rngType (optional) - Random number generator specification. If not entered, rng
 %       will be assigned as {'shuffle', 'twister'}. 
-%       --- Acceptable specifications for rand_seed ---
+%       --- Acceptable specifications for rngType ---
 %           - Single acceptable rng specification input (e.g., 1, 
 %               'default', 'shuffle'); in these cases, the generator will 
 %               be set to 'twister'. If 'default' is entered, the seed will
@@ -28,7 +28,7 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %           - Dual-argument specifications as either a 2-element cell 
 %               array (e.g., {'shuffle', 'twister'}) or string array 
 %               (e.g., ["shuffle", "twister"]).
-%           - rng struct as assigned by rand_seed = rng.
+%           - rng struct as assigned by rngType = rng.
 %
 % Output Args:
 %   reliabilities - reliability for each electrode across time. The dimensions of
@@ -54,24 +54,24 @@ else
     error('Input data should be a 2D or 3D matrix.');
 end
 
-if nargin < 3 || isempty(num_permutations)
-    num_permutations = 10;
+if nargin < 3 || isempty(numPermutations)
+    numPermutations = 10;
 end
 
 % Set random number generator
-if nargin < 4 || isempty(rand_seed), setUserSpecifiedRng();
-else, setUserSpecifiedRng(rand_seed);
+if nargin < 4 || isempty(rngType), setUserSpecifiedRng();
+else, setUserSpecifiedRng(rngType);
 end
 
 num_components = size(X, 1);
 num_timepoints = size(X, 3);
 
-reliabilities = zeros(num_timepoints, num_permutations, num_components);
+reliabilities = zeros(num_timepoints, numPermutations, num_components);
 for t=1:num_timepoints
     fprintf('Timepoint %d\n', t);
     curr_data = squeeze(X(:,:,t));
-    rels = computeReliability(curr_data, Y, num_permutations);
-    assert(isequal(size(rels), [num_permutations, num_components]));
+    rels = computeReliability(curr_data, Y, numPermutations);
+    assert(isequal(size(rels), [numPermutations, num_components]));
     reliabilities(t,:,:) = rels;
 end
 
