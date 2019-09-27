@@ -1,8 +1,8 @@
-function [reliabilities] = computeSampleSizeReliability(X, Y, feature_idx, ...
-    num_trials_per_half, num_permutations, num_trial_permutations, rand_seed)
+function [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, ...
+    numTrialsPerHalf, numPermutations, numTrialPermutations, rngType)
 %---------------------------------------------------------------------------------------------
-%  [reliabilities] = computeSampleSizeReliability(X, Y, feature_idx, ...
-%                       num_trials_per_half, num_permutations, num_trial_permutations)
+%  [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, ...
+%                       numTrialsPerHalf, numPermutations, numTrialPermutations)
 %---------------------------------------------------------------------------------------------
 %
 % Computes split-half reliabilities of data over subsets of trials for each component for a
@@ -15,36 +15,36 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, feature_idx, ...
 %              nSpace x nTime x nTrial. If X is a 2D matrix, it is assumed to be of
 %              size nTrial x nFeature.
 %   Y - labels vector. The length of Y should be nTrial.
-%   feature_idx - Feature (e.g., time) sample index to use in computing reliability for a subset
+%   featureIdx - Feature (e.g., time) sample index to use in computing reliability for a subset
 %                   of trials.
-%   num_trials_per_half (optional) - a vector of how many trials in a split half to
+%   numTrialsPerHalf (optional) - a vector of how many trials in a split half to
 %                                    use for reliability computation. (e.g. [1,2,3] would
 %                                    correspond to using 2, 4 and 6 trials in the reliability
 %                                    computation). If not entererd, defaults to [1], meaning
 %                                    that it uses 2 trials in total.
-%   num_permutations (optional) - how many permutations to split the trials for split half
+%   numPermutations (optional) - how many permutations to split the trials for split half
 %                                 reliability? This is for inner loop to compute reliability.
 %                                 If not entered, this defaults to 10.
-%   num_trial_permutations (optional) - how many times to choose trials in the data set
+%   numTrialPermutations (optional) - how many times to choose trials in the data set
 %                                       to compute reliability? This is for the outer loop.
 %                                       This is useful if we wanted to compute the variance
 %                                       of the reliability across random draws of the trials.
 %                                       If not entered, this defaults to 10.
-%   rand_seed (optional) - Random number generator specification. If not entered, rng
+%   rngType (optional) - Random number generator specification. If not entered, rng
 %       will be assigned as ('shuffle', 'twister').
-%       --- Acceptable specifications for rand_seed ---
+%       --- Acceptable specifications for rngType ---
 %           - Single acceptable rng specification input (e.g., 1,
 %               'default', 'shuffle'); in these cases, the generator will
 %               be set to 'twister'.
 %           - Dual-argument specifications as either a 2-element cell
 %               array (e.g., {'shuffle', 'twister'}) or string array
 %               (e.g., ["shuffle", "twister"].
-%           - rng struct as assigned by rand_seed = rng.
+%           - rng struct as assigned by rngType = rng.
 %
 % Output Args:
-%   reliabilities - If input matrix was 3D, dimensions are: num_trial_permutations x
-%                   length(num_trials_per_half) x nSpace. If input matrix was 2D, dimensions
-%                   are: num_trial_permutations x length(num_trials_per_half). Note that the
+%   reliabilities - If input matrix was 3D, dimensions are: numTrialPermutations x
+%                   length(numTrialsPerHalf) x nSpace. If input matrix was 2D, dimensions
+%                   are: numTrialPermutations x length(numTrialsPerHalf). Note that the
 %                   permutations used to split the trials in half for the inner loop reliability
 %                   computation is averaged out.
 %
@@ -69,29 +69,29 @@ end
 assert(size(X, 2) == length(Y), 'Length of labels vector does not match number of trials in the data.');
 
 if nargin < 4
-    num_trials_per_half = 1;
-    num_permutations = 10;
+    numTrialsPerHalf = 1;
+    numPermutations = 10;
 end
-if nargin < 5 || isempty(num_permutations)
-    num_permutations = 10;
+if nargin < 5 || isempty(numPermutations)
+    numPermutations = 10;
 end
-if nargin < 6 || isempty(num_trial_permutations)
-    num_trial_permutations = 10;
+if nargin < 6 || isempty(numTrialPermutations)
+    numTrialPermutations = 10;
 end
 
 % Set random number generator
-if nargin < 7 || isempty(rand_seed), setUserSpecifiedRng();
-else, setUserSpecifiedRng(rand_seed);
+if nargin < 7 || isempty(rngType), setUserSpecifiedRng();
+else, setUserSpecifiedRng(rngType);
 end
 
 num_components = size(X, 1);
 total_trials = size(X, 2);
-num_trial_subsets = length(num_trials_per_half);
+num_trial_subsets = length(numTrialsPerHalf);
 num_images = length(unique(Y));
 
-reliabilities = nan(num_trial_permutations, num_trial_subsets, num_components);
-time_data = squeeze(X(:,:,feature_idx));
-for k=1:num_trial_permutations
+reliabilities = nan(numTrialPermutations, num_trial_subsets, num_components);
+time_data = squeeze(X(:,:,featureIdx));
+for k=1:numTrialPermutations
     
     % Shuffle data and labels
     random_indices = randperm(total_trials);
@@ -99,10 +99,10 @@ for k=1:num_trial_permutations
     shuffled_labels = Y(random_indices);
     
     for i=1:num_trial_subsets
-        fprintf('Permutation %d: %d trials in subset\n', k, num_trials_per_half(i)*2);
+        fprintf('Permutation %d: %d trials in subset\n', k, numTrialsPerHalf(i)*2);
         
         % Acquire trials for each stimulus
-        num_trials_to_use = num_trials_per_half(i)*2;
+        num_trials_to_use = numTrialsPerHalf(i)*2;
         [curr_data, curr_data_labels] = acquire_data( ...
             shuffled_data, ...
             shuffled_labels, ...
@@ -112,7 +112,7 @@ for k=1:num_trial_permutations
         if sum(isnan(curr_data_labels)) == (num_trials_to_use * num_images)
             continue;
         end
-        rel = computeReliability(curr_data, curr_data_labels, num_permutations);
+        rel = computeReliability(curr_data, curr_data_labels, numPermutations);
         reliabilities(k,i,:) = mean(rel, 1);
     end % Trial subsets
 end % Random permutations of trials
