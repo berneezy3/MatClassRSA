@@ -10,15 +10,19 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, numPermutations, rn
 % one will be able to see how reliable each component is across time (on average). Since
 % split-half reliability is computed, Spearman-Brown correction is applied.
 %
-% Input Args:
+% Required inputs:
 %   X - data matrix. 3D data matrices are assumed to be nSpace x nTime x
-%              nTrial.  If the data matrix is 2D, it is assumed to be nTrial x 
-%              nFeature.
+%       nTrial.  If the data matrix is 2D, it is assumed to be nTrial x 
+%       nFeature.
 %   Y - labels vector. The length of labels should be equal to nTrials.
-%   numPermutations (optional) - how many permutations to split the trials for split-half
-%                                 reliability. If not entered, this defaults to 10.
-%   rngType (optional) - Random number generator specification. If not entered, rng
-%       will be assigned as {'shuffle', 'twister'}. 
+%
+% Optional inputs:
+%   numPermutations (optional) - how many permutations to split the trials 
+%       for split-half reliability. If numPermutations is not entered or is 
+%       empty, this defaults to 10.
+%   rngType (optional) - Random number generator specification. If rngType 
+%       is not entered or is empty, rng will be assigned as 
+%       {'shuffle', 'twister'}. 
 %       --- Acceptable specifications for rngType ---
 %           - Single acceptable rng specification input (e.g., 1, 
 %               'default', 'shuffle'); in these cases, the generator will 
@@ -31,11 +35,11 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, numPermutations, rn
 %           - rng struct as assigned by rngType = rng.
 %
 % Output Args:
-%   reliabilities - reliability for each electrode across time. The dimensions of
-%                   this matrix are: nSpace x nTime x nPermutations if a 3D matrix was
-%                   provided.  If a 2D matrix was provided, the dimensions of the results
-%                   are: nTime x nPermutations. You would typically average across the permutations 
-%                   dimension.
+%   reliabilities - reliability for each electrode across time. The 
+%       dimensions of this matrix are nSpace x nTime x nPermutations if a 
+%       3D matrix was provided. If a 2D matrix was provided, the 
+%       dimensions of the results are nTime x nPermutations. You would 
+%       typically average across the permutations dimension.
 %
 % MatClassRSA dependencies: setUserSpecifiedRng computeReliability
 % See also computeSampleSizeReliability
