@@ -1,21 +1,21 @@
-function [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
+function [reliabilities] = computeSampleSizeReliability(X, Y, feature_idx, ...
     num_trials_per_half, num_permutations, num_trial_permutations, rand_seed)
 %---------------------------------------------------------------------------------------------
-%  [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
+%  [reliabilities] = computeSampleSizeReliability(X, Y, feature_idx, ...
 %                       num_trials_per_half, num_permutations, num_trial_permutations)
 %---------------------------------------------------------------------------------------------
 %
-% Computes split-half reliabilities of data over subsets of trials for each component for a 
+% Computes split-half reliabilities of data over subsets of trials for each component for a
 % specific time point. Typically, one would aggregate the trials across participants and provide
-% the aggregated data as input into this function. Since split-half reliability is computed, 
+% the aggregated data as input into this function. Since split-half reliability is computed,
 % Spearman-Brown correction is applied.
 %
 % Input Args:
-%   X - data matrix. X is a 3D matrix, it is assumed to be of size 
-%              nSpace x nTime x nTrial. If X is a 2D matrix, it is assumed to be of 
+%   X - data matrix. X is a 3D matrix, it is assumed to be of size
+%              nSpace x nTime x nTrial. If X is a 2D matrix, it is assumed to be of
 %              size nTrial x nFeature.
 %   Y - labels vector. The length of Y should be nTrial.
-%   timepoint_idx - Time (feature) sample index to use in computing reliability for a subset
+%   feature_idx - Feature (e.g., time) sample index to use in computing reliability for a subset
 %                   of trials.
 %   num_trials_per_half (optional) - a vector of how many trials in a split half to
 %                                    use for reliability computation. (e.g. [1,2,3] would
@@ -31,19 +31,19 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, timepoint_idx, ...
 %                                       of the reliability across random draws of the trials.
 %                                       If not entered, this defaults to 10.
 %   rand_seed (optional) - Random number generator specification. If not entered, rng
-%       will be assigned as ('shuffle', 'twister'). 
+%       will be assigned as ('shuffle', 'twister').
 %       --- Acceptable specifications for rand_seed ---
-%           - Single acceptable rng specification input (e.g., 1, 
-%               'default', 'shuffle'); in these cases, the generator will 
+%           - Single acceptable rng specification input (e.g., 1,
+%               'default', 'shuffle'); in these cases, the generator will
 %               be set to 'twister'.
-%           - Dual-argument specifications as either a 2-element cell 
-%               array (e.g., {'shuffle', 'twister'}) or string array 
+%           - Dual-argument specifications as either a 2-element cell
+%               array (e.g., {'shuffle', 'twister'}) or string array
 %               (e.g., ["shuffle", "twister"].
 %           - rng struct as assigned by rand_seed = rng.
 %
 % Output Args:
-%   reliabilities - If input matrix was 3D, dimensions are: num_trial_permutations x 
-%                   length(num_trials_per_half) x nSpace. If input matrix was 2D, dimensions 
+%   reliabilities - If input matrix was 3D, dimensions are: num_trial_permutations x
+%                   length(num_trials_per_half) x nSpace. If input matrix was 2D, dimensions
 %                   are: num_trial_permutations x length(num_trials_per_half). Note that the
 %                   permutations used to split the trials in half for the inner loop reliability
 %                   computation is averaged out.
@@ -87,14 +87,14 @@ num_trial_subsets = length(num_trials_per_half);
 num_images = length(unique(Y));
 
 reliabilities = nan(num_trial_permutations, num_trial_subsets, num_components);
-time_data = squeeze(X(:,:,timepoint_idx));
+time_data = squeeze(X(:,:,feature_idx));
 for k=1:num_trial_permutations
-
+    
     % Shuffle data and labels
     random_indices = randperm(total_trials);
     shuffled_data = time_data(:,random_indices);
     shuffled_labels = Y(random_indices);
-
+    
     for i=1:num_trial_subsets
         fprintf('Permutation %d: %d trials in subset\n', k, num_trials_per_half(i)*2);
         
@@ -105,7 +105,7 @@ for k=1:num_trial_permutations
             shuffled_labels, ...
             num_trials_to_use, ...
             num_images ...
-        );
+            );
         if sum(isnan(curr_data_labels)) == (num_trials_to_use * num_images)
             continue;
         end
