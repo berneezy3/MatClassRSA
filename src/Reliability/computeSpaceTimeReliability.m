@@ -36,6 +36,9 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, num_permutations, r
 %                   provided.  If a 2D matrix was provided, the dimensions of the results
 %                   are: nTime x nPermutations. You would typically average across the permutations 
 %                   dimension.
+%
+% MatClassRSA dependencies: setUserSpecifiedRng computeReliability
+% See also computeSampleSizeReliability
 
 % If 3D matrix entered, dimensions are: space x time x trial
 % We will permute so that it becomes space x trial x time
