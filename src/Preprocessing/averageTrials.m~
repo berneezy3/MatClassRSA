@@ -11,12 +11,12 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 % category, where the number of trials averaged in each group is specified
 % by the variable groupSize. The user can optionally enter a vector of 
 % participant identifiers P, in which case trial averaging will 
-% additionally be performed on a per-participant basis. The function takes 
-% in optional name-value pairs to specify handling of remainder trials, 
+% additionally be done on a per-participant basis. The function takes in 
+% optional name-value pairs to specify handling of remainder trials, 
 % whether to shuffle the data after averaging (retaining the mapping 
 % between trials and labels), and to set the random number generator. If 
-% the user wishes to shuffle the ordering of data (while preserving 
-% labeling of data observations) prior to averaging, they should call the 
+% the user wishes to shuffle the bordering of data prior to averaging 
+% (while preserving labeling of data observations), they should call the 
 % shuffleData function prior to calling this function.
 %
 % Required inputs:
@@ -30,10 +30,7 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 % Optional inputs: 
 %       P - optional participants vector. Must be the same length as Y.
 %           Can be numeric or a string array. If not entered or is empty, 
-%           a vector of zeros (same size as Y) will be returned. If
-%           entered, trial averaging will be performed on a per-participant
-%           basis, meaning that each averaged trial will contain trials 
-%           from a single participant.
+%           a vector of zeros (same size as Y) will be returned.
 % 
 % Optional name-value inputs: 
 %       'handleRemainder' - method to handle remainder trials.
