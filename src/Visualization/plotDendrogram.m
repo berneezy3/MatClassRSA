@@ -7,7 +7,7 @@ function img = plotDendrogram(RDM, varargin)
 % This function creates a dendrogram plot with the distance matrix
 % passed in.
 %
-% INPUT ARGS:
+% INPUT ARGS (REQUIRED):
 %   RDM: A distance matrix.  Diagonals must be 0, and must be
 %               symmetrical along the diagonal
 %
@@ -24,30 +24,32 @@ function img = plotDendrogram(RDM, varargin)
 %       labels of the confusion matrix
 %   'fontSize': a number to specify the size of fonts when plotting colored
 %   labels.
-%   ?orientation? - Dendrogram orientation.  This parameter lets the user 
+%   'orientation' - Dendrogram orientation.  This parameter lets the user 
 %       specify which direction to point the dendrogram (orientation defined 
 %       here as the side that contains the dendrogram leaves).
 %       --options--
-%       'down? (default) 
+%       'down' (default) 
 %       'up' 
 %       'left'
 %       'right'
-%   ?reorder? - Specify order of classes in the dendrogram.  Must pass in
+%   'reorder' - Specify order of classes in the dendrogram.  Must pass in
 %       as a length N vector, N being the number of classes in RDM.  Also,
 %       vector should contain values 1:N. 
-%   ?yLim? - Set range of the Y-axis.  Pass in as an array of length 2, 
+%   'yLim' - Set range of the Y-axis.  Pass in as an array of length 2, 
 %       [yMin yMax].
-%   ?textRotation? - Set this parameter to an  amount in degrees to rotate 
+%   'textRotation' - Set this parameter to an  amount in degrees to rotate 
 %       the text.  Default 0.
-%   ?lineWidth? - Line width  Use this parameter to set the width of the 
+%   'lineWidth' - Line width  Use this parameter to set the width of the 
 %       lines in the dendrogram.  Default 2.
-%   ?lineColor? - Line color  Use this parameter to set the color of the 
-%       lines in the dendrogram.  Similar to ?nodeColors?, we can either 
+%   'lineColor' - Line color  Use this parameter to set the color of the 
+%       lines in the dendrogram.  Similar to 'nodeColors', we can either 
 %       pass in color abbreviations, full-length color names, or RGB color triplets.
 %       Default 'black'.
 %   'iconSize' - if parameter 'iconPath' is passed in, then this parameter
 %       will determine the size of each image icon.  Default 40.
 %
+% OUTPUT ARGS:
+%   'img' - figure corresponding to output plot
 
 % Notes:
 %   - linkage order - inorder w/crossing, best order w/o crossing, dist

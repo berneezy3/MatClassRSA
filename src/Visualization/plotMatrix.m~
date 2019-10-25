@@ -36,8 +36,8 @@ function [img, fig] = plotMatrix(RDM, varargin)
 %       of image labels. Default 40.
 % 
 % OUTPUT ARGS:
-%   'img': image corresponding to graph
-%   'fig': figure corresponding to output plot
+%   'img': 
+%   'fig': 
 %
 % Notes:
 %   6 types of labels for the visualiations:
