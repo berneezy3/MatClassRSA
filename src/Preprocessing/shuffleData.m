@@ -1,6 +1,6 @@
-function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
+function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
 %-------------------------------------------------------------------
-% [randX, randY, randP, randIdx] = shuffleData(X,Y,P,r)
+% [randX, randY, randP, randIdx] = shuffleData(X,Y,P,rngType)
 %-------------------------------------------------------------------
 % Bernard Wang - April 30, 2017
 % Revised by Blair Kaneshiro, August 2019
@@ -12,35 +12,34 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
 % wish to mix trials across the course of a recording session or across
 % participants prior to trial averaging or cross-validation.
 %
-% INPUT ARGS:
+% REQUIRED INPUTS
 %   X: Data matrix. Data can be in 3D (space x time x trial) or 2D
 %       (trial x feature) form.
-%   Y: Labels vector. The length of Y must correspond to the length of the
-%       trial dimension of X.
+%   Y: Labels vector (numeric). The length of Y must correspond to the 
+%       length of the trial dimension of X.
+%
+% OPTIONAL INPUTS
 %   P: Participant vector (optional). The length of P must correspond to
 %       the length of Y and the length of the trial dimension of X. If P
-%       is not entered, the function will return NaN as randomized P. P can
-%       be a numeric vector, string array, or cell array.
-%   r: Random number generator (rng) specification. If not entered, rng
-%       will be assigned as ('shuffle', 'twister'). 
-%       --- Acceptable specifications for r ---
+%       is not entered or is empty, the function will return NaN as 
+%       randomized P. P can be a numeric vector, string array, or cell 
+%       array.
+%   rngType: Random number generator (rng) specification. If not entered or
+%       empty, rng will be assigned as ('shuffle', 'twister'). 
+%       --- Acceptable specifications for rngType ---
 %           - Single acceptable rng specification input (e.g., 1, 
 %               'default', 'shuffle'); in these cases, the generator will 
 %               be set to 'twister'.
 %           - Dual-argument specifications as either a 2-element cell 
 %               array (e.g., {'shuffle', 'twister'}) or string array 
 %               (e.g., ["shuffle", "twister"].
-%           - rng struct as assigned by r = rng.
+%           - rng struct as assigned by rngType = rng.
 %
-% OUTPUT ARGS:
+% OUTPUTS
 %   randX: Data matrix with its trials reordered (same size as X).
 %   randY: Labels vector with its trials reordered (same size as Y).
 %   randP: Participants vector with its trials reordered (same size as P).
 %   randIdx: Randomized ordering applied to all inputs.
-%
-% TODO:
-% - Confirm whether labels vector has to be numeric or can be cell array of
-%   strings.
 
 % This software is licensed under the 3-Clause BSD License (New BSD License),
 % as follows:
@@ -73,10 +72,12 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, r)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: setUserSpecifiedRng
 
 % Set random number generator
-if nargin < 4 || isempty(r), setUserSpecifiedRng();
-else, setUserSpecifiedRng(r);
+if nargin < 4 || isempty(rngType), setUserSpecifiedRng();
+else, setUserSpecifiedRng(rngType);
 end
 
 % Make sure data matrix X is a 2D or 3D matrix
