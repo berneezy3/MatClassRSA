@@ -47,6 +47,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %           explain N * 100% of the variance in input matrix X.
 %       (integer greater than or equal to 1, N) - Use N most important
 %       features of input matrix X.
+%   'nFolds' - Specify number of folds for cross validation
 %   'classifier' - choose classifier. 
 %        --options--
 %       'SVM' (default)
@@ -162,19 +163,18 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     if verLessThan('matlab', '8.2')
 %         addParamValue(ip, 'shuffleData', defaultShuffleData, ...
 %             @(x) (x==1 || x==0));
-        addParamValue(ip, 'PCA', defaultPCA);
-        %addParamValue(ip, 'PCAinFold', defaultPCAinFold);
-        addParamValue(ip, 'nFolds', defaultNFolds);
-        addParamValue(ip, 'classifier', defaultClassifier, ...
-             @(x) any(validatestring(x, expectedClassifier)));
         addParamValue(ip, 'timeUse', defaultTimeUse, ...
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'spaceUse', defaultSpaceUse, ...
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
-        addParamValue(ip, 'featureUse', defaultFeatureUse, ...
-            @(x) (assert(isvector(x))));
+        addParamValue(ip, 'PCA', defaultPCA);
+        %addParamValue(ip, 'PCAinFold', defaultPCAinFold);
+        addParamValue(ip, 'nFolds', defaultNFolds);
+        addParamValue(ip, 'classifier', defaultClassifier, ...
+            @(x) any(validatestring(x, expectedClassifier)));
+
         addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernel)));
@@ -185,15 +185,16 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     else
 %         addParameter(ip, 'shuffleData', defaultShuffleData, ...
 %             @(x)  (x==1 || x==0));
-        addParameter(ip, 'PCA', defaultPCA);
-        addParameter(ip, 'classifier', defaultClassifier, ...
-             @(x) any(validatestring(x, expectedClassifier)));
         addParameter(ip, 'timeUse', defaultTimeUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'spaceUse', defaultSpaceUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
+        addParameter(ip, 'PCA', defaultPCA);
+        addParameter(ip, 'classifier', defaultClassifier, ...
+             @(x) any(validatestring(x, expectedClassifier)));
+
         addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernel)));

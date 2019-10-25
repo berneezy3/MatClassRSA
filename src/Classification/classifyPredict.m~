@@ -78,8 +78,8 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     
     defaultY = NaN;
     defaultRandomSeed = 'shuffle';
-%     defaultAverageTrials = -1;
-%     defaultAverageTrialsHandleRemainder = 'discard';
+    defaultAverageTrials = -1;
+    defaultAverageTrialsHandleRemainder = 'discard';
     
     expectedRandomSeed = {'default', 'shuffle'};
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
@@ -208,7 +208,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
            % Get Accuracy and confusion matrix
             if ( ~isnan(ip.Results.actualLabels) )
                 Y = ip.Results.actualLabels;
-                P{i}.accuracy = computeAccuracy(P{i}.predY, Y); 
+                P{i}.accuracy = computeAccuracy(P.predY, Y); 
                 P{i}.CM = confusionmat(Y, P{i}.predY);
             else
                 P{i}.accuracy = NaN; 
