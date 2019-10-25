@@ -1,6 +1,6 @@
 function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
 %-------------------------------------------------------------------
-% [randX, randY, randP, randIdx] = shuffleData(X,Y,P,rngType)
+% [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
 %-------------------------------------------------------------------
 % Bernard Wang - April 30, 2017
 % Revised by Blair Kaneshiro, August 2019
@@ -9,8 +9,8 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
 % labels vector Y, and, optionally, participants vector P. Therefore,
 % ordering is disrupted, but mappings between trials, stimulus labels, and
 % participants is preserved. The function can be used in cases where users
-% wish to mix trials across the course of a recording session or across
-% participants prior to trial averaging or cross-validation.
+% wish to distribute trials across the course of a recording session or 
+% across participants, prior to trial averaging or cross-validation.
 %
 % REQUIRED INPUTS
 %   X: Data matrix. Data can be in 3D (space x time x trial) or 2D
@@ -24,14 +24,15 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
 %       is not entered or is empty, the function will return NaN as 
 %       randomized P. P can be a numeric vector, string array, or cell 
 %       array.
-%   rngType: Random number generator (rng) specification. If not entered or
-%       empty, rng will be assigned as ('shuffle', 'twister'). 
+%   rngType (optional) - Random number generator specification. If rngType
+%       is not entered or is empty, rng will be assigned as 
+%       ('shuffle', 'twister').
 %       --- Acceptable specifications for rngType ---
-%           - Single acceptable rng specification input (e.g., 1, 
-%               'default', 'shuffle'); in these cases, the generator will 
+%           - Single acceptable rng specification input (e.g., 1,
+%               'default', 'shuffle'); in these cases, the generator will
 %               be set to 'twister'.
-%           - Dual-argument specifications as either a 2-element cell 
-%               array (e.g., {'shuffle', 'twister'}) or string array 
+%           - Dual-argument specifications as either a 2-element cell
+%               array (e.g., {'shuffle', 'twister'}) or string array
 %               (e.g., ["shuffle", "twister"].
 %           - rng struct as assigned by rngType = rng.
 %
