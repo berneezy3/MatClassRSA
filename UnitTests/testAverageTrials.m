@@ -86,10 +86,6 @@ for i=1:length(y3)
     curr_trials = o3{i};
     curr_label = y3(i);
     temp = Y(curr_trials);
-    if i == length(y3)
-        disp('stop')
-    end
-    %keyboard
     assert(range(temp) == 0 && temp(1) == curr_label, 'Incorrect label'); % Check if all labels the same when doing trial averaging
     to_average = X_3D(:,:,curr_trials);
     assert(isequal(averaged, mean(to_average,3)), 'Average mismatch.'); % Check that the averaging is done appropriately
@@ -172,7 +168,7 @@ P = [P 1]
 [x2, y2, p2, whichObs] = averageTrials(X_2D, Y, 20, P, 'endShuffle', 0, 'handleRemainder', 'distribute');
 % assert(isequal(X_2D, x2));
 
-%% SUCCESS: 3D input data matrix with endShuffle and averaging the remaining trials to a new pseudo-trial
+%% SUCCESS: 3D input data matrix with endShuffle and appending reminader trials to last pseudotrial of same label and participant
 
 Y = randi(10, [1 nTrial]);
 [x3, y3, p3, o3] = averageTrials(X_3D, Y, 5, P, 'endShuffle', 1, 'handleRemainder', 'append');
@@ -185,15 +181,29 @@ for i=1:length(y3)
     curr_trials = o3{i};
     curr_label = y3(i);
     temp = Y(curr_trials);
-%     if i == length(y3)
-%         disp('stop')
-%     end
-    disp(i)
-    %keyboard
     assert(range(temp) == 0 && temp(1) == curr_label, 'Incorrect label'); % Check if all labels the same when doing trial averaging
     to_average = X_3D(:,:,curr_trials);
     assert(isequal(averaged, mean(to_average,3)), 'Average mismatch.'); % Check that the averaging is done appropriately
 end
+
+%% SUCCCESS: 3D input data matrix with endShuffle and randomly distributing reminader trials other pseudotrial of same label and participant
+
+Y = randi(10, [1 nTrial]);
+[x3, y3, p3, o3] = averageTrials(X_3D, Y, 5, P, 'endShuffle', 1, 'handleRemainder', 'distribute');
+
+% Test that averaged data are as expected
+assert(length(y3) == length(o3), 'Lengths of output labels and pseudotrials unequal');
+assert(size(x3,3) == length(y3), 'Averaged data trials dimension mismatch.');
+for i=1:length(y3)
+    averaged = x3(:,:,i);
+    curr_trials = o3{i};
+    curr_label = y3(i);
+    temp = Y(curr_trials);
+    assert(range(temp) == 0 && temp(1) == curr_label, 'Incorrect label'); % Check if all labels the same when doing trial averaging
+    to_average = X_3D(:,:,curr_trials);
+    assert(isequal(averaged, mean(to_average,3)), 'Average mismatch.'); % Check that the averaging is done appropriately
+end
+
 
 %%
 

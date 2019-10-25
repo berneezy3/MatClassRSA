@@ -1,5 +1,19 @@
 function [xTickVec yTickVec] = getTickCoord()
-
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
+% [xTickVec yTickVec] = getTickCoord()
+% --------------------------------
+% Bernard Wang, Sept 28, 2019
+% 
+% INPUT ARGS:
+%
+% OUTPUT ARGS:
+%   - xTickVec 
+%   - yTickVec
+%
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------

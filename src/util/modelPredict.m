@@ -1,6 +1,21 @@
 function [predictions decision_values] = modelPredict(X, mdl)
 %-------------------------------------------------------------------
-
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
+% modelPredict(X, mdl)
+% --------------------------------
+% Bernard Wang, Sept 28, 2019
+% 
+% INPUT ARGS:
+%   - X: 
+%   - mdl: 
+%
+% OUTPUT ARGS:
+%   - predictions
+%   - decision_values
+%
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------
@@ -37,7 +52,7 @@ function [predictions decision_values] = modelPredict(X, mdl)
     switch classifier
         case 'struct'  %libsvm
             [r c] = size(X);
-            Y = zeros(r,1);
+            Y = rand(r,1);
             [predictions, acc, decision_values] = svmpredict(Y, X, mdl, ['-q']);
             
             % handle ties

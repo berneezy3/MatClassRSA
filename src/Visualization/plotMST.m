@@ -21,18 +21,15 @@ function img = plotMST(RDM, varargin)
 %   'iconPath': a directory containing images used to label, in which the
 %                   image files must be ordered in the same order as the 
 %                   labels of the confusion matrix
-%   'edgeLabelSize'
-%   'nodeLabelSize'
-%   'nodeLabelRotation'
-%   'roundEdgeLabel'
-%   ip.addParameter('lineWidth', 2, @(x) assert(isnumeric(x)));
-%   ip.addParameter('lineColor', [.5 .5 .5]);
-%
-%
-%
+%   'iconSize': set size of icon.  Default is 40
+%   'edgeLabelSize': set size of edge labels.  Default is 15
+%   'nodeLabelSize': set size of node labels.  Default is 15
+%   'nodeLabelRotation': set angle of node label.
+%   'lineWidth': set line width.  Default is 2
+%   'lineColor': Set line color.  Default is 15
 %
 % Outputs:
-% - None
+% - img: figure corresponding to output plot
 %
 % Notes:
 %   TODO - find out how to plot images on the coordinates
@@ -82,7 +79,6 @@ function img = plotMST(RDM, varargin)
     ip.addParameter('edgeLabelSize', 15, @(x) isnumeric(x));
     ip.addParameter('nodeLabelSize', 15, @(x) isnumeric(x));
     ip.addParameter('nodeLabelRotation', 0, @(x) isnumeric(x));
-    ip.addParameter('roundEdgeLabel', 4, @(x) isnumeric(x));
     ip.addParameter('lineWidth', 2, @(x) assert(isnumeric(x)));
     ip.addParameter('lineColor', [.5 .5 .5]);
 

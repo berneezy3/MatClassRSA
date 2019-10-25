@@ -3,7 +3,7 @@ function pVal = pbinomNoXVal(actualLabels, actualAcc, nClasses)
 % pVal = pbinomNoXVal(Y, nFolds, accuracy)
 % -----------
 % Bernard Wang
-% January 30 2012
+% January 30 2017
 %
 % This function computes the p-value via binomial CDF (cumutalive
 % Distribution Function)

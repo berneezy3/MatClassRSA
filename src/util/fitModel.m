@@ -1,6 +1,21 @@
 function mdl = fitModel(X, Y, ip)
 %-------------------------------------------------------------------
-
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
+% mdl = fitModel(X, Y, ip)
+% --------------------------------
+% Bernard Wang, Sept 28, 2019
+% 
+% INPUT ARGS:
+%   - X
+%   - Y
+%   - ip
+%
+% OUTPUT ARGS:
+%   - mdl
+%
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------

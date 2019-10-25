@@ -26,7 +26,7 @@ iconpath = './stimuli/';
 % Looks good
 
 figure;
-plotMST(ec_rdms);
+img = plotMST(ec_rdms);
 
 %% Plot MST with iconPath
 % Looks good. Need to check icon ordering!

@@ -1,5 +1,18 @@
 function [y, V, nPC] = getPCs(X, PCs)
 %-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
+% [xTickVec yTickVec] = getTickCoord()
+% --------------------------------
+% Bernard Wang, Sept 28, 2019
+% 
+% INPUT ARGS:
+%
+% OUTPUT ARGS:
+%   - xTickVec 
+%   - yTickVec
 % y = getPCs(X, PCs)
 %-------------------------------------------------------------------
 % Function to extract principal componenets via singular value
