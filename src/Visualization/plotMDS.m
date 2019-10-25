@@ -23,7 +23,12 @@ function img = plotMDS(RDM, varargin)
 %   'dimensions': Choose which MDS dimensions to display (default [1 2]).
 %   'xLim': Set range of the X-axis with array of length 2, [xMin xMax].
 %   'yLim': Set range of the Y-axis with an array of length 2, [yMin yMax].
-
+%   'classical':  choose between classical and non-classical mdscaling.
+%       Default is classical.  More info can be found here: 
+%       https://www.mathworks.com/help/stats/cmdscale.html
+%
+% Outputs:
+% - img: figure corresponding to output plot
 %
 % Notes:
 %   - linkage order
@@ -289,19 +294,13 @@ function img = plotMDS(RDM, varargin)
     elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.iconPath) ...
             && isempty(ip.Results.nodeLabels)
         
-        
         for i = 1:r
             plot( Y(i,xDim) ,Y(i,yDim) , 'o', 'MarkerSize', 15, 'LineWidth', 4, ...
                 'MarkerEdgeColor', ip.Results.nodeColors{i}, ...
                 'MarkerFaceColor', ip.Results.nodeColors{i});
         end
-
             xlim([xMin xMax]);
- 
             ylim([yMin yMax]);
-
-
-        
     end
     
     hold on;

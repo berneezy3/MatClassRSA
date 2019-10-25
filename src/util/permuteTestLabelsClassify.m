@@ -1,5 +1,20 @@
 function accuracy = permuteTestLabelsClassify(testLabels, ip)
-
+%-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
+% permuteTestLabelsClassify(testLabels, ip)
+% --------------------------------
+% Bernard Wang, Sept 28, 2019
+% 
+% INPUT ARGS:
+%   - testLabels: 
+%   - ip: 
+%
+% OUTPUT ARGS:
+%   - accuracy
+%.
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------

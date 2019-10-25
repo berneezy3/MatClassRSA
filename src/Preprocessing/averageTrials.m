@@ -285,12 +285,15 @@ for pp = 1:nP % Iterate through the participants
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if (labelNumRemains(num2str(uniqueLabels(i))) > 0)
             
+            
             % what is this???
             %
             remInd = find(Yalt==uniqueLabels(i), ...
                 labelNumRemains(num2str(uniqueLabels(i))),...
                 'last');
             
+            labelNumRemains(num2str(uniqueLabels(i))) = 0;
+
 %             disp(Y(remInd));
             
             % Initialize return parameters remX, remY
