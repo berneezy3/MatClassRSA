@@ -103,11 +103,11 @@ classdef cvData
                         % Separate test labels from training labels
                         % trainY will now store training labels for this
                         % fold
-                        trainY = bsxfun(@times, cvPart.training{i}, Y);
+                        trainY = bsxfun(@times, cvPart.training{i}', Y);
                         trainY = trainY(trainY ~=0);
                         % And testY will now store test labels for this
                         % fold
-                        testY = bsxfun(@times, cvPart.test{i}, Y);
+                        testY = bsxfun(@times, cvPart.test{i}', Y);
                         testY = testY(testY ~=0);
 
                         % 

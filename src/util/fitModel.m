@@ -72,7 +72,7 @@ function mdl = fitModel(X, Y, ip)
             mdl = fitcecoc(X,Y','Learners', temp, 'Coding', 'onevsone', 'ClassNames', classOrder);
             
         case 'LDA'
-            mdl = fitcdiscr(X, Y, 'DiscrimType', 'linear'); 
+            mdl = fitcdiscr(X, Y', 'DiscrimType', 'linear'); 
             
         case 'RF'
             mdl = TreeBagger(ip.Results.numTrees, X, Y, ...

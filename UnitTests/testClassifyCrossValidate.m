@@ -75,6 +75,9 @@ M = classifyCrossValidate( X_2D(1:6, :) , [1 1 2 2 3.1 3.1], ...
     'nFolds', 3, ...
     'randomSeed', 1 ...
 );
+%%
+M = classifyCrossValidate( X_2D(1:12, :), labels6(1:12));
+
 
 
 

@@ -265,9 +265,9 @@
     [r c] = size(X);
     [r1 c1] = size(Y)
     
-    if (r1 < c1)
-        Y = Y'
-    end
+%     if (r1 > c1)
+%         Y = Y'
+%     end
     
     
     %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
@@ -419,7 +419,7 @@
 
             [predictions decision_values] = modelPredict(testX, mdl);
 
-            labelsConcat = [labelsConcat testY'];
+            labelsConcat = [labelsConcat testY];
             predictionsConcat = [predictionsConcat predictions];
             modelsConcat{i} = mdl; 
 
