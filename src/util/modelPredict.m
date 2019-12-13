@@ -52,7 +52,7 @@ function [predictions decision_values] = modelPredict(X, mdl)
     switch classifier
         case 'struct'  %libsvm
             [r c] = size(X);
-            Y = rand(r,1);
+            Y = round(rand(r,1)*6);
             [predictions, acc, decision_values] = svmpredict(Y, X, mdl, ['-q']);
             
             % handle ties

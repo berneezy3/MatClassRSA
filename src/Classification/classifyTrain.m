@@ -295,9 +295,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
         
         mdl = fitModel(trainData, Y, ip);
         M.classifierInfo = classifierInfo;
-
-
-
         M.mdl = mdl;
 
 
