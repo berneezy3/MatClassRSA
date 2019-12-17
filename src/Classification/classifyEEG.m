@@ -242,7 +242,7 @@
             @(x) assert(x==1 | x==0, 'verbose should be either 0 or 1'));
         addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-        addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
+        addParamValue(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
     else
