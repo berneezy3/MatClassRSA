@@ -227,7 +227,6 @@
         addParamValue(ip, 'nFolds', defaultNFolds);
         addParamValue(ip, 'classify', defaultClassify, ...
              @(x) any(validatestring(x, expectedClassify)));
-
         addParamValue(ip, 'pValueMethod', defaultPValueMethod, ...
             @(x) any(validatestring(x, expectedPValueMethod)));
         % must be a positive integer
@@ -259,7 +258,6 @@
         addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'classify', defaultClassify, ...
              @(x) any(validatestring(x, expectedClassify)));
-
         addParameter(ip,'pValueMethod', defaultPValueMethod, ...
              @(x) any(validatestring(x, expectedPValueMethod)));
         % must be a positive integer
