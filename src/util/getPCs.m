@@ -4,33 +4,21 @@ function [y, V, nPC] = getPCs(X, PCs)
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% [xTickVec yTickVec] = getTickCoord()
+% [y, V, nPC] = getPCs(X, PCs)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
 % 
-% INPUT ARGS:
-%
-% OUTPUT ARGS:
-%   - xTickVec 
-%   - yTickVec
-% y = getPCs(X, PCs)
-%-------------------------------------------------------------------
 % Function to extract principal componenets via singular value
 % decomposition
 %
 % INPUT ARGS:
-%       X - training data matrix
-%       PCs - if value is a positive integer, either number of PCs to extract based on significance , or variance explained by PCs if value
-%       between 0 and 1
+%   X - training data matrix
+%   PCs - if value is a positive integer, either number of PCs to 
+%     extract based on significance , or variance explained by PCs 
+%     if value between 0 and 1
 %
 % OUTPUT ARGS:
 %       y - training data matrix with only principal compenents
-%
-% EXAMPLES:
-
-% TODO:
-%   Retrieve the indices of the principal componenets
-% 
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

@@ -29,11 +29,6 @@ function [W, nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, spaceUse, t
 %
 % OUTPUT ARGS:
 % - N/A
-%
-% EXAMPLE:
-%
-% TODO:
-%
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

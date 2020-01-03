@@ -8,11 +8,16 @@ function checkInputData(X, Y)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
 % 
+% This function checks if the format of input data (X,Y) is correct.  It
+% checks to make sure dimensions between X and Y and consistent.
+%
 % INPUT ARGS:
-%   - X: 
-%   - Y: 
+%   - X: Training Data (2D or 3D)
+%   - Y: Labels
 %
 % OUTPUT ARGS:
+%   - N/A
+
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

@@ -1,4 +1,4 @@
-Ifunction overlayImage(original, new, X, Y, width, height)
+function overlayImage(original, new, X, Y, width, height)
 %-------------------------------------------------------------------
 % overlayImage(original, new, X, Y, width, height)
 % ------------------------------------------------
@@ -11,16 +11,12 @@ Ifunction overlayImage(original, new, X, Y, width, height)
 %   new - The new image to be overlayed on the original image
 %   X - The middle pixel index for the new image to be overlayed
 %   Y - The top pixel index for the new image to be overlayed
-%   width - self-explanatory
-%   height - self-explanatory
+%   width - width of new image to be overlayed
+%   height - height of new image to be overlayed
 %
 % OUTPUT ARGS:
 % - N/A
-%
-% EXAMPLE:
-%
-% TODO:
-%
+
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

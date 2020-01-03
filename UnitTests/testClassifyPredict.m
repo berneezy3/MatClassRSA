@@ -63,8 +63,8 @@ figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 %    - Error using classifyPredict (line 103)
 %      Expected a string for the parameter name, instead the input type was 'double'.
 
-M = classifyTrain( X_2D(1:floor(dim3/5 * 4), :) , labels6(1:floor(dim3/5 * 4)), 'classifier', 'SVM', 'PCA', .9, 'PCAinFold', 1, 'kernel', 'rbf');
-C = classifyPredict( M, X_2D(floor(dim3/5 * 4)+1:dim3, :),  labels6(floor(dim3/5 * 4)+1:dim3));
+M_split = classifyTrain( X_2D(1:3456, :) , labels6(1:3456), 'classifier', 'SVM', 'PCA', .9, 'kernel', 'rbf');
+C = classifyPredict( M_split, X_2D(3457:end, :),  labels6( 3457:end));
 
 figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 

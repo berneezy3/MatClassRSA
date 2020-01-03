@@ -8,8 +8,16 @@ classdef cvpart
 % --------------------------------
 % Bernard Wang, June 27, 2017
 % 
-% This class is an alternative to the matlab cvpartition class.  It
-% partitions cross validation folds without randomization.
+% This class stores a cross-validation partition for data.  This constructor
+% of this class takes in the number of training samples n and number of
+% training k folds, then creates k partitions in the data.  This object is
+% to be passed into the constructor cvData() later.
+%
+% This class is an alternative to the matlab cvpartition class.  The reason
+% this class is used instead of the matlab cvpartition class is because the
+% matlab class uses randomization to assign partitions.  In MatClassRSA, 
+% data shuffling is handled in the preprocessing step, we choose to assign
+% partitions sequentially.  
 % 
 % INPUT ARGS:
 %   - n: number of training samples

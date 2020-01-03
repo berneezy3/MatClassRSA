@@ -7,12 +7,16 @@ function [xTickVec yTickVec] = getTickCoord()
 % [xTickVec yTickVec] = getTickCoord()
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
+%
+% This function gets the x,y coordinates of the ticks of the plot.  This is
+% a helper function to the visualization classes
 % 
 % INPUT ARGS:
+%   N/A
 %
 % OUTPUT ARGS:
-%   - xTickVec 
-%   - yTickVec
+%   - xTickVec:  x coordinates of ticks
+%   - yTickVec: y coordinates of ticks
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

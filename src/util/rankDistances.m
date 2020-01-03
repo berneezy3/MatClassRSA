@@ -5,12 +5,16 @@ function xOut = rankDistances(xIn, rankType)
 % Blair - February 22, 2017
 %
 % This function ranks distances in a symmetric distance matrix.
+%
 % Inputs:
 % - xIn: The square confusion matrix, possibly normlized
 % - rankType
 %   - Rank ('rank', 'r')
 %   - Percent rank ('percentrank', 'p')
 %   - None ('none', 'n')
+%
+% Outputs:
+% - xOut: a symmetric matrix of ranks
 %
 % Ranking is based on the values in the lower triangle (under the diagonal)
 % of the matrix only. If a non-symmetric matrix is input, the function

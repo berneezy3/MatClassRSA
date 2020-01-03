@@ -7,15 +7,23 @@ function [winnerIndex, tallies, tieFlag] = SVMhandleties(dec_vals, labels)
 % [winnerIndex, tallies, tieFlag] = SVMhandleties(dec_vals, labels)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
+%
+% This function is an auxiliary function to libSVM to handle ties.
+% libSVM's multiclass classification is implemented using one-to-one
+% classification.  However, in the event that a trial's most classified
+% class is tied by two or more different classes, this function is used to break 
+% the tie.  This function is important because otherwise, during a
+% multiclass tie, libSVM would default to the first class amongst the ties,
+% inducing a bias in classification.
 % 
 % INPUT ARGS:
-%   - dec_vals: 
-%   - labels: 
+%   - dec_vals: decision values from libSVM
+%   - labels: the labels vector from libSVM
 %
 % OUTPUT ARGS:
-%   - winnerIndex:
-%   - tallies:
-%   - tieFlag:
+%   - winnerIndex: index of the winning label
+%   - tallies: number of votes
+%   - tieFlag: flag indicating if tie was detected.  This is debugging output
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

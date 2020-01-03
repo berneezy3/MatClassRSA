@@ -1,5 +1,22 @@
 function y = endswith(a, b)
 %-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
+% y = endswith(a, b)
+% --------------------------------
+% Bernard Wang
+%
+% Checks if string a ends with string b
+% 
+% INPUT ARGS:
+%   - a: string, must be as long as b
+%   - b: string, must be at most as long as a
+%
+% OUTPUT ARGS:
+%   - y:  1 or 0
+%
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

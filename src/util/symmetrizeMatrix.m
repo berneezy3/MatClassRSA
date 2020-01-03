@@ -13,6 +13,7 @@ function xOut = symmetrizeMatrix(xIn, symmType)
 %   - Geometric ('geometric', 'geom', 'geo', 'g')
 %   - Harmonic ('harmonic', 'harm', 'h')
 %   - None ('none', 'n')
+% Output: Symmetrized matrix
 %
 % There is no default symmetrization approach, as symmetrization type is
 % assumed to be decided prior to calling this function. If none of the

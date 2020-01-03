@@ -4,21 +4,26 @@ function [pairwiseAccuracies, pairwiseCMs, pairwiseCell] = decValues2PairwiseAcc
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% [pairwiseAccuracies, pairwiseCMs, pairwiseCell] = decValues2PairwiseAcc(pairwiseCMs, testY, labels, decVals, pairwiseCell )
+% [pairwiseAccuracies, pairwiseCMs, pairwiseCell] = ...
+%   decValues2PairwiseAcc(pairwiseCMs, testY, labels, decVals, pairwiseCell )
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
+%
+% When conducting pairwise classification using libSVM, this function is
+% needed to convert the decision values output from libSVM to
+% pairwise accuracies.  
 % 
 % INPUT ARGS:
-%   - pairwiseCMs: 
-%   - testY: 
-%   - labels:
-%   - decVals:
-%   - pairwiseCell:
+%   - pairwiseCMs: a 2 x 2 x (N choose 2) matrix to store the pairwise CMs 
+%   - testY: labels vector Y
+%   - labels: labels vector from svm_predict()
+%   - decVals: decision values matrix from svm_predict()
+%   - pairwiseCell: from initPairwiseCellMat(numClasses)
 %
 % OUTPUT ARGS:
-%   - pairwiseAccuracies:
-%   - pairwiseCMs:
-%   - pairwiseCell:
+%   - pairwiseAccuracies: accuracies of pairwise CV
+%   - pairwiseCMs: updated pairwiseCMs
+%   - pairwiseCell: updated pairwiseCell
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -83,27 +88,14 @@ function [pairwiseAccuracies, pairwiseCMs, pairwiseCell] = decValues2PairwiseAcc
                 thisAcc = (this2x2cm(1,1) + this2x2cm(2,2)) / sum(sum(this2x2cm));
                 pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.CM = this2x2cm;
                 pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.accuracy = thisAcc;
-                %pairwiseCell{thisBoundClasses(2), thisBoundClasses(1)}.CM = this2x2cm;
-                %pairwiseCell{thisBoundClasses(2), thisBoundClasses(1)}.accuracy = thisAcc;
                                 
                 % increment
                 pairwiseCMs(tallyCoordX, tallyCoordY, tallyCoordZ) = ...
                      pairwiseCMs(tallyCoordX, tallyCoordY, tallyCoordZ) + 1;
-                
-%                 disp('%%')
-%                 disp(['current actual Label: ' num2str(actualLabel)]);
-%                 disp(['current predicted Label: ' num2str(predictedLabel())]);
-%                 disp(['current classifier splits classes: ' num2str(thisBoundClasses)]);
-%                 disp(['decision boundary loop k: ' num2str(k)]);
-%                 disp(['index of the 2-by-2 pairwise mat dervied from dec boundary: ' num2str(tallyCoordZ)]);
-%                 disp(['2-by-2 pairwise mat after increment: ' ]);
-%                 disp(num2str(pairwiseCMs(:,:, tallyCoordZ)));
 
             end
 
         end
-%                 disp('%%%%%%%%%%%%%%%%%%%%%%%%')
-%                 disp('End decision boundary analysis for current observation.  There should have been 5 analyses for current obs')
     end
     
     

@@ -1,16 +1,23 @@
 classdef cvData
-% cvDataObj = cvpart(n,k)
+% cvDataObj = cvData(X,Y, partition, PCA, PCAinFold);
 % --------------------------------
 % Bernard Wang, August 17, 2017
 % 
-% Object that stores the data to be used for cross validation.
+% cvData is an object that stores data to be used for cross validation.  It
+% takes as input the X, Y data matrices, the cvpart object, then the PCA
+% parameters specificed in the classifyCrossValidate() function call.  It
+% formats the data into partitions to enable convineint cross validation
+% later.  
 % 
 % INPUT ARGS:
-%   - n: number of training samples
-%   - k: number of folds
+%   - X: training data (2D)
+%   - Y: labels
+%   - partition: object of class cvpart
+%   - PCA: ip.Results.PCA parameter specified in classifyCrossValidate() 
+%   - kPCAinFold: ip.Results.PCAinFold specified in classifyCrossValidate() 
 %
 % OUTPUT ARGS:
-%   - obj:  ann object of the cvpart class
+%   - obj:  an object of the cvpart class
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
