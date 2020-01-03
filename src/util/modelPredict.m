@@ -7,14 +7,18 @@ function [predictions decision_values] = modelPredict(X, mdl)
 % modelPredict(X, mdl)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
+%
+% This function takes a classification produced by fitModel(), and predicts
+% the labels of newly passed in data.
 % 
 % INPUT ARGS:
-%   - X: 
-%   - mdl: 
+%   - X: 2D trial by feature test data matrix
+%   - mdl: output obejct from fitModel()
 %
 % OUTPUT ARGS:
-%   - predictions
-%   - decision_values
+%   - predictions: predicted values of 
+%   - decision_values: decision values are returned if SVM is the
+%   classifier
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -53,7 +57,7 @@ function [predictions decision_values] = modelPredict(X, mdl)
         case 'struct'  %libsvm
             [r c] = size(X);
             Y = round(rand(r,1)*6);
-            [predictions, acc, decision_values] = svmpredict(Y, X, mdl, ['-q']);
+            [predictions, ~, decision_values] = svmpredict(Y, X, mdl, ['-q']);
             
             % handle ties
             for i=1:r

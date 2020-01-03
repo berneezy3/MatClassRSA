@@ -1,4 +1,4 @@
-function y = getImageFilesNew(iconPath)
+function y = getImageFiles(iconPath)
 %-------------------------------------------------------------------
 % y = getImageFiles(iconPath)
 % ------------------------------------------------
@@ -13,8 +13,6 @@ function y = getImageFilesNew(iconPath)
 %
 % OUTPUT ARGS:
 %   y - an array of jpg, jpeg, or png file names
-%
-% EXAMPLES:
 %
 % TODO:
 %   - output warning if no image files found in iconPath

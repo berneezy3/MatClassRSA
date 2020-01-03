@@ -13,6 +13,13 @@ function xOut = cube2trRows(xIn)
 %
 % See also cube2chRows ch2trRows tr2chRows chRows2cube trRows2cube
 
+% Inputs:
+%   - xIn:  a 3D electrodes x time x trials matrix
+%
+% Outputs:
+%   - xOut: a 2D trials by concatenated-electrodes matrix
+
+
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------

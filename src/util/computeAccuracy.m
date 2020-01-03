@@ -1,6 +1,22 @@
 function acc = computeAccuracy(actualY, predictedY)
 %-------------------------------------------------------------------
+% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% Published under a GNU General Public License (GPL)
+% Contact: bernardcwang@gmail.com
+%-------------------------------------------------------------------
+% computeAccuracy(actualY, predictedY)
+% --------------------------------
+% Bernard Wang, Jan 1, 2020
+% 
+% This functions computes the accuracy of a model, given the actual labels
+% and the predicted labels
 %
+% INPUT ARGS:
+%   - actualY: actual labels
+%   - predictedY: the predicted labels from the model
+%
+% OUTPUT ARGS:
+%   - acc: percent accuracy
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

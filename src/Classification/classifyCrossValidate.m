@@ -264,7 +264,7 @@
     
     
     % SET RANDOM SEED
-    % for data shuffling and permutation testing purposes
+    % for Random forest purposes
     %rng(ip.Results.randomSeed);
     setUserSpecifiedRng(ip.Results.randomSeed);
 

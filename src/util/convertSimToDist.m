@@ -15,6 +15,9 @@ function xOut = convertSimToDist(xIn, distType, distPower)
 % - distPower:
 %   - Distance power (used in power and logarithmic computations)
 %
+% Outputs
+%   xOut: distance matrix
+%
 % There is no default distance computation, as distance type is
 % assumed to be decided prior to calling this function. If none of the
 % above distType options are specified, the function returns an error.

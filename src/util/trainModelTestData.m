@@ -9,10 +9,15 @@
 % Bernard Wang, Sept 28, 2019
 % 
 % INPUT ARGS:
-%   - X: 
-%   - Y: 
+%   - X: Training Data (split into train and test set )
+%   - Y: Labels (split into train and test labels)
+%   - ip:  input parser from main function
 %
 % OUTPUT ARGS:
+%   - CM: Confusion Matrix
+%   - accuracy: prediction accuracy of 
+%   - predY: predicted Y values
+%   - pVal: pVal 
 % 
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 

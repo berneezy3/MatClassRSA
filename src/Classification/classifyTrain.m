@@ -170,8 +170,9 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'PCA', defaultPCA);
-        %addParamValue(ip, 'PCAinFold', defaultPCAinFold);
-        addParamValue(ip, 'nFolds', defaultNFolds);
+        %addParamValue(ip, 'PCAinFold', defaultPCAinFold); % THERE ARE NO
+        %FOLDs
+        %addParamValue(ip, 'nFolds', defaultNFolds);
         addParamValue(ip, 'classifier', defaultClassifier, ...
             @(x) any(validatestring(x, expectedClassifier)));
 
@@ -192,6 +193,9 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'PCA', defaultPCA);
+%         addParameter(ip, 'PCAinFold', defaultPCAinFold); % THERE ARE NO
+%         FOLDS
+        %addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'classifier', defaultClassifier, ...
              @(x) any(validatestring(x, expectedClassifier)));
 
@@ -292,8 +296,8 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 
     if (ip.Results.pairwise == 0) || ...
        ((ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM'))
-        
-        mdl = fitModel(trainData, Y, ip);
+        disp('doing multiclass/pairwise SVM')
+        mdl = fitModel(trainData, Y(:), ip);
         M.classifierInfo = classifierInfo;
         M.mdl = mdl;
 
@@ -306,7 +310,7 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
         numDecBounds = nchoosek(numClasses, 2);
         M = cell(1, numDecBounds);
 
-        mdl = fitModel(trainData, Y', ip);
+        mdl = fitModel(trainData, Y(:), ip);
         j = 0;
         for cat1 = 1:numClasses-1
             for cat2 = (cat1+1):numClasses

@@ -4,15 +4,18 @@ function pairwiseCellMat = initPairwiseCellMat(numClasses)
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% [xTickVec yTickVec] = getTickCoord()
+% pairwiseCellMat = initPairwiseCellMat(numClasses)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
+%
+% Initializes an empty 2 x 2 x (numClasses choose 2) matrix for pairwise
+% classification
 % 
 % INPUT ARGS:
-%   - numClasses
+%   - numClasses: number of classes in pairwise classification
 %
 % OUTPUT ARGS:
-%   - pairwiseCellMat
+%   - pairwiseCellMat: an empty 2 x 2 x (numClasses choose 2) matrix
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

@@ -1,5 +1,4 @@
 function y = classTuple2Nchoose2Ind(classTuple, n)
-function checkInputData(X, Y)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
@@ -8,13 +7,21 @@ function checkInputData(X, Y)
 % classTuple2Nchoose2Ind(classTuple, n)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
+%
+% Say we are given N choose 2 pairs of classes, and these N choose 2
+% classes were sequentially ordered into a vector. This function takes a 
+% pair of classes (classTuple) and finds the index of said pair in the 
+% vector of pairs. For example, if we are conducting pairwise 
+% classification amongst 5 classes, we would have 5 choose 2 tuples of 
+% classes.  If we were to run the function call classTuple2Nchoose2Ind((2, 4), 5), 
+% the function would return index 6.  
 % 
 % INPUT ARGS:
-%   - classTuple: 
-%   - n: 
+%   - classTuple: a pair of classes in array form
+%   - n: number of classes
 %
 % OUTPUT ARGS:
-%   - y:
+%   - y: index of the class pair
 %
 
 
@@ -55,8 +62,6 @@ function checkInputData(X, Y)
 
     firstClass = classTuple(1);
     secondClass = classTuple(2);
-    
-
     
     temp = n-1;
     y = 0;
