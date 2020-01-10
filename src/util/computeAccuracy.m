@@ -1,6 +1,6 @@
 function acc = computeAccuracy(actualY, predictedY)
 %-------------------------------------------------------------------
-% (c) Bernard Wang and Blair Kaneshiro, 2017.
+% (c) Bernard Wang, Nathan Kong, Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------

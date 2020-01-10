@@ -137,11 +137,11 @@ classdef cvData
 %                 parfor i = 1:cvPart.NumTestSets
                     trainX = bsxfun(@times, cvPart.training{i}, X);
                     trainX = trainX(any(trainX~=0,2),:);
-                    trainY = bsxfun(@times, cvPart.training{i}', Y);
+                    trainY = bsxfun(@times, cvPart.training{i}, Y);
                     trainY = trainY(trainY ~=0);
                     testX = bsxfun(@times, cvPart.test{i}, X);
                     testX = testX(any(testX~=0, 2),:);
-                    testY = bsxfun(@times, cvPart.test{i}', Y);
+                    testY = bsxfun(@times, cvPart.test{i}, Y);
                     testY = testY(testY ~=0);
 
                     trainXall = [trainXall {trainX}];

@@ -53,7 +53,7 @@ function mdl = fitModel(X, Y, ip)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-    switch ip.Results.classifier
+    switch upper(ip.Results.classifier)
         case 'SVM'
             [ry cy] = size(Y);
             if (cy> ry)

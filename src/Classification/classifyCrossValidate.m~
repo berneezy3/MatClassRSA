@@ -269,11 +269,7 @@
 
     % PCA 
     % Split Data into fold (w/ or w/o PCA)
-    if (ip.Results.PCA>0)
-        disp('Conducting Principal Component Analysis');
-    else
-        disp('Skipping Principal Component Analysis');
-    end
+    disp('Conducting Principal Component Analysis');
     partition = cvpart(r, ip.Results.nFolds);
     tic
     cvDataObj = cvData(X,Y, partition, ip.Results.PCA, ip.Results.PCAinFold);
@@ -361,7 +357,7 @@
     % END PAIRWISE LDA/RF
     % START PAIRWISE SVM 
     elseif  (ip.Results.pairwise) && ... 
-            strcmp( upper(ip.Results.classifier), 'SVM')
+            strcmp(upper(ip.Results.classifier), 'SVM')
         
         for i = 1:ip.Results.nFolds
 
