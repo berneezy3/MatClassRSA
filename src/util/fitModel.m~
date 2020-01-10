@@ -1,24 +1,26 @@
-function [predictions decision_values] = modelPredict(X, Y, mdl)
+function mdl = fitModel(X, Y, ip)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% modelPredict(X, mdl)
+% mdl = fitModel(X, Y, ip)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
 %
-% This function takes a classification produced by fitModel(), and predicts
-% the labels of newly passed in data.
+% Given the classifier and training data specified in classifyCrossValidate(), 
+% fitModel() of returns a classifcation model.  The output object mdl is to
+% be passed into modelPredict.  The purpose of this class is to provide a
+% unified interface towards training a model, because the function calls to 
+% the different classifiers (SVM, RF, and LDA etc) are all different.
 % 
 % INPUT ARGS:
-%   - X: 2D trial by feature test data matrix
-%   - mdl: output obejct from fitModel()
+%   - X: 2D trial by feature training data matrix
+%   - Y: label vector
+%   - ip: input parser parameters from classifyCrossValidate()
 %
 % OUTPUT ARGS:
-%   - predictions: predicted values of 
-%   - decision_values: decision values are returned if SVM is the
-%   classifier
+%   - mdl: an object that contains the classification model
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -50,49 +52,39 @@ function [predictions decision_values] = modelPredict(X, Y, mdl)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
-    classifier = class(mdl);
-    decision_values = NaN;
-    
-    switch classifier
-        case 'struct'  %libsvm
-            [r c] = size(X);
-%             Y = round(rand(r,1)*6);
-            [predictions, ~, decision_values] = svmpredict(Y, X, mdl, ['-q']);
-            
-            % handle ties
-            for i=1:r
-                [indOfWinner tallies tie] = SVMhandleties(decision_values(i, :), mdl.Label');
-                if (tie ~= 0)
-%                     disp(['libsvm''s winner: ' num2str(predictions(i)) ', bernard''s tie broken winner: ' num2str(mdl.Label(indOfWinner))]);
-%                     disp(['label order: ' num2str(mdl.Label')]);
-                    predictions(i) = mdl.Label(indOfWinner);
-                end
+
+    switch upper(ip.Results.classifier
+        case 'SVM'
+            [ry cy] = size(Y);
+            if (cy> ry)
+                Y = Y';
             end
-            
-            % implement pairwise
-            %pairwiseMat = cell(1, length(decision_values));
-            pairwiseMat = zeros(2,2, length(decision_values));
-            
-            
-            predictions = predictions';
-        case 'ClassificationECOC' % multi-class SVM
-            [r c] = size(X);
-            [predictions, score] = predict(mdl, X);
-            predictions = predictions';
-        case 'ClassificationDiscriminant'
-            predictions = predict(mdl,X);
-            predictions = predictions(:,end);
-            predictions = predictions';
-        case 'TreeBagger'
-            predictions = predict(mdl,X);
-            [rows, cols] = size(predictions);
-            predictions = str2num(cell2mat(predictions));
-            if (rows>cols)
-                predictions = reshape(predictions,[cols rows]);
+            switch ip.Results.kernel
+                case 'linear'
+                    kernelNum = 0;
+                case 'polynomial'
+                    kernelNum = 1;
+                case 'rbf'
+                    kernelNum = 2;
+                case 'sigmoid'
+                    kernelNum = 3;
             end
-        otherwise
-            error(['mdl must be of class struct, ClassificationDiscriminant ' ...
-                'or TreeBagger']);
+              mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ']);
+        case 'SVM2'
+            
+%             temp = templateSVM('KernelFunction','rbf', 'Standardize',true);
+%             classOrder = 1:length(unique(Y));
+%             
+%             mdl = fitcecoc(X,Y','Learners', temp, 'Coding', 'onevsone', 'ClassNames', classOrder);
+            
+        case 'LDA'
+            mdl = fitcdiscr(X, Y', 'DiscrimType', 'linear'); 
+            
+        case 'RF'
+            mdl = TreeBagger(ip.Results.numTrees, X, Y, ...
+                'OOBPrediction', 'on', 'minLeafSize', ip.Results.minLeafSize);
     end
     
+
 end
+

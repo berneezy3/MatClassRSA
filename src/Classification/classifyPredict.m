@@ -109,7 +109,9 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     if length(M) > 1 && iscell(M)
         tempM = M{1};
     end
-    pairwise = tempM.classifierInfo.pairwise;
+    if (~isnan(tempM.classifierInfo))
+        pairwise = tempM.classifierInfo.pairwise;
+    end
     
     % Check input data
     testDataSize = size(X);
