@@ -38,13 +38,7 @@ X_sc11 = scaleDataMinMax(X, [-1 1]);
 XNN_sc01 = scaleDataMinMax(XNN, [0 1]);
 XNN_sc11 = scaleDataMinMax(XNN, [-1 1]);
 
-% START HERE
-% ----------------------------
-% PCs are messed up when doing this! BUT WHY DOES PCA ACT NORMAL WHEN I
-% SCALE THE 2D MATRIX AND THEN INPUT IT TO CLASSIFYCROSSVALIDATE AND ASK IT
-% TO DO PCA IN THERE???
-% I think we need zero-mean data for SVD-based PCA
-% So scaling to [-1 1] will be more stable 
+% PCs are messed up when doing this! 
 
 %% Quick implementation: PCA, then scaling on all data at once
 
@@ -59,9 +53,9 @@ XNN_sc11 = scaleDataMinMax(XNN_pc, [-1 1]);
 %% Classify quick-scaled data
 
 C_sc01_svm_5 = classifyCrossValidate(X_sc01, labels6, 'classifier', 'SVM',... 
-    'nFolds', 5, 'randomSeed', 1, 'PCA', 0.999999999999);
-C_sc11_svm_5 = classifyCrossValidate(X_sc11, labels6, 'classifier', 'SVM',... 
-    'nFolds', 5, 'randomSeed', 1, 'PCA', 0.999999999999);
+    'nFolds', 5, 'randomSeed', 1);
+C_sc11_svm_5 = classifyCrossValidate(XNN_sc01, labels6, 'classifier', 'SVM',... 
+    'nFolds', 5, 'randomSeed', 1);
 
 %%
 
