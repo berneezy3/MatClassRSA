@@ -11,14 +11,14 @@ function [img, fig] = plotMatrix(RDM, varargin)
 % - matrix: A matrix, e.g., a confusion matrix, RDM/distance matrix.
 %
 % Optional name-value pairs:
-%   'ranktype': specification for whether to convert the matrix values
-%       to percentile ranks (a common step when visualizing RDMs) or ranks
+%   'ranktype': specification for whether to convert matrix values to 
+%       percentile ranks (a common step when visualizing RDMs) or ranks
 %       prior to plotting. Note that conversion of values to ranks or 
-%       percentile ranks assumes that the input matrix is symmetric and 
-%       operates only on values in the lower triangle of the matrix. If a 
-%       non-symmetric matrix is input, a warning is printed and conversion 
-%       proceeds using only lower-triangle values, returning a symmetric 
-%       matrix.
+%       percentile ranks assumes a symmetric input matrix and operates only 
+%       on values in the lower triangle of the matrix, not including the 
+%       diagonal. If a non-symmetric matrix is input, a warning is printed 
+%       and conversion proceeds using only lower-triangle values, returning 
+%       a symmetric matrix.
 %       --options--
 %       'none', 'n' - perform no conversion of matrix values (default)
 %       'rank', 'r' - convert matrix values to ranks
@@ -100,7 +100,7 @@ function [img, fig] = plotMatrix(RDM, varargin)
     ip.addRequired('matrix',@ismatrix);
     options = [1, 0];
     expectedRanktype = {'none', 'rank', 'percentrank'};
-    defaultRanktype = 'percentrank';
+    defaultRanktype = 'none';
     
     ip.addParameter('ranktype', defaultRanktype,...
         @(x) any(validatestring(x, expectedRanktype)));
@@ -120,7 +120,6 @@ function [img, fig] = plotMatrix(RDM, varargin)
     
     % Rank distances
     RDM = rankDistances(RDM, ip.Results.ranktype);
-    keyboard
     
     img = imagesc(RDM);
     fig = gcf;
@@ -149,7 +148,11 @@ function [img, fig] = plotMatrix(RDM, varargin)
         %truncMax = fix(matMax * 10^2)/10^2;
         inc = (matMax - matMin)/(ip.Results.ticks-1);
         %c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.ticks-2] * inc + matMin  matMax]));
-        c.Ticks = linspace(matMin, matMax, 4);
+        switch ip.Results.ranktype
+            case 'none'
+                c.Ticks = linspace(matMin, matMax, 4);
+            case 'rank'
+            case 'percentrank'
         c.FontWeight = 'bold';
     end
     

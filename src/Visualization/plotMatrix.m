@@ -148,7 +148,16 @@ function [img, fig] = plotMatrix(RDM, varargin)
         %truncMax = fix(matMax * 10^2)/10^2;
         inc = (matMax - matMin)/(ip.Results.ticks-1);
         %c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.ticks-2] * inc + matMin  matMax]));
-        c.Ticks = linspace(matMin, matMax, 4);
+        switch ip.Results.ranktype
+            case 'none'
+                c.Ticks = round(linspace(matMin, matMax, 3), 2);
+            case 'rank'
+                t = sum(sum(tril(ones(size(RDM)), -1)));
+                c.Limits = [0 t];
+                c.Ticks = round(linspace(0, t, 3), 2);
+            case 'percentrank'
+                c.Limits = [0 100];
+                c.Ticks = 0:50:100; 
         c.FontWeight = 'bold';
     end
     
