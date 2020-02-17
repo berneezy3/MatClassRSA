@@ -1,6 +1,6 @@
-function [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
+function [RDM, params] = computeClassificationRDM(M, matrixType, varargin)
 %-------------------------------------------------------------------
-% [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
+% [RDM, params] = computeClassificationRDM(M, matrixType, varargin)
 % ------------------------------------------------------------------
 % Blair - January 31, 2017, revised September 2019
 %
@@ -17,43 +17,50 @@ function [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
 % more information and examples.
 %
 % REQUIRED INPUTS
-% M -- A square proximity matrix. Matrix elements can contain measures of
-%   similarity (e.g., classifier/perceptual confusions, similarity ratings)
-%   or distance (e.g., pairwise classifier accuracy, Euclidean distance)
-%   between all i,j (i ~= j). Self-similarity or distance (i=j) can also be
-%   included and is required for some transformation procedures.
+% M -- A square matrix, assumed to be a multicategory confusion matrix or 
+%   matrix of pairwise accuraciues.
 %
 % matrixType -- String specifying the type of input matrix.
-%   - Enter 's', 'sim', 'similarity', if inputting a similarity matrix
-%     (e.g., multicategory confusion matrix, correlation matrix).
-%   - Enter 'd', 'dist', or 'distance' if inputting a distance matrix
-%     (e.g., matrix of pairwise accuracies or other RDM).
+%   - Enter 'CM' if inputting a multicategory confusion matrix.
+%   - Enter 'pairs' if inputting a matrix of pairwise accuracies.
 %
 % OPTIONAL NAME-VALUE PAIRS
-% 'normalize' -- 'diagonal', 'sum', 'zeroToOne', 'none'
-%   Matrix normalization refers to rescaling each element of the matrix
-%   using division and/or subtraction. The 'diagonal' and 'sum' options
-%   divide each matrix element by the diagonal value in its row or the sum
-%   of each row, respectively, and are intended to be applied to
-%   multicategory classification confusion matrices. The 'zeroToOne' option
-%   subtracts 0.5 from each off-diagonal matrix element and divides the
-%   result by 0.5 (returning a value of 1 in the case of 100% accuracy and
-%   0 for chance-level accuracy of 50%), and is intended to be applied to
-%   matrices of pairwise classifier accuracies .
-%   - For 'similarity' input matrix M, the default is 'diagonal', but
-%     'sum', and 'none' can also be specified. If 'zeroToOne' is specified,
-%     the function will override it with 'none' and print a warning. Users
-%     should use caution if calling 'diagonal' or 'sum' on similarity
-%     matrices whose diagonals are undefined or contain zeros.
-%   - For 'distance' input matrix M, the default specification is
-%     'zeroToOne', but 'none' can also be specified. If 'diagonal' or 'sum'
-%     is specified with this input type, the function will override it
-%     with 'none' and print a warning.
+% 'normalize' -- 'diagonal', 'sum', 'subtractPointFive', 'none'
+%   Matrix normalization refers to dividing or subtracting each element of 
+%   the matrix.
+%   --- options ---
+%   'diagonal' (default for matrixType 'CM') - divide each matrix element
+%       by the diagonal value in the respective row. This produces self-
+%       similarity of one. If any element along the diagonal is zero, the 
+%       function will print a warning and attempt 'sum' normalization 
+%       instead.
+%   'sum' - divide each matrix element by the sum of the respective row.
+%       For confusion matrices with actual labels as rows and predicted 
+%       labels as columns, this procedure computes the estimated
+%       conditional probabilities P(predicted|actual) (Shepard, 1958). If
+%       the sum of any row is zero, the function will print an error and
+%       exit.
+%   'subtractPointFive' (default for matrixType 'pairs') - subtract 0.5
+%       from each matrix element. For pairwise accuracies, this provides a
+%       unitless measure of distance with expected level (at chance-level
+%       classification) of zero. 
+%   'none' - perform no normalization of the matrix.
+%   --- notes ---
+%   - For matrixType 'CM', the default normalization is 'diagonal', but
+%       'sum', and 'none' can also be specified. If 'subtractPointFive' is 
+%       specified, the function will print a warning and override it with 
+%       'none'. Users should use caution if calling 'diagonal' or 'sum' on 
+%       confusion matrices matrices whose diagonals are undefined or 
+%       contain zeros.
+%   - For matrixType 'pairs', the default specification is
+%       'subtractPointFive', but 'none' can also be specified. If 
+%       'diagonal' or 'sum' is specified with this input type, the function 
+%       will override it with 'none' and print a warning.
 %
 % 'symmetrize' -- 'arithmetic', 'geometric', 'harmonic', 'none'
 %   Symmetrizing the matrix ensures that the the distance between i,j
 %   equals the distance between j,i by computing the arithmetic, geometric,
-%   or harmonic mean of the upper and lower triangles of the matrix. Any
+%   or harmonic mean of the matrix and its transpose. Any
 %   zeros on the diagonal will be converted to NaNs; aside from this, if
 %   an already symmetric matrix is input to the function, the output will
 %   be the same as the input.
@@ -105,6 +112,9 @@ function [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
 % - Computing inverse percentile: http://bit.ly/2koMsAn
 % - Harmonic mean with two numbers:
 %   https://en.wikipedia.org/wiki/Harmonic_mean#Two_numbers
+% - Shepard RN. Stimulus and response generalization: Tests of a model 
+%   relating generalization to dis- tance in psychological space. Journal 
+%   of Experimental Psychology. 1958; 55(6):509?523. doi: 10.1037/h0042354
 
 % This software is licensed under the 3-Clause BSD License (New BSD License),
 % as follows:
@@ -153,7 +163,7 @@ matrixType = lower(matrixType); % Convert to lowercase
 % Specify input parser parameters based in similarity or distance
 if any(strcmp(matrixType, {'d', 'dist', 'distance'}))
     disp('Operating on input distance matrix.')
-    defaultNormalize = 'zeroToOne';
+    defaultNormalize = 'subtractPointFive';
     defaultSymmetrize = 'arithmetic';
     defaultDistance = 'none';
 elseif any(strcmp(matrixType, {'s', 'sim', 'similarity'}))
@@ -172,7 +182,7 @@ defaultRankdistances = 'none';
 % Specify expected values
 expectedMatrixType = {'d', 'dist', 'distance',...
     's', 'sim', 'similarity'};
-expectedNormalize = {'diagonal', 'sum', 'zeroToOne', 'none'};
+expectedNormalize = {'diagonal', 'sum', 'subtractPointFive', 'none'};
 expectedSymmetrize = {'arithmetic', 'mean',...
     'geometric', 'harmonic', 'none'};
 expectedDistance = {'linear', 'power', 'logarithmic', 'none'};
@@ -234,7 +244,7 @@ if any(strcmp(matrixType, {'d', 'dist', 'distance'}))
     % Check: 'normalize' should NOT be 'diagonal' or 'sum'
     if any(strcmp(params.normalize, {'diagonal', 'sum'}))
         warning(['Normalize was specified as ''' params.normalize ''' but '...
-            'must be set to ''zeroToOne'' or ''none'' for ''distance'' input matrix. '...
+            'must be set to ''subtractPointFive'' or ''none'' for ''distance'' input matrix. '...
             'Overriding user input and setting to ''none''.'])
         params.normalize = 'none';
     end
@@ -248,8 +258,8 @@ if any(strcmp(matrixType, {'d', 'dist', 'distance'}))
 end
 % Verify inappropriate parms not specified with 'similarity' input matrix
 if any(strcmp(matrixType, {'s', 'sim', 'similarity'}))
-    % Check: 'normalize' should NOT be 'zeroToOne'
-    if strcmp(params.normalize, 'zeroToOne')
+    % Check: 'normalize' should NOT be 'subtractPointFive'
+    if strcmp(params.normalize, 'subtractPointFive')
         warning(['Normalize was specified as ''' params.normalize ''' but '...
             'this specification cannot be used for ''similarity'' input matrix. '...
             'Overriding user input and setting to ''none''.'])
