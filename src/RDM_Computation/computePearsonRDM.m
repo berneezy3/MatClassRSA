@@ -33,7 +33,7 @@ function [dissimilarities] = computePearsonRDM(X, Y, num_permutations, rand_seed
 %                     x num_images x num_permutations
 
 num_dim = length(size(X));
-assert(num_dim == 2, 'Data of this size are not supported. See documentation.');
+assert(num_dim == 2, 'Data of this size are not supported. A typical use case would be to provide a 2D matrix with dimensions of: nSpace-by-nTrials.');
 assert(size(X,2) == length(Y), 'Mismatch in number of trials in data and length of labels vector.');
 
 if nargin < 3 || isempty(num_permutations)
