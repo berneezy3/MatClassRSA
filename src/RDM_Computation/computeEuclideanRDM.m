@@ -47,7 +47,6 @@ catch
 end
 disp(['computeEuclideanRDM: Input feature-by-trial data matrix is of size ' mat2str(size(X)) '.']);
 disp(['Input labels vector is of length ' num2str(length(Y)) '.'])
-return
 
 if nargin < 3 || isempty(num_permutations)
     num_permutations = 10;
