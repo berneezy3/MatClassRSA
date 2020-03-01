@@ -62,3 +62,15 @@ d = computeEuclideanRDM(X, labels6)
 %% Fail: Input transposed 2D matrix
 X2d = squeeze(X(96,:,:))';
 d = computeEuclideanRDM(X2d, labels6)
+
+%% Feb 2020: Should work: Input 2D feat-by-trial matrix
+X2d = squeeze(X(96,:,:));
+d = computeEuclideanRDM(X2d, labels6);
+
+%% Feb 2020: Should work with warning: Input 2D trial-by-feat matrix
+X2dt = transpose(X2d);
+d = computeEuclideanRDM(X2dt, labels6);
+
+%% Feb 2020: Should fail: Input 2D matrix doesn't match labels length on either dimension
+Xbad = randi(20, [40, 5183]);
+d = computeEuclideanRDM(Xbad, labels6);
