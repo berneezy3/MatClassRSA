@@ -32,8 +32,8 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_se
 %           - rng struct as assigned by rand_seed = rng.
 %
 % Output Args:
-%   dissimilarities - the dissimilarity matrix, dimensions: num_images
-%                     x num_images x num_permutations
+%   dissimilarities - the dissimilarity matrix, dimensions: num_labels
+%                     x num_labels x num_permutations
 
 % Input data needs to be a 2D matrix
 num_dim = length(size(X));
@@ -64,12 +64,12 @@ else, setUserSpecifiedRng(rand_seed);
 end
 
 unique_labels = unique(Y);
-num_images = length(unique_labels);
+num_labels = length(unique_labels);
 num_features = size(X,1);
-dissimilarities = zeros(num_permutations, num_images, num_images);
+dissimilarities = zeros(num_permutations, num_labels, num_labels);
 for p=1:num_permutations
     
-    for i=1:num_images
+    for i=1:num_labels
         curr_label_i = unique_labels(i);
         
         img1_data = squeeze(X(:,Y==curr_label_i));
@@ -84,7 +84,7 @@ for p=1:num_permutations
         img1_train = squeeze(mean(img1_train,2));
         img1_test = squeeze(mean(img1_test,2));
         
-        for j=i+1:num_images
+        for j=i+1:num_labels
             curr_label_j = unique_labels(j);
             
             img2_data = squeeze(X(:,Y==curr_label_j));
