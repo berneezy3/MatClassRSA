@@ -57,16 +57,17 @@ switch normType
     case {'diagonal', 'diag', 'd'}
         disp('Normalize: diagonal')
         if ismember(0, diag(xIn))
-            error('Cannot divide by zero on the diagonal.')
+            error('Cannot divide by zero on the diagonal. Suggest using ''sum'' rather than ''diagonal'' for normalization.')
         else
             xOut = xIn ./ repmat(diag(xIn), 1, size(xIn, 2));
         end
     case {'sum', 's'}
         disp('Normalize: sum')
+        xOut = xIn ./ repmat(sum(xIn, 2), 1, size(xIn, 2));
         if ismember(0, sum(xIn, 2))
-            error('Cannot divide by zero row sum.')
-        else
-            xOut = xIn ./ repmat(sum(xIn, 2), 1, size(xIn, 2));
+            warning('Input matrix contains at least one zero-sum row. These output rows will be rows of zeros.')
+            zeroRows = find(sum(xIn,2) == 0);
+            xOut(zeroRows,:) = 0;
         end
     case {'none', 'n'}
         disp('Normalize: none')

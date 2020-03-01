@@ -60,7 +60,7 @@ rankType = lower(rankType);
 
 switch rankType
     case {'none', 'n'}
-        disp('Rank distance: none')
+        disp('Rank type: none')
         xOut = xIn;
     case {'rank', 'r', 'percentrank', 'p'}
         if sum(unique(xIn - xIn') == 0) ~= numel(unique(xIn - xIn'))
@@ -71,11 +71,11 @@ switch rankType
         trV = tiedrank(distV);
         switch rankType
             case{'rank', 'r'}
-                disp('Rank distance: rank ')
+                disp('Rank type: rank ')
                 theRanks = trV;
             case{'percentrank', 'p'}
-                disp('Rank distance: percentrank')
-                theRanks = trV / length(trV);
+                disp('Rank type: percentrank')
+                theRanks = trV / length(trV) * 100;
         end
         outM = zeros(size(xIn));
         outM(trilM == 1) = theRanks;

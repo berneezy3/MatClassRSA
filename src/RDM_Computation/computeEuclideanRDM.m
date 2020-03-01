@@ -36,8 +36,17 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_se
 %                     x num_images x num_permutations
 
 num_dim = length(size(X));
-assert(num_dim == 2, 'Input data must be a 2D matrix. See documentation.');
-assert(size(X,2) == length(Y), ['Mismatch in number of trials in data and length of labels vector. 2D input matrix should be feature x trial']);
+assert(num_dim == 2, 'Input data must be a 2D matrix. A typical use case would be to provide a 2D matrix with dimensions of: nSpace-by-nTrials.');
+try
+    assert(size(X,2) == length(Y));
+%     assert(size(X,2) == length(Y), ['Mismatch in number of trials in data and length of labels vector. 2D input matrix should be feature x trial']);
+catch
+    X = transpose(X);
+    assert(size(X,2) == length(Y), ['Mismatch in number of trials in data and length of labels vector. 2D input matrix should be feature x trial']);
+    warning('Input data matrix has been transposed in order for column dimension to match length of labels vector.')
+end
+disp(['computeEuclideanRDM: Input feature-by-trial data matrix is of size ' mat2str(size(X)) '.']);
+disp(['Input labels vector is of length ' num2str(length(Y)) '.'])
 
 if nargin < 3 || isempty(num_permutations)
     num_permutations = 10;

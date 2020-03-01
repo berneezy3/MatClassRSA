@@ -8,16 +8,28 @@ function [img, fig] = plotMatrix(RDM, varargin)
 % specified labels.
 %
 % INPUT ARGS:
-% - matrix: A matrix, e.g. a confusion matrix or a distance matrix
+% - matrix: A matrix, e.g., a confusion matrix, RDM/distance matrix.
 %
 % Optional name-value pairs:
+%   'ranktype': specification for whether to convert matrix values to 
+%       percentile ranks (a common step when visualizing RDMs) or ranks
+%       prior to plotting. Note that conversion of values to ranks or 
+%       percentile ranks assumes a symmetric input matrix and operates only 
+%       on values in the lower triangle of the matrix, not including the 
+%       diagonal. If a non-symmetric matrix is input, a warning is printed 
+%       and conversion proceeds using only lower-triangle values, returning 
+%       a symmetric matrix.
+%       --options--
+%       'none', 'n' - perform no conversion of matrix values (default)
+%       'rank', 'r' - convert matrix values to ranks
+%       'percentrank', 'p' - convert matrix values to percentile ranks
 %   'axisColors': a vector of colors, ordered by the order of labels in the 
-%       confusion matrix e.g. {?y? ?m? ?c? ?r?} or {?yellow? ?magenta? ?cyan? ?red?}
-%       or {?[1 1 0]? ?[1 0 1]? ?[0 1 1]? ?[1 0 0]?}
+%       confusion matrix e.g. {'y' 'm' 'c' 'r'} or {'yellow' 'magenta' 'cyan' 'red'}
+%       or {'[1 1 0]' '[1 0 1]' '[0 1 1]' '[1 0 0]'}
 %   'axisLabels': a matrix of alphanumeric labels, ordered by same order of
-%       labels in the confusion matrix e.g. ['cat' 'dog' 'fish']
-%   'iconPath': a directory containing images used to label, in which the
-%       image files must be ordered in the same order as the labels of the 
+%       items in the confusion matrix e.g., ['cat' 'dog' 'fish']
+%   'iconPath': a directory containing images to be used for labels, in which the
+%       image filenames must be ordered in the same order as the items of the 
 %       confusion matrix
 %   'colorMap' - This parameter can be used to call a default Matlab colormap, 
 %       or one specified by the user, to change the overall look of the plot. 
@@ -49,6 +61,7 @@ function [img, fig] = plotMatrix(RDM, varargin)
 %       None
 %  
 % TODO: test, calcuate optimal size for icons
+% See also rankDistances
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -86,6 +99,11 @@ function [img, fig] = plotMatrix(RDM, varargin)
     ip.FunctionName = 'plotCM';
     ip.addRequired('matrix',@ismatrix);
     options = [1, 0];
+    expectedRanktype = {'none', 'rank', 'percentrank'};
+    defaultRanktype = 'none';
+    
+    ip.addParameter('ranktype', defaultRanktype,...
+        @(x) any(validatestring(x, expectedRanktype)));
     ip.addParameter('axisColors', [], @(x) isvector(x)); 
     ip.addParameter('axisLabels', [], @(x) isvector(x));
     ip.addParameter('iconPath', '');
@@ -100,10 +118,12 @@ function [img, fig] = plotMatrix(RDM, varargin)
     ip.addParameter('iconSize', 40);
     parse(ip, RDM, varargin{:});
     
+    % Rank distances
+    RDM = rankDistances(RDM, ip.Results.ranktype);
+    
     img = imagesc(RDM);
     fig = gcf;
 
-    
     if ~isempty(ip.Results.colormap)
         colormap(ip.Results.colormap);
     end
@@ -128,7 +148,16 @@ function [img, fig] = plotMatrix(RDM, varargin)
         %truncMax = fix(matMax * 10^2)/10^2;
         inc = (matMax - matMin)/(ip.Results.ticks-1);
         %c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.ticks-2] * inc + matMin  matMax]));
-        c.Ticks = linspace(matMin, matMax, 4);
+        switch ip.Results.ranktype
+            case 'none'
+                c.Ticks = round(linspace(matMin, matMax, 3), 2);
+            case 'rank'
+                t = sum(sum(tril(ones(size(RDM)), -1)));
+                c.Limits = [0 t];
+                c.Ticks = round(linspace(0, t, 3), 2);
+            case 'percentrank'
+                c.Limits = [0 100];
+                c.Ticks = 0:50:100; 
         c.FontWeight = 'bold';
     end
     
