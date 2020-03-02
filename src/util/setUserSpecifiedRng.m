@@ -68,7 +68,8 @@ if nargin >= 1 && length(r)==1 && isstring(r), r = r{1}; end
 
 % If input is not specified, default to ('shuffle', 'twister').
 if nargin < 1 || isempty(r) || (length(r) == 1 && isnan(r))
-    warning('Random number generator not specified. Setting rng=(''shuffle'', ''twister'').');
+    warning('setUserSpecifiedRng:noSpecification',...
+    '<a href="matlab: open(which(''setUserSpecifiedRng.m''))">setUserSpecifiedRng</a> line 71. Random number generator not specified. Setting rng=(''shuffle'', ''twister'').');
     rng('shuffle', 'twister');
     return
 end
