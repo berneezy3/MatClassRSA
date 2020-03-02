@@ -46,13 +46,14 @@ try
 % If it's not, we'll attempt to correct by transposing X.
 catch
     X = transpose(X);
-    assert(size(X,2) == length(Y), ['Mismatch in number of trials in data and length of labels vector. 2D input matrix should be feature x trial']);
-    warning('Input data matrix has been transposed in order for column dimension to match length of labels vector.')
+    assert(size(X,2) == length(Y), ['Mismatch in number of trials in data and length of labels vector. 2D input matrix should be feature x trial.']);
+    warning('computeEuclideanRDM:transposeInput',... 
+        '<a href="matlab: open(which(''computeEuclideanRDM.m''))">computeEuclideanRDM</a> line 50. Input data matrix has been transposed in order for column dimension to match length of labels vector.')
 end
 
 % Input data are usable: Print size of input variables.
-disp(['computeEuclideanRDM: Input feature-by-trial data matrix is of size ' mat2str(size(X)) '.']);
-disp(['Input labels vector is of length ' num2str(length(Y)) '.'])
+disp(['<a href="matlab: open(which(''computeEuclideanRDM.m''))">computeEuclideanRDM</a> input feature-by-trial data matrix is of size ' mat2str(size(X)) '.'])
+disp(['<a href="matlab: open(which(''computeEuclideanRDM.m''))">computeEuclideanRDM</a> input labels vector is of length ' num2str(length(Y)) '.'])
 
 if nargin < 3 || isempty(num_permutations)
     num_permutations = 10;
