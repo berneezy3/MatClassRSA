@@ -12,16 +12,16 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_se
 % computed using the time point values for a particular electrode as features.
 %
 % Input Args:
-%   X - data matrix. The size of X should be nFeatures x
-%              nTrials. Users working with 3D data matrices should already
-%              have subset the data along a single sensor (along the space
-%              dimension) or time sample (along the time dimension).
+%   X - data matrix. The size of X should be nFeatures x nTrials. Users 
+%       working with 3D data matrices should already have subset the data 
+%       along a single sensor (along the space dimension) or time sample 
+%       (along the time dimension).
 %   Y - labels vector. The length of Y should be nTrials.
 %   num_permutations (optional) - how many permutations to randomly select
-%                                 train and test data matrix. If not entered,
-%                                 this defaults to 10.
-%   rand_seed (optional) - random seed for reproducibility. If not entered, rng
-%       will be assigned as ('shuffle', 'twister').
+%       train and test data matrix. If not entered or empty, this defaults 
+%       to 10.
+%   rand_seed (optional) - random seed for reproducibility. If not entered, 
+%       rng will be assigned as ('shuffle', 'twister').
 %       --- Acceptable specifications for rand_seed ---
 %           - Single acceptable rng specification input (e.g., 1,
 %               'default', 'shuffle'); in these cases, the generator will
