@@ -71,6 +71,7 @@ d = computeEuclideanRDM(X2d, labels6);
 
 %% Feb 2020: Should work with warning: Input 2D trial-by-feat matrix
 clc
+X2d = squeeze(X(96,:,:))';
 X2dt = transpose(X2d);
 d = computeEuclideanRDM(X2dt, labels6);
 
