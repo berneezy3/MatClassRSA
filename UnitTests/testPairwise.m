@@ -1,21 +1,18 @@
 %%
-uiwait(msgbox('In the next window, select the directory containing the .mat file ''S6.mat.'''))
-inDir = uigetdir(pwd);
-currDir = pwd;
-cd(inDir)
-load S6.mat
+
+load S06.mat
 cd(currDir)
 %% test SVM pairwise classification
 
 
-[svmC] = classifyCrossValidate(X_3D, ...
-    categoryLabels, 'classifier', 'SVM', 'randomSeed', 'default', 'PCAinFold', 0, 'pairwise', 1);
+[svmC] = classifyCrossValidate(X, ...
+    labels6, 'classifier', 'SVM', 'randomSeed', 'default', 'PCAinFold', 0, 'pairwise', 1);
 
 %% test LDA pairwise classification
 
 
 [ldaC] = classifyCrossValidate(X_3D, ...
-    categoryLabels, 'classifier', 'LDA', 'randomSeed', 'default', 'PCAinFold', 0, 'pairwise', 1);
+    labels6, 'classifier', 'LDA', 'randomSeed', 'default', 'PCAinFold', 0, 'pairwise', 1);
 
 
 %% test RF pairwise classification

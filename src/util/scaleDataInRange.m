@@ -1,5 +1,5 @@
 function [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(xIn, desiredMinMax)
-% [xScaled, scaledRange] = scaleDataInRange(xIn, desiredMinMax, scaleByMinMax)
+% [xScaled, scaledRange] = scaleDataInRange(xIn, desiredMinMax)
 % -------------------------------------------------------------------------
 % Blair/Bernard - February 25th, 2020
 %

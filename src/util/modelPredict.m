@@ -1,4 +1,4 @@
-function [predictions decision_values] = modelPredict(X, Y, mdl)
+function [predictions decision_values] = modelPredict(X, mdl, scale)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
@@ -56,7 +56,11 @@ function [predictions decision_values] = modelPredict(X, Y, mdl)
     switch classifier
         case 'struct'  %libsvm
             [r c] = size(X);
-%             Y = round(rand(r,1)*6);
+            Y = round(rand(r,1)*6);
+%             if (isstruct(scale))
+%                 X = scaleDataShiftDivide(X, scale.shift1, scale.shift2, scale.scaleFactor);
+%             end
+            
             [predictions, ~, decision_values] = svmpredict(Y, X, mdl, ['-q']);
             
             % handle ties
