@@ -1,4 +1,4 @@
-function mdl = fitModel(X, Y, ip)
+function [mdl, scale] = fitModel(X, Y, ip)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
@@ -55,10 +55,21 @@ function mdl = fitModel(X, Y, ip)
 
     switch upper(ip.Results.classifier)
         case 'SVM'
+            
             [ry cy] = size(Y);
             if (cy> ry)
                 Y = Y';
             end
+            
+            % data scaling
+%             [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(X, [-1,1]);
+%             X = xScaled;
+            scale = struct();
+%             scale.needScale = 1;
+%             scale.shift1 = shift1;
+%             scale.shift2 = shift2;
+%             scale.scaleFactor = scaleFactor;
+            
             switch ip.Results.kernel
                 case 'linear'
                     kernelNum = 0;
@@ -69,7 +80,22 @@ function mdl = fitModel(X, Y, ip)
                 case 'sigmoid'
                     kernelNum = 3;
             end
-              mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ']);
+            
+            figure
+            h = histogram(Y, 'BinMethod', 'integers');
+            hw = h.Values(1) ./ h.Values ;
+
+            nw  = length(hw)
+
+            allW = [];
+
+            for i = 1:nw
+                allW = [allW '-w' num2str(i) ' ' num2str(hw(i)) ' '];
+            end
+            
+            %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' allW]);
+            mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ']);
+
         case 'SVM2'
             
 %             temp = templateSVM('KernelFunction','rbf', 'Standardize',true);
@@ -78,11 +104,14 @@ function mdl = fitModel(X, Y, ip)
 %             mdl = fitcecoc(X,Y','Learners', temp, 'Coding', 'onevsone', 'ClassNames', classOrder);
             
         case 'LDA'
-            mdl = fitcdiscr(X, Y', 'DiscrimType', 'linear'); 
+            mdl = fitcdiscr(X, Y', 'DiscrimType', 'linear');
+            scale = NaN;
             
         case 'RF'
             mdl = TreeBagger(ip.Results.numTrees, X, Y, ...
                 'OOBPrediction', 'on', 'minLeafSize', ip.Results.minLeafSize);
+            scale = NaN;
+
     end
     
 

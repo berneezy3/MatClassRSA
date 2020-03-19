@@ -47,6 +47,8 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %           explain N * 100% of the variance in input matrix X.
 %       (integer greater than or equal to 1, N) - Use N most important
 %       features of input matrix X.
+%       (negative value) - off
+%       features of input matrix X.
 %   'nFolds' - Specify number of folds for cross validation
 %   'classifier' - choose classifier. 
 %        --options--
@@ -292,15 +294,23 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
             classifierInfo.minLeafSize =  ip.Results.minLeafSize;
     end
     
+    if(ip.Results.pairwise == 0) 
+        disp('Conducting multiclass classification.  Pairwise turned off');
+    else 
+        disp('Conducting pairwise classification.  Multiclass turned off');
+    end
     
-
+    disp(['classifying with ' ip.Results.classifier] )
+    
+    
     if (ip.Results.pairwise == 0) || ...
        ((ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM'))
-        disp('doing multiclass/pairwise SVM')
-        mdl = fitModel(trainData, Y(:), ip);
+        
+
+        [mdl, scale] = fitModel(trainData, Y(:), ip);
         M.classifierInfo = classifierInfo;
         M.mdl = mdl;
-
+        M.scale = scale;
 
         
     elseif (ip.Results.pairwise == 1) && ...

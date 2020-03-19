@@ -269,7 +269,7 @@
 
     % PCA 
     % Split Data into fold (w/ or w/o PCA)
-    if (ip.Results.PCA>0)
+    if (ip.Results.PCA>0 && ip.Results.PCA>0)
         disp('Conducting Principal Component Analysis');
     else
         disp('Skipping Principal Component Analysis');
@@ -329,7 +329,8 @@
                 % Store the accuracy in the accMatrix
                 [~, tempC] = evalc([' classifyCrossValidate(tempX, tempY, ' ...
                     ' ''classifier'', ip.Results.classifier, ''randomSeed'',' ...
-                    ' ''default'', ''PCAinFold'', ip.Results.PCAinFold) ' ]);
+                    ' ''default'', ''PCAinFold'', ip.Results.PCAinFold, '...
+                    ' ''nFolds'', ip.Results.PCAinFold) ' ]);
                 tempStruct.CM = tempC.CM;
                 
                 tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
@@ -372,9 +373,9 @@
             testX = cvDataObj.testXall{i};
             testY = cvDataObj.testYall{i};
 
-            mdl = fitModel(trainX, trainY, ip);
+            [mdl, scale] = fitModel(trainX, trainY, ip);
 
-            [predictions decision_values] = modelPredict(testX, mdl);
+            [predictions decision_values] = modelPredict(testX, mdl, scale);
 
             labelsConcat = [labelsConcat testY];
             predictionsConcat = [predictionsConcat predictions];
@@ -407,9 +408,9 @@
             testX = cvDataObj.testXall{i};
             testY = cvDataObj.testYall{i};
 
-            mdl = fitModel(trainX, trainY, ip);
+            [mdl, scale] = fitModel(trainX, trainY, ip);
 
-            [predictions decision_values] = modelPredict(testX, testY, mdl);
+            [predictions decision_values] = modelPredict(testX, mdl, scale);
 
             labelsConcat = [labelsConcat testY'];
             predictionsConcat = [predictionsConcat predictions];

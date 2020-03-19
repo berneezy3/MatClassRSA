@@ -78,8 +78,6 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     
     defaultY = NaN;
     defaultRandomSeed = 'shuffle';
-%     defaultAverageTrials = -1;
-%     defaultAverageTrialsHandleRemainder = 'discard';
     
     expectedRandomSeed = {'default', 'shuffle'};
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
@@ -87,13 +85,6 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     %addParameter(ip, 'actualLabels', defaultY, @(x) assert( isvector(x) ));
     addOptional(ip, 'actualLabels', defaultY, @isvector);
 
-    %{
-	addParameter(ip, 'averageTrials', defaultAverageTrials, ...
-        @(x) assert(rem(x,1) == 0 ));
-    addParameter(ip, 'averageTrialsHandleRemainder', ...
-        defaultAverageTrialsHandleRemainder, ...
-        @(x) any(validatestring(x, expectedAverageTrialsHandleRemainder)));
-    %}
     addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
         || isequal('shuffle', x) || (isnumeric(x) && x > 0));
 %     addParameter(ip, 'pairwise', defaultRandomSeed,  @(x) isequal('default', x)...
@@ -109,7 +100,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     if length(M) > 1 && iscell(M)
         tempM = M{1};
     end
-    if (~isnan(tempM.classifierInfo))
+    if (isstruct(tempM.classifierInfo))
         pairwise = tempM.classifierInfo.pairwise;
     end
     
@@ -167,7 +158,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
         ((pairwise == 0) && strcmp(classifier, 'SVM'))
    
         
-        P.predY = modelPredict(testData, M.mdl);
+        P.predY = modelPredict(testData, M.mdl, M.scale);
     
         % Get Accuracy and confusion matrix
         if ( ~isnan(ip.Results.actualLabels) )
