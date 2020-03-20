@@ -21,7 +21,7 @@ function setUserSpecifiedRng(r)
 % This software is licensed under the 3-Clause BSD License (New BSD License),
 % as follows:
 % -------------------------------------------------------------------------
-% Copyright 2019 Bernard C. Wang, Nathan C. L. Kong, Anthony M. Norcia, 
+% Copyright 2019 Bernard C. Wang, Nathan C. L. Kong, Anthony M. Norcia,
 % and Blair Kaneshiro
 %
 % Redistribution and use in source and binary forms, with or without
@@ -68,8 +68,9 @@ if nargin >= 1 && length(r)==1 && isstring(r), r = r{1}; end
 
 % If input is not specified, default to ('shuffle', 'twister').
 if nargin < 1 || isempty(r) || (length(r) == 1 && isnan(r))
-    warning('setUserSpecifiedRng:noSpecification',...
-    '<a href="matlab: open(which(''setUserSpecifiedRng.m''))">setUserSpecifiedRng</a> line 71. Random number generator not specified. Setting rng=(''shuffle'', ''twister'').');
+    %     warning('setUserSpecifiedRng:noSpecification',...
+    %     '<a href="matlab: open(which(''setUserSpecifiedRng.m''))">setUserSpecifiedRng</a> line 71. Random number generator not specified. Setting rng=(''shuffle'', ''twister'').');
+    warning('Random number generator not specified. Setting rng=(''shuffle'', ''twister'').');
     rng('shuffle', 'twister');
     return
 end
@@ -85,16 +86,16 @@ if length(r) == 2
     if isstring(r) % Assignment and formatting for string array input
         if isnumeric(str2double(r{1})) && ~isnan(str2double(r{1}))
             rng(str2double(r{1}), r{2});
-%             disp('debug 1')
+            %             disp('debug 1')
             disp(['Setting rng=(' num2str(str2double(r{1})) ',' r{2} ').']);
         else
             rng(r{1}, r{2});
-%             disp('debug 2')
+            %             disp('debug 2')
             disp(['Setting rng=(''' r{1} ''', ''' r{2} ''').' ]);
         end
     elseif iscell(r) % Assignment and formatting for cell array input
         rng(r{1}, r{2});
-%         disp('debug 3')
+        %         disp('debug 3')
         if isnumeric(r{1})
             disp(['Setting rng=(' num2str(r{1}) ', ''' r{2} ''').' ]);
         else
@@ -107,7 +108,7 @@ if length(r) == 2
 elseif ischar(r) || length(r) == 1
     try
         rng(r);
-%         disp('debug 4')
+        %         disp('debug 4')
         if isequal(r, 'default')
             disp(['Setting rng=(' mat2str(r) ').']);
         else
