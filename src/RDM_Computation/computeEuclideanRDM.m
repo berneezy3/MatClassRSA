@@ -35,6 +35,10 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_se
 %   dissimilarities - the dissimilarity matrix, dimensions: num_labels
 %                     x num_labels x num_permutations
 
+if nargin < 2
+    error('At least two inputs are required: A 2D data matrix and a labels vector.');
+end
+
 % Input data needs to be a 2D matrix
 num_dim = length(size(X));
 assert(num_dim == 2, 'Input data must be a 2D matrix. A typical use case would be to provide a 2D matrix with dimensions of: nSpace-by-nTrials.');
