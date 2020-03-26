@@ -55,20 +55,20 @@ function [mdl, scale] = fitModel(X, Y, ip)
 
     switch upper(ip.Results.classifier)
         case 'SVM'
-            
+            [rx cx] = size(X);
             [ry cy] = size(Y);
             if (cy> ry)
                 Y = Y';
             end
             
             % data scaling
-%             [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(X, [-1,1]);
-%             X = xScaled;
+            [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(X, [-1,1]);
+            X = xScaled;
             scale = struct();
-%             scale.needScale = 1;
-%             scale.shift1 = shift1;
-%             scale.shift2 = shift2;
-%             scale.scaleFactor = scaleFactor;
+            scale.needScale = 1;
+            scale.shift1 = shift1;
+            scale.shift2 = shift2;
+            scale.scaleFactor = scaleFactor;
             
             switch ip.Results.kernel
                 case 'linear'
@@ -93,16 +93,8 @@ function [mdl, scale] = fitModel(X, Y, ip)
                 allW = [allW '-w' num2str(i) ' ' num2str(hw(i)) ' '];
             end
             
-            %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' allW]);
-            mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ']);
-
-        case 'SVM2'
-            
-%             temp = templateSVM('KernelFunction','rbf', 'Standardize',true);
-%             classOrder = 1:length(unique(Y));
-%             
-%             mdl = fitcecoc(X,Y','Learners', temp, 'Coding', 'onevsone', 'ClassNames', classOrder);
-            
+            mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' allW ' -g ' num2str(1/cx/10^7) ' -c ' num2str(1000000000000)] );
+            %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ']);           
         case 'LDA'
             mdl = fitcdiscr(X, Y', 'DiscrimType', 'linear');
             scale = NaN;
