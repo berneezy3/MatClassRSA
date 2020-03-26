@@ -63,7 +63,7 @@ assert(isequal(max_val, max(xScaled)), 'Range upper bound does not match max val
 
 %% Test on partitioned folds of S06
 
-% UNBALANCED, UNSCALED, UNWEIGHED
+% UNBALANCED, SCALED, WEIGHED
 
 fold = 4000;
 
@@ -75,6 +75,8 @@ max_val = 1;
 trainX = X_2D(1:fold, :);
 testX = X_2D(fold + 1:end, :);
 
+trainXScaled = X_2D_Scaled(1:fold, :);
+testXScaled = X_2D_Scaled(fold + 1:end, :);
 
 trainY = labels6(1:fold);
 testY = labels6(fold + 1:end);
@@ -118,6 +120,10 @@ title('Unbalanced classes, data scaled, unweighed')
 %%
 
 fold = 3600;
+
+min_val = -1;
+max_val = 1;
+
 
 [X_2D_Scaled, shift1, shift2, scaleFactor] = scaleDataInRange(X_2D, [min_val, max_val]);
 

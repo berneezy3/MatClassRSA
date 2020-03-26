@@ -57,9 +57,9 @@ function [predictions decision_values] = modelPredict(X, mdl, scale)
         case 'struct'  %libsvm
             [r c] = size(X);
             Y = round(rand(r,1)*6);
-%             if (isstruct(scale))
-%                 X = scaleDataShiftDivide(X, scale.shift1, scale.shift2, scale.scaleFactor);
-%             end
+            if (isstruct(scale))
+                X = scaleDataShiftDivide(X, scale.shift1, scale.shift2, scale.scaleFactor);
+            end
             
             [predictions, ~, decision_values] = svmpredict(Y, X, mdl, ['-q']);
             
