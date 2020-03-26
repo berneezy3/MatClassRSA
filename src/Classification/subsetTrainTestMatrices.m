@@ -1,4 +1,4 @@
-function [W,Z,nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, Y, ip)
+function [W, Z, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, Y, ip)
 
     if ndims(X) == 3
         [nSpace, nTime, nTrials] = size(X);
@@ -6,6 +6,8 @@ function [W,Z,nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, Y, ip)
                 num2str(nTime) ' time x ' num2str(nTrials) ' trials'])
     elseif ndims(X) == 2
         [nTrials, nFeature] = size(X);
+        nSpace = NaN;
+        nTime = NaN;
         warning(['2D input data matrix. Assuming '...
             num2str(nTrials) ' trials x ' num2str(nFeature) ' features.'])
     else
