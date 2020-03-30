@@ -71,10 +71,7 @@ function mdl = fitModel(X, Y, ip)
 %             cd(currpath);
             
         case 'LDA'
-
             mdl = fitcdiscr(X, Y, 'DiscrimType', 'linear'); 
-            
-            
         case 'RF'
 %             for i=1:structLength
 %                 switch char(params(i))
