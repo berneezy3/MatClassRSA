@@ -93,7 +93,7 @@ function [mdl, scale] = fitModel(X, Y, ip)
                 allW = [allW '-w' num2str(i) ' ' num2str(hw(i)) ' '];
             end
             
-            mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' allW ' -g ' num2str(1/cx) ' -c ' num2str(1000000000)] );
+            mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' allW  ' -c ' num2str(1000000000)] );
             %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ']);           
         case 'LDA'
             mdl = fitcdiscr(X, Y', 'DiscrimType', 'linear');
