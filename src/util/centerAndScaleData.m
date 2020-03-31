@@ -1,5 +1,5 @@
-function [xNorm, colMeans, colScales] = normalizeColumns(xIn, centering, scaling)
-% [xNorm, colMeans, colScales] = normalizeColumns(xIn, centering, scaling)
+function [xOut, colMeans, colScales] = centerAndScaleData(xIn, centering, scaling)
+% [xOut, colMeans, colScales] = normalizeColumns(xIn, centering, scaling)
 % ------------------------------------------------------------------------
 % This function takes in a 2D data matrix, and optional centering/scaling
 % specifications, and centers and scales each data column as specified.
@@ -36,7 +36,7 @@ function [xNorm, colMeans, colScales] = normalizeColumns(xIn, centering, scaling
 %   NOTE that if the input data matrix xIn has 1 column and 1 or 0 is
 %   specified for centering, the function will print a warning and treat
 %   this as a numeric vector input of length 1 (i.e., the user should
-%   specify 'true' or 'false' for centering if wishing to use one of those
+%   specify 'true' or 'false' for scaling if wishing to use one of those
 %   specifications).
 %
 % Outputs
@@ -54,7 +54,18 @@ function [xNorm, colMeans, colScales] = normalizeColumns(xIn, centering, scaling
 
 % LICENSE TEXT HERE
 
-assert(ismatrix(xIn), 'Input ''xIn'' should be a 2D matrix.')
+% Check for 2D or 3D numeric input; reshape and flag for post-reshape if 3D.
+switch ndims(xIn)
+    case 2
+        reshapeToCube = 0;
+    case 3
+        xIn = cube2trRows(xIn);
+        reshapeToCube = 1;
+    otherwise
+        error('Input data should be a 2D or 3D matrix.')
+end
+
+if ~isnumeric(xIn), error('Input must be numeric.'); end
 
 % Assign centering and scaling to default 'true' if undefined or empty.
 if ~exist('centering', 'var') || isempty(centering)
