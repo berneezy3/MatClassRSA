@@ -63,9 +63,6 @@ classdef cvData
             testXall = {};
             trainYall = {};
             testYall = {};
-            
-%             if min(size(Y)) ~= min(size())
-            
             %parpool;
             % DO PCA
             if (PCA >0)
@@ -75,15 +72,12 @@ classdef cvData
                     X = getPCs(X, PCA);
                     
                     for i = 1:cvPart.NumTestSets
-%                     parfor i = 1:cvPart.NumTestSets
-                        trainX = bsxfun(@times, cvPart.training{i}, X);
-                        trainX = trainX(any(trainX~=0,2),:);
-                        trainY = bsxfun(@times, cvPart.training{i}, Y);
-                        trainY = trainY(trainY ~=0);
-                        testX = bsxfun(@times, cvPart.test{i}, X);
-                        testX = testX(any(testX~=0, 2),:);
-                        testY = bsxfun(@times, cvPart.test{i}, Y);
-                        testY = testY(testY ~=0);
+                        trainIndx = find(cvPart.training{i});
+                        testIndx = find(cvPart.training{i} == 0);
+                        trainX = X(trainIndx, :);
+                        trainY = Y(trainIndx);
+                        testX = X(testIndx, :);
+                        testY = Y(testIndx);
                     
                         trainXall = [trainXall {trainX}];
                         testXall = [testXall {testX}];
@@ -95,29 +89,14 @@ classdef cvData
                     [r c] = size(X);
 
                     for i = 1:cvPart.NumTestSets
-                        disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);
-                       % Here, we separate the training and testing
-                       % instances for each fold
-                        
-                        % Separaate test data from training data
-                        % trainX will now store training data for this fold
-                        trainX = bsxfun(@times, cvPart.training{i}, X);
-                        trainX = trainX(any(trainX~=0,2),:);
-                        % And testX will now store test data for this fold
-                        testX = bsxfun(@times, cvPart.test{i}, X);
-                        testX = testX(any(testX~=0, 2),:);
-                        
-                        % Separate test labels from training labels
-                        % trainY will now store training labels for this
-                        % fold
-                        trainY = bsxfun(@times, cvPart.training{i}, Y);
-                        trainY = trainY(trainY ~=0);
-                        % And testY will now store test labels for this
-                        % fold
-                        testY = bsxfun(@times, cvPart.test{i}, Y);
-                        testY = testY(testY ~=0);
+                        disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);                
+                        trainIndx = find(cvPart.training{i});
+                        testIndx = find(cvPart.training{i} == 0);
+                        trainX = X(trainIndx, :);
+                        trainY = Y(trainIndx);
+                        testX = X(testIndx, :);
+                        testY = Y(testIndx);
 
-                        % 
                         if (PCAinFold == 1)
                             [trainX, V, nPC] = getPCs(trainX, PCA);
                             testX = testX*V;
@@ -134,15 +113,12 @@ classdef cvData
             else
 
                 for i = 1:cvPart.NumTestSets
-%                 parfor i = 1:cvPart.NumTestSets
-                    trainX = bsxfun(@times, cvPart.training{i}, X);
-                    trainX = trainX(any(trainX~=0,2),:);
-                    trainY = bsxfun(@times, cvPart.training{i}, Y);
-                    trainY = trainY(trainY ~=0);
-                    testX = bsxfun(@times, cvPart.test{i}, X);
-                    testX = testX(any(testX~=0, 2),:);
-                    testY = bsxfun(@times, cvPart.test{i}, Y);
-                    testY = testY(testY ~=0);
+                    trainIndx = find(cvPart.training{i});
+                    testIndx = find(cvPart.training{i} == 0);
+                    trainX = X(trainIndx, :);
+                    trainY = Y(trainIndx);
+                    testX = X(testIndx, :);
+                    testY = Y(testIndx);
 
                     trainXall = [trainXall {trainX}];
                     testXall = [testXall {testX}];
