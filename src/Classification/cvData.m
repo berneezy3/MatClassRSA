@@ -65,15 +65,12 @@ classdef cvData
                     X = getPCs(X, PCA);
                     
                     for i = 1:cvPart.NumTestSets
-%                     parfor i = 1:cvPart.NumTestSets
-                        trainX = bsxfun(@times, cvPart.training{i}, X);
-                        trainX = trainX(any(trainX~=0,2),:);
-                        trainY = bsxfun(@times, cvPart.training{i}', Y);
-                        trainY = trainY(trainY ~=0);
-                        testX = bsxfun(@times, cvPart.test{i}, X);
-                        testX = testX(any(testX~=0, 2),:);
-                        testY = bsxfun(@times, cvPart.test{i}', Y);
-                        testY = testY(testY ~=0);
+                        trainIndx = find(cvPart.training{i});
+                        testIndx = find(cvPart.training{i} == 0);
+                        trainX = X(trainIndx, :);
+                        trainY = Y(trainIndx);
+                        testX = X(testIndx, :);
+                        testY = Y(testIndx);
                     
                         trainXall = [trainXall {trainX}];
                         testXall = [testXall {testX}];
@@ -85,15 +82,13 @@ classdef cvData
                     [r c] = size(X);
 
                     for i = 1:cvPart.NumTestSets
-                        disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);
-                        trainX = bsxfun(@times, cvPart.training{i}, X);
-                        trainX = trainX(any(trainX~=0,2),:);
-                        trainY = bsxfun(@times, cvPart.training{i}', Y);
-                        trainY = trainY(trainY ~=0);
-                        testX = bsxfun(@times, cvPart.test{i}, X);
-                        testX = testX(any(testX~=0, 2),:);
-                        testY = bsxfun(@times, cvPart.test{i}', Y);
-                        testY = testY(testY ~=0);
+                        disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);                
+                        trainIndx = find(cvPart.training{i});
+                        testIndx = find(cvPart.training{i} == 0);
+                        trainX = X(trainIndx, :);
+                        trainY = Y(trainIndx);
+                        testX = X(testIndx, :);
+                        testY = Y(testIndx);
 
                         if (PCAinFold == 1)
                             [trainX, V, nPC] = getPCs(trainX, PCA);
@@ -111,15 +106,12 @@ classdef cvData
             else
 
                 for i = 1:cvPart.NumTestSets
-%                 parfor i = 1:cvPart.NumTestSets
-                    trainX = bsxfun(@times, cvPart.training{i}, X);
-                    trainX = trainX(any(trainX~=0,2),:);
-                    trainY = bsxfun(@times, cvPart.training{i}', Y);
-                    trainY = trainY(trainY ~=0);
-                    testX = bsxfun(@times, cvPart.test{i}, X);
-                    testX = testX(any(testX~=0, 2),:);
-                    testY = bsxfun(@times, cvPart.test{i}', Y);
-                    testY = testY(testY ~=0);
+                    trainIndx = find(cvPart.training{i});
+                    testIndx = find(cvPart.training{i} == 0);
+                    trainX = X(trainIndx, :);
+                    trainY = Y(trainIndx);
+                    testX = X(testIndx, :);
+                    testY = Y(testIndx);
 
                     trainXall = [trainXall {trainX}];
                     testXall = [testXall {testX}];
