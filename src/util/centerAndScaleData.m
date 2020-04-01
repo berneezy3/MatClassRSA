@@ -59,6 +59,7 @@ switch ndims(xIn)
     case 2
         reshapeToCube = 0;
     case 3
+        [nSpace, nTime, nTrial] = size(xIn);
         xIn = cube2trRows(xIn);
         reshapeToCube = 1;
     otherwise
@@ -191,3 +192,8 @@ end
 nTrials = size(xIn, 1);
 xCentered = xIn - repmat(colMeans, nTrials, 1);
 xOut = xCentered ./ repmat(colScales, nTrials, 1);
+
+% Reshape to 3D, if original input data was 3D
+if reshapeToCube
+    xOut = trRows2cube(xOut, nTime);
+end
