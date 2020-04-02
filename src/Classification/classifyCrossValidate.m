@@ -66,41 +66,16 @@
 %       'polynomial' 
 %       'rbf' (default)
 %       'sigmoid' 
+%   'gamma' - 
+%   'C' - 
 %   'numTrees' - Choose the number of decision trees to grow.  Default is
 %   128.
 %   'minLeafSize' - Choose the minimum number of observations per tree leaf.
 %   Default is 1,
-%   pValueMethod - Choose the method to compute p-value.  
-%       --options--
-%       'off'
-%           permutation testing is not conducted
-%       'binomcdf' 
-%           computes a binomial cdf at each of the values in x using number 
-%           of permutations sepcified in 'permutations'in N and probability 
-%           of success for each trial in p
-%       'permuteTestLabels' 
-%           with the 'permuteTestLabels' option, we perform k -fold cross 
-%           validation only once. In each fold, the classification model is   
-%           trained on the intact data and labels, but predictions are made
-%           on test observations whose labels have been shuffled. The prediction   
-%           is repeated N times, with the test labels re-randomized for each   
-%           attempt. The 'permuteTestLabels' option is the second fastest method,   
-%           since it requires training the k models only once, but a total of
-%           k * N  prediction operations are performed. So that there are enough
-%           test labels to randomize in each fold, here we also recommend having   
-%           at least 100 observations total, and no more than 10 cross-validation folds.
-%       'permuteFullModel'
-%           With the ?permuteFullModel? option, we perform the entire 10-fold 
-%           cross validation N times. For each of the N permutation iterations, 
-%           the entire labels vector (training and test observations) is shuffled, 
-%           and in each fold, the classifier model is both trained and tested using 
-%           the shuffled labels. As the full classification procedure is performed 
-%           N times, the ?permuteFullModel? option is the slowest, but is suitable 
-%           to use with any classifier configuration, including settings with 
-%           unbalanced classes, few observations, and up to N-fold cross validation.
-%   'permutations' - Choose number of permutations to perform, if permutation 
-%           testing is turned on.  Default 1000.  This option will only work 
-%           if 'permuteFullModel' or 'permuteTestLabels' is chosen.
+%   'permutations' - Choose number of permutations to perform. Default value 
+%   is 0, where permutation testing is turned off.  
+%
+%
 %
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
@@ -158,8 +133,6 @@
 % TODO : FINISH DOCSTRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    tic
-    
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = true;
@@ -170,7 +143,7 @@
     defaultShuffleData = 1;
     defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
-    defaultPCA = .9;
+    defaultPCA = .99;
     defaultPCAinFold = 1;
     defaultNFolds = 10;
     defaultClassifier = 'SVM';
@@ -196,6 +169,8 @@
     expectedPValueMethod = {'permuteFullModel'};
     expectedRandomSeed = {'default', 'shuffle'};
     expectedKernels = {'linear', 'sigmoid', 'rbf', 'polynomial'};
+    expectedGamma = {'default'};
+
     expectedPairwise = {0,1};
     
     %Required inputs
@@ -220,6 +195,8 @@
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
+        addParamValue(ip, 'gamma', 1);
+        addParamValue(ip, 'C', 1);
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
     else
@@ -237,6 +214,8 @@
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
+        addParameter(ip, 'gamma', 1, @(x) any([strcmp(x, 'default') isnumeric(x)]));
+        addParameter(ip, 'C', 1);
         addParameter(ip, 'numTrees', 128);
         addParameter(ip, 'minLeafSize', 1);
         addParameter(ip, 'pairwise', 0);
@@ -306,7 +285,7 @@
         disp('Skipping Principal Component Analysis');
     end
     partition = cvpart(r, ip.Results.nFolds);
-    tic
+    tic 
     cvDataObj = cvData(X,Y, partition, ip.Results.PCA, ip.Results.PCAinFold);
     toc
     
@@ -429,7 +408,7 @@
        
     % END PAIRWISE SVM
     else % NORMAL SVM/LDA/RF
-        
+        tic
         for i = 1:ip.Results.nFolds
 
             disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
@@ -451,6 +430,7 @@
             C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
             
         end
+        toc
         % END NORMAL SVM/LDA/RF
         
     end
@@ -467,19 +447,14 @@
         predY = predictionsConcat;
     end
 %}
-       
-    switch ip.Results.pValueMethod
-        case 'permuteFullModel'
-            pVal = permTestPVal(accuracy, accDist);
-        otherwise
-            pVal = '';    
-    end
+
+%     pVal = permTestPVal(C.accuracy, accDist);
+
 
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.classifierInfo = classifierInfo;
     disp('classifyCrossValidate() Finished!')
-    toc
     
  end
 
