@@ -70,6 +70,9 @@ function [mdl, scale] = fitModel(X, Y, ip)
             scale.shift2 = shift2;
             scale.scaleFactor = scaleFactor;
             
+            gamma = ip.Results.gamma;
+            C = ip.Results.C;
+            
             switch ip.Results.kernel
                 case 'linear'
                     kernelNum = 0;
@@ -81,20 +84,38 @@ function [mdl, scale] = fitModel(X, Y, ip)
                     kernelNum = 3;
             end
             
-            figure
+            
+            %%%%%%%%%%%%%
+            % Formatting hyperparameter input to libsvm
+            %%%%%%%%%%%%%
+            
+            % SVM kernel
+            kernel_input = ['t ' num2str(kernelNum) ' '];
+            
+            % SVM class weights
+            %figure
             h = histogram(Y, 'BinMethod', 'integers');
             hw = h.Values(1) ./ h.Values ;
-
-            nw  = length(hw)
-
-            allW = [];
-
+            nw  = length(hw);
+            weights = [' -q '];
             for i = 1:nw
-                allW = [allW '-w' num2str(i) ' ' num2str(hw(i)) ' '];
+                weights = [weights '-w' num2str(i) ' ' num2str(hw(i)) ' '];
             end
             
-            mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' allW  ' -c ' num2str(1000000000)] );
-            %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ']);           
+            % SVM gamma hyperparameter
+            gamma_input = 0;
+            if ( ischar(ip.Results.gamma) )
+                if ( strcmp(ip.Results.gamma, 'default') )
+                    gamma_input = '';
+                end
+            else
+                gamma_input = [' -g ' num2str(ip.Results.gamma)];
+            end
+            
+            % C hyperparameter
+            C_input = [' -c ' num2str(ip.Results.C)];
+            %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' weights  ' -c ' num2str(1000000000)] );
+            mdl = svmtrain(Y, X, [kernel_input weights gamma_input C_input]);           
         case 'LDA'
             mdl = fitcdiscr(X, Y', 'DiscrimType', 'linear');
             scale = NaN;
