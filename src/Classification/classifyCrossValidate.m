@@ -158,6 +158,8 @@
     defaultNumTrees = 64;
     defaultMinLeafSize = 1;
     defaultPairwise = 0;
+    defaultCenter = true;
+    defaultScale = false;
 
 
     %Specify expected values
@@ -170,8 +172,9 @@
     expectedRandomSeed = {'default', 'shuffle'};
     expectedKernels = {'linear', 'sigmoid', 'rbf', 'polynomial'};
     expectedGamma = {'default'};
-
     expectedPairwise = {0,1};
+    expectedCenter = {0,1};
+    expectedScale = {0,1};
     
     %Required inputs
     addRequired(ip, 'X', @is2Dor3DMatrixOrCell)
@@ -185,6 +188,8 @@
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParamValue(ip, 'PCA', defaultPCA);
         addParamValue(ip, 'PCAinFold', defaultPCAinFold);
+        addParamValue(ip, 'center', defaultCenter, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
+        addParamValue(ip, 'scale', defaultScale, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
         addParamValue(ip, 'nFolds', defaultNFolds);
         addParamValue(ip, 'classifier', defaultClassifier, ...
              @(x) any(validatestring(x, expectedClassifier)));
@@ -195,7 +200,7 @@
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
-        addParamValue(ip, 'gamma', 1);
+        addParamValue(ip, 'gamma', 'default',  @(x) any([strcmp(x, 'default') isnumeric(x)]));
         addParamValue(ip, 'C', 1);
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
@@ -204,6 +209,8 @@
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParameter(ip, 'PCA', defaultPCA);
         addParameter(ip, 'PCAinFold', defaultPCAinFold);
+        addParameter(ip, 'center', defaultCenter);
+        addParameter(ip, 'scale', defaultScale);
         addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'classifier', defaultClassifier, ...
              @(x) any(validatestring(x, expectedClassifier)));
@@ -214,7 +221,7 @@
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
-        addParameter(ip, 'gamma', 1, @(x) any([strcmp(x, 'default') isnumeric(x)]));
+        addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
         addParameter(ip, 'C', 1);
         addParameter(ip, 'numTrees', 128);
         addParameter(ip, 'minLeafSize', 1);
@@ -284,9 +291,13 @@
     else
         disp('Skipping Principal Component Analysis');
     end
+    if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
+        warning(['Data centering must be on if performing PCA. Overriding '...
+        'user input and removing the mean from each data feature.']);
+    end
     partition = cvpart(r, ip.Results.nFolds);
     tic 
-    cvDataObj = cvData(X,Y, partition, ip.Results.PCA, ip.Results.PCAinFold);
+    cvDataObj = cvData(X,Y, partition, ip);
     toc
     
     

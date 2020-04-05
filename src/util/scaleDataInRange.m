@@ -39,7 +39,7 @@ else
     warning('Output data scaling range not specified. Setting to [0, 1].');
     desiredMinMax = [0 1];
 end
-disp(['desiredMinMax = ' mat2str(desiredMinMax)]) % For debugging
+% disp(['desiredMinMax = ' mat2str(desiredMinMax)]) % For debugging
 
 desiredMin = desiredMinMax(1);
 desiredMax = desiredMinMax(2);

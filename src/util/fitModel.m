@@ -90,7 +90,7 @@ function [mdl, scale] = fitModel(X, Y, ip)
             %%%%%%%%%%%%%
             
             % SVM kernel
-            kernel_input = ['t ' num2str(kernelNum) ' '];
+            kernel_input = ['-t ' num2str(kernelNum) ' '];
             
             % SVM class weights
             %figure
@@ -109,11 +109,11 @@ function [mdl, scale] = fitModel(X, Y, ip)
                     gamma_input = '';
                 end
             else
-                gamma_input = [' -g ' num2str(ip.Results.gamma)];
+                gamma_input = [' -g ' num2str(ip.Results.gamma, '%.20f\n')];
             end
             
             % C hyperparameter
-            C_input = [' -c ' num2str(ip.Results.C)];
+            C_input = [' -c ' num2str(ip.Results.C, '%.20f\n')];
             %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' weights  ' -c ' num2str(1000000000)] );
             mdl = svmtrain(Y, X, [kernel_input weights gamma_input C_input]);           
         case 'LDA'
