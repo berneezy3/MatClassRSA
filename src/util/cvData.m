@@ -81,12 +81,12 @@ classdef cvData
                         testIndx = find(cvPart.training{i} == 0);
                         trainX = X(trainIndx, :);
                         % center and scale training data
-%                         [trainX, colMeans, colScales] = ...
-%                             centerAndScaleData(trainX, center, scale);
+                        [trainX, colMeans, colScales] = ...
+                            centerAndScaleData(trainX, center, scale);
                         trainY = Y(trainIndx);
                         testX = X(testIndx, :);
                         % accordingly center and scale test data
-%                         [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
+                        [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
                         testY = Y(testIndx);
                         
                     
