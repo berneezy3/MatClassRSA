@@ -57,7 +57,12 @@ classdef cvData
         testYall 
     end
     methods
-        function obj = cvData(X, Y, cvPart, PCA, PCAinFold)
+        function obj = cvData(X, Y, cvPart, ip)
+            
+            PCA = ip.Results.PCA;
+            PCAinFold = ip.Results.PCAinFold;
+            center = ip.Results.center;
+            scale = ip.Results.scale;
             
             trainXall = {};
             testXall = {};
@@ -66,7 +71,7 @@ classdef cvData
             %parpool;
             % DO PCA
             if (PCA >0)
-                % (outside of folds)
+                % outside of folds
                 if (PCAinFold == 0)
                     %disp('Extracting principal components');
                     X = getPCs(X, PCA);
@@ -75,9 +80,15 @@ classdef cvData
                         trainIndx = find(cvPart.training{i});
                         testIndx = find(cvPart.training{i} == 0);
                         trainX = X(trainIndx, :);
+                        % center and scale training data
+%                         [trainX, colMeans, colScales] = ...
+%                             centerAndScaleData(trainX, center, scale);
                         trainY = Y(trainIndx);
                         testX = X(testIndx, :);
+                        % accordingly center and scale test data
+%                         [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
                         testY = Y(testIndx);
+                        
                     
                         trainXall = [trainXall {trainX}];
                         testXall = [testXall {testX}];
@@ -88,15 +99,21 @@ classdef cvData
                 else
                     [r c] = size(X);
 
-                    for i = 1:cvPart.NumTestSets
+                    for i = 1:ip.Results.nFolds
                         disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);                
                         trainIndx = find(cvPart.training{i});
                         testIndx = find(cvPart.training{i} == 0);
                         trainX = X(trainIndx, :);
+                        % center and scale training data
+                        [trainX, colMeans, colScales] = ...
+                            centerAndScaleData(trainX, center, scale);
                         trainY = Y(trainIndx);
                         testX = X(testIndx, :);
+                        % accordingly center and scale test data
+                            [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
                         testY = Y(testIndx);
-
+                        
+                        % PCA after data center/scaling
                         if (PCAinFold == 1)
                             [trainX, V, nPC] = getPCs(trainX, PCA);
                             testX = testX*V;
@@ -112,7 +129,7 @@ classdef cvData
             % DONT DO PCA
             else
 
-                for i = 1:cvPart.NumTestSets
+                for i = 1:ip.Results.nFolds
                     trainIndx = find(cvPart.training{i});
                     testIndx = find(cvPart.training{i} == 0);
                     trainX = X(trainIndx, :);
