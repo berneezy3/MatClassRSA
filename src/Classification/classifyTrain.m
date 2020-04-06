@@ -260,8 +260,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     if (ip.Results.PCA > 0)
         disp('Conducting Principal Component Analysis...')
         [trainData, V, nPC] = getPCs(trainData, ip.Results.PCA);
-%         testData = X*V;
-%         testData = testData(:,1:nPC); 
     else 
         disp('Principal Component Analysis turned off')
         V = NaN;
