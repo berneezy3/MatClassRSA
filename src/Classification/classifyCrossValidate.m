@@ -290,13 +290,18 @@
     else
         disp('Skipping Principal Component Analysis');
     end
+    % Moving centering and scaling parameters out of ip, in case we need to
+    % override the user's centering specification
+    ipCenter = ip.Results.center; 
+    ipScale = ip.Results.scale;
     if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
         warning(['Data centering must be on if performing PCA. Overriding '...
         'user input and removing the mean from each data feature.']);
+        ipCenter = true;
     end
     partition = cvpart(r, ip.Results.nFolds);
     tic 
-    cvDataObj = cvData(X,Y, partition, ip);
+    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
     toc
     
     

@@ -1,5 +1,5 @@
-function [xOut, colMeans, colScales] = centerAndScaleData(xIn, centering, scaling)
-% [xOut, colMeans, colScales] = normalizeColumns(xIn, centering, scaling)
+function [xOut, centerOut, scaleOut] = centerAndScaleData(xIn, centering, scaling)
+% [xOut, centerOut, scaleOut] = normalizeColumns(xIn, centering, scaling)
 % ------------------------------------------------------------------------
 % This function takes in a 2D data matrix, and optional centering/scaling
 % specifications, and centers and scales each data column as specified.
@@ -42,17 +42,19 @@ function [xOut, colMeans, colScales] = centerAndScaleData(xIn, centering, scalin
 % Outputs
 % - xOut: The centered and/or scaled data matrix (same size as xIn).
 %
-% - colMeans: Vector whose length is the number of columns of xIn,
+% - centerOut: Vector whose length is the number of columns of xIn,
 %   representing the value that was subtracted from each column of the
 %   input data matrix. This can be used, for example, to apply centering
 %   parameters computed from training data onto test data.
 %
-% - colScales: Vector whose length is the number of columns of xIn,
+% - scaleOut: Vector whose length is the number of columns of xIn,
 %   representing the value by which each column of the input data matrix
 %   was scaled. This can be used, for example, to apply scaling parameters
 %   computed from training data onto test data.
 
 % LICENSE TEXT HERE
+
+disp('DEBUG: CENTER AND SCALE DATA!')
 
 % Check for 2D or 3D input; if 3D, reshape to 2D and flag for end reshape.
 switch ndims(xIn)
@@ -71,20 +73,20 @@ if ~isnumeric(xIn), error('Input must be numeric.'); end
 
 % Assign centering and scaling to default 'true' if undefined or empty.
 if ~exist('centering', 'var') || isempty(centering)
-    disp('Centering not specified! Setting to ''true''.'); 
+    disp('Centering not specified! Setting to ''true''.');
     centering = true; % logical
 end
 if ~exist('scaling', 'var') || isempty(scaling)
-    disp('Scaling not specified! Setting to ''true''.'); 
+    disp('Scaling not specified! Setting to ''true''.');
     scaling = true; % logical
 end
 
 % Make sure the scaling and centering parameters are either logical or
 % numeric.
 if ~(islogical(centering) || isnumeric(centering))
-   error('Centering specification should be logical or numeric') 
+    error('Centering specification should be logical or numeric')
 elseif ~(islogical(scaling) || isnumeric(scaling))
-   error('Scaling specification should be logical or numeric') 
+    error('Scaling specification should be logical or numeric')
 end
 
 % If the function call has requested scaling without centering, display a
@@ -93,8 +95,8 @@ if any(scaling(:)) && ~any(centering(:))
     warning('Scaling data without centering is generally not recommended. Proceed with caution!');
 end
 
-% Make sure length of 'centering' and 'scaling' is either 1 or the number 
-% of features (where number of features is the number of columns of the 2D 
+% Make sure length of 'centering' and 'scaling' is either 1 or the number
+% of features (where number of features is the number of columns of the 2D
 % input matrix).
 expectedCenterScaleVectorSize = size(mean(xIn,1));
 if length(centering) ~= 1 && ~isequal(size(centering), expectedCenterScaleVectorSize)
@@ -105,9 +107,10 @@ elseif length(scaling) ~= 1 && ~isequal(size(scaling), expectedCenterScaleVector
         'length is the number of columns of ''xIn''.'])
 end
 
-% Create the colMeans and colScales vectors:
-% colMeans: This value will be subtracted from each column of data.
-% colScales: Every column of data will be divided by this value.
+%%
+% Create the toSubtract and toDivide vectors:
+% toSubtract: This value will be subtracted from each column of data.
+% toDivide: Every column of data will be divided by this value.
 %
 % Print a warning in the case that the input data matrix has only 1 column,
 % and centering and/or scaling was specified as a numeric (not logical)
@@ -120,9 +123,9 @@ if size(xIn, 2) == 1
     if islogical(centering)
         
         % Set to 0 (no centering) if 'false'; set to column mean if 'true'.
-        colMeans = centering * mean(xIn);
-    
-    % Centering, numeric specification
+        toSubtract = centering * mean(xIn);
+        
+        % Centering, numeric specification
     else % ~islogical(centering)
         warning(['Input data ''xIn'' is single column and centering '...
             'specification is numeric (' num2str(centering) '). '...
@@ -132,7 +135,7 @@ if size(xIn, 2) == 1
             'please instead input it as a logical (true or false).'])
         
         % Set to specified numeric value of 'centering'.
-        colMeans = centering;
+        toSubtract = centering;
     end
     
     % Scaling, logical specification
@@ -140,22 +143,24 @@ if size(xIn, 2) == 1
         
         % Set to 1 (no scaling) if 'false'; set to standard deviation of
         % column if 'true'.
-        colScales = std(xIn)^scaling;
-    
-    % scaling, numeric specification
+        toDivide = std(xIn)^scaling;
+        
+        % scaling, numeric specification
     else % ~islogical(scaling)
-       warning(['Input data ''xIn'' is single column and scaling '...
-        'specification is numeric (' num2str(scaling) '). '...
-        'The scaling specification will be therefore treated as numeric '...
-        'during computations. If wishing '...
-        'to set scaling to ''on'' (division by standard deviation) or '...
-        '''off'', please instead input it as a logical (true or false).'])
-    
+        warning(['Input data ''xIn'' is single column and scaling '...
+            'specification is numeric (' num2str(scaling) '). '...
+            'The scaling specification will be therefore treated as numeric '...
+            'during computations. **This will cause the scaled output to be '...
+            'the same as the input if the input specification is 1, and to be '...
+            '''Inf'' if the input specification is 0.** If wishing '...
+            'to set scaling to ''on'' (division by standard deviation) or '...
+            '''off'', please instead input it as a logical (true or false).'])
+        
         % Set to specified numeric value of 'scaling'.
-        colScales = scaling;
+        toDivide = scaling;
     end
-
-% MULTIPLE-COLUMN INPUT xIn (in 2D form)
+    
+    % MULTIPLE-COLUMN INPUT xIn (in 2D form)
 else
     % Centering, single-element specification. Since we have multiple
     % columns, this isn't specifying a column mean, so we'll convert to
@@ -164,13 +169,13 @@ else
         
         % Set to vector of 0 (no centering) if 'false' or 0; set to vector
         % of column means if 'true' or non-zero.
-        colMeans = logical(centering) * mean(xIn, 1);
-   
-    % Centering, vector specification
-    else 
+        toSubtract = logical(centering) * mean(xIn, 1);
+        
+        % Centering, vector specification
+    else
         
         % Set to the specified numeric (row) vector.
-        colMeans = centering(:)';
+        toSubtract = centering(:)';
     end
     
     % Scaling, single-element specification (logical or numeric)
@@ -178,21 +183,53 @@ else
         
         % Set to vector of 1 (no scaling) if 'false' or 0; set to vector of
         % column standard deviations if 'true' or non-zero.
-        colScales = std(xIn, [], 1) .^ logical(scaling);
-   
-    % Scaling, vector specification
+        toDivide = std(xIn, [], 1) .^ logical(scaling);
+        
+        % Scaling, vector specification
     else
         
         % Set to specified numeric (row) vector.
-        colScales = scaling(:)';
+        toDivide = scaling(:)';
+    end
+end
+%%
+% Do the centering and scaling!
+nTrials = size(xIn, 1);
+xCentered = xIn - repmat(toSubtract, nTrials, 1);
+xOut = xCentered ./ repmat(toDivide, nTrials, 1);
+
+%% Prepare the outputs
+
+centerOut = toSubtract; scaleOut = toDivide;
+
+% If input data was single column and centering or scaling input was logical
+% false, return a logical false as corresponding output.
+if size(xIn, 2) == 1
+    if islogical(centering) && ~centering
+        centerOut = false;
+        disp('DEBUG: single-column input, centering in logical false --> centering out logical false')
+    end
+    if islogical(scaling) && ~scaling
+        scaleOut = false;
+        disp('DEBUG: single-column input, scaling in logical false --> scaling out logical false')
+    end
+    
+% For inputs with > 1 column, if input specification for centering or 
+% scaling was length 1 and logical or numeric false, return logical false
+% as corresponding output.
+else
+    if length(centering) == 1 && ~centering
+        centerOut = false;
+        disp('DEBUG: multi-columns and centering in logical or numeric 0, centering out logical false')
+    end
+    if length(scaling) == 1 && ~scaling
+        scaleOut = false;
+        disp('DEBUG: multi-columns and scaling in logical or numeric 0, scaling out logical false')
     end
 end
 
-% Do the centering and scaling!
-nTrials = size(xIn, 1);
-xCentered = xIn - repmat(colMeans, nTrials, 1);
-xOut = xCentered ./ repmat(colScales, nTrials, 1);
 
+%%
 % Reshape to 3D, if original input data was 3D
 if reshapeToCube
     xOut = trRows2cube(xOut, nTime);
