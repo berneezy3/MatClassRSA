@@ -34,6 +34,8 @@ colorbar
 
 C_plus100center = classifyCrossValidate(x100, Y, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0, 'center', true, 'scale', true);
 C_plus100center
+C_plus100center = classifyCrossValidate(X + 100, Y, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0, 'center', true);
+C_plus100center = classifyCrossValidate(X + 100 , Y, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0, 'center', true);
 figure
 plotMatrix(C_plus100center.CM)
 title(' + 100 w/ data centering')
