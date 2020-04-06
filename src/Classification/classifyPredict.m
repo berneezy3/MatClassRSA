@@ -129,8 +129,11 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
-    rng(ip.Results.randomSeed);                                        
-
+    rng(ip.Results.randomSeed);               
+    
+    % center data and scale according to values set for classifyTrain
+    [X, ~, ~] = centerAndScaleData(X, tempM.classifierInfo.colMeans, ...
+        tempM.classifierInfo.colScales);
     
     % If PCA was turned on for training, we will select principal
     % compoenents for prediciton as well
