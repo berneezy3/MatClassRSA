@@ -57,12 +57,12 @@ classdef cvData
         testYall 
     end
     methods
-        function obj = cvData(X, Y, cvPart, ip)
+        function obj = cvData(X, Y, cvPart, ip, ipCenter, ipScale)
             
             PCA = ip.Results.PCA;
             PCAinFold = ip.Results.PCAinFold;
-            center = ip.Results.center;
-            scale = ip.Results.scale;
+            center = ipCenter;
+            scale = ipScale;
             
             trainXall = {};
             testXall = {};
@@ -74,19 +74,17 @@ classdef cvData
                 % outside of folds
                 if (PCAinFold == 0)
                     %disp('Extracting principal components');
+%                     keyboard;
+                    [X, ~, ~] = centerAndScaleData(X, center, scale);
+%                     keyboard
                     X = getPCs(X, PCA);
                     
                     for i = 1:cvPart.NumTestSets
                         trainIndx = find(cvPart.training{i});
                         testIndx = find(cvPart.training{i} == 0);
                         trainX = X(trainIndx, :);
-                        % center and scale training data
-                        [trainX, colMeans, colScales] = ...
-                            centerAndScaleData(trainX, center, scale);
                         trainY = Y(trainIndx);
                         testX = X(testIndx, :);
-                        % accordingly center and scale test data
-                        [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
                         testY = Y(testIndx);
                         
                     
@@ -108,6 +106,7 @@ classdef cvData
                         [trainX, colMeans, colScales] = ...
                             centerAndScaleData(trainX, center, scale);
                         trainY = Y(trainIndx);
+                        
                         testX = X(testIndx, :);
                         % accordingly center and scale test data
                             [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
@@ -128,7 +127,7 @@ classdef cvData
                 end
             % DONT DO PCA
             else
-
+                [X, ~, ~] = centerAndScaleData(X, center, scale);
                 for i = 1:ip.Results.nFolds
                     trainIndx = find(cvPart.training{i});
                     testIndx = find(cvPart.training{i} == 0);
