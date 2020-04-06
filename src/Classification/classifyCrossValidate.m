@@ -230,7 +230,6 @@
     
     %Optional name-value pairs
     %NOTE: Should use addParameter for R2013b and later.
-    
     if (find(isnan(X(:))))
         error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
     end
@@ -250,21 +249,21 @@
                         'nFolds', ip.Results.nFolds, ...
                         'classifier', ip.Results.classifier);
     
-       % check if data is double, convert to double if it isn't
-       if ~isa(X, 'double')
-           warning('X data matrix not in double format.  Converting X values to double.')
-           disp('Converting X matrix to double')
-           X = double(X); 
-       end
-       if ~isa(Y, 'Converting Y matrix to double')
-           warning('Y label vector not in double format.  Converting Y labels to double.')
-           Y = double(Y);
-       end
-       [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
-                                                    ip.Results.spaceUse, ...
-                                                    ip.Results.timeUse, ...
-                                                    ip.Results.featureUse);
-    
+   % check if data is double, convert to double if it isn't
+   if ~isa(X, 'double')
+       warning('X data matrix not in double format.  Converting X values to double.')
+       disp('Converting X matrix to double')
+       X = double(X); 
+   end
+   if ~isa(Y, 'Converting Y matrix to double')
+       warning('Y label vector not in double format.  Converting Y labels to double.')
+       Y = double(Y);
+   end
+   [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+                                                ip.Results.spaceUse, ...
+                                                ip.Results.timeUse, ...
+                                                ip.Results.featureUse);
+
     
     % let r and c store size of 2D matrix
     [r c] = size(X);
