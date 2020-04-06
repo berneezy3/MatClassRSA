@@ -28,3 +28,18 @@ figure
 plotMatrix(C_plus100center.CM)
 title(' + 100 w/ data centering')
 colorbar
+
+%% Add 100 to Data Matrix, center AND SCALE, and classify.  
+% The classification should perform well now
+
+C_plus100center = classifyCrossValidate(x100, Y, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0, 'center', true, 'scale', true);
+C_plus100center
+figure
+plotMatrix(C_plus100center.CM)
+title(' + 100 w/ data centering')
+colorbar
+
+%%
+
+clear all; close all
+
