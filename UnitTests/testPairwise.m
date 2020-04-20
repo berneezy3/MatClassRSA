@@ -1,7 +1,7 @@
 %%
 
 load S06.mat
-cd(currDir)
+
 %% test SVM pairwise classification
 
 
@@ -11,7 +11,7 @@ cd(currDir)
 %% test LDA pairwise classification
 
 
-[ldaC] = classifyCrossValidate(X_3D, ...
+[ldaC] = classifyCrossValidatePairs(X, ...
     labels6, 'classifier', 'LDA', 'randomSeed', 'default', 'PCAinFold', 0, 'pairwise', 1);
 
 

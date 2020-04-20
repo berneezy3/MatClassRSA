@@ -140,7 +140,6 @@
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
     %Specify default values
-    defaultShuffleData = 1;
     defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
     defaultPCA = .99;
@@ -163,7 +162,6 @@
 
 
     %Specify expected values
-    expectedShuffleData = [0, 1];
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     expectedPCAinFold = [0,1];
     expectedClassifier = {'SVM', 'LDA', 'RF', 'SVM2', 'svm', 'lda', 'rf'};
@@ -177,8 +175,8 @@
     expectedScale = {0,1};
     
     %Required inputs
-    addRequired(ip, 'X', @is2Dor3DMatrixOrCell)
-    addRequired(ip, 'Y', @isVectorOrCell)
+    addRequired(ip, 'X')
+    addRequired(ip, 'Y')
     [r c] = size(X);
 
     %Optional positional inputs
@@ -415,56 +413,16 @@
         end
         
         %convert pairwiseMat3D to diagonal matrix
-        
         C.pairwiseInfo = pairwiseCell;
         C.AM = pairwiseAccuracies;
         disp('classifyCrossValidate() Finished!')
         return;
        
-    % END PAIRWISE SVM
-    else % NORMAL SVM/LDA/RF
-        tic
-        for i = 1:ip.Results.nFolds
-
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
-
-            trainX = cvDataObj.trainXall{i};
-            trainY = cvDataObj.trainYall{i};
-            testX = cvDataObj.testXall{i};
-            testY = cvDataObj.testYall{i};
-
-            [mdl, scale] = fitModel(trainX, trainY, ip);
-
-            [predictions decision_values] = modelPredict(testX, mdl, scale);
-
-            labelsConcat = [labelsConcat testY'];
-            predictionsConcat = [predictionsConcat predictions];
-            modelsConcat{i} = mdl; 
-
-            C.CM = confusionmat(labelsConcat, predictionsConcat);
-            C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
-            
-        end
-        toc
-        % END NORMAL SVM/LDA/RF
+    else 
         
     end
 
-%{
-    % unshuffle predictions vector to return to user IF shuffle is on
-    predY = NaN;
-    if (ip.Results.shuffleData == 1)
-        predY = NaN(1, r);
-        for i = 1:r
-            predY(shuffledInd(i)) = predictionsConcat(i);
-        end
-    else
-        predY = predictionsConcat;
-    end
-%}
-
 %     pVal = permTestPVal(C.accuracy, accDist);
-
 
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
@@ -472,38 +430,3 @@
     disp('classifyCrossValidate() Finished!')
     
  end
-
- 
- function y = is2Dor3DMatrixOrCell(x)
-        % check if input is a cell with two matrices, each of the same width
-        if iscell(x)
-            if isequal(size(x), [1 2])
-                [r1 w1] = size(x{1});
-                [r2 w2] = size(x{2});
-                if w1 == w2
-                    y = 1;
-                else
-                    y = 0;
-                end
-            end
-        % check input is a 2D matrix
-        elseif ismatrix(x)
-            y = 1;
-        % checck if input is a 3D matrix
-        elseif isequal(size(size(x)), [1 3])
-            y = 1;
-        else
-            y = 0;
-        end
- end
- 
- function y = isVectorOrCell(x)
-    if iscell(x)
-        y = 1;
-    elseif isvector(x)
-        y = 1;
-    else
-        y = 0;
-    end
- end
-    
