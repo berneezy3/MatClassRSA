@@ -209,8 +209,8 @@
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParameter(ip, 'PCA', defaultPCA);
         addParameter(ip, 'PCAinFold', defaultPCAinFold);
-        addParameter(ip, 'center', defaultCenter,  @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParameter(ip, 'scale', defaultScale, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
+        addParameter(ip, 'center', defaultCenter);
+        addParameter(ip, 'scale', defaultScale);
         addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'classifier', defaultClassifier, ...
              @(x) any(validatestring(x, expectedClassifier)));

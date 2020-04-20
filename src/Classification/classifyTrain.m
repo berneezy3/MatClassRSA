@@ -146,8 +146,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     defaultNumTrees = 64;
     defaultMinLeafSize = 1;
     defaultPairwise = 0;
-    defaultCenter = true;
-    defaultScale = false;
 
     %Specify expected values
     expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
@@ -174,8 +172,9 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'PCA', defaultPCA);
-        addParamValue(ip, 'center', defaultCenter, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParamValue(ip, 'scale', defaultScale, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
+        %addParamValue(ip, 'PCAinFold', defaultPCAinFold); % THERE ARE NO
+        %FOLDs
+        %addParamValue(ip, 'nFolds', defaultNFolds);
         addParamValue(ip, 'classifier', defaultClassifier, ...
             @(x) any(validatestring(x, expectedClassifier)));
 
@@ -195,9 +194,10 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
             @(x) (assert(isvector(x))));
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
-        addParameter(ip, 'center', defaultCenter, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParameter(ip, 'scale', defaultScale, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
         addParameter(ip, 'PCA', defaultPCA);
+%         addParameter(ip, 'PCAinFold', defaultPCAinFold); % THERE ARE NO
+%         FOLDS
+        %addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'classifier', defaultClassifier, ...
              @(x) any(validatestring(x, expectedClassifier)));
 
@@ -255,20 +255,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     setUserSpecifiedRng(ip.Results.randomSeed);
 
     
-    
-    % Moving centering and scaling parameters out of ip, in case we need to
-    % override the user's centering specification
-    ipCenter = ip.Results.center; 
-    ipScale = ip.Results.scale;
-    if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
-        warning(['Data centering must be on if performing PCA. Overriding '...
-        'user input and removing the mean from each data feature.']);
-        ipCenter = true;
-    end
-    % center and scale data
-    [X, colMeans, colScales] = ...
-        centerAndScaleData(X, ipCenter , ipScale);
-    
     trainData = X;
     % PCA
     if (ip.Results.PCA > 0)
@@ -296,8 +282,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     classifierInfo.trainingDataSize = dataSize;
     classifierInfo.numClasses = length(unique(Y));
     classifierInfo.pairwise = ip.Results.pairwise;
-    classifierInfo.colMeans = colMeans;
-    classifierInfo.colScales = colScales;
     
     switch classifierInfo.classifier
         case 'SVM'
