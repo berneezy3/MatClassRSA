@@ -1,6 +1,6 @@
-function [M, varargout] = classifyTrain(X, Y, varargin)
+function [M, varargout] = classifyTrainMulti(X, Y, varargin)
 % -------------------------------------------------------------------------
-% [C, ] = classifyTrain(X, Y)
+% [C] = classifyTrainMulti(X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -82,9 +82,6 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
 %   cell array of structs, each one containing a classification struct M
 %   foreach decision boundary.  
 
-% TODO:
-%   
-
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------
@@ -128,6 +125,9 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = false;
+    st = dbstack;
+    namestr = st.name;
+    ip = parseInputs(namestr, ip);
 
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
@@ -159,55 +159,47 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     addRequired(ip, 'X', @(X) ndims(X)==3 || ismatrix(X)==1)
     addRequired(ip, 'Y', @isvector)
     [r c] = size(X);
+    
+    
 
-    %Optional positional inputs
-    %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
-    if verLessThan('matlab', '8.2')
-%         addParamValue(ip, 'shuffleData', defaultShuffleData, ...
-%             @(x) (x==1 || x==0));
-        addParamValue(ip, 'timeUse', defaultTimeUse, ...
-            @(x) (assert(isvector(x))));
-        addParamValue(ip, 'spaceUse', defaultSpaceUse, ...
-            @(x) (assert(isvector(x))));
-        addParamValue(ip, 'featureUse', defaultFeatureUse, ...
-            @(x) (assert(isvector(x))));
-        addParamValue(ip, 'PCA', defaultPCA);
-        %addParamValue(ip, 'PCAinFold', defaultPCAinFold); % THERE ARE NO
-        %FOLDs
-        %addParamValue(ip, 'nFolds', defaultNFolds);
-        addParamValue(ip, 'classifier', defaultClassifier, ...
-            @(x) any(validatestring(x, expectedClassifier)));
-
-        addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-        addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernel)));
-        addParamValue(ip, 'numTrees', 128);
-        addParamValue(ip, 'minLeafSize', 1);
-        addParamValue(ip, 'pairwise', defaultPairwise);
-
-    else
-%         addParameter(ip, 'shuffleData', defaultShuffleData, ...
-%             @(x)  (x==1 || x==0));
-        addParameter(ip, 'timeUse', defaultTimeUse, ...
-            @(x) (assert(isvector(x))));
-        addParameter(ip, 'spaceUse', defaultSpaceUse, ...
-            @(x) (assert(isvector(x))));
-        addParameter(ip, 'featureUse', defaultFeatureUse, ...
-            @(x) (assert(isvector(x))));
-        addParameter(ip, 'PCA', defaultPCA);
-%         addParameter(ip, 'PCAinFold', defaultPCAinFold); % THERE ARE NO
-%         FOLDS
-        %addParameter(ip, 'nFolds', defaultNFolds);
-        addParameter(ip, 'classifier', defaultClassifier, ...
-             @(x) any(validatestring(x, expectedClassifier)));
-
-        addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-        addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernel)));
-        addParameter(ip, 'numTrees', 128);
-        addParameter(ip, 'minLeafSize', 1);
-        addParameter(ip, 'pairwise', defaultPairwise);
-    end
+%     %Optional positional inputs
+%     %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
+%     if verLessThan('matlab', '8.2')
+%         addParamValue(ip, 'timeUse', defaultTimeUse, ...
+%             @(x) (assert(isvector(x))));
+%         addParamValue(ip, 'spaceUse', defaultSpaceUse, ...
+%             @(x) (assert(isvector(x))));
+%         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
+%             @(x) (assert(isvector(x))));
+%         addParamValue(ip, 'PCA', defaultPCA);
+%         addParamValue(ip, 'classifier', defaultClassifier, ...
+%             @(x) any(validatestring(x, expectedClassifier)));
+% 
+%         addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+%             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
+%         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernel)));
+%         addParamValue(ip, 'numTrees', 128);
+%         addParamValue(ip, 'minLeafSize', 1);
+%         addParamValue(ip, 'pairwise', defaultPairwise);
+% 
+%     else
+%         addParameter(ip, 'timeUse', defaultTimeUse, ...
+%             @(x) (assert(isvector(x))));
+%         addParameter(ip, 'spaceUse', defaultSpaceUse, ...
+%             @(x) (assert(isvector(x))));
+%         addParameter(ip, 'featureUse', defaultFeatureUse, ...
+%             @(x) (assert(isvector(x))));
+%         addParameter(ip, 'PCA', defaultPCA);
+%         addParameter(ip, 'classifier', defaultClassifier, ...
+%              @(x) any(validatestring(x, expectedClassifier)));
+% 
+%         addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
+%             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
+%         addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernel)));
+%         addParameter(ip, 'numTrees', 128);
+%         addParameter(ip, 'minLeafSize', 1);
+%         addParameter(ip, 'pairwise', defaultPairwise);
+%     end
     
     %Optional name-value pairs
     %NOTE: Should use addParameter for R2013b and later.
@@ -254,11 +246,24 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     %rng(ip.Results.randomSeed);
     setUserSpecifiedRng(ip.Results.randomSeed);
 
+    % Moving centering and scaling parameters out of ip, in case we need to
+    % override the user's centering specification
+    ipCenter = ip.Results.center; 
+    ipScale = ip.Results.scale;
+    if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
+        warning(['Data centering must be on if performing PCA. Overriding '...
+        'user input and removing the mean from each data feature.']);
+        ipCenter = true;
+    end
     
     trainData = X;
+    
     % PCA
     if (ip.Results.PCA > 0)
         disp('Conducting Principal Component Analysis...')
+        % accordingly center and scale test data
+        [trainData, colMeans, colScales] = centerAndScaleData(trainData, ...
+            ipCenter, ipScale);
         [trainData, V, nPC] = getPCs(trainData, ip.Results.PCA);
     else 
         disp('Principal Component Analysis turned off')
@@ -282,6 +287,8 @@ function [M, varargout] = classifyTrain(X, Y, varargin)
     classifierInfo.trainingDataSize = dataSize;
     classifierInfo.numClasses = length(unique(Y));
     classifierInfo.pairwise = ip.Results.pairwise;
+    classifierInfo.colMeans = colMeans;
+    classifierInfo.colScales = colScales;
     
     switch classifierInfo.classifier
         case 'SVM'
