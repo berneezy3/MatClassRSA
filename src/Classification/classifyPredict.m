@@ -6,13 +6,13 @@ function [P, varargout] = classifyPredict(M, X, varargin)
 %
 % The main function for fitting data to create a model.  
 %
-% INPUT ARGS (REQUIRED)
-%   M - EEG Model (output from classifyTrain)
-%   X - training data
+% INPUT ARGS 
+%   M (REQUIRED) - EEG Model (output from classifyTrain)
+%   X (REQUIRED) - training data
+%   actualLabels (OPTIONAl) - actual labels of test data X.  Length of this vector
+%   must equal the number of trials in X.
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   'actualLabels' - actual labels of test data X.  Length of this vector
-%   must equal the number of trials in X.
 %   'randomSeed' - This option determines whether the randomization is to produce
 %       varying or unvarying results each different execution.  
 %        --options--
@@ -87,8 +87,6 @@ function [P, varargout] = classifyPredict(M, X, varargin)
 
     addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
         || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-%     addParameter(ip, 'pairwise', defaultRandomSeed,  @(x) isequal('default', x)...
-%         || isequal('shuffle', x) || (isnumeric(x) && x > 0));
     
     try 
         parse(ip, M, X, varargin{:});
@@ -135,6 +133,7 @@ function [P, varargout] = classifyPredict(M, X, varargin)
     % If PCA was turned on for training, we will select principal
     % compoenents for prediciton as well
     if (tempM.classifierInfo.PCA > 0) 
+        [X, ~, ~] = centerAndScaleData(X, tempM.classifierInfo.colMeans, tempM.classifierInfo.colScales);
         testData = X*tempM.classifierInfo.PCA_V;
         testData = testData(:,1:tempM.classifierInfo.PCA_nPC);
     else
