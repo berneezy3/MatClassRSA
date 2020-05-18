@@ -1,4 +1,4 @@
-function img = plotDendrogram(RDM, varargin)
+function fig = plotDendrogram(RDM, varargin)
 %-------------------------------------------------------------------
 % plotDendrogram(RDM, varargin)
 % ------------------------------------------------

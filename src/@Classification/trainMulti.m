@@ -1,6 +1,7 @@
-function [M, varargout] = classifyTrainMulti(X, Y, varargin)
+function [M, varargout] = trainMulti(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
-% [C] = classifyTrainMulti(X, Y)
+% RSA = MatClassRSA;
+% C = trainMulti(X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -70,7 +71,11 @@ function [M, varargout] = classifyTrainMulti(X, Y, varargin)
 %   classification (one vs. one).  This returns n choose 2 number of 
 %   decision boundaries.  When using classify predict, this returns a
 %   prediction for each decision boundary.  Set to 0 to turn off.  This 
-%   parameter does not need to be passed to classifyPredict().  
+%   parameter does not need to be passed to classifyPredict(). 
+%   'center' - Specification for centering columns of the data.  If empty or 
+%   not specified, will default to true.
+%   'scale' - Specification for scaling columns of the data. If
+%   empty or not specified, will default to true.
 %
 % OUTPUT ARGS 
 %   M - Classification output produced by classifyTrain.  This contains two 
@@ -269,6 +274,8 @@ function [M, varargout] = classifyTrainMulti(X, Y, varargin)
         disp('Principal Component Analysis turned off')
         V = NaN;
         nPC = NaN;
+        colMeans = NaN;
+        colScales = NaN;
     end
     
     % Train Model

@@ -1,4 +1,4 @@
-function img = plotMDS(RDM, varargin)
+function fig = plotMDS(RDM, varargin)
 %-------------------------------------------------------------------
 % y = plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
 % ------------------------------------------------
@@ -128,7 +128,10 @@ function img = plotMDS(RDM, varargin)
     else
         [Y,stress] = mdscale(RDM, length(RDM));
     end
-    img = gcf;
+    
+    % generate figure and image for output
+    fig = gcf;
+    %img = imagesc(RDM);
         
     [r c] = size(Y);
     

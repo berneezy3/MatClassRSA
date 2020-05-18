@@ -1,4 +1,4 @@
-function img = plotMST(RDM, varargin)
+function  fig = plotMST(RDM, varargin)
 %-------------------------------------------------------------------
 % plotMST = plotMST(RDM, varargin)
 % ------------------------------------------------
@@ -107,7 +107,10 @@ function img = plotMST(RDM, varargin)
     %p = plot(G,'EdgeLabel',G.Edges.Weight);
     [T,pred] = minspantree(G);
     P = plot(T);
-    img = gcf;
+
+    % generate figure and image for output
+    fig = gcf;
+    %img = imagesc(RDM);
     highlight(P, T, 'LineWidth',  ip.Results.lineWidth, 'EdgeColor', ip.Results.lineColor);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -218,7 +221,7 @@ function plt = MSTplothelper(sourceNodes, destNodes, weights, nodeLabels, ip)
             endNode = findNodeWithLabel(nl, T.Edges.EndNodes(i,2));
             edgeCoord(i,1) = (xd(startNode) + xd(endNode))/2;
             edgeCoord(i,2) = (yd(startNode) + yd(endNode))/2;
-            ang = findAngle(xd(startNode), yd(startNode), xd(endNode), yd(endNode))
+            ang = findAngle(xd(startNode), yd(startNode), xd(endNode), yd(endNode));
             text((xd(startNode) + xd(endNode))/2 ,(yd(startNode) + yd(endNode))/2, ...
                  num2str(T.Edges.Weight(i)), 'HorizontalAlignment','center', ...
                  'Rotation', ang, 'FontSize', ip.Results.edgeLabelSize, ...
@@ -318,7 +321,7 @@ end
 function y = findNodeWithLabel(labels, label)
     %y = find(not(cellfun('isempty',strfind(labels,label))));
     y = find(strcmp(labels,label));
-    assert(length(y) == 1 , 'labels need to be unique')
+    assert(length(y) == 1 , 'labels need to be unique');
 end
 
 function y = findAngle(x1, y1, x2, y2)

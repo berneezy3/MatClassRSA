@@ -1,6 +1,6 @@
- function C = classifyCrossValidateMulti(X, Y, varargin)
+ function C = classifyCrossValidateMulti_optimize(X, Y, varargin)
 % -------------------------------------------------------------------------
-% C = classifyCrossValidate(X, Y, varargin)
+% C = classifyCrossValidateMulti_optimize(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -133,13 +133,17 @@
 % TODO : FINISH DOCSTRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    % Initialize the input parser
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
     ip = parseInputs(namestr, ip);
+
+    % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
+    
     %Required inputs
-    addRequired(ip, 'X', @is2Dor3DMatrixOrCell)
-    addRequired(ip, 'Y', @isVectorOrCell)
+    addRequired(ip, 'X', @ismatrix)
+    addRequired(ip, 'Y', @isvector)
     [r c] = size(X);
     
     %Optional name-value pairs
@@ -249,175 +253,39 @@
     
     CM = NaN;
    
-    % PAIRWISE LDA/RF
-    if (ip.Results.pairwise == 1) && ...
-        (strcmp(upper(ip.Results.classifier), 'LDA') || ...
-        strcmp(upper(ip.Results.classifier), 'RF'))
-    
-        decision_values = NaN(length(Y), numDecBounds);
-        AM = NaN(numClasses, numClasses);
-    
-        for cat1 = 1:numClasses-1
-            for cat2 = (cat1+1):numClasses
-                disp([num2str(cat1) ' vs ' num2str(cat2)]) 
-                currUse = ismember(Y, [cat1 cat2]);
-      
-                tempX = X(currUse, :);
-                tempY = Y(currUse);
-                tempStruct = struct();
-                % Store the accuracy in the accMatrix
-                [~, tempC] = evalc([' classifyCrossValidate(tempX, tempY, ' ...
-                    ' ''classifier'', ip.Results.classifier, ''randomSeed'',' ...
-                    ' ''default'', ''PCAinFold'', ip.Results.PCAinFold, '...
-                    ' ''nFolds'', ip.Results.PCAinFold) ' ]);
-                tempStruct.CM = tempC.CM;
-                
-                tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
-                tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
-                tempStruct.dataPoints = find(currUse);
-                tempStruct.actualY = tempY;
-                tempStruct.predY = tempC.predY;
-                
-                
-                %tempStruct.decision
-                AM(cat1, cat2) = tempStruct.accuracy;
-                AM(cat2, cat1) = tempStruct.accuracy;
-                %pairwiseCell{cat1, cat2} = tempStruct;
-                %pairwiseCell{cat2, cat1} = tempStruct;
-                
-                decInd = classTuple2Nchoose2Ind([cat1 cat2], numClasses);
-                if (tempC.predY)
-                    
-                end
-                
-            end
-        end
+    % NORMAL SVM/LDA/RF
+    tic
+    for i = 1:ip.Results.nFolds
+
+        disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+
+        trainX = cvDataObj.trainXall{i};
+        trainY = cvDataObj.trainYall{i};
+        testX = cvDataObj.testXall{i};
+        testY = cvDataObj.testYall{i};
         
+        % conduct grid search here
+        [gamma_opt, C_opt] = gridSearchSVM(trainX, trainY, ip.Results.gammaSpace, ip.Results.cSpace);
 
-        C.pairwiseInfo = pairwiseCell;
-        C.AM = AM;
-        disp('classifyCrossValidate() Finished!')
-        return
-    % END PAIRWISE LDA/RF
-    % START PAIRWISE SVM 
-    elseif  (ip.Results.pairwise) && ... 
-            strcmp( upper(ip.Results.classifier), 'SVM')
-        
-        for i = 1:ip.Results.nFolds
+        %[mdl, scale] = fitModel(trainX, trainY, ip);
+        M = classifyTrainMulti(trainX, trainY, 'classifier', ip.Results.classifier ,'gamma', gamma_opt, 'C', C_opt);
 
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+        %[predictions decision_values] = modelPredict(testX, mdl, scale);
+        P = classifyPredict(M, testX, testY);
 
-            trainX = cvDataObj.trainXall{i};
-            trainY = cvDataObj.trainYall{i};
-            testX = cvDataObj.testXall{i};
-            testY = cvDataObj.testYall{i};
+        labelsConcat = [labelsConcat testY'];
+        predictionsConcat = [predictionsConcat P.predY];
+        modelsConcat{i} = M.mdl;
 
-            [mdl, scale] = fitModel(trainX, trainY, ip);
+        C.CM = confusionmat(labelsConcat, predictionsConcat);
 
-            [predictions decision_values] = modelPredict(testX, mdl, scale);
-
-            labelsConcat = [labelsConcat testY];
-            predictionsConcat = [predictionsConcat predictions];
-            modelsConcat{i} = mdl; 
-
-            if (ip.Results.pairwise) 
-                if strcmp(upper(ip.Results.classifier), 'SVM')
-                    [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
-                        decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
-                end
-            end
-        end
-        
-        %convert pairwiseMat3D to diagonal matrix
-        
-        C.pairwiseInfo = pairwiseCell;
-        C.AM = pairwiseAccuracies;
-        disp('classifyCrossValidate() Finished!')
-        return;
-       
-    % END PAIRWISE SVM
-    else % NORMAL SVM/LDA/RF
-        tic
-        for i = 1:ip.Results.nFolds
-
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
-
-            trainX = cvDataObj.trainXall{i};
-            trainY = cvDataObj.trainYall{i};
-            testX = cvDataObj.testXall{i};
-            testY = cvDataObj.testYall{i};
-
-            [mdl, scale] = fitModel(trainX, trainY, ip);
-
-            [predictions decision_values] = modelPredict(testX, mdl, scale);
-
-            labelsConcat = [labelsConcat testY'];
-            predictionsConcat = [predictionsConcat predictions];
-            modelsConcat{i} = mdl; 
-
-            C.CM = confusionmat(labelsConcat, predictionsConcat);
-            C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
-            
-        end
-        toc
-        % END NORMAL SVM/LDA/RF
-        
     end
+    toc
 
-%{
-    % unshuffle predictions vector to return to user IF shuffle is on
-    predY = NaN;
-    if (ip.Results.shuffleData == 1)
-        predY = NaN(1, r);
-        for i = 1:r
-            predY(shuffledInd(i)) = predictionsConcat(i);
-        end
-    else
-        predY = predictionsConcat;
-    end
-%}
-
-%     pVal = permTestPVal(C.accuracy, accDist);
-
-
+    C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.classifierInfo = classifierInfo;
     disp('classifyCrossValidate() Finished!')
     
  end
-
- 
- function y = is2Dor3DMatrixOrCell(x)
-        % check if input is a cell with two matrices, each of the same width
-        if iscell(x)
-            if isequal(size(x), [1 2])
-                [r1 w1] = size(x{1});
-                [r2 w2] = size(x{2});
-                if w1 == w2
-                    y = 1;
-                else
-                    y = 0;
-                end
-            end
-        % check input is a 2D matrix
-        elseif ismatrix(x)
-            y = 1;
-        % checck if input is a 3D matrix
-        elseif isequal(size(size(x)), [1 3])
-            y = 1;
-        else
-            y = 0;
-        end
- end
- 
- function y = isVectorOrCell(x)
-    if iscell(x)
-        y = 1;
-    elseif isvector(x)
-        y = 1;
-    else
-        y = 0;
-    end
- end
-    

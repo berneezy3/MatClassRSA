@@ -1,4 +1,4 @@
-function [img, fig] = plotMatrix(RDM, varargin)
+function  [img, fig] = plotMatrix(RDM, varargin)
 %-------------------------------------------------------------------
 % plotMatrix(matrix, varargin)
 % ------------------------------------------------
