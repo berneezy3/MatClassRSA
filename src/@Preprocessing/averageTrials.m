@@ -1,6 +1,8 @@
 function [averagedX, averagedY, averagedP, whichObs] = averageTrials(obj, X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
-% [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, groupSize, varargin)
+% RSA = MatClassRSA;
+% [averagedX, averagedY, averagedP, whichObs] = ...
+%   RSA.preprocess.averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
 % Bernard Wang - April 30, 2017
 % Revised by Blair Kaneshiro - August 2019

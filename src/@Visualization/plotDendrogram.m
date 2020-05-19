@@ -1,6 +1,7 @@
 function fig = plotDendrogram(obj, RDM, varargin)
 %-------------------------------------------------------------------
-% plotDendrogram(RDM, varargin)
+% RSA = MatClassRSA;
+% RSA.visualize.plotDendrogram(RDM, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %

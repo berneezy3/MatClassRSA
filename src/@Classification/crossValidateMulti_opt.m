@@ -1,4 +1,4 @@
- function C = classifyCrossValidateMulti_optimize(obj, X, Y, varargin)
+ function C = classifyCrossValidateMulti_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % C = classifyCrossValidateMulti_optimize(X, Y, varargin)
 % -------------------------------------------------------------------------

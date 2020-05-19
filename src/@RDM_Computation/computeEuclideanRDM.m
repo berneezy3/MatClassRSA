@@ -1,6 +1,8 @@
 function [dissimilarities] = computeEuclideanRDM(obj, X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------
-%  [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_seed)
+%  RSA = MatClassRSA;
+%  [dissimilarities] = ...
+%  RSA.computeRDM.computeEuclideanRDM(X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------
 %
 % Returns pairwise similarities with respect to cross-validated Euclidean

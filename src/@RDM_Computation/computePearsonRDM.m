@@ -1,6 +1,8 @@
 function [dissimilarities] = computePearsonRDM(obj,X, Y, num_permutations, rand_seed)
 %----------------------------------------------------------------------------------
-%  [dissimilarities] = computePearsonRDM(X, Y, num_permutations, rand_seed)
+%  RSA = MatClassRSA;
+%  [dissimilarities] = ...
+%  RSA.computeRDM.computePearsonRDM(X, Y, num_permutations, rand_seed)
 %----------------------------------------------------------------------------------
 %
 % Returns pairwise dissimilarities with respect to cross-validated Pearson

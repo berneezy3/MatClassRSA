@@ -1,5 +1,6 @@
 function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, P, rngType)
 %-------------------------------------------------------------------
+% RSA = MatClassRSA;
 % [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
 %-------------------------------------------------------------------
 % Bernard Wang - April 30, 2017

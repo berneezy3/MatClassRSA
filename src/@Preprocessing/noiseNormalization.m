@@ -1,6 +1,7 @@
 function [norm_data, sigma_inv] = noiseNormalization(obj, X, Y)
 %---------------------------------------------------------------------------
-%  [norm_data, sigma_inv] = noiseNormalization(X, Y)
+%   RSA = MatClassRSA;
+%  [norm_data, sigma_inv] = RSA.preprocess.noiseNormalization(X, Y)
 %---------------------------------------------------------------------------
 %
 % Function to perform multivariate noise normalization on time varying data.

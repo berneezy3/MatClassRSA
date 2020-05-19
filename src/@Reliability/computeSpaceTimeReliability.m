@@ -1,6 +1,8 @@
 function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, numPermutations, rngType)
 %------------------------------------------------------------------------------------------
-%  [reliabilities] = computeSpaceTimeReliability(X, Y, numPermutations, rngType)
+%  RSA = MatClassRSA;
+%  [reliabilities] = ...
+%  RSA.computeReliability.computeSpaceTimeReliability(X, Y, numPermutations, rngType)
 %------------------------------------------------------------------------------------------
 %
 % Returns split-half reliabilities computed for each component across time. With the 

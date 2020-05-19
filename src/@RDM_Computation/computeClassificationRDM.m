@@ -1,6 +1,7 @@
 function [RDM, params] = computeClassificationRDM(obj, M, matrixType, varargin)
 %-------------------------------------------------------------------
-% [RDM, params] = computeClassificationRDM(M, matrixType, varargin)
+% RSA = MatClassRSA;
+% [RDM, params] = RSA.computeRDM.computeClassificationRDM(M, matrixType, varargin)
 % ------------------------------------------------------------------
 % Blair - January 31, 2017, revised September 2019
 %

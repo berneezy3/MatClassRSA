@@ -1,7 +1,8 @@
 function [reliabilities] = computeSampleSizeReliability(obj, X, Y, featureIdx, ...
     numTrialsPerHalf, numPermutations, numTrialPermutations, rngType)
 %---------------------------------------------------------------------------------------------
-%  [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, ...
+%  RSA = MatClassRSA;
+%  [reliabilities] = RSA.computeReliability.computeSampleSizeReliability(X, Y, featureIdx, ...
 %                       numTrialsPerHalf, numPermutations, numTrialPermutations)
 %---------------------------------------------------------------------------------------------
 %

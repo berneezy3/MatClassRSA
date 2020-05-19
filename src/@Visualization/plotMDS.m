@@ -1,6 +1,7 @@
 function fig = plotMDS(obj, RDM, varargin)
 %-------------------------------------------------------------------
-% y = plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
+%  RSA = MatClassRSA;
+%  RSA.visualize.plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
