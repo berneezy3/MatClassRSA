@@ -1,16 +1,16 @@
-function G = gridSearchSVM(gammas, Cs)
+function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2020.
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% mdl = gridSearchSVM(gammaRange, cRange)
+% mdl = gridSearch(X, Y, gammaRange, cRange)
 % --------------------------------
 % Bernard Wang, April 5, 2020
 %
-%
-% Given a vector of gamma's and C's to search over, this function runs
-% cross validation a grid of all possible combinations of gammas and C's.
+% Given training data matrix X, label vector Y, and a vector of gamma's 
+% and C's to search over, this function runs cross validation over a grid 
+% of all possible combinations of gammas and C's.
 %
 % 
 % INPUT ARGS:
@@ -58,11 +58,21 @@ function G = gridSearchSVM(gammas, Cs)
 
     for i = 1:length(Cs)
         for j = 1:length(gammas)
-            tempC = classifyCrossValidate(X, Y, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'C', Cs(i), 'gamma', gammas(j));
+            tempC = classifyCrossValidateMulti(X, Y, 'PCA', -1, 'classifier', 'SVM','C', Cs(i), 'gamma', gammas(j));
             accGrid(i,j) = tempC.accuracy;
             cGrid{i,j} = tempC;
         end
     end
+    
+    % get maximum accuracy, and return the gamma and C value for the
+    % maximum accuracy
+    
+    
+    [maxVal, maxIdx] = max(accGrid(:));
+    [xInd yInd] = ind2sub(size(accGrid), maxIdx);
+    
+    gamma_opt = gammas(yInd);
+    C_opt = Cs(xInd);
     
 
 end

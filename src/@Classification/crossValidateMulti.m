@@ -39,7 +39,7 @@
 %       (   e.g., ["shuffle", "twister"].
 %       - rng struct as assigned by rand_seed = rng.
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
-%       keep components that explan 90% of the variance. To retrieve
+%       keep components that explan 99% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
 %       decimal between 1 and 0.  To retrieve a certain number of most
 %       significant features, enter an integer greater or equal to 1.
@@ -57,15 +57,15 @@
 %       greater than 1 and less than number of trials. Default is 10.
 %   'classifier' - choose classifier. 
 %        --options--
-%       'SVM' (default)
-%       'LDA' 
+%       'SVM' 
+%       'LDA' (default)
 %       'RF' 
 %   'kernel' - Choose the kernel for decision function for SVM.  This input will do
 %       nothing if a classifier other than SVM is selected.
 %        --options--
-%       'linear' 
+%       'linear' (default)
 %       'polynomial' 
-%       'rbf' (default)
+%       'rbf' 
 %       'sigmoid' 
 %   'gamma' - 
 %   'C' - 
@@ -204,7 +204,7 @@
     % PCA 
     % Split Data into fold (w/ or w/o PCA)
     if (ip.Results.PCA>0 && ip.Results.PCA>0)
-        disp('Conducting Principal Component Analysis');
+        disp(['Conducting Principal Component Analysis']);
     else
         disp('Skipping Principal Component Analysis');
     end

@@ -1,4 +1,4 @@
-function fig = plotMDS(RDM, varargin)
+function fig = plotMDS(obj, RDM, varargin)
 %-------------------------------------------------------------------
 % y = plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
 % ------------------------------------------------

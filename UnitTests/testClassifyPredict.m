@@ -16,6 +16,7 @@ load('S06.mat');
 X_2D = reshape(X, [dim1*dim2, dim3]);
 X_2D = X_2D';
 
+RSA = MatClassRSA;
 %% Classification and prediction with 2D data using LDA
 % Issue related to the random seed:
 %    - Although the confusion matrices are the same for both runs, the
@@ -32,13 +33,13 @@ testLabels = labels6(floor(dim3/5)+1:dim3);
 % Issue:
 %    - CM is no longer in the struct
 
-M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1);
-C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3), 'randomSeed', 1);
+M = RSA.classify.trainMulti( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1);
+C = RSA.classify.predict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3), 'randomSeed', 1);
 
-M1 = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1);
-C1 = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3), 'randomSeed', 1);
+M1 = RSA.classify.trainMulti( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1);
+C1 = RSA.classify.predict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3), 'randomSeed', 1);
 
-figure; plotMatrix(C1.CM, 'matrixLabels', 0, 'colorMap', 'jet');
+figure; RSA.visualize.plotMatrix(C1.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 
 %% Classification and prediction with 2D data using random forest
 % Runs successfully, and CM looks OK.
@@ -49,10 +50,10 @@ figure; plotMatrix(C1.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 %    - Error using classifyPredict (line 103)
 %      Expected a string for the parameter name, instead the input type was 'double'.
 
-M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'RF', 'numTrees', 200, 'minLeafSize', 1);
-C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3));
+M = RSA.classify.trainMulti( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'RF', 'numTrees', 200, 'minLeafSize', 1);
+C = RSA.classify.predict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3));
 
-figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
+figure; RSA.visualize.plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 
 %% Classification and prediction with 2D data using SVM
 % Issues:
@@ -63,25 +64,26 @@ figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 %    - Error using classifyPredict (line 103)
 %      Expected a string for the parameter name, instead the input type was 'double'.
 
-M_split = classifyTrain( X_2D(1:3456, :) , labels6(1:3456), 'classifier', 'SVM', 'PCA', .9, 'kernel', 'rbf');
-C = classifyPredict( M_split, X_2D(3457:end, :),  labels6( 3457:end));
+M_split = RSA.classify.trainMulti( X_2D(1:3456, :) , labels6(1:3456), 'classifier', 'SVM', 'PCA', .9, 'kernel', 'rbf');
+C = RSA.classify.predict( M_split, X_2D(3457:end, :),  labels6( 3457:end));
 
-figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
+figure; RSA.visualize.plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 
 %% Classification and prediction with 2D data using SVM
 % Issues:
 %    - Run PCA with 1000 components, output CM does not make sense
 
-M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 1000);
-C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3));
-figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
+M = RSA.classify.trainMulti( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 1000);
+C = RSA.classify.predict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3));
+figure; RSA.visualize.plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 
 %% Classification and prediction with 2D data using pairwise and LDA
 % Runs successfully
 
-M = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1, 'pairwise', 1);
-C = classifyPredict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3), 'randomSeed', 1);
+M = RSA.classify.trainMulti( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), 'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1, 'pairwise', 1);
+C = RSA.classify.predict( M, X_2D(floor(dim3/5)+1:dim3, :),  labels6(floor(dim3/5)+1:dim3), 'randomSeed', 1);
 
+%%
 
 
 

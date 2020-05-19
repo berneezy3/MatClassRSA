@@ -1,4 +1,4 @@
-function  fig = plotMST(RDM, varargin)
+function  fig = plotMST(obj, RDM, varargin)
 %-------------------------------------------------------------------
 % plotMST = plotMST(RDM, varargin)
 % ------------------------------------------------

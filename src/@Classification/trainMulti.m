@@ -39,7 +39,7 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
 %           (e.g., ["shuffle", "twister"].
 % - rng struct as assigned by rand_seed = rng.
 %   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
-%       keep components that explan 90% of the variance. To retrieve
+%       keep components that explan 99% of the variance. To retrieve
 %       components that explain a certain variance, enter the variance as a
 %       decimal between 1 and 0.  To retrieve a certain number of most
 %       significant features, enter an integer greater or equal to 1.
@@ -50,18 +50,17 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
 %       features of input matrix X.
 %       (negative value) - off
 %       features of input matrix X.
-%   'nFolds' - Specify number of folds for cross validation
 %   'classifier' - choose classifier. 
 %        --options--
-%       'SVM' (default)
-%       'LDA' 
+%       'SVM'
+%       'LDA' (default)
 %       'RF' 
 %   'kernel' - Choose the kernel for decision function for SVM.  This input will do
 %       nothing if a classifier other than SVM is selected.
 %        --options--
-%       'linear' 
+%       'linear' (default)
 %       'polynomial' 
-%       'rbf' (default)
+%       'rbf' 
 %       'sigmoid' 
 %   'numTrees' - Choose the number of decision trees to grow.  Default is
 %   128.

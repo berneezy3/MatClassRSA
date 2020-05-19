@@ -1,4 +1,4 @@
-function [RDM, params] = computeClassificationRDM(M, matrixType, varargin)
+function [RDM, params] = computeClassificationRDM(obj, M, matrixType, varargin)
 %-------------------------------------------------------------------
 % [RDM, params] = computeClassificationRDM(M, matrixType, varargin)
 % ------------------------------------------------------------------

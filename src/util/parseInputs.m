@@ -9,16 +9,16 @@ function y = parseInputs(functionName, ip)
     
     %Specify default values
     defaultPCA = .99;
-    defaultPCAinFold = 1;
+    defaultPCAinFold = 0;
     defaultNFolds = 10;
-    defaultClassifier = 'SVM';
+    defaultClassifier = 'LDA';
     defaultPValueMethod = '';
     defaultPermutations = 1000;
     defaultTimeUse = [];
     defaultSpaceUse = [];
     defaultFeatureUse = [];
     defaultRandomSeed = 'shuffle';
-    defaultKernel = 'rbf';
+    defaultKernel = 'linear';
 %   defaultDiscrimType = 'linear';
     defaultNumTrees = 64;
     defaultMinLeafSize = 1;
@@ -31,8 +31,7 @@ function y = parseInputs(functionName, ip)
 
     %Specify expected values
     expectedPCAinFold = [0,1];
-    expectedClassifier = {'SVM', 'LDA', 'RF', 'SVM2', 'svm', 'lda', 'rf'};
-%     expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
+    expectedClassifier = {'SVM', 'LDA', 'RF', 'svm', 'lda', 'rf'};
     expectedPValueMethod = {'permuteFullModel'};
     expectedRandomSeed = {'default', 'shuffle'};
     expectedKernels = {'linear', 'sigmoid', 'rbf', 'polynomial'};
@@ -85,36 +84,36 @@ function y = parseInputs(functionName, ip)
     end
     
     switch functionName
-       case 'classifyTrainMulti'
+       case 'trainMulti'
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
-       case 'classifyPredict.m'
-       case 'classifyTrainPairs'
-       case 'classifyCrossValidateMulti'
+       case 'predict.m'
+       case 'trainPairs'
+       case 'crossValidateMulti'
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
-       case 'classifyCrossValidatePairs'
-       case 'classifyCrossValidateMulti_optimize'
+       case 'crossValidatePairs'
+       case 'crossValidateMulti_opt'
             expectedClassifier = {'SVM', 'svm'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
-       case 'classifyCrossValidatePairs_optimize'
-       case 'classifyTrainPairs_optimize'
-       case 'classifyTrainMulti_optimize'
+       case 'crossValidatePairs_opt'
+       case 'trainPairs_opt'
+       case 'trainMulti_opt'
        otherwise
           error(['parseInputs() must be called from one of the following functions:' ...
-          ' classifyTrainMulti.m, classifyPredict.m, classifyTrainPairs.m,' ...
-          'classifyCrossValidateMulti.m, classifyCrossValidatePairs.m,' ...
-          'classifyCrossValidateMulti_optimize.m, classifyCrossValidatePairs_optimize.m,' ...
-          'classifyTrainPairs_optimize.m, classifyTrainMulti_optimize.m']);
+          'trainMulti.m, predict.m, trainPairs.m,' ...
+          'crossValidateMulti.m, crossValidatePairs.m,' ...
+          'crossValidateMulti_opt.m, crossValidatePairs_opt.m,' ...
+          'trainPairs_opt.m, trainMulti_opt.m']);
     end
     
 

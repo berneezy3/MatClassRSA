@@ -1,4 +1,4 @@
-function [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_seed)
+function [dissimilarities] = computeEuclideanRDM(obj, X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------
 %  [dissimilarities] = computeEuclideanRDM(X, Y, num_permutations, rand_seed)
 %------------------------------------------------------------------------------------

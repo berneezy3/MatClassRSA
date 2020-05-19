@@ -54,7 +54,7 @@ function [xOut, centerOut, scaleOut] = centerAndScaleData(xIn, centering, scalin
 
 % LICENSE TEXT HERE
 
-disp('DEBUG: CENTER AND SCALE DATA!')
+%disp('DEBUG: CENTER AND SCALE DATA!')
 
 % Check for 2D or 3D input; if 3D, reshape to 2D and flag for end reshape.
 switch ndims(xIn)
@@ -207,11 +207,11 @@ centerOut = toSubtract; scaleOut = toDivide;
 if size(xIn, 2) == 1
     if islogical(centering) && ~centering
         centerOut = false;
-        disp('DEBUG: single-column input, centering in logical false --> centering out logical false')
+        %disp('DEBUG: single-column input, centering in logical false --> centering out logical false')
     end
     if islogical(scaling) && ~scaling
         scaleOut = false;
-        disp('DEBUG: single-column input, scaling in logical false --> scaling out logical false')
+        %disp('DEBUG: single-column input, scaling in logical false --> scaling out logical false')
     end
     
 % For inputs with > 1 column, if input specification for centering or 
@@ -220,11 +220,11 @@ if size(xIn, 2) == 1
 else
     if length(centering) == 1 && ~centering
         centerOut = false;
-        disp('DEBUG: multi-columns and centering in logical or numeric 0, centering out logical false')
+        %disp('DEBUG: multi-columns and centering in logical or numeric 0, centering out logical false')
     end
     if length(scaling) == 1 && ~scaling
         scaleOut = false;
-        disp('DEBUG: multi-columns and scaling in logical or numeric 0, scaling out logical false')
+        %disp('DEBUG: multi-columns and scaling in logical or numeric 0, scaling out logical false')
     end
 end
 

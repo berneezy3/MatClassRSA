@@ -23,7 +23,7 @@ figure; plotMatrix(C.CM, 'matrixLabels', 0, 'colorMap', 'jet');
 
 %%
 
-classifyCrossValidate(X_2D, labels6, classify, 'LDA', 'PCA', 20)
+classifyCrossValidate(X_2D, labels6, 'classifier', 'SVM', 'PCAinFold', 0)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,4 +1,4 @@
-function [norm_data, sigma_inv] = noiseNormalization(X, Y)
+function [norm_data, sigma_inv] = noiseNormalization(obj, X, Y)
 %---------------------------------------------------------------------------
 %  [norm_data, sigma_inv] = noiseNormalization(X, Y)
 %---------------------------------------------------------------------------

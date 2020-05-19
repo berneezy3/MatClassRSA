@@ -57,12 +57,10 @@ classdef cvData
         testYall 
     end
     methods
-        function obj = cvData(X, Y, cvPart, ip, ipCenter, ipScale)
+        function obj = cvData(X, Y, cvPart, ip, center, scale)
             
             PCA = ip.Results.PCA;
             PCAinFold = ip.Results.PCAinFold;
-            center = ipCenter;
-            scale = ipScale;
             
             trainXall = {};
             testXall = {};

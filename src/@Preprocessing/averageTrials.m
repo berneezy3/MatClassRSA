@@ -1,4 +1,4 @@
-function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, groupSize, varargin)
+function [averagedX, averagedY, averagedP, whichObs] = averageTrials(obj, X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
 % [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
@@ -239,7 +239,7 @@ for pp = 1:nP % Iterate through the participants
     % THROW ERROR if group size is greater than number of trials for that
     % label
     for i=1:length(k)
-        assert(nnz(Y==str2num(k{i})) >= groupSize, ...
+        assert(nnz(Y==str2num(k{i})) > groupSize, ...
             'Label %s has fewer trials than specified group size.', k{i});
     end
     

@@ -1,4 +1,4 @@
-function [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
+function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, P, rngType)
 %-------------------------------------------------------------------
 % [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
 %-------------------------------------------------------------------

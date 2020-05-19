@@ -1,4 +1,4 @@
-function [reliabilities] = computeSpaceTimeReliability(X, Y, numPermutations, rngType)
+function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, numPermutations, rngType)
 %------------------------------------------------------------------------------------------
 %  [reliabilities] = computeSpaceTimeReliability(X, Y, numPermutations, rngType)
 %------------------------------------------------------------------------------------------

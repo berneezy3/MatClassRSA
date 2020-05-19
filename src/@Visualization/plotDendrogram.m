@@ -1,4 +1,4 @@
-function fig = plotDendrogram(RDM, varargin)
+function fig = plotDendrogram(obj, RDM, varargin)
 %-------------------------------------------------------------------
 % plotDendrogram(RDM, varargin)
 % ------------------------------------------------

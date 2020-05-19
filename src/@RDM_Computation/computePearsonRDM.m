@@ -1,4 +1,4 @@
-function [dissimilarities] = computePearsonRDM(X, Y, num_permutations, rand_seed)
+function [dissimilarities] = computePearsonRDM(obj,X, Y, num_permutations, rand_seed)
 %----------------------------------------------------------------------------------
 %  [dissimilarities] = computePearsonRDM(X, Y, num_permutations, rand_seed)
 %----------------------------------------------------------------------------------
