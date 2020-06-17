@@ -33,6 +33,9 @@ function [xOut, centerOut, scaleOut] = centerAndScaleData(xIn, centering, scalin
 %     xIn will be divided by the respective value in this vector. This is
 %     useful, for example, when scaling test data according to standard
 %     deviations computed from the training data.
+%   NOTE that this function handles scaling of constant-valued columns as
+%   is done in Matlab's zscore function: The output column will be
+%   "constant at 0."
 %   NOTE that if the input data matrix xIn has 1 column and 1 or 0 is
 %   specified for centering, the function will print a warning and treat
 %   this as a numeric vector input of length 1 (i.e., the user should
@@ -192,6 +195,11 @@ else
         toDivide = scaling(:)';
     end
 end
+
+%% If standard deviation is 0 (constant input), change it to 1
+
+toDivide(toDivide == 0) = 1;
+
 %%
 % Do the centering and scaling!
 nTrials = size(xIn, 1);
