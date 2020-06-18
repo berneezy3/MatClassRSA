@@ -351,7 +351,7 @@
             testX = cvDataObj.testXall{i};
             testY = cvDataObj.testYall{i};
 
-            [mdl, scale] = fitModel(trainX, trainY, ip);
+            [mdl, scale] = fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
 
             [predictions decision_values] = modelPredict(testX, mdl, scale);
 

@@ -1,4 +1,4 @@
-function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs)
+function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs, kernel)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2020.
 % Published under a GNU General Public License (GPL)
@@ -11,11 +11,11 @@ function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs)
 % Given training data matrix X, label vector Y, and a vector of gamma's 
 % and C's to search over, this function runs cross validation over a grid 
 % of all possible combinations of gammas and C's.
-%
 % 
 % INPUT ARGS:
 %   - gammas: 2D trial by feature training data matrix
 %   - Cs: label vector
+%   - kernel:  SVM classification kernel
 %
 % OUTPUT ARGS:
 %   - gamma_opt: gamma value that produces the highest cross validation
@@ -56,9 +56,11 @@ function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs)
     accGrid = zeros(length(Cs), length(gammas));
     cGrid = cell(length(Cs), length(gammas));
 
+    RSA = MatClassRSA;
     for i = 1:length(Cs)
         for j = 1:length(gammas)
-            tempC = classifyCrossValidateMulti(X, Y, 'PCA', -1, 'classifier', 'SVM','C', Cs(i), 'gamma', gammas(j));
+            tempC = RSA.classify.crossValidateMulti(X, Y, 'PCA', -1, ...
+                'classifier', 'SVM','C', Cs(i), 'gamma', gammas(j), 'kernel', kernel);
             accGrid(i,j) = tempC.accuracy;
             cGrid{i,j} = tempC;
         end

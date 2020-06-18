@@ -318,7 +318,7 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
        ((ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM'))
         
 
-        [mdl, scale] = fitModel(trainData, Y(:), ip);
+        [mdl, scale] = fitModel(trainData, Y(:), ip, ip.Results.gamma, ip.Results.C);
         M.classifierInfo = classifierInfo;
         M.mdl = mdl;
         M.scale = scale;

@@ -1,4 +1,4 @@
-function [mdl, scale] = fitModel(X, Y, ip)
+function [mdl, scale] = fitModel(X, Y, ip, gamma, C)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
@@ -70,8 +70,8 @@ function [mdl, scale] = fitModel(X, Y, ip)
             scale.shift2 = shift2;
             scale.scaleFactor = scaleFactor;
             
-            gamma = ip.Results.gamma;
-            C = ip.Results.C;
+%             gamma = ip.Results.gamma;
+%             C = ip.Results.C;         
             
             switch ip.Results.kernel
                 case 'linear'
@@ -104,16 +104,16 @@ function [mdl, scale] = fitModel(X, Y, ip)
             
             % SVM gamma hyperparameter
             gamma_input = 0;
-            if ( ischar(ip.Results.gamma) )
-                if ( strcmp(ip.Results.gamma, 'default') )
+            if ( ischar(gamma) )
+                if ( strcmp(gamma, 'default') )
                     gamma_input = '';
                 end
             else
-                gamma_input = [' -g ' num2str(ip.Results.gamma, '%.20f\n')];
+                gamma_input = [' -g ' num2str(gamma, '%.20f\n')];
             end
             
             % C hyperparameter
-            C_input = [' -c ' num2str(ip.Results.C, '%.20f\n')];
+            C_input = [' -c ' num2str(C, '%.20f\n')];
             %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' weights  ' -c ' num2str(1000000000)] );
             mdl = svmtrain(Y, X, [kernel_input weights gamma_input C_input]);           
         case 'LDA'

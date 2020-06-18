@@ -66,8 +66,9 @@
 %       'polynomial' 
 %       'rbf' (default)
 %       'sigmoid' 
-%   'gamma' - 
-%   'C' - 
+%   'gammaSpace' - vector of gamma values to search over for the SVM rbf
+%   kernel
+%   'CSpace' - vector of C values to search over for the SVM rbf kernel
 %   'numTrees' - Choose the number of decision trees to grow.  Default is
 %   128.
 %   'minLeafSize' - Choose the minimum number of observations per tree leaf.
@@ -250,9 +251,9 @@
     % classification infomration
     pairwiseCell = initPairwiseCellMat(numClasses);
 
-    
     CM = NaN;
-   
+    RSA = MatClassRSA;
+    
     % NORMAL SVM/LDA/RF
     tic
     for i = 1:ip.Results.nFolds
@@ -265,13 +266,15 @@
         testY = cvDataObj.testYall{i};
         
         % conduct grid search here
-        [gamma_opt, C_opt] = gridSearchSVM(trainX, trainY, ip.Results.gammaSpace, ip.Results.cSpace);
+        [gamma_opt, C_opt] = gridSearchSVM(trainX, trainY, ...
+            ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
 
         %[mdl, scale] = fitModel(trainX, trainY, ip);
-        M = classifyTrainMulti(trainX, trainY, 'classifier', ip.Results.classifier ,'gamma', gamma_opt, 'C', C_opt);
+        M = RSA.classify.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+            'gamma', gamma_opt, 'C', C_opt);
 
         %[predictions decision_values] = modelPredict(testX, mdl, scale);
-        P = classifyPredict(M, testX, testY);
+        P = RSA.classify.predict(M, testX, testY);
 
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat P.predY];

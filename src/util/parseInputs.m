@@ -108,6 +108,12 @@ function y = parseInputs(functionName, ip)
        case 'crossValidatePairs_opt'
        case 'trainPairs_opt'
        case 'trainMulti_opt'
+            expectedClassifier = {'SVM'};
+            defaultClassifier = 'SVM';
+            addParameter(ip, 'classifier', defaultClassifier, ...
+                @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'gammaSpace', defaultGammaSpace);
+            addParameter(ip, 'cSpace', defaultCSpace);
        otherwise
           error(['parseInputs() must be called from one of the following functions:' ...
           'trainMulti.m, predict.m, trainPairs.m,' ...
