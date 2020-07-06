@@ -1,0 +1,809 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>example_rdm_crossValidatedPearson</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-05-10"><meta name="DC.source" content="example_rdm_crossValidatedPearson.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Compute 72 class RDMs without random seed and without noise normalization</a></li><li><a href="#3">Compute 72 class RDMs without random seed and with noise normalization</a></li><li><a href="#4">Compute 6 class RDMs without random seed and without noise normalization</a></li><li><a href="#5">Compute 6 class RDMs without random seed and with noise normalization</a></li></ul></div><pre class="codeinput"><span class="comment">% example_rdm_crossValidatedPearson.m</span>
+<span class="comment">% ---------------------</span>
+<span class="comment">% Nathan - Aug 19, 2019</span>
+<span class="comment">%</span>
+<span class="comment">% Example code for compute an RDM using the cross-validated Pearson</span>
+<span class="comment">% correlation using computePearsonRDM.m.</span>
+
+clear <span class="string">all</span>; close <span class="string">all</span>; clc
+
+rng(<span class="string">'shuffle'</span>);
+n_perm = 3;
+
+<span class="comment">% Load data</span>
+load(<span class="string">'S06.mat'</span>);
+n_time = size(X, 2);
+n_label72 = max(unique(labels72));
+n_label6 = max(unique(labels6));
+</pre><h2 id="2">Compute 72 class RDMs without random seed and without noise normalization</h2><pre class="codeinput">fprintf(<span class="string">'Compute 72 class RDMs without random seed and without noise normalization.\n'</span>)
+time_resolved_rdms = zeros(n_time, n_label72, n_label72, n_perm);
+
+<span class="comment">% Loop through time to compute an RDM at each time point</span>
+<span class="keyword">for</span> i=1:n_time
+    fprintf(<span class="string">'Time point %d\n'</span>, i);
+    data = squeeze(X(:,i,:));
+    rdms = computePearsonRDM(data, labels72, n_perm);
+    time_resolved_rdms(i,:,:,:) = rdms;
+<span class="keyword">end</span>
+
+<span class="comment">% Average time-resolved RDMs across time and permutations</span>
+avg_rdm = squeeze(mean(time_resolved_rdms, 4));
+avg_rdm = squeeze(mean(avg_rdm, 1));
+
+<span class="comment">% Plot the time-averaged RDM</span>
+figure;
+plotMatrix(avg_rdm, <span class="string">'matrixLabels'</span>, 0, <span class="string">'colorMap'</span>, <span class="string">'jet'</span>)
+</pre><pre class="codeoutput">Compute 72 class RDMs without random seed and without noise normalization.
+Time point 1
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 2
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 3
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 4
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 5
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 6
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 7
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 8
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 9
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 10
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 11
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 12
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 13
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 14
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 15
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 16
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 17
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 18
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 19
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 20
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 21
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 22
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 23
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 24
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 25
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 26
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 27
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 28
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 29
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 30
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 31
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 32
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 33
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 34
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 35
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 36
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 37
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 38
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 39
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 40
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Rank type: none
+
+ans = 
+
+  Image with properties:
+
+           CData: [72&times;72 double]
+    CDataMapping: 'scaled'
+
+  Use GET to show all properties
+
+</pre><img vspace="5" hspace="5" src="example_rdm_crossValidatedPearson_01.png" alt=""> <h2 id="3">Compute 72 class RDMs without random seed and with noise normalization</h2><pre class="codeinput">fprintf(<span class="string">'Compute 72 class RDMs without random seed and with noise normalization.\n'</span>)
+time_resolved_rdms = zeros(n_time, n_label72, n_label72, n_perm);
+
+<span class="comment">% Noise normalize the data</span>
+fprintf(<span class="string">'Performing noise normalization...\n'</span>);
+[noise_norm_x, ~] = noiseNormalization(X, labels72);
+
+<span class="comment">% Loop through time to compute an RDM at each time point</span>
+<span class="keyword">for</span> i=1:n_time
+    fprintf(<span class="string">'Time point %d\n'</span>, i);
+    data = squeeze(noise_norm_x(:,i,:));
+    rdms = computePearsonRDM(data, labels72, n_perm);
+    time_resolved_rdms(i,:,:,:) = rdms;
+<span class="keyword">end</span>
+
+<span class="comment">% Average time-resolved RDMs across time and permutations</span>
+avg_rdm = squeeze(mean(time_resolved_rdms, 4));
+avg_rdm = squeeze(mean(avg_rdm, 1));
+
+<span class="comment">% Plot the time-averaged RDM</span>
+figure;
+plotMatrix(avg_rdm, <span class="string">'matrixLabels'</span>, 0, <span class="string">'colorMap'</span>, <span class="string">'jet'</span>)
+</pre><pre class="codeoutput">Compute 72 class RDMs without random seed and with noise normalization.
+Performing noise normalization...
+Time point 1
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 2
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 3
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 4
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 5
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 6
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 7
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 8
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 9
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 10
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 11
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 12
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 13
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 14
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 15
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 16
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 17
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 18
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 19
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 20
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 21
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 22
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 23
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 24
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 25
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 26
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 27
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 28
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 29
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 30
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 31
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 32
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 33
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 34
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 35
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 36
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 37
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 38
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 39
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 40
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Rank type: none
+
+ans = 
+
+  Image with properties:
+
+           CData: [72&times;72 double]
+    CDataMapping: 'scaled'
+
+  Use GET to show all properties
+
+</pre><img vspace="5" hspace="5" src="example_rdm_crossValidatedPearson_02.png" alt=""> <h2 id="4">Compute 6 class RDMs without random seed and without noise normalization</h2><pre class="codeinput">fprintf(<span class="string">'Compute 6 class RDMs without random seed and without noise normalization.\n'</span>);
+time_resolved_rdms = zeros(n_time, n_label6, n_label6, n_perm);
+
+<span class="comment">% Loop through time to compute an RDM at each time point</span>
+<span class="keyword">for</span> i=1:n_time
+    fprintf(<span class="string">'Time point %d\n'</span>, i);
+    data = squeeze(X(:,i,:));
+    rdms = computePearsonRDM(data, labels6, n_perm);
+    time_resolved_rdms(i,:,:,:) = rdms;
+<span class="keyword">end</span>
+
+<span class="comment">% Average time-resolved RDMs across time and permutations</span>
+avg_rdm = squeeze(mean(time_resolved_rdms, 4));
+avg_rdm = squeeze(mean(avg_rdm, 1));
+
+<span class="comment">% Plot the time-averaged RDM</span>
+figure;
+plotMatrix(avg_rdm, <span class="string">'matrixLabels'</span>, 0, <span class="string">'colorMap'</span>, <span class="string">'jet'</span>)
+</pre><pre class="codeoutput">Compute 6 class RDMs without random seed and without noise normalization.
+Time point 1
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 2
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 3
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 4
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 5
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 6
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 7
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 8
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 9
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 10
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 11
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 12
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 13
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 14
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 15
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 16
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 17
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 18
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 19
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 20
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 21
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 22
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 23
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 24
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 25
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 26
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 27
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 28
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 29
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 30
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 31
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 32
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 33
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 34
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 35
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 36
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 37
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 38
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 39
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 40
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Rank type: none
+
+ans = 
+
+  Image with properties:
+
+           CData: [6&times;6 double]
+    CDataMapping: 'scaled'
+
+  Use GET to show all properties
+
+</pre><img vspace="5" hspace="5" src="example_rdm_crossValidatedPearson_03.png" alt=""> <h2 id="5">Compute 6 class RDMs without random seed and with noise normalization</h2><pre class="codeinput">fprintf(<span class="string">'Compute 6 class RDMs without random seed and with noise normalization.\n'</span>);
+time_resolved_rdms = zeros(n_time, n_label6, n_label6, n_perm);
+
+<span class="comment">% Noise normalize the data</span>
+fprintf(<span class="string">'Performing noise normalization...\n'</span>);
+[noise_norm_x, ~] = noiseNormalization(X, labels6);
+
+<span class="comment">% Loop through time to compute an RDM at each time point</span>
+<span class="keyword">for</span> i=1:n_time
+    fprintf(<span class="string">'Time point %d\n'</span>, i);
+    data = squeeze(noise_norm_x(:,i,:));
+    rdms = computePearsonRDM(data, labels6, n_perm);
+    time_resolved_rdms(i,:,:,:) = rdms;
+<span class="keyword">end</span>
+
+<span class="comment">% Average time-resolved RDMs across time and permutations</span>
+avg_rdm = squeeze(mean(time_resolved_rdms, 4));
+avg_rdm = squeeze(mean(avg_rdm, 1));
+
+<span class="comment">% Plot the time-averaged RDM</span>
+figure;
+plotMatrix(avg_rdm, <span class="string">'matrixLabels'</span>, 0, <span class="string">'colorMap'</span>, <span class="string">'jet'</span>)
+</pre><pre class="codeoutput">Compute 6 class RDMs without random seed and with noise normalization.
+Performing noise normalization...
+Time point 1
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 2
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 3
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 4
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 5
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 6
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 7
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 8
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 9
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 10
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 11
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 12
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 13
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 14
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 15
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 16
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 17
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 18
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 19
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 20
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 21
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 22
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 23
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 24
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 25
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 26
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 27
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 28
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 29
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 30
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 31
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 32
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 33
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 34
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 35
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 36
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 37
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 38
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 39
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Time point 40
+Warning: Random number generator not specified. Setting rng=('shuffle',
+'twister'). 
+Rank type: none
+
+ans = 
+
+  Image with properties:
+
+           CData: [6&times;6 double]
+    CDataMapping: 'scaled'
+
+  Use GET to show all properties
+
+</pre><img vspace="5" hspace="5" src="example_rdm_crossValidatedPearson_04.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% example_rdm_crossValidatedPearson.m
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% Nathan - Aug 19, 2019
+%
+% Example code for compute an RDM using the cross-validated Pearson
+% correlation using computePearsonRDM.m.
+
+clear all; close all; clc
+
+rng('shuffle');
+n_perm = 3;
+
+% Load data
+load('S06.mat');
+n_time = size(X, 2);
+n_label72 = max(unique(labels72));
+n_label6 = max(unique(labels6));
+
+%% Compute 72 class RDMs without random seed and without noise normalization
+fprintf('Compute 72 class RDMs without random seed and without noise normalization.\n')
+time_resolved_rdms = zeros(n_time, n_label72, n_label72, n_perm);
+
+% Loop through time to compute an RDM at each time point
+for i=1:n_time
+    fprintf('Time point %d\n', i);
+    data = squeeze(X(:,i,:));
+    rdms = computePearsonRDM(data, labels72, n_perm);
+    time_resolved_rdms(i,:,:,:) = rdms;
+end
+
+% Average time-resolved RDMs across time and permutations
+avg_rdm = squeeze(mean(time_resolved_rdms, 4));
+avg_rdm = squeeze(mean(avg_rdm, 1));
+
+% Plot the time-averaged RDM
+figure;
+plotMatrix(avg_rdm, 'matrixLabels', 0, 'colorMap', 'jet')
+
+%% Compute 72 class RDMs without random seed and with noise normalization
+fprintf('Compute 72 class RDMs without random seed and with noise normalization.\n')
+time_resolved_rdms = zeros(n_time, n_label72, n_label72, n_perm);
+
+% Noise normalize the data
+fprintf('Performing noise normalization...\n');
+[noise_norm_x, ~] = noiseNormalization(X, labels72);
+
+% Loop through time to compute an RDM at each time point
+for i=1:n_time
+    fprintf('Time point %d\n', i);
+    data = squeeze(noise_norm_x(:,i,:));
+    rdms = computePearsonRDM(data, labels72, n_perm);
+    time_resolved_rdms(i,:,:,:) = rdms;
+end
+
+% Average time-resolved RDMs across time and permutations
+avg_rdm = squeeze(mean(time_resolved_rdms, 4));
+avg_rdm = squeeze(mean(avg_rdm, 1));
+
+% Plot the time-averaged RDM
+figure;
+plotMatrix(avg_rdm, 'matrixLabels', 0, 'colorMap', 'jet')
+
+%% Compute 6 class RDMs without random seed and without noise normalization
+fprintf('Compute 6 class RDMs without random seed and without noise normalization.\n');
+time_resolved_rdms = zeros(n_time, n_label6, n_label6, n_perm);
+
+% Loop through time to compute an RDM at each time point
+for i=1:n_time
+    fprintf('Time point %d\n', i);
+    data = squeeze(X(:,i,:));
+    rdms = computePearsonRDM(data, labels6, n_perm);
+    time_resolved_rdms(i,:,:,:) = rdms;
+end
+
+% Average time-resolved RDMs across time and permutations
+avg_rdm = squeeze(mean(time_resolved_rdms, 4));
+avg_rdm = squeeze(mean(avg_rdm, 1));
+
+% Plot the time-averaged RDM
+figure;
+plotMatrix(avg_rdm, 'matrixLabels', 0, 'colorMap', 'jet')
+
+%% Compute 6 class RDMs without random seed and with noise normalization
+fprintf('Compute 6 class RDMs without random seed and with noise normalization.\n');
+time_resolved_rdms = zeros(n_time, n_label6, n_label6, n_perm);
+
+% Noise normalize the data
+fprintf('Performing noise normalization...\n');
+[noise_norm_x, ~] = noiseNormalization(X, labels6);
+
+% Loop through time to compute an RDM at each time point
+for i=1:n_time
+    fprintf('Time point %d\n', i);
+    data = squeeze(noise_norm_x(:,i,:));
+    rdms = computePearsonRDM(data, labels6, n_perm);
+    time_resolved_rdms(i,:,:,:) = rdms;
+end
+
+% Average time-resolved RDMs across time and permutations
+avg_rdm = squeeze(mean(time_resolved_rdms, 4));
+avg_rdm = squeeze(mean(avg_rdm, 1));
+
+% Plot the time-averaged RDM
+figure;
+plotMatrix(avg_rdm, 'matrixLabels', 0, 'colorMap', 'jet')
+
+
+
+
+
+##### SOURCE END #####
+--></body></html>

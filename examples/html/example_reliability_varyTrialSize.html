@@ -1,0 +1,376 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>example_reliability_varyTrialSize</title><meta name="generator" content="MATLAB 9.6"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2020-05-10"><meta name="DC.source" content="example_reliability_varyTrialSize.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="comment">% example_reliability_varyTrialSize.m</span>
+<span class="comment">% ---------------------</span>
+<span class="comment">% Nathan - Sept 5, 2019</span>
+<span class="comment">%</span>
+<span class="comment">% Example code for compute reliability varying the number of trials using</span>
+<span class="comment">% computeSampleSizeReliability.m.</span>
+
+clear <span class="string">all</span>; close <span class="string">all</span>; clc
+
+rng(<span class="string">'shuffle'</span>);
+timepoint_idx = 17; <span class="comment">% 144 ms</span>
+n_perm = 10; <span class="comment">% Inner loop (random split-half)</span>
+n_trial_perm = 12; <span class="comment">% Outer loop (sampling trials)</span>
+trial_subset_size_array = 1:18;
+rnd_seed = 0;
+
+<span class="comment">% Load data</span>
+load(<span class="string">'S06.mat'</span>);
+
+<span class="comment">% Compute reliability with varying number of trials from [2,4,...,36],</span>
+<span class="comment">% n_trial_perm trial permutations, n_perm permutations, rnd_seed random</span>
+<span class="comment">% seed.</span>
+reliability_trials = computeSampleSizeReliability(X, <span class="keyword">...</span>
+    labels72, <span class="keyword">...</span>
+    timepoint_idx, <span class="keyword">...</span>
+    trial_subset_size_array, <span class="keyword">...</span>
+    n_perm, <span class="keyword">...</span>
+    n_trial_perm, <span class="keyword">...</span>
+    rnd_seed <span class="keyword">...</span>
+);
+
+<span class="comment">% Average across space</span>
+avg_reliability_space = mean(reliability_trials, 3);
+
+<span class="comment">% Plot reliability as function of varying trial subset size</span>
+close <span class="string">all</span>;
+plot(trial_subset_size_array .* 2, mean(avg_reliability_space, 1), <span class="string">'b'</span>, <span class="string">'linewidth'</span>, 2);
+hold <span class="string">on</span>; grid <span class="string">on</span>
+plot(trial_subset_size_array .* 2, mean(avg_reliability_space, 1)+std(avg_reliability_space, [], 1), <span class="string">'b'</span>);
+plot(trial_subset_size_array .* 2, mean(avg_reliability_space, 1)-std(avg_reliability_space, [], 1), <span class="string">'b'</span>);
+xlabel(<span class="string">'Number of Trials'</span>);
+ylabel(sprintf(<span class="string">'Reliability at %d ms'</span>, t(timepoint_idx)));
+</pre><pre class="codeoutput">Single-input rng specification: Setting generator to 'twister'.
+Setting rng=(0, 'twister').
+Permutation 1: 2 trials in subset
+Permutation 1: 4 trials in subset
+Permutation 1: 6 trials in subset
+Permutation 1: 8 trials in subset
+Permutation 1: 10 trials in subset
+Permutation 1: 12 trials in subset
+Permutation 1: 14 trials in subset
+Permutation 1: 16 trials in subset
+Permutation 1: 18 trials in subset
+Permutation 1: 20 trials in subset
+Permutation 1: 22 trials in subset
+Permutation 1: 24 trials in subset
+Permutation 1: 26 trials in subset
+Permutation 1: 28 trials in subset
+Permutation 1: 30 trials in subset
+Permutation 1: 32 trials in subset
+Permutation 1: 34 trials in subset
+Permutation 1: 36 trials in subset
+Permutation 2: 2 trials in subset
+Permutation 2: 4 trials in subset
+Permutation 2: 6 trials in subset
+Permutation 2: 8 trials in subset
+Permutation 2: 10 trials in subset
+Permutation 2: 12 trials in subset
+Permutation 2: 14 trials in subset
+Permutation 2: 16 trials in subset
+Permutation 2: 18 trials in subset
+Permutation 2: 20 trials in subset
+Permutation 2: 22 trials in subset
+Permutation 2: 24 trials in subset
+Permutation 2: 26 trials in subset
+Permutation 2: 28 trials in subset
+Permutation 2: 30 trials in subset
+Permutation 2: 32 trials in subset
+Permutation 2: 34 trials in subset
+Permutation 2: 36 trials in subset
+Permutation 3: 2 trials in subset
+Permutation 3: 4 trials in subset
+Permutation 3: 6 trials in subset
+Permutation 3: 8 trials in subset
+Permutation 3: 10 trials in subset
+Permutation 3: 12 trials in subset
+Permutation 3: 14 trials in subset
+Permutation 3: 16 trials in subset
+Permutation 3: 18 trials in subset
+Permutation 3: 20 trials in subset
+Permutation 3: 22 trials in subset
+Permutation 3: 24 trials in subset
+Permutation 3: 26 trials in subset
+Permutation 3: 28 trials in subset
+Permutation 3: 30 trials in subset
+Permutation 3: 32 trials in subset
+Permutation 3: 34 trials in subset
+Permutation 3: 36 trials in subset
+Permutation 4: 2 trials in subset
+Permutation 4: 4 trials in subset
+Permutation 4: 6 trials in subset
+Permutation 4: 8 trials in subset
+Permutation 4: 10 trials in subset
+Permutation 4: 12 trials in subset
+Permutation 4: 14 trials in subset
+Permutation 4: 16 trials in subset
+Permutation 4: 18 trials in subset
+Permutation 4: 20 trials in subset
+Permutation 4: 22 trials in subset
+Permutation 4: 24 trials in subset
+Permutation 4: 26 trials in subset
+Permutation 4: 28 trials in subset
+Permutation 4: 30 trials in subset
+Permutation 4: 32 trials in subset
+Permutation 4: 34 trials in subset
+Permutation 4: 36 trials in subset
+Permutation 5: 2 trials in subset
+Permutation 5: 4 trials in subset
+Permutation 5: 6 trials in subset
+Permutation 5: 8 trials in subset
+Permutation 5: 10 trials in subset
+Permutation 5: 12 trials in subset
+Permutation 5: 14 trials in subset
+Permutation 5: 16 trials in subset
+Permutation 5: 18 trials in subset
+Permutation 5: 20 trials in subset
+Permutation 5: 22 trials in subset
+Permutation 5: 24 trials in subset
+Permutation 5: 26 trials in subset
+Permutation 5: 28 trials in subset
+Permutation 5: 30 trials in subset
+Permutation 5: 32 trials in subset
+Permutation 5: 34 trials in subset
+Permutation 5: 36 trials in subset
+Permutation 6: 2 trials in subset
+Permutation 6: 4 trials in subset
+Permutation 6: 6 trials in subset
+Permutation 6: 8 trials in subset
+Permutation 6: 10 trials in subset
+Permutation 6: 12 trials in subset
+Permutation 6: 14 trials in subset
+Permutation 6: 16 trials in subset
+Permutation 6: 18 trials in subset
+Permutation 6: 20 trials in subset
+Permutation 6: 22 trials in subset
+Permutation 6: 24 trials in subset
+Permutation 6: 26 trials in subset
+Permutation 6: 28 trials in subset
+Permutation 6: 30 trials in subset
+Permutation 6: 32 trials in subset
+Permutation 6: 34 trials in subset
+Permutation 6: 36 trials in subset
+Permutation 7: 2 trials in subset
+Permutation 7: 4 trials in subset
+Permutation 7: 6 trials in subset
+Permutation 7: 8 trials in subset
+Permutation 7: 10 trials in subset
+Permutation 7: 12 trials in subset
+Permutation 7: 14 trials in subset
+Permutation 7: 16 trials in subset
+Permutation 7: 18 trials in subset
+Permutation 7: 20 trials in subset
+Permutation 7: 22 trials in subset
+Permutation 7: 24 trials in subset
+Permutation 7: 26 trials in subset
+Permutation 7: 28 trials in subset
+Permutation 7: 30 trials in subset
+Permutation 7: 32 trials in subset
+Permutation 7: 34 trials in subset
+Permutation 7: 36 trials in subset
+Permutation 8: 2 trials in subset
+Permutation 8: 4 trials in subset
+Permutation 8: 6 trials in subset
+Permutation 8: 8 trials in subset
+Permutation 8: 10 trials in subset
+Permutation 8: 12 trials in subset
+Permutation 8: 14 trials in subset
+Permutation 8: 16 trials in subset
+Permutation 8: 18 trials in subset
+Permutation 8: 20 trials in subset
+Permutation 8: 22 trials in subset
+Permutation 8: 24 trials in subset
+Permutation 8: 26 trials in subset
+Permutation 8: 28 trials in subset
+Permutation 8: 30 trials in subset
+Permutation 8: 32 trials in subset
+Permutation 8: 34 trials in subset
+Permutation 8: 36 trials in subset
+Permutation 9: 2 trials in subset
+Permutation 9: 4 trials in subset
+Permutation 9: 6 trials in subset
+Permutation 9: 8 trials in subset
+Permutation 9: 10 trials in subset
+Permutation 9: 12 trials in subset
+Permutation 9: 14 trials in subset
+Permutation 9: 16 trials in subset
+Permutation 9: 18 trials in subset
+Permutation 9: 20 trials in subset
+Permutation 9: 22 trials in subset
+Permutation 9: 24 trials in subset
+Permutation 9: 26 trials in subset
+Permutation 9: 28 trials in subset
+Permutation 9: 30 trials in subset
+Permutation 9: 32 trials in subset
+Permutation 9: 34 trials in subset
+Permutation 9: 36 trials in subset
+Permutation 10: 2 trials in subset
+Permutation 10: 4 trials in subset
+Permutation 10: 6 trials in subset
+Permutation 10: 8 trials in subset
+Permutation 10: 10 trials in subset
+Permutation 10: 12 trials in subset
+Permutation 10: 14 trials in subset
+Permutation 10: 16 trials in subset
+Permutation 10: 18 trials in subset
+Permutation 10: 20 trials in subset
+Permutation 10: 22 trials in subset
+Permutation 10: 24 trials in subset
+Permutation 10: 26 trials in subset
+Permutation 10: 28 trials in subset
+Permutation 10: 30 trials in subset
+Permutation 10: 32 trials in subset
+Permutation 10: 34 trials in subset
+Permutation 10: 36 trials in subset
+Permutation 11: 2 trials in subset
+Permutation 11: 4 trials in subset
+Permutation 11: 6 trials in subset
+Permutation 11: 8 trials in subset
+Permutation 11: 10 trials in subset
+Permutation 11: 12 trials in subset
+Permutation 11: 14 trials in subset
+Permutation 11: 16 trials in subset
+Permutation 11: 18 trials in subset
+Permutation 11: 20 trials in subset
+Permutation 11: 22 trials in subset
+Permutation 11: 24 trials in subset
+Permutation 11: 26 trials in subset
+Permutation 11: 28 trials in subset
+Permutation 11: 30 trials in subset
+Permutation 11: 32 trials in subset
+Permutation 11: 34 trials in subset
+Permutation 11: 36 trials in subset
+Permutation 12: 2 trials in subset
+Permutation 12: 4 trials in subset
+Permutation 12: 6 trials in subset
+Permutation 12: 8 trials in subset
+Permutation 12: 10 trials in subset
+Permutation 12: 12 trials in subset
+Permutation 12: 14 trials in subset
+Permutation 12: 16 trials in subset
+Permutation 12: 18 trials in subset
+Permutation 12: 20 trials in subset
+Permutation 12: 22 trials in subset
+Permutation 12: 24 trials in subset
+Permutation 12: 26 trials in subset
+Permutation 12: 28 trials in subset
+Permutation 12: 30 trials in subset
+Permutation 12: 32 trials in subset
+Permutation 12: 34 trials in subset
+Permutation 12: 36 trials in subset
+</pre><img vspace="5" hspace="5" src="example_reliability_varyTrialSize_01.png" alt=""> <p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2019a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+% example_reliability_varyTrialSize.m
+% REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH-
+% Nathan - Sept 5, 2019
+%
+% Example code for compute reliability varying the number of trials using
+% computeSampleSizeReliability.m.
+
+clear all; close all; clc
+
+rng('shuffle');
+timepoint_idx = 17; % 144 ms
+n_perm = 10; % Inner loop (random split-half)
+n_trial_perm = 12; % Outer loop (sampling trials)
+trial_subset_size_array = 1:18;
+rnd_seed = 0;
+
+% Load data
+load('S06.mat');
+
+% Compute reliability with varying number of trials from [2,4,...,36],
+% n_trial_perm trial permutations, n_perm permutations, rnd_seed random
+% seed.
+reliability_trials = computeSampleSizeReliability(X, ...
+    labels72, ...
+    timepoint_idx, ...
+    trial_subset_size_array, ...
+    n_perm, ...
+    n_trial_perm, ...
+    rnd_seed ...
+);
+
+% Average across space
+avg_reliability_space = mean(reliability_trials, 3);
+
+% Plot reliability as function of varying trial subset size
+close all;
+plot(trial_subset_size_array .* 2, mean(avg_reliability_space, 1), 'b', 'linewidth', 2);
+hold on; grid on
+plot(trial_subset_size_array .* 2, mean(avg_reliability_space, 1)+std(avg_reliability_space, [], 1), 'b');
+plot(trial_subset_size_array .* 2, mean(avg_reliability_space, 1)-std(avg_reliability_space, [], 1), 'b');
+xlabel('Number of Trials');
+ylabel(sprintf('Reliability at %d ms', t(timepoint_idx)));
+
+
+##### SOURCE END #####
+--></body></html>

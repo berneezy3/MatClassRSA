@@ -140,10 +140,8 @@
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = parseInputs(namestr, ip);
+    ip = initInputParser(namestr, ip);
     %Required inputs
-    addRequired(ip, 'X', @is2Dor3DMatrixOrCell)
-    addRequired(ip, 'Y', @isVectorOrCell)
     [r c] = size(X);
     
     %Optional name-value pairs
@@ -153,12 +151,9 @@
     end
 
 
-    % Parse
-    try 
-        parse(ip, X, Y, varargin{:});
-    catch ME
-        disp(getReport(ME,'extended'));
-    end
+    % Parse Inputs
+    parse(ip, X, Y, varargin{:});
+
             
     % Initilize info struct
     classifierInfo = struct(...
@@ -168,15 +163,8 @@
                         'classifier', ip.Results.classifier);
     
    % check if data is double, convert to double if it isn't
-   if ~isa(X, 'double')
-       warning('X data matrix not in double format.  Converting X values to double.')
-       disp('Converting X matrix to double')
-       X = double(X); 
-   end
-   if ~isa(Y, 'Converting Y matrix to double')
-       warning('Y label vector not in double format.  Converting Y labels to double.')
-       Y = double(Y);
-   end
+    [X, Y] = convert2double(X,Y);
+   
    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
@@ -201,7 +189,6 @@
     %rng(ip.Results.randomSeed);
     setUserSpecifiedRng(ip.Results.randomSeed);
 
-    % PCA 
     % Split Data into fold (w/ or w/o PCA)
     if (ip.Results.PCA>0 && ip.Results.PCA>0)
         disp(['Conducting Principal Component Analysis']);

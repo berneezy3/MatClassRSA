@@ -1,11 +1,8 @@
-function y = parseInputs(functionName, ip)
+function y = initInputParser(functionName, ip)
 
-    
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = false;
-
-    % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
     %Specify default values
     defaultPCA = .99;
@@ -59,8 +56,6 @@ function y = parseInputs(functionName, ip)
         addParamValue(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
-%         addParamValue(ip, 'gamma', 'default',  @(x) any([strcmp(x, 'default') isnumeric(x)]));
-%         addParamValue(ip, 'C', 1);
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
     else
@@ -85,29 +80,65 @@ function y = parseInputs(functionName, ip)
     
     switch functionName
        case 'trainMulti'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
-       case 'predict.m'
+       case 'predict'
        case 'trainPairs'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
+            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            addParameter(ip, 'classifier', defaultClassifier, ...
+                @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
+            addParameter(ip, 'C', 1);
        case 'crossValidateMulti'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'crossValidatePairs'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
+            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            addParameter(ip, 'classifier', defaultClassifier, ...
+                @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
+            addParameter(ip, 'C', 1);
        case 'crossValidateMulti_opt'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'svm'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
        case 'crossValidatePairs_opt'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
+            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            addParameter(ip, 'classifier', defaultClassifier, ...
+                @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'gammaSpace', defaultGammaSpace);
+            addParameter(ip, 'cSpace', defaultCSpace);
        case 'trainPairs_opt'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
+            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            addParameter(ip, 'classifier', defaultClassifier, ...
+                @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'gammaSpace', defaultGammaSpace);
+            addParameter(ip, 'cSpace', defaultCSpace);
        case 'trainMulti_opt'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
             defaultClassifier = 'SVM';
             addParameter(ip, 'classifier', defaultClassifier, ...

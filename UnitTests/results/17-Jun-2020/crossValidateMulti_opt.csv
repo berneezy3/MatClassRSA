@@ -1,0 +1,3 @@
+functionName,dataset,accuracy,shuffle,classifier,optimization,averageTrials,dataSplit
+crossValidateMulti_opt/predict,Steven_500,0.782051282051282,on,SVM,on,on,N/A
+crossValidate_opt/predict,S06,0.787790697674419,on,SVM,on,off,N/A

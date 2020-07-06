@@ -1,10 +1,10 @@
- function C = classifyCrossValidateMulti(obj, X, Y, varargin)
+ function C = crossValidatePairs(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
-% C = classifyCrossValidate(X, Y, varargin)
+% C = crossValidatePairs(X, Y, varargin)
 % -------------------------------------------------------------------------
-% Blair/Bernard - Feb. 22, 2017
+% Blair/Bernard - Jun. 21, 2020
 %
-% The main function for cross-validating data.  
+% Conduct pairwise cross validation
 %
 % INPUT ARGS (REQUIRED)
 %   X - training data
@@ -75,8 +75,6 @@
 %   'permutations' - Choose number of permutations to perform. Default value 
 %   is 0, where permutation testing is turned off.  
 %
-%
-%
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
 %   information, including confucion matrix, accuracy, prediction results
@@ -134,104 +132,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     % Initialize the input parser
+    st = dbstack;
+    namestr = st.name;
     ip = inputParser;
-    ip.CaseSensitive = true;
-
-    % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
-    
-    %Specify default values
-    defaultAverageTrials = -1;
-    defaultAverageTrialsHandleRemainder = 'discard';
-    defaultPCA = .99;
-    defaultPCAinFold = 1;
-    defaultNFolds = 10;
-    defaultClassifier = 'SVM';
-    defaultPValueMethod = '';
-    defaultPermutations = 1000;
-    defaultTimeUse = [];
-    defaultSpaceUse = [];
-    defaultFeatureUse = [];
-    defaultRandomSeed = 'shuffle';
-    defaultKernel = 'rbf';
-%   defaultDiscrimType = 'linear';
-    defaultNumTrees = 64;
-    defaultMinLeafSize = 1;
-    defaultPairwise = 0;
-    defaultCenter = true;
-    defaultScale = false;
-
-
-    %Specify expected values
-    expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
-    expectedPCAinFold = [0,1];
-    expectedClassifier = {'SVM', 'LDA', 'RF', 'SVM2', 'svm', 'lda', 'rf'};
-%     expectedPValueMethod = {'binomcdf', 'permuteTestLabels', 'permuteFullModel'};
-    expectedPValueMethod = {'permuteFullModel'};
-    expectedRandomSeed = {'default', 'shuffle'};
-    expectedKernels = {'linear', 'sigmoid', 'rbf', 'polynomial'};
-    expectedGamma = {'default'};
-    expectedPairwise = {0,1};
-    expectedCenter = {0,1};
-    expectedScale = {0,1};
+    ip = initInputParser(namestr, ip);
     
     %Required inputs
-    addRequired(ip, 'X')
-    addRequired(ip, 'Y')
     [r c] = size(X);
-
-    %Optional positional inputs
-    %addOptional(ip, 'distpower', defaultDistpower, @isnumeric);
-    if verLessThan('matlab', '8.2')
-        addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-        addParamValue(ip, 'PCA', defaultPCA);
-        addParamValue(ip, 'PCAinFold', defaultPCAinFold);
-        addParamValue(ip, 'center', defaultCenter, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParamValue(ip, 'scale', defaultScale, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParamValue(ip, 'nFolds', defaultNFolds);
-        addParamValue(ip, 'classifier', defaultClassifier, ...
-             @(x) any(validatestring(x, expectedClassifier)));
-        addParamValue(ip, 'timeUse', defaultTimeUse, ...
-            @(x) (assert(isvector(x))));
-        addParamValue(ip, 'spaceUse', defaultSpaceUse, ...
-            @(x) (assert(isvector(x))));
-        addParamValue(ip, 'featureUse', defaultFeatureUse, ...
-            @(x) (assert(isvector(x))));
-        addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
-        addParamValue(ip, 'gamma', 'default',  @(x) any([strcmp(x, 'default') isnumeric(x)]));
-        addParamValue(ip, 'C', 1);
-        addParamValue(ip, 'numTrees', 128);
-        addParamValue(ip, 'minLeafSize', 1);
-    else
-        addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-        addParameter(ip, 'PCA', defaultPCA);
-        addParameter(ip, 'PCAinFold', defaultPCAinFold);
-        addParameter(ip, 'center', defaultCenter,  @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParameter(ip, 'scale', defaultScale, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParameter(ip, 'nFolds', defaultNFolds);
-        addParameter(ip, 'classifier', defaultClassifier, ...
-             @(x) any(validatestring(x, expectedClassifier)));
-        addParameter(ip, 'timeUse', defaultTimeUse, ...
-            @(x) (assert(isvector(x))));
-        addParameter(ip, 'spaceUse', defaultSpaceUse, ...
-            @(x) (assert(isvector(x))));
-        addParameter(ip, 'featureUse', defaultFeatureUse, ...
-            @(x) (assert(isvector(x))));
-        addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
-        addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
-        addParameter(ip, 'C', 1);
-        addParameter(ip, 'numTrees', 128);
-        addParameter(ip, 'minLeafSize', 1);
-        addParameter(ip, 'pairwise', 0);
-    end
     
     %Optional name-value pairs
     %NOTE: Should use addParameter for R2013b and later.
     if (find(isnan(X(:))))
         error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
     end
-
 
     % Parse
     try 
@@ -319,9 +232,8 @@
         ip.Results.nFolds <= nTrials, ...
         'nFolds must be an integer between 1 and nTrials to perform CV' );
         
-        predictionsConcat = [];
-        labelsConcat = [];
-        modelsConcat = {1, ip.Results.nFolds};
+    predictionsConcat = [];
+    labelsConcat = [];
        
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses ,2);
@@ -329,63 +241,63 @@
     % initialize the diagonal cell matrix of structs containing pairwise
     % classification infomration
     pairwiseCell = initPairwiseCellMat(numClasses);
+    C = struct();
+    modelsConcat = cell(ip.Results.nFolds, numDecBounds);
 
-    
     CM = NaN;
+    RSA = MatClassRSA;
    
-    % PAIRWISE LDA/RF
-    if (ip.Results.pairwise == 1) && ...
-        (strcmp(upper(ip.Results.classifier), 'LDA') || ...
-        strcmp(upper(ip.Results.classifier), 'RF'))
+    % PAIRWISE LDA/RF/SVM(w/ PCA)
+    if (strcmp(upper(ip.Results.classifier), 'LDA') || ...
+        strcmp(upper(ip.Results.classifier), 'RF') || ...
+        strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA > 0)
     
         decision_values = NaN(length(Y), numDecBounds);
         AM = NaN(numClasses, numClasses);
     
+        % Iterate through all combintaions of labels
         for cat1 = 1:numClasses-1
             for cat2 = (cat1+1):numClasses
                 disp([num2str(cat1) ' vs ' num2str(cat2)]) 
                 currUse = ismember(Y, [cat1 cat2]);
       
+                % now tempx and tempY contains the data pertaining to a
+                % specific combintaion
                 tempX = X(currUse, :);
                 tempY = Y(currUse);
                 tempStruct = struct();
                 % Store the accuracy in the accMatrix
-                [~, tempC] = evalc([' classifyCrossValidate(tempX, tempY, ' ...
+                [~, tempC] = evalc([' RSA.classify.crossValidateMulti(tempX, tempY, ' ...
                     ' ''classifier'', ip.Results.classifier, ''randomSeed'',' ...
                     ' ''default'', ''PCAinFold'', ip.Results.PCAinFold, '...
-                    ' ''nFolds'', ip.Results.PCAinFold) ' ]);
+                    ' ''nFolds'', ip.Results.nFolds) ' ]);
                 tempStruct.CM = tempC.CM;
                 
                 tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
                 tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
-                tempStruct.dataPoints = find(currUse);
+%                 tempStruct.dataPoints = find(currUse);
                 tempStruct.actualY = tempY;
-                tempStruct.predY = tempC.predY;
+                tempStruct.predY = tempC.predY';
                 
                 
                 %tempStruct.decision
                 AM(cat1, cat2) = tempStruct.accuracy;
                 AM(cat2, cat1) = tempStruct.accuracy;
-                %pairwiseCell{cat1, cat2} = tempStruct;
-                %pairwiseCell{cat2, cat1} = tempStruct;
+                modelsConcat(:, classTuple2Nchoose2Ind([cat1, cat2], 6)) = ...
+                    tempC.modelsConcat';
+                pairwiseCell{cat1, cat2} = tempStruct;
+                pairwiseCell{cat2, cat1} = tempStruct;
                 
                 decInd = classTuple2Nchoose2Ind([cat1 cat2], numClasses);
-                if (tempC.predY)
-                    
-                end
-                
+
             end
         end
-        
 
         C.pairwiseInfo = pairwiseCell;
         C.AM = AM;
-        disp('classifyCrossValidate() Finished!')
-        return
     % END PAIRWISE LDA/RF
-    % START PAIRWISE SVM 
-    elseif  (ip.Results.pairwise) && ... 
-            strcmp( upper(ip.Results.classifier), 'SVM')
+    % START SVM skipping the pairwise split to decrease runtime
+    elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
         
         for i = 1:ip.Results.nFolds
 
@@ -396,7 +308,7 @@
             testX = cvDataObj.testXall{i};
             testY = cvDataObj.testYall{i};
 
-            [mdl, scale] = fitModel(trainX, trainY, ip);
+            [mdl, scale] = fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
 
             [predictions decision_values] = modelPredict(testX, mdl, scale);
 
@@ -404,29 +316,23 @@
             predictionsConcat = [predictionsConcat predictions];
             modelsConcat{i} = mdl; 
 
-            if (ip.Results.pairwise) 
-                if strcmp(upper(ip.Results.classifier), 'SVM')
-                    [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
-                        decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
-                end
+
+            if strcmp(upper(ip.Results.classifier), 'SVM')
+                [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
+                    decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
             end
+            
         end
         
         %convert pairwiseMat3D to diagonal matrix
         C.pairwiseInfo = pairwiseCell;
         C.AM = pairwiseAccuracies;
-        disp('classifyCrossValidate() Finished!')
-        return;
-       
-    else 
         
     end
-
-%     pVal = permTestPVal(C.accuracy, accDist);
+    % END SVM skipping the pairwise split to decrease runtime
 
     C.modelsConcat = modelsConcat;
-    C.predY = predictionsConcat;
-    C.classifierInfo = classifierInfo;
+    C.classificationInfo = classifierInfo;
     disp('classifyCrossValidate() Finished!')
     
  end

@@ -138,13 +138,11 @@
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = parseInputs(namestr, ip);
+    ip = initInputParser(namestr, ip);
 
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
     %Required inputs
-    addRequired(ip, 'X', @ismatrix)
-    addRequired(ip, 'Y', @isvector)
     [r c] = size(X);
     
     %Optional name-value pairs

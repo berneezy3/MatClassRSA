@@ -1,4 +1,6 @@
 % test classifyCrossValidateMulti_optimize
+
+%% run optimized SVM on Steven's data
 clear
 load 'losorelli_500sweep_epoched.mat'
 
@@ -20,7 +22,7 @@ toc
 accuracy(1) = C_noopt.accuracy;
 
 
-%% S06 
+%% run optimized SVM on Blair's S06 data 
 
 load 'S06.mat'
 RSA = MatClassRSA;

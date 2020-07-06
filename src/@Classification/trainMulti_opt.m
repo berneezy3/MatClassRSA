@@ -76,9 +76,9 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
 %   not specified, will default to true.
 %   'scale' - Specification for scaling columns of the data. If
 %   empty or not specified, will default to true.
-%   'gammaSpace' - values to search over for the SVM rbf kernel's gamma
-%   parameter.   Default s 
-%   'cSpace' - 
+%   'gammaSpace' - Set vector of gamma values to search over for the SVM rbf
+%   kernel
+%   'CSpace' - Set vector of C values to search over for the SVM rbf kernel
 %
 % OUTPUT ARGS 
 %   M - Classification output.  This outer struct contains two inner 
@@ -135,37 +135,10 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
     ip.CaseSensitive = false;
     st = dbstack;
     namestr = st.name;
-    ip = parseInputs(namestr, ip);
+    ip = initInputParser(namestr, ip);
 
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
-    %Specify default values
-    defaultShuffleData = 1;
-    defaultRandomSeed = 'shuffle';
-    defaultAverageTrials = -1;
-    defaultAverageTrialsHandleRemainder = 'discard';
-    defaultPCA = .99;
-    defaultClassifier = 'SVM';
-    defaultTimeUse = [];
-    defaultSpaceUse = [];
-    defaultFeatureUse = [];
-    defaultKernel = 'rbf';
-%   defaultDiscrimType = 'linear';
-    defaultNumTrees = 64;
-    defaultMinLeafSize = 1;
-    defaultPairwise = 0;
-
-    %Specify expected values
-    expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
-    expectedPCAinFold = [0,1];
-    expectedClassifier = {'SVM', 'LDA', 'RF'};
-    expectedKernel = {'linear', 'sigmoid', 'rbf', 'polynomial'};
-    expectedPairwise = [0,1];
-    
-    
-    %Required inputs
-    addRequired(ip, 'X', @(X) ndims(X)==3 || ismatrix(X)==1)
-    addRequired(ip, 'Y', @isvector)
     [r c] = size(X);
 
     %Optional name-value pairs
@@ -287,54 +260,8 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
         M.classifierInfo = classifierInfo;
         M.mdl = mdl;
         M.scale = scale;
-
-    % case: pairwise classification
-%     elseif (ip.Results.pairwise == 1) && ...
-%             (strcmp(ip.Results.classifier, 'LDA') || strcmp(ip.Results.classifier, 'RF'))
-%         
-%         numClasses = length(unique(Y));
-%         numDecBounds = nchoosek(numClasses, 2);
-%         M = cell(1, numDecBounds);
-% 
-%         mdl = fitModel(trainData, Y(:), ip);
-%         j = 0;
-%         for cat1 = 1:numClasses-1
-%             for cat2 = (cat1+1):numClasses
-%                 j = j+1;
-%                 disp([num2str(cat1) ' vs ' num2str(cat2)]) 
-%                 currUse = ismember(Y, [cat1 cat2]);
-%       
-%                 tempX = X(currUse, :);
-%                 tempY = Y(currUse);
-%                 tempStruct = struct();
-%                 % Store the accuracy in the accMatrix
-%                 [~, tempM] = evalc([' classifyTrain(tempX, tempY, ' ...
-%                     ' ''classifier'', ip.Results.classifier, ''randomSeed'',' ...
-%                     ' ''default'' ) ' ]);
-%                 tempStruct.CM = tempM;
-%                 tempM.classifierInfo.numClasses = numClasses;
-%                 
-%                 M{j} = tempM;
-%                 
-% %                 tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
-% %                 tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
-% %                 tempStruct.dataPoints = find(currUse);
-% %                 tempStruct.predY = tempM.predY;
-% %                 
-% %                 %tempStruct.decision
-% %                 pairwiseCell{cat1, cat2} = tempStruct;
-% %                 pairwiseCell{cat2, cat1} = tempStruct;
-%                 
-% %                 decInd = classTuple2Nchoose2Ind([cat1 cat2], numClasses);
-% %                 if (tempC.predY)
-% %                     
-% %                 end
-%                 
-%             end
-%         end
-%         
-%     end
-    
+        M.pairwise = 0;
+        M.classifier = ip.Results.classifier;
 
 
     
