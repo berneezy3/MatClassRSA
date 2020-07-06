@@ -18,7 +18,9 @@ function [RDM, params] = convertConfusionMatrixToRDM(obj, M, varargin)
 % more information and examples.
 %
 % REQUIRED INPUTS
-% M -- A square matrix representing a multicategory confusion matrix. The
+% M -- A square matrix, typically thought to be a confusion matrix but 
+%   could also be a matrix of correlations or other distances if using 
+%   custom name-value specifications. If inputting a confusion matrix, the
 %   matrix should be oriented so that rows represent actual labels and
 %   columns represent predicted labels (e.g., element (3, 1) denotes the
 %   number of observations actually from class 3 that were predicted to be
@@ -32,65 +34,46 @@ function [RDM, params] = convertConfusionMatrixToRDM(obj, M, varargin)
 %   'diagonal' (default) - divide each matrix element
 %       by the diagonal value in the respective row. For confusion 
 %       matrices, this produces self-similarity of one (Shepard, 1958a). 
-%       If any element along the diagonal is zero, the function will print 
-%       a warning and advise the user to use 'sum' instead.
+%       If any element along the diagonal is zero, this option will 
+%       introduce NaNs in the output; thus the function will print a 
+%       warning and advise the user to use 'sum' instead.
 %   'sum' - divide each matrix element by the sum of the respective row.
 %       For confusion matrices with actual labels as rows and predicted 
 %       labels as columns, this procedure computes the estimated
 %       conditional probabilities P(predicted|actual) (Shepard, 1958b). If
-%       the sum of any row is zero, the function will print an error and
-%       exit.
+%       the sum of any row is zero, the normalization subfunction will 
+%       print a warning and the outputs of all elements in those rows will
+%       be zeros.
 %   'none' - perform no normalization of the matrix. 
-%   --- notes ---
-%   - As noted above, users should use caution when calling 'diagonal' on 
-%       confusion matrices whose diagonal entries are undefined or contain 
-%       zeros. If 'diagonal' is specified and the input matrix contains a 
-%       zero on the diagonal, this will result in a NaN after division. 
-%   - If 'sum' is specified and the input matrix contains any zero-sum rows, 
-%       the normalization subfunction will print a warning and the outputs 
-%       of all elements in those rows will be zeros.
 %
 % 'symmetrize' -- 'arithmetic' (default), 'geometric', 'harmonic', 'none'
 %   Symmetrizing the matrix ensures that the the distance between i,j
 %   equals the distance between j,i by computing the arithmetic, geometric,
-%   or harmonic mean of the matrix and its transpose. Any zeros on the 
-%   diagonal will be converted to NaNs; aside from this, if
-%   an already symmetric matrix is input to the function, the output will
-%   be the same as the input.
-%   - For 'similarity' AND 'distance' input matrix M, the default is
-%     'arithmetic', but any of the four options may be specified.
+%   or harmonic mean of the matrix and its transpose. If computing the 
+%   harmonic mean, any zeros on the diagonal will be converted to NaNs, and 
+%   the symmetrize subfunction will print a warning.
 %
-% 'distance' -- 'linear', 'power', 'logarithmic', 'none'
+% 'distance' -- 'linear' (default), 'power', 'logarithmic', 'none'
 %   The distance option converts similarities to distances through linear
 %   (D = 1 - S), power (D = 1 - S.^distpower), or logarithmic
 %   D = log2(distPower*M + 1) ./ log2(distPower + 1) operations.
 %   Similarities are assumed to already be in the range of -1 to 1 (or 0
 %   to 1 for non-negative distances only).
-%   - For 'similarity' input matrix M, the default is 'linear', but any
-%     of the four options may be specified.
-%   - For 'distance' input matrix M, the default is 'none' since the data
-%     are assumed to be already in distance space. If any other option is
-%     specified, the functino will override it with 'none' and print a
-%     warning.
 %
+TODO IS THIS A NAME-VALUE PAIR OR A VALUE?
 % 'distpower' -- Integer > 0 (if using 'power' or 'log' distance)
 %   Distpower is used in the 'power' and 'logarithmic' options of the
-%   distance computations.
-%   - For 'similarity' input matrix M, the default value is 1. This
-%     parameter applies only to 'power' and 'logarithmic' distance
-%     specifications; in these cases, if the parameter is not a positive
-%     integer, the function will override it with 1 and issue a warning.
-%   - For 'distance' input matrix M, this input is ignored since no
-%     distance computations can be performed.
+%   distance computations. The default value is 1. This parameter applies 
+%   only to 'power' and 'logarithmic' distance specifications; in these 
+%   cases, if the parameter is not a positive integer, the function will 
+%   override it with 1 and issue a warning.
 %
-% 'rankdistances' -- 'none', 'rank', 'percentrank'
+% 'rankdistances' -- 'none' (default), 'rank', 'percentrank'
 %   The distances of an RDM are sometimes transformed to ranks or
-%   percentile ranks for visualizing the data.
-%   - For 'similarity' AND 'distance' input matrices M, the default is
-%     'none'. If 'rank' or 'percentrank' are specified but the input matrix
-%     is not symmetric, the subfunction will issue a warning and operate
-%     only on the lower triangle of the matrix, returning a symmetric
-%     matrix.
+%   percentile ranks for visualizing the data. The default is 'none'. If 
+%   'rank' or 'percentrank' are specified but the input matrix is not 
+%   symmetric, the subfunction will issue a warning and operate only on 
+%   the lower triangle of the matrix, returning a symmetric matrix.
 %
 % OUTPUTS
 % RDM -- The Representational Dissimilarity (distance) Matrix. RDM is a
