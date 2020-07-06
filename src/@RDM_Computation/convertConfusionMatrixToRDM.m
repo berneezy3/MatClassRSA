@@ -1,7 +1,7 @@
-function [RDM, params] = computeClassificationRDM(obj, M, matrixType, varargin)
+function [RDM, params] = convertConfusionMatrixToRDM(obj, M, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
-% [RDM, params] = RSA.computeRDM.computeClassificationRDM(M, matrixType, varargin)
+% [RDM, params] = RSA.computeRDM.computeClassificationRDM(M, varargin)
 % ------------------------------------------------------------------
 % Blair - January 31, 2017, revised September 2019
 %
@@ -18,15 +18,14 @@ function [RDM, params] = computeClassificationRDM(obj, M, matrixType, varargin)
 % more information and examples.
 %
 % REQUIRED INPUTS
-% M -- A square matrix, assumed to be a multicategory confusion matrix or 
-%   matrix of pairwise accuraciues.
-%
-% matrixType -- String specifying the type of input matrix.
-%   - Enter 'CM' if inputting a multicategory confusion matrix.
-%   - Enter 'pairs' if inputting a matrix of pairwise accuracies.
+% M -- A square matrix representing a multicategory confusion matrix. The
+%   matrix should be oriented so that rows represent actual labels and
+%   columns represent predicted labels (e.g., element (3, 1) denotes the
+%   number of observations actually from class 3 that were predicted to be
+%   from class 1.
 %
 % OPTIONAL NAME-VALUE PAIRS
-% 'normalize' -- 'diagonal', 'sum', 'subtractPointFive', 'none'
+% 'normalize' -- 'diagonal', 'sum', 'none'
 %   Matrix normalization refers to dividing or subtracting each element of 
 %   the matrix by some value.
 %   --- options ---
@@ -41,18 +40,10 @@ function [RDM, params] = computeClassificationRDM(obj, M, matrixType, varargin)
 %       conditional probabilities P(predicted|actual) (Shepard, 1958b). If
 %       the sum of any row is zero, the function will print an error and
 %       exit.
-%   'subtractPointFive' (default for matrixType 'pairs') - subtract 0.5
-%       from each matrix element. For pairwise accuracies, this provides a
-%       unitless measure of distance with expected level (at chance-level
-%       classification) of zero. 
 %   'none' - perform no normalization of the matrix. 
 %   --- notes ---
-%   - For matrixType 'CM', the default normalization is 'diagonal', but
-%       'sum', and 'none' can also be specified. If 'subtractPointFive' is 
-%       specified, the function will print a warning and override it with 
-%       'diagonal' (the default normalization for confusion matrices). 
-%   - Users should use caution if calling 'diagonal' on confusion matrices 
-%       whose diagonals are undefined or contain zeros. If 'diagonal' is 
+%   - Users should use caution when calling 'diagonal' on confusion matrices 
+%       whose diagonal entries are undefined or contain zeros. If 'diagonal' is 
 %       specified and the input matrix contains a zero on the diagonal 
 %       (which would produce NaNs after division), the normalization 
 %       subfunction will print an error, and the user will be advised to 
