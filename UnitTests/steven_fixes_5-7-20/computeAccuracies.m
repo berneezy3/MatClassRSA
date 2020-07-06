@@ -39,7 +39,7 @@ SL.RF_avg_onePCA = zeros(1,5);
 SL.RF_avg_foldPCA = zeros(1,5);
 
 
-%% test CV once to get a good idea of runtime for single iteration
+%% 
 
 for i = 1:5
 

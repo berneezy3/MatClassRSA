@@ -9,11 +9,12 @@ clear all; close all; clc
 rng('shuffle');
 
 % S06.mat should be in UnitTests directory
-load('losorelli_500sweep_epoched.mat');
+load('s06.mat');
 [dim1, dim2, dim3] = size(X);
 X_2D = reshape(X, [dim1*dim2, dim3]);
 X_2D = X_2D';
 RSA = MatClassRSA;
+Y = labels6;
 
 %% Test default input parameters
 % default classifier should be LDA
@@ -56,7 +57,7 @@ M = RSA.classify.crossValidateMulti(X, Y);
 
 M = RSA.classify.crossValidateMulti( X , Y, ...
     'classifier', 'LDA', ...
-    'PCA', 0.9, ...
+    'PCA', 0.99, ...
     'nFolds', 3, ...
     'randomSeed', 1 ...
 );
