@@ -3,7 +3,7 @@ classdef MatClassRSA
        Preprocessing;
        Classification;
        RDM_Computation;
-       Reliabilityy;
+       Reliability;
        Visualization;
    end
    methods
