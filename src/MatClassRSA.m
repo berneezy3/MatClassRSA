@@ -1,18 +1,18 @@
 classdef MatClassRSA
    properties
-       preprocess;
-       classify;
-       computeRDM;
-       computeReliability;
-       visualize;
+       Preprocessing;
+       Classification;
+       RDM_Computation;
+       Reliabilityy;
+       Visualization;
    end
    methods
        function this = MatClassRSA()
-           this.preprocess = Preprocessing;
-           this.classify = Classification;
-           this.computeRDM = RDM_Computation;
-           this.computeReliability = Reliability;
-           this.visualize = Visualization;
+           this.Preprocessing = Preprocessing;
+           this.Classification = Classification;
+           this.RDM_Computation = RDM_Computation;
+           this.Reliability = Reliability;
+           this.Visualization = Visualization;
        end
    end
 end
