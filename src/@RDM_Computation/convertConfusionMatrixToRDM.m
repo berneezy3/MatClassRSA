@@ -5,83 +5,101 @@ function [RDM, params] = convertConfusionMatrixToRDM(obj, M, varargin)
 % ------------------------------------------------------------------
 % Blair - January 31, 2017, revised September 2019
 %
-% [RDM, params] = transformAndScaleMatrix(M, matrixType, varargin)
-% transforms and scales generalized proximity matrices (e.g., multicategory
-% confusion matrix, matrix of pairwise classifier accuracies, RDMs).
-%
-% NOTE: The default specifications of this function are based upon the
-% matrices that are output by MatClassRSA classificationfunctions:
-% Multicategory confusion matrices as similarity matrices, and matrices of
-% pairwise accuracies as distance matrices. However, this function can be
-% used on other types of proximity matrices as well (e.g., matrices of
-% similarity ratings, or un-ranked RDMs). See the MatClassRSA manual for
-% more information and examples.
+% This function transforms and scales a generalized square proximity 
+%   matrix. The default specifications assume a square multicategory 
+%   confusion matrix as input, but the function can be used on other types 
+%   of square proximity matrices as well (e.g., matrices of pairwise 
+%   similarity ratings, or un-ranked RDMs). See the MatClassRSA manual for 
+%   more information and examples.
 %
 % REQUIRED INPUTS
-% M -- A square matrix, typically thought to be a confusion matrix but 
-%   could also be a matrix of correlations or other distances if using 
-%   custom name-value specifications. If inputting a confusion matrix, the
-%   matrix should be oriented so that rows represent actual labels and
-%   columns represent predicted labels (e.g., element (3, 1) denotes the
-%   number of observations actually from class 3 that were predicted to be
-%   from class 1.
+% M -- A square matrix, typically thought to be a multicategory confusion 
+%   matrix but could also be a matrix of e.g., pairwise correlations or 
+%   distances if using custom name-value input specifications. If inputting 
+%   a confusion matrix, the matrix should be arranged such that rows 
+%   represent actual labels and columns represent predicted labels (e.g., 
+%   element (3, 1) denotes the number of observations actually from class 3 
+%   that were predicted to be from class 1) -- this is the orientation 
+%   output by the MatClassRSA classification functions.
 %
 % OPTIONAL NAME-VALUE PAIRS
-% 'normalize' -- 'diagonal' (default), 'sum', 'none'
+% 'normalize' -- 'sum' (default), 'diagonal', 'none'
 %   Matrix normalization refers to dividing each element of the matrix by 
 %   some value.
 %   --- options ---
-%   'diagonal' (default) - divide each matrix element
-%       by the diagonal value in the respective row. For confusion 
-%       matrices, this produces self-similarity of one (Shepard, 1958a). 
-%       If any element along the diagonal is zero, this option will 
-%       introduce NaNs in the output; thus the function will print a 
-%       warning and advise the user to use 'sum' instead.
-%   'sum' - divide each matrix element by the sum of the respective row.
-%       For confusion matrices with actual labels as rows and predicted 
-%       labels as columns, this procedure computes the estimated
-%       conditional probabilities P(predicted|actual) (Shepard, 1958b). If
-%       the sum of any row is zero, the normalization subfunction will 
-%       print a warning and the outputs of all elements in those rows will
-%       be zeros.
-%   'none' - perform no normalization of the matrix. 
+%   'sum' (default) - divide each matrix element by the sum of the 
+%       respective row, 
+%       so that each row sums to 1. Assuming confusion matrices with actual 
+%       labels as rows and predicted labels as columns, this procedure 
+%       computes the estimated conditional probabilities:  
+%       P(predicted|actual) (Shepard, 1958b). NOTE: If the sum of any row 
+%       is zero, the normalization subfunction will print a warning and the 
+%       outputs of all elements in those rows will be zeros.
+%   'diagonal' - divide each matrix element by the diagonal value 
+%       in the respective row. For confusion matrices, this produces 
+%       self-similarity of one (Shepard, 1958a). NOTE: If any element along 
+%       the diagonal is zero, this option will introduce NaNs in the 
+%       output; in this case the function will print a warning and advise 
+%       the user to use 'sum' normalization instead.
+%   'none' - do not perform any normalization of the matrix. 
 %
 % 'symmetrize' -- 'arithmetic' (default), 'geometric', 'harmonic', 'none'
 %   Symmetrizing the matrix ensures that the the distance between i,j
-%   equals the distance between j,i by computing the arithmetic, geometric,
-%   or harmonic mean of the matrix and its transpose. If computing the 
-%   harmonic mean, any zeros on the diagonal will be converted to NaNs, and 
-%   the symmetrize subfunction will print a warning.
+%   equals the distance between j,i. There are options to compute 
+%   the arithmetic, geometric, or harmonic mean of the input matrix and its 
+%   transpose. 
+%   --- options ---
+%   'arithmetic' (default) - for input matrix M, compute (M + M.') / 2.
+%   'geometric' - for input matrix M, compute sqrt(M .* M.').
+%   'harmonic' - for input matrix M, compute 2 * M .* M.' ./ (M + M.'). 
+%       NOTE: In this case, any zeros on the diagonal will be converted to 
+%       NaNs, and the symmetrize subfunction will print a warning.
+%   'none' - do not symmetrize the matrix (e.g., if the input is already
+%       symmetric).
 %
 % 'distance' -- 'linear' (default), 'power', 'logarithmic', 'none'
-%   The distance option converts similarities to distances through linear
-%   (D = 1 - S), power (D = 1 - S.^distpower), or logarithmic
-%   D = log2(distPower*M + 1) ./ log2(distPower + 1) operations.
-%   Similarities are assumed to already be in the range of -1 to 1 (or 0
-%   to 1 for non-negative distances only).
-%
-TODO IS THIS A NAME-VALUE PAIR OR A VALUE?
-% 'distpower' -- Integer > 0 (if using 'power' or 'log' distance)
+%   The distance option converts similarities to distances. Similarities 
+%   are assumed to already be in the range of -1 to 1 (or 0 to 1 for non-
+%   negative distances only).
+%   --- options ---
+%   'linear' (default) - computes distance D = 1 - S.
+%   'power' - computes distance D = 1 - S.^distpower (see below for 
+%       specification of distpower).
+%   'logarithmic' - computes distance 
+%       D = log2(distPower*M + 1) ./ log2(distPower + 1) (see below for
+%       specification of distpower).
+%   
+% 'distpower' -- Integer > 0 (default 1)
 %   Distpower is used in the 'power' and 'logarithmic' options of the
-%   distance computations. The default value is 1. This parameter applies 
-%   only to 'power' and 'logarithmic' distance specifications; in these 
-%   cases, if the parameter is not a positive integer, the function will 
+%   distance computations (see above). The default value is 1. If the 
+%   parameter is not input as a positive integer, the function will 
 %   override it with 1 and issue a warning.
 %
 % 'rankdistances' -- 'none' (default), 'rank', 'percentrank'
 %   The distances of an RDM are sometimes transformed to ranks or
-%   percentile ranks for visualizing the data. The default is 'none'. If 
-%   'rank' or 'percentrank' are specified but the input matrix is not 
-%   symmetric, the subfunction will issue a warning and operate only on 
-%   the lower triangle of the matrix, returning a symmetric matrix.
+%   percentile ranks for visualizing the data. MatClassRSA rank operations
+%   assume a symmetric input matrix, and operate on the lower triangle of
+%   the input (not including the diagonal).
+%   --- options ---
+%   'none' (default) - do not rank the matrix elements. 
+%   'rank' - return the ranked values, adjusted for ties. If the input 
+%       matrix is not symmetric, the subfunction will issue a warning and 
+%       operate only on the lower triangle of the matrix, returning a 
+%       symmetric matrix.
+%   'percentrank' - return the ranked distances, adjusted for ties and 
+%       divided by the number of unique pairs represented in the matrix 
+%       (i.e., the number of elements in the lower triangle of the matrix,
+%       excluding the diagonal). If the input matrix is not symmetric, the 
+%       subfunction will issue a warning and operate only on the lower 
+%       triangle of the matrix, returning a symmetric matrix.
 %
 % OUTPUTS
 % RDM -- The Representational Dissimilarity (distance) Matrix. RDM is a
 %   square matrix of the same size as the input matrix M.
 %
-% params -- RDM computation parameters. It is a struct whose fields specify
-%   normalization, symmetrization, distance measure, distance power, and
-%   ranking of distances.
+% params -- RDM computation parameters. It is a struct whose fields contain
+%   the normalization, symmetrization, distance measure, distance power, 
+%   and ranking specifications.
 
 % Notes
 % - Computing ranks (with ties): tiedrank
@@ -137,10 +155,9 @@ ip.CaseSensitive = false;
 if nargin < 1
     error('Function requires at least one input: Square confusion matrix.');
 end
-matrixType = lower(matrixType); % Convert to lowercase
 
 % Specify input parser defaults
-defaultNormalize = 'diagonal';
+defaultNormalize = 'sum';
 defaultSymmetrize = 'arithmetic';
 defaultDistance = 'linear';
 defaultDistpower = 1;
