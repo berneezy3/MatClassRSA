@@ -57,16 +57,16 @@ symmType = lower(symmType);
 switch symmType
     case{'arithmetic', 'a', 'mean'}
         disp('Symmetrize: arithmetic')
-        xOut = (xIn + xIn') / 2;
+        xOut = (xIn + xIn.') / 2;
     case{'geometric', 'geom', 'geo', 'g'}
         disp('Symmetrize: geometric')
-        xOut = sqrt(xIn .* xIn');
+        xOut = sqrt(xIn .* xIn.');
     case{'harmonic', 'harm', 'h'}
         disp('Symmetrize: harmonic')
         if ismember(0, diag(xIn))
             warning('Zero values on diagonal of input matrix are now NaN.')
         end
-        xOut = 2 * xIn .* xIn' ./ (xIn + xIn');
+        xOut = 2 * xIn .* xIn.' ./ (xIn + xIn.');
     case{'none', 'n'}
         disp('Symmetrize: none')
         xOut = xIn;
