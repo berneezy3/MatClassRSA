@@ -275,7 +275,6 @@
                 
                 tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
                 tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
-%                 tempStruct.dataPoints = find(currUse);
                 tempStruct.actualY = tempY;
                 tempStruct.predY = tempC.predY';
                 

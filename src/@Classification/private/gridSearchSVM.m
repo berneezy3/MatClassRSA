@@ -59,7 +59,7 @@ function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs, kernel)
     RSA = MatClassRSA;
     for i = 1:length(Cs)
         for j = 1:length(gammas)
-            tempC = RSA.classify.crossValidateMulti(X, Y, 'PCA', -1, ...
+            tempC = RSA.Classification.crossValidateMulti(X, Y, 'PCA', -1, ...
                 'classifier', 'SVM','C', Cs(i), 'gamma', gammas(j), 'kernel', kernel);
             accGrid(i,j) = tempC.accuracy;
             cGrid{i,j} = tempC;

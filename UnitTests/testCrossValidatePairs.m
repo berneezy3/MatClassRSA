@@ -15,21 +15,21 @@ PCA = {'0'; '.99'};
 %% LDA
 
 RSA = MatClassRSA;
-[X_shuf,Y_shuf] = RSA.preprocess.shuffleData(X, Y);
+[X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
 tic
-C = RSA.classify.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0);
+C_pairs = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0);
 toc
 
 %% SVM (PCA)
 
 tic
-C = RSA.classify.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
+C = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
 toc
 
 %% SVM (no PCA)
 
 tic
-C = RSA.classify.crossValidatePairs(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'SVM', 'PCAinFold', 0);
+C = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'SVM', 'PCAinFold', 0);
 toc
 
 %% RF

@@ -15,7 +15,7 @@ PCA = {'0'; '.99'};
 %%
 
 RSA = MatClassRSA;
-[X_shuf,Y_shuf] = RSA.preprocess.shuffleData(X, Y);
+[X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
 [r c] = size(X_shuf);
 trainData = X_shuf(1:floor(r*9/10), :);
 trainLabels = Y_shuf(1:floor(r*9/10));
@@ -25,9 +25,9 @@ testLabels = Y_shuf(floor(r*9/10)+1:end);
 
 %%
 
-M = RSA.classify.trainPairs_opt( trainData , trainLabels, ...
+M = RSA.Classification.trainPairs_opt( trainData , trainLabels, ...
     'classifier', 'SVM', 'PCA', 0, 'randomSeed', 1);
-C = RSA.classify.predict( M, testData, testLabels);
+C = RSA.Classification.predict( M, testData, testLabels);
 
 %%
 

@@ -24,6 +24,7 @@ function y = initInputParser(functionName, ip)
     defaultScale = false;
     defaultCSpace = logspace((-5), 5, 5);
     defaultGammaSpace = logspace((-5), 5, 5);
+    defaultTrainDevTestSplit = [.8 .1 .1];
 
 
     %Specify expected values
@@ -120,6 +121,7 @@ function y = initInputParser(functionName, ip)
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
+            addParameter(ip, 'trainDevTestSplit', defaultTrainDevTestSplit);
        case 'crossValidatePairs_opt'
             addRequired(ip, 'X', @ismatrix);
             addRequired(ip, 'Y', @isvector);

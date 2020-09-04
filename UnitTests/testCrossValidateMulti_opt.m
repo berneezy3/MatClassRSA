@@ -15,9 +15,9 @@ dataSplit = {'N/A'; 'N/A'};
 PCA = {'0'; '.99'};
 
 RSA = MatClassRSA;
-[X_shuf,Y_shuf] = RSA.preprocess.shuffleData(X, Y);
+[X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
 tic
-C_noopt = RSA.classify.crossValidateMulti_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
+C_noopt = RSA.Classification.crossValidateMulti_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
 toc
 accuracy(1) = C_noopt.accuracy;
 

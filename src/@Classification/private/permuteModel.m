@@ -11,8 +11,9 @@ function accArr = permuteModel(cvDataObj, nFolds, nPerms, classifier, classifyOp
     incorrectPreds = 0;
     
     %loop same # of times as cross validation
-    parpool;
-    parfor i = 1:nPerms
+%     parpool;
+%     parfor i = 1:nPerms
+    for i = 1:nPerms
         correctPreds = 0;
         incorrectPreds = 0;
         for j = 1:nFolds

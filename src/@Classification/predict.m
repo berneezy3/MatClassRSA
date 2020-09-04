@@ -161,7 +161,8 @@ function [P, varargout] = predict(obj,M, X, varargin)
                         'randomSeed', ip.Results.randomSeed);
 
         P.predictionInfo = predictionInfo;
-
+        P.classifiationInfo = M.classifierInfo;
+        P.model = M.mdl;
         disp('Prediction Finished')
         disp('classifyPredict() Finished!')
         
@@ -170,9 +171,7 @@ function [P, varargout] = predict(obj,M, X, varargin)
       
         numClasses = tempInfo.numClasses;
         numDecBounds = length(M.mdl);
-        P.classBoundary = cell(1, numDecBounds);
         predY = cell(1, numDecBounds);
-        
         P.AM = NaN(numClasses, numClasses);
         Y = ip.Results.actualLabels;    
 
@@ -181,12 +180,12 @@ function [P, varargout] = predict(obj,M, X, varargin)
 %         P.accuracy = cell(1, numDecBounds);
         P.CM = cell(numClasses, numClasses);
         P.CM(:,:) = {NaN};
-        
+        P.classificationInfo = struct();
+        P.pairwiseInfo = struct();
+        pairwiseCell = initPairwiseCellMat(numClasses);
         decMatchups = nchoosek(1:numClasses, 2);
 
         for i = 1:numDecBounds
-%         for cat1 = 1:numClasses-1
-%             for cat2 = (cat1+1):numClasses
             % If PCA was turned on for training, we will select principal
             % compoenents for prediciton as well
             class1 = firstClass(i);
@@ -206,21 +205,41 @@ function [P, varargout] = predict(obj,M, X, varargin)
             end
             
             predY{i} = modelPredict(testData, M.mdl{i}, M.scale{i});
-            P.classBoundary{i} = [num2str(firstClass(i)) ' vs. ' num2str(secondClass(i))];
+%             P.classBoundary{i} = [num2str(firstClass(i)) ' vs. ' num2str(secondClass(i))];
 %             P.predictionInfo{i}.classBoundary = decMatchups(i, :);
-
+            P.classificationInfo.classBoundary{i} = [num2str(firstClass(i)) ' vs. ' num2str(secondClass(i))];
+            
+            tempStruct = struct();
            % Get Accuracy and confusion matrix
             if ( ~isnan(ip.Results.actualLabels) )
 %                 P.accuracy{i} = computeAccuracy(predY{i}, tempY); 
-                P.CM{firstClass(i), secondClass(i)} = confusionmat(tempY, predY{i});
-                P.CM{secondClass(i), firstClass(i)} = confusionmat(tempY, predY{i});
+                tempStruct.CM{firstClass(i), secondClass(i)} = confusionmat(tempY, predY{i});
+                tempStruct.CM{secondClass(i), firstClass(i)} = confusionmat(tempY, predY{i});
 
-                P.AM(firstClass(i), secondClass(i)) = sum(diag(P.CM{i}))/sum(sum(P.CM{i}));
-                P.AM(secondClass(i), firstClass(i)) = sum(diag(P.CM{i}))/sum(sum(P.CM{i})); 
+                tempStruct.AM(firstClass(i), secondClass(i)) = sum(diag(P.CM{i}))/sum(sum(P.CM{i}));
+                tempStruct.AM(secondClass(i), firstClass(i)) = sum(diag(P.CM{i}))/sum(sum(P.CM{i})); 
             else
 %                 P.accuracy{i} = NaN; 
                 P.CM{i} = NaN;
             end
+           
+                
+            tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
+%             tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
+            tempStruct.actualY = tempY;
+%             tempStruct.predY = tempC.predY';
+                
+                
+            %tempStruct.decision
+%             AM(class1, class2) = tempStruct.accuracy;
+%             AM(class2, class1) = tempStruct.accuracy;
+%             modelsConcat(:, classTuple2Nchoose2Ind([class1, class2], 6)) = ...
+%                 tempC.modelsConcat';
+            pairwiseCell{class1, class2} = tempStruct;
+            pairwiseCell{class2, class1} = tempStruct;
+
+
+
          
         end
 

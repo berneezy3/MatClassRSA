@@ -160,7 +160,7 @@
     end
             
     % Initilize info struct
-    classifierInfo = struct(...
+    classificationInfo = struct(...
                         'PCA', ip.Results.PCA, ...
                         'PCAinFold', ip.Results.PCAinFold, ...
                         'nFolds', ip.Results.nFolds, ...
@@ -268,11 +268,11 @@
             ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
 
         %[mdl, scale] = fitModel(trainX, trainY, ip);
-        M = RSA.classify.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+        M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
             'gamma', gamma_opt, 'C', C_opt);
 
         %[predictions decision_values] = modelPredict(testX, mdl, scale);
-        P = RSA.classify.predict(M, testX, testY);
+        P = RSA.Classification.predict(M, testX, testY);
 
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat P.predY];
@@ -286,7 +286,7 @@
     C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
-    C.classifierInfo = classifierInfo;
+    C.classificationInfo = classificationInfo;
     disp('classifyCrossValidate() Finished!')
     
  end

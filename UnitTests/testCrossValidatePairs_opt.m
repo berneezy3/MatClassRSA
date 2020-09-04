@@ -16,7 +16,7 @@ PCA = {'0'; '.99'};
 %% SVM (PCA)
 
 tic
-C = RSA.classify.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
+C = RSA.Classification.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
 toc
 
 %% SVM (no PCA)

@@ -13,17 +13,17 @@ PCA = {'0', '.99'};
 
 load 'losorelli_500sweep_epoched.mat'
 RSA = MatClassRSA;
-[X_shuf,Y_shuf] = RSA.preprocess.shuffleData(X, Y);
+[X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
 [r c] = size(X_shuf);
 trainData = X_shuf(1:floor(r*9/10), :);
 trainLabels = Y_shuf(1:floor(r*9/10));
 testData = X_shuf(floor(r*9/10)+1:end, :);
 testLabels = Y_shuf(floor(r*9/10)+1:end);
-M = RSA.classify.trainMulti_opt( trainData , trainLabels, ...
+M = RSA.Classification.trainMulti_opt( trainData , trainLabels, ...
     'classifier', 'SVM', 'PCA', 0, 'randomSeed', 1);
-C = RSA.classify.predict( M, testData, testLabels);
+C_tt_multi_opt = RSA.Classification.predict( M, testData, testLabels);
 
-accuracy(1) = C.accuracy;
+accuracy(1) = C_tt_multi_opt.accuracy;
 
 %% S06 
 
