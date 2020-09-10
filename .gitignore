@@ -4,8 +4,7 @@ src/.DS_Store
 examples/.DS_Store
 .DS_Store
 UnitTests/S06.mat
-UnitTests/S01.mat
 UnitTests/.DS_Store
-UnitTests/*.mat
+UnitTests/AllData.mat
 *.m~
 UnitTests/losorelli*.mat
