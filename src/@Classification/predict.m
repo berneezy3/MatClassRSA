@@ -213,11 +213,11 @@ function [P, varargout] = predict(obj,M, X, varargin)
            % Get Accuracy and confusion matrix
             if ( ~isnan(ip.Results.actualLabels) )
 %                 P.accuracy{i} = computeAccuracy(predY{i}, tempY); 
-                tempStruct.CM{firstClass(i), secondClass(i)} = confusionmat(tempY, predY{i});
-                tempStruct.CM{secondClass(i), firstClass(i)} = confusionmat(tempY, predY{i});
+                P.CM{class1, class2} = confusionmat(tempY, predY{i});
+                P.CM{class2, class1} = P.CM{class1, class2};
 
-                tempStruct.AM(firstClass(i), secondClass(i)) = sum(diag(P.CM{i}))/sum(sum(P.CM{i}));
-                tempStruct.AM(secondClass(i), firstClass(i)) = sum(diag(P.CM{i}))/sum(sum(P.CM{i})); 
+                P.AM(class1, class2) = sum(diag(P.CM{class1, class2}))/sum(sum(P.CM{class1, class2}));
+                P.AM(class2, class1) = P.AM(class1, class2); 
             else
 %                 P.accuracy{i} = NaN; 
                 P.CM{i} = NaN;
@@ -225,9 +225,9 @@ function [P, varargout] = predict(obj,M, X, varargin)
            
                 
             tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
-%             tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
+            tempStruct.accuracy = sum(diag(P.CM{class1, class2}))/sum(sum(P.CM{class1, class2}));
             tempStruct.actualY = tempY;
-%             tempStruct.predY = tempC.predY';
+            tempStruct.predY = predY';
                 
                 
             %tempStruct.decision
@@ -237,11 +237,11 @@ function [P, varargout] = predict(obj,M, X, varargin)
 %                 tempC.modelsConcat';
             pairwiseCell{class1, class2} = tempStruct;
             pairwiseCell{class2, class1} = tempStruct;
-
-
-
          
         end
+        
+        P.pairwiseInfo = pairwiseCell;
+
 
     % CASE: pairwise classification SVM w/ PCA off (correct AM!!!)
     elseif (M.pairwise == 1 && length(M.classifierInfo) == 1 && strcmp(M.classifier, 'SVM'))
