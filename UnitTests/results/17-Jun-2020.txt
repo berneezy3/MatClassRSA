@@ -1,2 +1,0 @@
-functionName_1,functionName_2,accuracy_1,accuracy_2,shuffle_1,shuffle_2,classifier_1,classifier_2,optimization_1,optimization_2,averageTrials_1,averageTrials_2,dataSplit_1,dataSplit_2
-trainMulti_opt/predict,trainMulti_opt/predict,0.794871794871795,0.711538461538462,on,on,SVM,SVM,on,on,on,off,90/10,90/10
