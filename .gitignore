@@ -6,5 +6,6 @@ examples/.DS_Store
 UnitTests/S06.mat
 UnitTests/S01.mat
 UnitTests/.DS_Store
+UnitTests/*.mat
 *.m~
 UnitTests/losorelli*.mat

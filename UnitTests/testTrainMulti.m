@@ -19,6 +19,8 @@ trainData = X_shuf(1:floor(r*9/10), :);
 trainLabels = Y_shuf(1:floor(r*9/10));
 testData = X_shuf(floor(r*9/10)+1:end, :);
 testLabels = Y_shuf(floor(r*9/10)+1:end);
+
+
 M_tt_multi = RSA.Classification.trainMulti( trainData , trainLabels, ...
     'classifier', 'SVM', 'PCA', 0, 'randomSeed', 1);
 C_tt_multi = RSA.Classification.predict( M_tt_multi, testData, testLabels);
