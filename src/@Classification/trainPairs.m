@@ -154,6 +154,9 @@
     
    % check if data is double, convert to double if it isn't
    [X, Y] = convert2double(X, Y);
+   
+   % If SVM is selected, then gamma and C parameters must be manually set
+   verifySVMParameters(ip);
 
    
    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...

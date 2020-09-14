@@ -22,6 +22,8 @@ function y = initInputParser(functionName, ip)
     defaultPairwise = 0;
     defaultCenter = true;
     defaultScale = false;
+    defaultC = 'default';
+    defaultG = 'default';
     defaultCSpace = logspace((-5), 5, 5);
     defaultGammaSpace = logspace((-5), 5, 5);
     defaultTrainDevTestSplit = [.8 .1 .1];
@@ -157,6 +159,8 @@ function y = initInputParser(functionName, ip)
     
 
     y=ip;
+    
+    
 
     
 end

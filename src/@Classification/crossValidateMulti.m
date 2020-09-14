@@ -150,10 +150,12 @@
         error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
     end
 
-
     % Parse Inputs
     parse(ip, X, Y, varargin{:});
     
+    % If SVM is selected, then gamma and C parameters must be manually set
+    verifySVMParameters(ip);
+   
    % check if data is double, convert to double if it isn't
     [X, Y] = convert2double(X,Y);
    

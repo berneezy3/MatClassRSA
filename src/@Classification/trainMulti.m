@@ -140,17 +140,27 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
     
     
     % check input data 
-    checkInputData(X, Y);
-    dataSize = size(X);
-    if(ip.Results.spaceUse)
-        dataSize(1) = length(ip.Results.spaceUse);
-    end
-    if(ip.Results.timeUse)
-        dataSize(2) = length(ip.Results.timeUse);
-    end
-    if(ip.Results.featureUse)
-        dataSize(2) = length(ip.Results.featureUse);
-    end
+    checkInputDataShape(X, Y);
+    
+    % If SVM is selected, then gamma and C parameters must be manually set
+    verifySVMParameters(ip);
+    
+       
+    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+                                        ip.Results.spaceUse, ...
+                                        ip.Results.timeUse, ...
+                                        ip.Results.featureUse);
+
+%     dataSize = size(X);
+%     if(ip.Results.spaceUse)
+%         dataSize(1) = length(ip.Results.spaceUse);
+%     end
+%     if(ip.Results.timeUse)
+%         dataSize(2) = length(ip.Results.timeUse);
+%     end
+%     if(ip.Results.featureUse)
+%         dataSize(2) = length(ip.Results.featureUse);
+%     end
 
     
     % this function contains input checking functions
@@ -209,7 +219,7 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
     classifierInfo.randomSeed = ip.Results.randomSeed;
     classifierInfo.PCA_V = V;
     classifierInfo.PCA_nPC = nPC;
-    classifierInfo.trainingDataSize = dataSize;
+%     classifierInfo.trainingDataSize = dataSize;
     classifierInfo.numClasses = length(unique(Y));
     classifierInfo.pairwise = ip.Results.pairwise;
     classifierInfo.colMeans = colMeans;

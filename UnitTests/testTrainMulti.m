@@ -1,5 +1,5 @@
 
-load 'losorelli_100sweep_epoched.mat'
+load 'losorelli_500sweep_epoched.mat'
 functionName = {'trainMulti/predict', 'trainMulti/predict'};
 accuracy = zeros(1, 2);
 dataset = {'Steven_500', 'S06'};
@@ -11,7 +11,6 @@ dataSplit = {'90/10', '90/10'};
 PCA = {'0', '.99'};
 %% Steven 500 data
 
-load 'losorelli_500sweep_epoched.mat'
 RSA = MatClassRSA;
 [X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
 [r c] = size(X_shuf);
@@ -22,7 +21,7 @@ testLabels = Y_shuf(floor(r*9/10)+1:end);
 
 
 M_tt_multi = RSA.Classification.trainMulti( trainData , trainLabels, ...
-    'classifier', 'SVM', 'PCA', 0, 'randomSeed', 1);
+    'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1);
 C_tt_multi = RSA.Classification.predict( M_tt_multi, testData, testLabels);
 
 accuracy(1) = C_tt_multi.accuracy;

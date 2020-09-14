@@ -98,17 +98,17 @@ function [P, varargout] = predict(obj,M, X, varargin)
     % Check input data
     testDataSize = size(X);
     
-    if (length(tempInfo.trainingDataSize == 2))
-        assert(tempInfo.trainingDataSize(2) == testDataSize(2), ...
-            'Dimension 2 (feature) of test data does not match Dimension 2 of training data used in classifyTrain().');
-    elseif (length(tempInfo.trainingDataSize == 3))
-        assert(tempM.classifierInfo.trainingDataSize(1) == testDataSize(1), ...
-            'Dimension 1 (space) of test data does not match Dimension 1 of training data used in classifyTrain().');
-        assert(tempInfo.trainingDataSize(2) == testDataSize(2), ...
-            'Dimension 2 (time) of test data does not match Dimension 2 of training data used in classifyTrain().');
-    else
-        error('Data formatting issue.  Check input data matrix to classifyTrain and to classifyPredict');
-    end
+%     if (length(tempInfo.trainingDataSize == 2))
+%         assert(tempInfo.trainingDataSize(2) == testDataSize(2), ...
+%             'Dimension 2 (feature) of test data does not match Dimension 2 of training data used in classifyTrain().');
+%     elseif (length(tempInfo.trainingDataSize == 3))
+%         assert(tempInfo.trainingDataSize(1) == testDataSize(1), ...
+%             'Dimension 1 (space) of test data does not match Dimension 1 of training data used in classifyTrain().');
+%         assert(tempInfo.trainingDataSize(2) == testDataSize(2), ...
+%             'Dimension 2 (time) of test data does not match Dimension 2 of training data used in classifyTrain().');
+%     else
+%         error('Data formatting issue.  Check input data matrix to classifyTrain and to classifyPredict');
+%     end
     
     % Subset data 
     [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...

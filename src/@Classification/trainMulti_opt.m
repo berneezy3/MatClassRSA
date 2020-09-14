@@ -154,7 +154,7 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
     
     
     % check input data 
-    checkInputData(X, Y);
+    checkInputDataShape(X, Y);
     dataSize = size(X);
     if(ip.Results.spaceUse)
         dataSize(1) = length(ip.Results.spaceUse);
