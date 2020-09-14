@@ -29,9 +29,9 @@ C_tt_pairs = RSA.Classification.predict(M_tt_pairs, testData, testLabels);
 
 %%
 
-M = RSA.classify.trainPairs( trainData , trainLabels, ...
+M = RSA.Classification.trainPairs( trainData , trainLabels, ...
     'classifier', 'SVM', 'PCA', 0, 'randomSeed', 1);
-C = RSA.classify.predict( M, testData, testLabels);
+C = RSA.Classification.predict( M, testData, testLabels);
 
 %%
 

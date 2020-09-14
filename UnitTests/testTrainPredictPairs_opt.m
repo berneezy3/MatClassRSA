@@ -27,7 +27,7 @@ testLabels = Y_shuf(floor(r*9/10)+1:end);
 
 M = RSA.Classification.trainPairs_opt( trainData , trainLabels, ...
     'classifier', 'SVM', 'PCA', 0, 'randomSeed', 1);
-C = RSA.Classification.predict( M, testData, testLabels);
+C_tt_pairs_opt = RSA.Classification.predict( M, testData, testLabels);
 
 %%
 

@@ -294,7 +294,10 @@
 
         C.pairwiseInfo = pairwiseCell;
         C.AM = AM;
-        disp('classifyCrossValidate() Finished!')
+        C.modelsConcat = modelsConcat;
+        C.classificationInfo = tempStruct;
+        
+        disp('classifyCrossValidate_opt() Finished!')
         return
     % END PAIRWISE LDA/RF
     % START PAIRWISE SVM 
@@ -330,13 +333,12 @@
         %convert pairwiseMat3D to diagonal matrix
         C.pairwiseInfo = pairwiseCell;
         C.AM = pairwiseAccuracies;
-    else 
         
     end
 
     C.modelsConcat = modelsConcat;
 %     C.predY = predictionsConcat;
-    C.classifierInfo = classifierInfo;
-    disp('classifyCrossValidate() Finished!')
+    C.classificationInfo = classifierInfo;
+    disp('classifyCrossValidate_opt() Finished!')
     
  end

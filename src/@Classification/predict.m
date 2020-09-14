@@ -22,8 +22,9 @@ function [P, varargout] = predict(obj,M, X, varargin)
 %       'default' (option to replicate results)
 %
 % OUTPUT ARGS 
-%   P - Prediciton output produced by classifyPredict().  This contains a
-%   few fields: 
+%   P - Prediciton output produced by classifyPredict(), which may slightly 
+%   differ depending on which function is used to train the model M.  This 
+%   contains a few fields: 
 %       - P.predY, or the predicted labels for the input data
 %       - P.accuracy, accuracy of predicted values compared to actual labels
 %       - P.CM matrix of predicted values vs actual labels
@@ -178,19 +179,26 @@ function [P, varargout] = predict(obj,M, X, varargin)
         [firstClass, secondClass] = getNChoose2Ind(numClasses);
 %         P.predictionInfo = cell(1, numDecBounds);
 %         P.accuracy = cell(1, numDecBounds);
-        P.CM = cell(numClasses, numClasses);
-        P.CM(:,:) = {NaN};
+%         P.CM = cell(numClasses, numClasses);
+%         P.CM(:,:) = {NaN};
         P.classificationInfo = struct();
         P.pairwiseInfo = struct();
         pairwiseCell = initPairwiseCellMat(numClasses);
         decMatchups = nchoosek(1:numClasses, 2);
-
+        
+        classifierInfo = struct(...
+            'PCA', M.classifierInfo{1}.PCA, ...
+            'classifier', M.classifierInfo{1}.classifier);
+        P.classificationInfo = classifierInfo;
+        
+        % Initilize info struct
         for i = 1:numDecBounds
             % If PCA was turned on for training, we will select principal
             % compoenents for prediciton as well
             class1 = firstClass(i);
             class2 = secondClass(i);
             currUse = ismember(Y, [class1 class2]);
+            
             
             tempX = X(currUse, :);
             tempY =  ip.Results.actualLabels(currUse);
@@ -213,21 +221,22 @@ function [P, varargout] = predict(obj,M, X, varargin)
            % Get Accuracy and confusion matrix
             if ( ~isnan(ip.Results.actualLabels) )
 %                 P.accuracy{i} = computeAccuracy(predY{i}, tempY); 
-                P.CM{class1, class2} = confusionmat(tempY, predY{i});
-                P.CM{class2, class1} = P.CM{class1, class2};
-
-                P.AM(class1, class2) = sum(diag(P.CM{class1, class2}))/sum(sum(P.CM{class1, class2}));
+%                 P.CM{class1, class2} = confusionmat(tempY, predY{i});
+%                 P.CM{class2, class1} = P.CM{class1, class2};
+                thisCM = confusionmat(tempY, predY{i});
+                P.AM(class1, class2) = sum(diag(thisCM))/sum(sum(thisCM));
                 P.AM(class2, class1) = P.AM(class1, class2); 
             else
 %                 P.accuracy{i} = NaN; 
-                P.CM{i} = NaN;
+%                 P.CM{i} = NaN;
             end
            
                 
             tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
-            tempStruct.accuracy = sum(diag(P.CM{class1, class2}))/sum(sum(P.CM{class1, class2}));
+            tempStruct.accuracy = sum(diag(thisCM))/sum(sum(thisCM));
             tempStruct.actualY = tempY;
             tempStruct.predY = predY';
+            tempStruct.CM = thisCM;
                 
                 
             %tempStruct.decision
@@ -240,8 +249,9 @@ function [P, varargout] = predict(obj,M, X, varargin)
          
         end
         
+%         P.classificationInfo = M;
         P.pairwiseInfo = pairwiseCell;
-
+        P.modelsConcat = M.mdl;
 
     % CASE: pairwise classification SVM w/ PCA off (correct AM!!!)
     elseif (M.pairwise == 1 && length(M.classifierInfo) == 1 && strcmp(M.classifier, 'SVM'))
@@ -252,7 +262,6 @@ function [P, varargout] = predict(obj,M, X, varargin)
         pairwiseMat3D = zeros(2,2, numDecBounds);
         decMatchups = nchoosek(1:numClasses, 2);
         AM = NaN(numClasses, numClasses);
-
         
         [predictions decision_values] = modelPredict(X, M.mdl, M.scale);           
         
@@ -288,17 +297,25 @@ function [P, varargout] = predict(obj,M, X, varargin)
         pairwiseMat3D = zeros(2,2, numDecBounds);
         
         if (sum(contains( fieldnames( ip.Results) , 'actualLabels' )))
-            [P.AM, ~, P.CM] = ...
+            [P.AM, ~, P.pairwiseInfo] = ...
             decValues2PairwiseAcc(pairwiseMat3D, ip.Results.actualLabels, M.mdl.Label, decision_values, pairwiseCell);
         end
         
-
         for i = 1:numDecBounds
-%             P.predY{i} = allPredictions(:, i);  
-            P.classBoundary{i} = [ decMatchups(i,1) ' vs. ' decMatchups(i,2)];
+%             P.predY{i} = allPredictions(:, i);
+%             P.actualY{i} = ip.Results.actualLabels(currUse);
+
+%             P.classBoundary{i} = [ decMatchups(i,1) ' vs. ' decMatchups(i,2)];
 %             P.predictionInfo{i}.classBoundary = decMatchups(i,:);
 %             P.accuracy{i} = predictions/;
         end
+        
+        P.mdl = M.mdl;
+        P.classificationInfo = struct(...
+            'PCA', M.classifierInfo.PCA, ...
+            'classifier', M.classifierInfo.classifier);
+%         P.predictionInfo = predictionInfo;
+%         P.pairwiseInfo = ;
         
     end
     

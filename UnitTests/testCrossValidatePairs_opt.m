@@ -16,13 +16,13 @@ PCA = {'0'; '.99'};
 %% SVM (PCA)
 
 tic
-C = RSA.Classification.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
+C_pairs_opt = RSA.Classification.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
 toc
 
 %% SVM (no PCA)
 
 tic
-C = RSA.classify.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'SVM', 'PCAinFold', 0);
+C_pairs_opt_noPCA = RSA.Classification.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'SVM', 'PCAinFold', 0);
 toc
 
 
@@ -39,11 +39,11 @@ X = X';
 
 %%
 
-C = RSA.classify.crossValidatePairs_opt(X_avg, Y_avg, 'PCA', .99, 'classifier', 'SVM');
+C = RSA.Classification.crossValidatePairs_opt(X_avg, Y_avg, 'PCA', .99, 'classifier', 'SVM');
 
 %%
 
-C = RSA.classify.crossValidatePairs_opt(X_avg, Y_avg, 'PCA', 0, 'classifier', 'SVM');
+C = RSA.Classification.crossValidatePairs_opt(X_avg, Y_avg, 'PCA', 0, 'classifier', 'SVM');
 
 
 %%

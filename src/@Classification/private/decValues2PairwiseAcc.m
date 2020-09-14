@@ -88,6 +88,7 @@ function [pairwiseAccuracies, pairwiseCMs, pairwiseCell] = decValues2PairwiseAcc
                 thisAcc = (this2x2cm(1,1) + this2x2cm(2,2)) / sum(sum(this2x2cm));
                 pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.CM = this2x2cm;
                 pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.accuracy = thisAcc;
+%                 pairwiseCell{thisBoundClasses(1), thisBoundClasses(2)}.actualLables = ;
                                 
                 % increment
                 pairwiseCMs(tallyCoordX, tallyCoordY, tallyCoordZ) = ...
