@@ -1,10 +1,10 @@
-function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs, kernel)
+function [gamma_opt, C_opt] = trainTestGridSearch(trainX, trainY, testX, testY, gammas, Cs, kernel)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2020.
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% mdl = gridSearch(X, Y, gammaRange, cRange)
+% mdl = trainTestGridSearch(X, Y, gammaRange, cRange)
 % --------------------------------
 % Bernard Wang, April 5, 2020
 %
@@ -57,10 +57,20 @@ function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs, kernel)
     cGrid = cell(length(Cs), length(gammas));
 
     RSA = MatClassRSA;
+%     for i = 1:length(Cs)
+%         for j = 1:length(gammas)
+%             tempC = RSA.Classification.crossValidateMulti(X, Y, 'PCA', -1, ...
+%                 'classifier', 'SVM','C', Cs(i), 'gamma', gammas(j), 'kernel', kernel);
+%             accGrid(i,j) = tempC.accuracy;
+%             cGrid{i,j} = tempC;
+%         end
+%     end
+    
     for i = 1:length(Cs)
         for j = 1:length(gammas)
-            tempC = RSA.Classification.crossValidateMulti(X, Y, 'PCA', -1, ...
+            tempM = RSA.Classification.trainMulti(trainX, trainY, 'PCA', -1, ...
                 'classifier', 'SVM','C', Cs(i), 'gamma', gammas(j), 'kernel', kernel);
+            tempC = RSA.Classification.predict(tempM, testX, testY);
             accGrid(i,j) = tempC.accuracy;
             cGrid{i,j} = tempC;
         end
@@ -68,7 +78,6 @@ function [gamma_opt, C_opt] = gridSearchSVM(X, Y, gammas, Cs, kernel)
     
     % get maximum accuracy, and return the gamma and C value for the
     % maximum accuracy
-    
     
     [maxVal, maxIdx] = max(accGrid(:));
     [xInd yInd] = ind2sub(size(accGrid), maxIdx);

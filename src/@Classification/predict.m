@@ -1,4 +1,4 @@
-function [P, varargout] = predict(obj,M, X, varargin)
+function [P, varargout] = predict(obj, M, X, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % [CM, accuracy, classifierInfo] = RSA.classify.predict(X, Y)

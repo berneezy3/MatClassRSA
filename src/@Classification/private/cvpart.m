@@ -1,4 +1,4 @@
-function obj = cvpart(n, k)
+function obj = cvpart(numTrials, nFolds)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
@@ -59,7 +59,7 @@ function obj = cvpart(n, k)
     
 
 
-assert(n >= k, 'first parameter, k, must be lager than second parameter, n');
+assert(numTrials >= nFolds, 'first parameter, k, must be lager than second parameter, n');
 
 obj.training = {};
 obj.test = {};
@@ -68,23 +68,21 @@ obj.test = {};
 obj.folds = {};
 
 %initialize number of sets
-obj.NumTestSets = k;
+obj.NumTestSets = nFolds;
 
 %get remainder
-remainder = rem(n, k);
+remainder = rem(numTrials, nFolds);
 
 %get quotient
 %this is the number of trials each fold
-quotient = floor(n/k);
+quotient = floor(numTrials/nFolds);
 
 %case divisible
 if remainder == 0
-    for i = 1:k
-        trainIndices = ones( n,1 );
-
+    for i = 1:nFolds
+        trainIndices = zeros( numTrials,1 );
         for j = 1:quotient
-            trainIndices(j+(i-1)*quotient) = 0;
-
+            trainIndices(j+(i-1)*quotient) = 1;
         end
         obj.training{end+1} = trainIndices;
         obj.test{end+1} = 1-trainIndices;
@@ -92,21 +90,20 @@ if remainder == 0
 %case indivisible
 else
     indexlocation = 0;
-    for i = 1:k-remainder
-        trainingIndices = ones( n,1 );
+    for i = 1:nFolds-remainder
+        trainingIndices = zeros( numTrials,1 );
         for j = 1:quotient
-            trainingIndices(j+(i-1)*quotient) = 0;
+            trainingIndices(j+(i-1)*quotient) = 1;
             indexlocation = indexlocation + 1;
         end
         obj.training{end+1} = trainingIndices;
         obj.test{end+1} = 1-trainingIndices;
     end
     for i = 1:remainder
-        %disp('ajhdbfajhsdbfljahsdf');
         %disp(indexlocation);
-        trainingIndices = ones( n,1 );
+        trainingIndices = zeros( numTrials,1 );
         for j = 1:quotient+1
-            trainingIndices(j+(i-1)*quotient+indexlocation+(i-1)) = 0;
+            trainingIndices(j+(i-1)*quotient+indexlocation+(i-1)) = 1;
         end
         obj.training{end+1} = trainingIndices;
         obj.test{end+1} = 1-trainingIndices;

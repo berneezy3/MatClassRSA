@@ -16,12 +16,20 @@ PCA = {'0'; '.99'};
 
 RSA = MatClassRSA;
 [X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
+
+%%
 tic
-C_noopt = RSA.Classification.crossValidateMulti_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
+C_opt_tdt = RSA.Classification.crossValidateMulti_opt(X_shuf, Y_shuf, ...
+    'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'trainDevTestSplit', [.8 .1 .1]);
 toc
-accuracy(1) = C_noopt.accuracy;
+accuracy(1) = C_opt_tdt.accuracy;
 
 
+%%
+tic
+C_opt_nested = RSA.Classification.crossValidateMulti_opt(X_shuf, Y_shuf, ...
+    'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'nestedCV', 1);
+toc
 %% run optimized SVM on Blair's S06 data 
 
 load 'S06.mat'

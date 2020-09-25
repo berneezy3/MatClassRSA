@@ -27,6 +27,7 @@ function y = initInputParser(functionName, ip)
     defaultCSpace = logspace((-5), 5, 5);
     defaultGammaSpace = logspace((-5), 5, 5);
     defaultTrainDevTestSplit = [.8 .1 .1];
+    defaultNestedCV = 0;
 
 
     %Specify expected values
@@ -124,6 +125,7 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
             addParameter(ip, 'trainDevTestSplit', defaultTrainDevTestSplit);
+            addParameter(ip, 'nestedCV', defaultNestedCV);
        case 'crossValidatePairs_opt'
             addRequired(ip, 'X', @ismatrix);
             addRequired(ip, 'Y', @isvector);
@@ -132,6 +134,7 @@ function y = initInputParser(functionName, ip)
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
+            addParameter(ip, 'nestedCV', defaultNestedCV);
        case 'trainPairs_opt'
             addRequired(ip, 'X', @ismatrix);
             addRequired(ip, 'Y', @isvector);
@@ -140,6 +143,7 @@ function y = initInputParser(functionName, ip)
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
+            addParameter(ip, 'nestedCV', defaultNestedCV);
        case 'trainMulti_opt'
             addRequired(ip, 'X', @ismatrix);
             addRequired(ip, 'Y', @isvector);
@@ -149,6 +153,7 @@ function y = initInputParser(functionName, ip)
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
+            addParameter(ip, 'nestedCV', defaultNestedCV);
        otherwise
           error(['parseInputs() must be called from one of the following functions:' ...
           'trainMulti.m, predict.m, trainPairs.m,' ...

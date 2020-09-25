@@ -51,6 +51,8 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
 %       features of input matrix X.
 %       (negative value) - off
 %       features of input matrix X.
+%   'trainDevSplit' - This determines the size of the training and
+%   developement (AKA validation) set sizes for optimization
 %   'classifier' - choose classifier. 
 %        --options--
 %       'SVM'
@@ -67,6 +69,7 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
 %   128.
 %   'minLeafSize' - Choose the inimum number of observations per tree leaf.
 %   Default is 1,
+%   cross validation. 
 %   'pairwise' - When set to 1, this creates models for pairwise 
 %   classification (one vs. one).  This returns n choose 2 number of 
 %   decision boundaries.  When using classify predict, this returns a
@@ -151,8 +154,6 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
         disp(getReport(ME,'extended'));
     end
     
-    
-    
     % check input data 
     checkInputDataShape(X, Y);
     dataSize = size(X);
@@ -165,7 +166,6 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
     if(ip.Results.featureUse)
         dataSize(2) = length(ip.Results.featureUse);
     end
-
     
     % this function contains input checking functions
     [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
@@ -173,9 +173,6 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
                                                     ip.Results.timeUse, ...
                                                     ip.Results.featureUse);
     
-                                           
-                                     
-                     
     defaultShuffleData = 1;
     defaultRandomSeed = 'shuffle';
     defaultAverageTrials = -1;
@@ -196,7 +193,12 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
         ipCenter = true;
     end
     
-    trainData = X;
+    if ( ~ip.Results.nestedCV )
+        tdtSplit = processTrainDevSplit(ip.Results.trainDevSplit, X)
+        trainData = X;
+    else
+        trainData = X;
+    end
     
     % PCA
     if (ip.Results.PCA > 0)
@@ -253,19 +255,27 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
 %     if (ip.Results.pairwise == 0) || ...
 %        ((ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM'))
         
-        % conduct grid search here
-        [gamma_opt, C_opt] = gridSearchSVM(trainData, Y(:), ...
+    % conduct grid search here
+    % train/dev/test optimization
+    if (~ip.Results.nestedCV)
+        [gamma_opt, C_opt] = trainTestGridSearch(trainData, Y(:), ...
             ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
         [mdl, scale] = fitModel(trainData, Y(:), ip, gamma_opt, C_opt);
-        M.classifierInfo = classifierInfo;
-        M.mdl = mdl;
-        M.scale = scale;
-        M.pairwise = 0;
-        M.classifier = ip.Results.classifier;
+    else
+    % nested CV optimization
+        [gamma_opt, C_opt] = nestedCvGridSearch(trainData, Y(:), ...
+            ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
+        [mdl, scale] = fitModel(trainData, Y(:), ip, gamma_opt, C_opt);
+        
+    end
+    
+    M.classifierInfo = classifierInfo;
+    M.mdl = mdl;
+    M.scale = scale;
+    M.pairwise = 0;
+    M.classifier = ip.Results.classifier;
 
 
-    
-    
     disp('Training Finished...')
     disp('Returning Model')
 

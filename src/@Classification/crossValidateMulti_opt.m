@@ -54,6 +54,9 @@
 %       0 - one PCA for entire training data matrix X.
 %   'nFolds' - number of folds in cross validation.  Must be integer
 %       greater than 1 and less than number of trials. Default is 10.
+%   'trainDevTestSplit' - This determines the size of the training,
+%       developement (AKA validation) and test set sizes for each fold of 
+%       cross validation. 
 %   'classifier' - choose classifier. 
 %        --options--
 %       'SVM' (default)
@@ -216,11 +219,17 @@
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    partition = cvpart(r, ip.Results.nFolds);
-    tic 
-    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
-    toc
     
+    tic
+    if ( ~ip.Results.nestedCV )
+        tdtSplit = processTrainDevTestSplit(ip.Results.trainDevTestSplit, X, ip.Results.nFolds)
+        partition = trainDevTestPart(r, ip.Results.nFolds, tdtSplit);
+        cvDataObj = cvData_opt(X,Y, partition, ip, ipCenter, ipScale);
+    else
+        partition = cvpart(r, ip.Results.nFolds);
+        cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
+    end
+    toc
     
     % CROSS VALIDATION
     disp('Cross Validating')
@@ -252,37 +261,82 @@
     CM = NaN;
     RSA = MatClassRSA;
     
-    % NORMAL SVM/LDA/RF
-    tic
-    for i = 1:ip.Results.nFolds
+    % Inner CV fold vs. train/dev/test split
+    if ( ~ip.Results.nestedCV )
+    % Train/Dev/Test Split
+    
+        disp('Conducting CV w/ train/dev/test split');
 
-        disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+        tic
+        for i = 1:ip.Results.nFolds
 
-        trainX = cvDataObj.trainXall{i};
-        trainY = cvDataObj.trainYall{i};
-        testX = cvDataObj.testXall{i};
-        testY = cvDataObj.testYall{i};
-        
-        % conduct grid search here
-        [gamma_opt, C_opt] = gridSearchSVM(trainX, trainY, ...
-            ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
+            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
 
-        %[mdl, scale] = fitModel(trainX, trainY, ip);
-        M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
-            'gamma', gamma_opt, 'C', C_opt);
+            trainX = cvDataObj.trainXall{i};
+            trainY = cvDataObj.trainYall{i};
+            devX = cvDataObj.devXall{i};
+            devY= cvDataObj.devYall{i};
+            testX = cvDataObj.testXall{i};
+            testY = cvDataObj.testYall{i};
 
-        %[predictions decision_values] = modelPredict(testX, mdl, scale);
-        P = RSA.Classification.predict(M, testX, testY);
+            % conduct grid search here
+            [gamma_opt, C_opt] = trainTestGridSearch(trainX, trainY, devX, devY, ...
+                ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
 
-        labelsConcat = [labelsConcat testY'];
-        predictionsConcat = [predictionsConcat P.predY];
-        modelsConcat{i} = M.mdl;
+            %[mdl, scale] = fitModel(trainX, trainY, ip);
+            M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+                'gamma', gamma_opt, 'C', C_opt);
 
-        C.CM = confusionmat(labelsConcat, predictionsConcat);
+            %[predictions decision_values] = modelPredict(testX, mdl, scale);
+            P = RSA.Classification.predict(M, testX, testY);
+
+            labelsConcat = [labelsConcat testY'];
+            predictionsConcat = [predictionsConcat P.predY];
+            modelsConcat{i} = M.mdl;
+
+            C.CM = confusionmat(labelsConcat, predictionsConcat); 
+
+        end
+
+    else
+    % NESTED CV FOLD
+         
+        disp('Conducting nested CV');
+        % Cross validation
+
+        for i = 1:ip.Results.nFolds
+
+            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+
+            trainX = cvDataObj.trainXall{i};
+            trainY = cvDataObj.trainYall{i};
+            testX = cvDataObj.testXall{i};
+            testY = cvDataObj.testYall{i};
+
+            % conduct grid search here
+            [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ...
+                ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
+
+            %[mdl, scale] = fitModel(trainX, trainY, ip);
+            M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+                'gamma', gamma_opt, 'C', C_opt);
+
+            %[predictions decision_values] = modelPredict(testX, mdl, scale);
+            P = RSA.Classification.predict(M, testX, testY);
+
+            labelsConcat = [labelsConcat testY'];
+            predictionsConcat = [predictionsConcat P.predY];
+            modelsConcat{i} = M.mdl;
+
+            C.CM = confusionmat(labelsConcat, predictionsConcat);
+            
+        % END INNER CV FOLD
+
+        end
 
     end
     toc
-
+    
     C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;

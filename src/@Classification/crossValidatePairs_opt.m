@@ -313,7 +313,7 @@
             testY = cvDataObj.testYall{i};
             
              % conduct grid search here
-            [gamma_opt, C_opt] = gridSearchSVM(trainX, trainY, ...
+            [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ...
                 ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
 
             [mdl, scale] = fitModel(trainX, trainY, ip, gamma_opt, C_opt);

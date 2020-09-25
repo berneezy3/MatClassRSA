@@ -22,7 +22,7 @@ function obj = trainDevTestPart(numTrials, nFolds, trainDevTestSplit)
 % INPUT ARGS:
 %   - trainDevTestSplit: %   'trainDevTestSplit' - This determines the size 
 %       of the train, developement (AKA validation) and test set sizes 
-%       for each fold of cross validation. 
+%       for each fold of cross validation.  
 %   - numTrials: number of train samples
 %   - nFolds: number of folds
 %
@@ -62,7 +62,7 @@ function obj = trainDevTestPart(numTrials, nFolds, trainDevTestSplit)
     
 
 
-assert(n >= nFolds, 'first parameter, k, must be lager than second parameter, n');
+assert(numTrials >= nFolds, 'first parameter, k, must be lager than second parameter, n');
 
 obj.train = {};
 obj.dev = {};
@@ -75,9 +75,9 @@ obj.folds = {};
 obj.NumTestSets = nFolds;
 
 %get size of train/dev/test sets
-train = trainDevTestSplit(1);
-dev = trainDevTestSplit(2);
-test = trainDevTestSplit(3);
+trainSize = trainDevTestSplit(1);
+devSize = trainDevTestSplit(2);
+testSize = trainDevTestSplit(3);
 
 %get remainder
 remainder = rem(numTrials, nFolds);
@@ -88,16 +88,24 @@ foldSize = floor(numTrials/nFolds);
 %case divisible
 if remainder == 0
     for i = 1:nFolds
-        indices = zeros( n,1 );
-        for j = 1:foldSize
-            indices(j+(i-1)*foldSize) = 1;
-        end
-        trainIndices = indices == 0;
-        trainIndices = trainIndices(1:trainSize);
-        devIndices = devIndices(end - devSize: end);
-
-        testIndices = indices == 1;
         
+        % indices of test trials for this fold
+        testIndices = zeros( numTrials,1 );
+        
+        for j = 1:foldSize
+            testIndices(j+(i-1)*foldSize) = 1;
+        end
+        
+        % the train/dev indices indices should consist of the
+        % non-test indices
+        trainDevIndices = find(testIndices == 0);
+        trainIndices = testIndices == 0;
+        % clear dev indices in train indices
+        trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize)) = 0;
+        devIndices = testIndices == 0;
+        % clear train indices in dev indices
+        devIndices(trainDevIndices(1:trainSize)) = 0;
+ 
         obj.train{end+1} = trainIndices;
         obj.dev{end+1} = devIndices;
         obj.test{end+1} = testIndices;
@@ -105,26 +113,48 @@ if remainder == 0
 %case indivisible
 else
     indexlocation = 0;
-    for i = 1:nFolds-remainder
-        indices = ones( n,1 );
+    
+    % handle non-remainders
+    for i = 1:nFolds
+        testIndices = zeros( numTrials,1 );
         for j = 1:foldSize
-            indices(j+(i-1)*foldSize) = 0;
+            testIndices(j+ (i-1)*foldSize) = 1;
             indexlocation = indexlocation + 1;
         end
-        obj.train{end+1} = indices;
+
+        % the train/dev indices indices should consist of the
+        % non-test indices
+        trainDevIndices = find(testIndices == 0);
+        trainIndices = testIndices == 0;
+        trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize)) = 0;
+        devIndices = testIndices == 0;
+        trainIndices(trainDevIndices(1:trainSize)) = 0;
+        
+        obj.train{end+1} = trainIndices;
         obj.dev{end+1} = devIndices;
-        obj.test{end+1} = 1-indices;
+        obj.test{end+1} = testIndices;
+        
     end
-    for i = 1:remainder
-        %disp(indexlocation);
-        indices = ones( n,1 );
-        for j = 1:foldSize+1
-            indices(j+(i-1)*foldSize+indexlocation+(i-1)) = 0;
-        end
-        obj.train{end+1} = indices;
-        obj.dev{end+1} = devIndices;
-        obj.test{end+1} = 1-indices;
-    end
+    
+    % handle remainders
+    disp("numTrials not divisible by nFolds.  Putting remainder trials within a new fold");
+    testIndices = zeros( numTrials,1 );
+    testIndices(nFolds * foldSize + 1:end) = 1;
+
+    trainIndices = testIndices == 0;
+    trainIndices = trainIndices(1:trainSize);
+    devIndices = devIndices(end - devSize: end);
+    testIndices = testIndices == 1;
+
+    trainDevIndices = find(testIndices == 0);
+    trainIndices = testIndices == 0;
+    trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize)) = 0;
+    devIndices = testIndices == 0;
+    trainIndices(trainDevIndices(1:trainSize)) = 0;
+
+    obj.train{end+1} = trainIndices;
+    obj.dev{end+1} = devIndices;
+    obj.test{end+1} = testIndices;
 end
 
 end

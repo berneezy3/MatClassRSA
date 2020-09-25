@@ -1,4 +1,4 @@
-function processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
+function y = processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
 %  processTrainDevTestSplit(trainDevTestSplit, X)
 % --------------------------------
 % Bernard Wang, September 17, 2020
@@ -51,11 +51,13 @@ function processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
 
     [r c] = size(X);
     
+
+
     % make sure the size of X is enough to allow for 3 data splits
     if r < 3
         error('X must have 3 or more trials to split into train/dev/test sets');
     end
-    
+
     % make sure that the size of the test set is consistent w/ nfolds
     if any(trainDevTestSplit < 1)
         if (trainDevTestSplit(3) ~= 1/nfolds)
@@ -77,21 +79,24 @@ function processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
             error('if trainDevTest is expressed as integers, then values must sum to number of trials');
         end
     end
-    
+
     % if the test/dev/train split is in decimal form, convert to integer
     if any(trainDevTestSplit < 1)
         for i = 1:3
             trainDevTestSplit(i) = trainDevTestSplit(i) * r;
         end
-        
+
         %add remainders to training set
         for i = 1:r-sum(trainDevTestSplit)
             trainDevTestSplit(1) = trainDevTestSplit(1) + 1 ;
         end
 
     end
-    
+
     % warning if the splits do not align well with the number of folds
 
+
+    % return trainDevTestSplit as integers
+    y = trainDevTestSplit
 
 end
