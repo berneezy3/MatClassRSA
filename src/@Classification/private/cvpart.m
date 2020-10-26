@@ -61,7 +61,7 @@ function obj = cvpart(numTrials, nFolds)
 
 assert(numTrials >= nFolds, 'first parameter, k, must be lager than second parameter, n');
 
-obj.training = {};
+obj.train = {};
 obj.test = {};
 
 %initialize indices list
@@ -73,41 +73,44 @@ obj.NumTestSets = nFolds;
 %get remainder
 remainder = rem(numTrials, nFolds);
 
-%get quotient
+%get foldSize
 %this is the number of trials each fold
-quotient = floor(numTrials/nFolds);
+foldSize = floor(numTrials/nFolds);
 
 %case divisible
 if remainder == 0
     for i = 1:nFolds
-        trainIndices = zeros( numTrials,1 );
-        for j = 1:quotient
-            trainIndices(j+(i-1)*quotient) = 1;
+        testIndices = zeros( numTrials,1 );
+        for j = 1:foldSize
+            testIndices(j+(i-1)*foldSize) = 1;
         end
-        obj.training{end+1} = trainIndices;
-        obj.test{end+1} = 1-trainIndices;
+        obj.train{end+1} = 1- testIndices;
+        obj.test{end+1} = testIndices;
     end
 %case indivisible
 else
+    warning(['Number of trials not divisible by number of folds. Adding remainder'...
+        ' trials to the last fold']);
     indexlocation = 0;
-    for i = 1:nFolds-remainder
-        trainingIndices = zeros( numTrials,1 );
-        for j = 1:quotient
-            trainingIndices(j+(i-1)*quotient) = 1;
-            indexlocation = indexlocation + 1;
+    for i = 1:nFolds
+        testIndices = zeros( numTrials,1 );
+        if i ~= nFolds
+            for j = 1:foldSize
+                testIndices(j+(i-1)*foldSize) = 1;
+                indexlocation = indexlocation + 1;
+            end
+        else
+            % handle remainders
+            for j = 1:foldSize + remainder
+                testIndices(j+(i-1)*foldSize) = 1;
+                indexlocation = indexlocation + 1;
+            end
         end
-        obj.training{end+1} = trainingIndices;
-        obj.test{end+1} = 1-trainingIndices;
+        obj.train{end+1} = 1-testIndices;
+        obj.test{end+1} = testIndices;
     end
-    for i = 1:remainder
-        %disp(indexlocation);
-        trainingIndices = zeros( numTrials,1 );
-        for j = 1:quotient+1
-            trainingIndices(j+(i-1)*quotient+indexlocation+(i-1)) = 1;
-        end
-        obj.training{end+1} = trainingIndices;
-        obj.test{end+1} = 1-trainingIndices;
-    end
+   
+
 end
 
 end

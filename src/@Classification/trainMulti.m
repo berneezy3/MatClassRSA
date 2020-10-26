@@ -151,17 +151,6 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
                                         ip.Results.timeUse, ...
                                         ip.Results.featureUse);
 
-%     dataSize = size(X);
-%     if(ip.Results.spaceUse)
-%         dataSize(1) = length(ip.Results.spaceUse);
-%     end
-%     if(ip.Results.timeUse)
-%         dataSize(2) = length(ip.Results.timeUse);
-%     end
-%     if(ip.Results.featureUse)
-%         dataSize(2) = length(ip.Results.featureUse);
-%     end
-
     
     % this function contains input checking functions
     [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
@@ -224,6 +213,7 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
     classifierInfo.pairwise = ip.Results.pairwise;
     classifierInfo.colMeans = colMeans;
     classifierInfo.colScales = colScales;
+    classifierInfo.ip = ip;
     
     switch classifierInfo.classifier
         case 'SVM'
@@ -253,7 +243,9 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
         M.scale = scale;
         M.pairwise = 0;
         M.classifier = ip.Results.classifier;
-        
+        M.trainData = X;
+        M.trainLabels = Y;
+        M.functionName = namestr;
 
         
     elseif (ip.Results.pairwise == 1) && ...

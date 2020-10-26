@@ -27,8 +27,8 @@ function y = initInputParser(functionName, ip)
     defaultCSpace = logspace((-5), 5, 5);
     defaultGammaSpace = logspace((-5), 5, 5);
     defaultTrainDevTestSplit = [.8 .1 .1];
+    defaultTrainDevSplit = [.9 .1];
     defaultNestedCV = 0;
-
 
     %Specify expected values
     expectedPCAinFold = [0,1];
@@ -50,7 +50,7 @@ function y = initInputParser(functionName, ip)
         addParamValue(ip, 'PCAinFold', defaultPCAinFold);
         addParamValue(ip, 'center', defaultCenter, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
         addParamValue(ip, 'scale', defaultScale, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParamValue(ip, 'nFolds', defaultNFolds);
+%         addParamValue(ip, 'nFolds', defaultNFolds);
         addParamValue(ip, 'classifier', defaultClassifier, ...
              @(x) any(validatestring(x, expectedClassifier)));
         addParamValue(ip, 'timeUse', defaultTimeUse, ...
@@ -62,6 +62,7 @@ function y = initInputParser(functionName, ip)
         addParamValue(ip, 'kernel', @(x) any(validatestring(x, expectedKernels)));
         addParamValue(ip, 'numTrees', 128);
         addParamValue(ip, 'minLeafSize', 1);
+        addParamValue(ip, 'permutations', 0);
     else
         addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
@@ -69,7 +70,7 @@ function y = initInputParser(functionName, ip)
         addParameter(ip, 'PCAinFold', defaultPCAinFold);
         addParameter(ip, 'center', defaultCenter);
         addParameter(ip, 'scale', defaultScale);
-        addParameter(ip, 'nFolds', defaultNFolds);
+%         addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'timeUse', defaultTimeUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'spaceUse', defaultSpaceUse, ...
@@ -80,32 +81,17 @@ function y = initInputParser(functionName, ip)
         addParameter(ip, 'numTrees', 128);
         addParameter(ip, 'minLeafSize', 1);
         addParameter(ip, 'pairwise', 0);
+        addParameter(ip, 'permutations', 0);
     end
     
     switch functionName
-       case 'trainMulti'
-            addRequired(ip, 'X', @ismatrix);
-            addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'SVM', 'LDA', 'RF'};
-            addParameter(ip, 'classifier', defaultClassifier, ...
-                @(x) any(validatestring(x, expectedClassifier)));
-            addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
-            addParameter(ip, 'C', 1);
-       case 'predict'
-       case 'trainPairs'
-            addRequired(ip, 'X', @ismatrix);
-            addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'SVM', 'LDA', 'RF'};
-            addParameter(ip, 'classifier', defaultClassifier, ...
-                @(x) any(validatestring(x, expectedClassifier)));
-            addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
-            addParameter(ip, 'C', 1);
        case 'crossValidateMulti'
             addRequired(ip, 'X', @ismatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'nFolds', defaultNFolds);
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'crossValidatePairs'
@@ -114,6 +100,7 @@ function y = initInputParser(functionName, ip)
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'nFolds', defaultNFolds);
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'crossValidateMulti_opt'
@@ -122,6 +109,7 @@ function y = initInputParser(functionName, ip)
             expectedClassifier = {'SVM', 'svm'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'nFolds', defaultNFolds);
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
             addParameter(ip, 'trainDevTestSplit', defaultTrainDevTestSplit);
@@ -132,9 +120,27 @@ function y = initInputParser(functionName, ip)
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'nFolds', defaultNFolds);
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
+            addParameter(ip, 'trainDevTestSplit', defaultTrainDevTestSplit);
             addParameter(ip, 'nestedCV', defaultNestedCV);
+       case 'trainMulti'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
+            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            addParameter(ip, 'classifier', defaultClassifier, ...
+                @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
+            addParameter(ip, 'C', 1);
+       case 'trainPairs'
+            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'Y', @isvector);
+            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            addParameter(ip, 'classifier', defaultClassifier, ...
+                @(x) any(validatestring(x, expectedClassifier)));
+            addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
+            addParameter(ip, 'C', 1);
        case 'trainPairs_opt'
             addRequired(ip, 'X', @ismatrix);
             addRequired(ip, 'Y', @isvector);
@@ -154,6 +160,8 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
             addParameter(ip, 'nestedCV', defaultNestedCV);
+            addParameter(ip, 'trainDevSplit', defaultTrainDevSplit);
+
        otherwise
           error(['parseInputs() must be called from one of the following functions:' ...
           'trainMulti.m, predict.m, trainPairs.m,' ...

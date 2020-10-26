@@ -31,13 +31,18 @@ C_tt_pairs_opt = RSA.Classification.predict( M, testData, testLabels);
 
 %%
 
-M = RSA.classify.trainPairs_opt( trainData , trainLabels, ...
+M = RSA.Classification.trainPairs_opt( trainData , trainLabels, ...
     'classifier', 'SVM', 'PCA', .99, 'randomSeed', 1);
-C = RSA.classify.predict(M, testData, testLabels);
+C = RSA.Classification.predict(M, testData, testLabels);
 
 %%
 
-M = RSA.classify.trainPairs( trainData , trainLabels, ...
+M = RSA.Classification.trainPairs( trainData , trainLabels, ...
     'classifier', 'RF', 'PCA', 0, 'randomSeed', 1);
-C = RSA.classify.predict(M, testData, testLabels);
+C = RSA.Classification.predict(M, testData, testLabels);
 
+%%
+
+M = RSA.Classification.trainPairs( trainData , trainLabels, ...
+    'classifier', 'LDA', 'PCA', 0);
+C = RSA.Classification.predict(M, testData, testLabels, 'permutations', 100);

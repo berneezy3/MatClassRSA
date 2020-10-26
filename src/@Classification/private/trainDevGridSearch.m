@@ -1,10 +1,10 @@
-function [gamma_opt, C_opt] = trainTestGridSearch(trainX, trainY, testX, testY, gammas, Cs, kernel)
+function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, testX, testY, gammas, Cs, kernel)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2020.
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% mdl = trainTestGridSearch(X, Y, gammaRange, cRange)
+% mdl = trainDevGridSearch(X, Y, gammaRange, cRange)
 % --------------------------------
 % Bernard Wang, April 5, 2020
 %
@@ -68,9 +68,10 @@ function [gamma_opt, C_opt] = trainTestGridSearch(trainX, trainY, testX, testY, 
     
     for i = 1:length(Cs)
         for j = 1:length(gammas)
-            tempM = RSA.Classification.trainMulti(trainX, trainY, 'PCA', -1, ...
-                'classifier', 'SVM','C', Cs(i), 'gamma', gammas(j), 'kernel', kernel);
-            tempC = RSA.Classification.predict(tempM, testX, testY);
+            [~, tempM] = evalc(['RSA.Classification.trainMulti(' ... 
+                'trainX, trainY, ''PCA'', -1, ''classifier'', ''SVM'',''C'', '...
+                'Cs(i), ''gamma'', gammas(j), ''kernel'', kernel);']);
+            [~, tempC] = evalc( 'RSA.Classification.predict(tempM, testX, testY);');
             accGrid(i,j) = tempC.accuracy;
             cGrid{i,j} = tempC;
         end

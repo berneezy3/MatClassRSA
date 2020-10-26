@@ -194,10 +194,14 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
     end
     
     if ( ~ip.Results.nestedCV )
-        tdtSplit = processTrainDevSplit(ip.Results.trainDevSplit, X)
-        trainData = X;
+        tdtSplit = processTrainDevTestSplit([ip.Results.trainDevSplit 0], X);
+        trainData = X(1:tdtSplit(1), :);
+        trainLabels = Y(1:tdtSplit(1));
+        devData = X(tdtSplit(1):end, :);
+        devLabels = Y(tdtSplit(1):end);
     else
         trainData = X;
+        trainLabels = Y;
     end
     
     % PCA
@@ -233,7 +237,8 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
     classifierInfo.pairwise = ip.Results.pairwise;
     classifierInfo.colMeans = colMeans;
     classifierInfo.colScales = colScales;
-    
+    classifierInfo.ip = ip;
+
     switch classifierInfo.classifier
         case 'SVM'
             classifierInfo.kernel = ip.Results.kernel;
@@ -258,9 +263,9 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
     % conduct grid search here
     % train/dev/test optimization
     if (~ip.Results.nestedCV)
-        [gamma_opt, C_opt] = trainTestGridSearch(trainData, Y(:), ...
+        [gamma_opt, C_opt] = trainDevGridSearch(trainData,trainLabels, devData, devLabels, ...
             ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
-        [mdl, scale] = fitModel(trainData, Y(:), ip, gamma_opt, C_opt);
+        [mdl, scale] = fitModel(X, Y, ip, gamma_opt, C_opt);
     else
     % nested CV optimization
         [gamma_opt, C_opt] = nestedCvGridSearch(trainData, Y(:), ...
@@ -274,7 +279,9 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
     M.scale = scale;
     M.pairwise = 0;
     M.classifier = ip.Results.classifier;
-
+    M.trainData = X;
+    M.trainLabels = Y;
+    M.functionName = namestr;
 
     disp('Training Finished...')
     disp('Returning Model')

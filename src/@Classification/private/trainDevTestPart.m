@@ -1,4 +1,4 @@
-function obj = trainDevTestPart(numTrials, nFolds, trainDevTestSplit)
+function obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
@@ -59,10 +59,19 @@ function obj = trainDevTestPart(numTrials, nFolds, trainDevTestSplit)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
+
+[numTrials c] = size(X);
     
-
-
 assert(numTrials >= nFolds, 'first parameter, k, must be lager than second parameter, n');
+
+trainDevTestSplit = processTrainDevTestSplit(trainDevTestSplit, X);
+
+obj.optimize = 1;
+
+if length(trainDevTestSplit) == 2
+    trainDevTestSplit = [trainDevTestSplit(1) 0 trainDevTestSplit(2)];''
+    obj.optimize = 0;
+end
 
 obj.train = {};
 obj.dev = {};
@@ -82,7 +91,7 @@ testSize = trainDevTestSplit(3);
 %get remainder
 remainder = rem(numTrials, nFolds);
 
-% foldSize is the number of trials each fold
+% foldSize is the number of trials each test fold
 foldSize = floor(numTrials/nFolds);
 
 %case divisible
@@ -92,8 +101,8 @@ if remainder == 0
         % indices of test trials for this fold
         testIndices = zeros( numTrials,1 );
         
-        for j = 1:foldSize
-            testIndices(j+(i-1)*foldSize) = 1;
+        for j = 1:testSize
+            testIndices(j+(i-1)*testSize) = 1;
         end
         
         % the train/dev indices indices should consist of the
@@ -117,8 +126,8 @@ else
     % handle non-remainders
     for i = 1:nFolds
         testIndices = zeros( numTrials,1 );
-        for j = 1:foldSize
-            testIndices(j+ (i-1)*foldSize) = 1;
+        for j = 1:testSize
+            testIndices(j+ (i-1)*testSize) = 1;
             indexlocation = indexlocation + 1;
         end
 
@@ -139,7 +148,7 @@ else
     % handle remainders
     disp("numTrials not divisible by nFolds.  Putting remainder trials within a new fold");
     testIndices = zeros( numTrials,1 );
-    testIndices(nFolds * foldSize + 1:end) = 1;
+    testIndices(nFolds * testSize + 1:end) = 1;
 
     trainIndices = testIndices == 0;
     trainIndices = trainIndices(1:trainSize);

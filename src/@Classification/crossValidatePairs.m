@@ -210,11 +210,20 @@
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    partition = cvpart(r, ip.Results.nFolds);
-    tic 
+
+    % partition data for cross validation 
+    trainTestSplit = [1-1/ip.Results.nFolds 1/ip.Results.nFolds];
+    partition = trainDevTestPart(X, ip.Results.nFolds, trainTestSplit); 
     cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
+
+    % Permutation Testing
+    tic    
+    if ip.Results.permutations > 0
+        % return distribution of accuracies (Correct clasification percentage)
+        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
+                    ip.Results.classifier, trainTestSplit, ip);
+    end
     toc
-    
     
     % CROSS VALIDATION
     disp('Cross Validating')

@@ -12,11 +12,11 @@ averageTrials = {'off'; 'on'};
 dataSplit = {'N/A'; 'N/A'};
 PCA = {'0'; '.99'};
 
-%%
-
 RSA = MatClassRSA;
 
 [X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
+
+%%
 tic
 C_multi = RSA.Classification.crossValidateMulti(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'LDA', 'PCAinFold', 0);
 toc
@@ -24,7 +24,12 @@ accuracy(1) = C_multi.accuracy;
 
 %%
 
-C_mutli = RSA.Classification.crossValidateMulti(X, Y, 'PCA', 0, 'classifier', 'RF', 'PCAinFold', 0);
+C_multi = RSA.Classification.crossValidateMulti(X, Y, 'PCA', 0, 'classifier', 'RF', 'PCAinFold', 0);
+
+
+%% test permutation testing
+
+C_multi = RSA.Classification.crossValidateMulti(X, Y, 'PCA', 0, 'classifier', 'LDA', 'PCAinFold', 0, 'permutations', 200);
 
 
 %% S06 

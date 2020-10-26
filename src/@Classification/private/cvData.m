@@ -1,10 +1,10 @@
-function obj = cvData(X, Y, cvPart, ip, center, scale)
-% cvDataObj = cvData(X,Y, partition, PCA, PCAinFold);
+function obj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
+% cvDataObj = cvData_opt(X,Y, partition, PCA, PCAinFold);
 % --------------------------------
 % Bernard Wang, August 17, 2017
 % 
 % cvData is an object that stores data to be used for cross validation.  It
-% takes as input the X, Y data matrices, the cvpart object, then the PCA
+% takes as input the X, Y data matrices, the trainDevTestSplit object, then the PCA
 % parameters specificed in the classifyCrossValidate() function call.  It
 % formats the data into partitions to enable convineint cross validation
 % later.  
@@ -12,12 +12,12 @@ function obj = cvData(X, Y, cvPart, ip, center, scale)
 % INPUT ARGS:
 %   - X: training data (2D)
 %   - Y: labels
-%   - partition: object of class cvpart
+%   - partition: object of class trainDevTestSplit
 %   - PCA: ip.Results.PCA parameter specified in classifyCrossValidate() 
 %   - kPCAinFold: ip.Results.PCAinFold specified in classifyCrossValidate() 
 %
 % OUTPUT ARGS:
-%   - obj:  an object of the cvpart class
+%   - obj:  an object of the trainDevTestSplit class
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -51,96 +51,123 @@ function obj = cvData(X, Y, cvPart, ip, center, scale)
 % POSSIBILITY OF SUCH DAMAGE.
     
 
-        PCA = ip.Results.PCA;
-        PCAinFold = ip.Results.PCAinFold;
+    PCA = ip.Results.PCA;
+    PCAinFold = ip.Results.PCAinFold;
 
-        trainXall = {};
-        testXall = {};
-        trainYall = {};
-        testYall = {};
-        %parpool;
-        % DO PCA
-        if (PCA >0)
-            % outside of folds
-            if (PCAinFold == 0)
-                %disp('Extracting principal components');
+    if (isfield(ip.Results,'nFolds'))
+        nFolds = ip.Results.nFolds;
+    end
+
+    obj = struct();
+    obj.optimize = trainDevTestSplit.optimize;
+
+    trainXall = {};
+    devXall = {};
+    testXall = {};
+    trainYall = {};
+    devYall = {};
+    testYall = {};
+    %parpool;
+    % DO PCA
+    if (PCA >0)
+        % outside of folds
+        if (PCAinFold == 0)
+            %disp('Extracting principal components');
 %                     keyboard;
-                [X, ~, ~] = centerAndScaleData(X, center, scale);
-%                     keyboard
-                X = getPCs(X, PCA);
-
-                for i = 1:cvPart.NumTestSets
-                    trainIndx = find(cvPart.training{i});
-                    testIndx = find(cvPart.training{i} == 0);
-                    trainX = X(trainIndx, :);
-                    trainY = Y(trainIndx);
-                    testX = X(testIndx, :);
-                    testY = Y(testIndx);
-
-
-                    trainXall = [trainXall {trainX}];
-                    testXall = [testXall {testX}];
-                    trainYall = [trainYall {trainY}];
-                    testYall = [testYall {testY}];
-                end
-            % inside folds    
-            else
-                [r c] = size(X);
-
-                for i = 1:ip.Results.nFolds
-                    disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(cvPart.NumTestSets)]);                
-                    trainIndx = find(cvPart.training{i});
-                    testIndx = find(cvPart.training{i} == 0);
-                    trainX = X(trainIndx, :);
-                    % center and scale training data
-                    [trainX, colMeans, colScales] = ...
-                        centerAndScaleData(trainX, center, scale);
-                    trainY = Y(trainIndx);
-
-                    testX = X(testIndx, :);
-                    % accordingly center and scale test data
-                        [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
-                    testY = Y(testIndx);
-
-                    % PCA after data center/scaling
-                    if (PCAinFold == 1)
-                        [trainX, V, nPC] = getPCs(trainX, PCA);
-                        testX = testX*V;
-                        testX = testX(:,1:nPC);
-                    end
-                    trainXall = [trainXall {trainX}];
-                    testXall = [testXall {testX}];
-                    trainYall = [trainYall {trainY}];
-                    testYall = [testYall {testY}];
-                end
-
-            end
-        % DONT DO PCA
-        else
             [X, ~, ~] = centerAndScaleData(X, center, scale);
-            for i = 1:ip.Results.nFolds
-                trainIndx = find(cvPart.training{i});
-                testIndx = find(cvPart.training{i} == 0);
+%                     keyboard
+            X = getPCs(X, PCA);
+
+            for i = 1:trainDevTestSplit.NumTestSets
+                trainIndx = find(trainDevTestSplit.train{i});
+                devIndx = find(trainDevTestSplit.dev{i});
+                testIndx = find(trainDevTestSplit.test{i} == 0);
+
                 trainX = X(trainIndx, :);
                 trainY = Y(trainIndx);
+                devX = X(devIndx, :);
+                devY = Y(devIndx);
                 testX = X(testIndx, :);
                 testY = Y(testIndx);
 
                 trainXall = [trainXall {trainX}];
+                devXall = [devXall {devX}];
                 testXall = [testXall {testX}];
                 trainYall = [trainYall {trainY}];
+                devYall = [devYall {devY}];
                 testYall = [testYall {testY}];
+            end
+        % inside folds    
+        else
+            [r c] = size(X);
+
+            for i = 1:ip.Results.nFolds
+                disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(trainDevTestSplit.NumTestSets)]);                
+                trainIndx = find(trainDevTestSplit.train{i});
+                devIndx = find(trainDevTestSplit.dev{i});
+                testIndx = find(trainDevTestSplit.test{i} == 0);
+
+                trainX = X(trainIndx, :);
+                % center and scale training data
+                [trainX, colMeans, colScales] = ...
+                    centerAndScaleData(trainX, center, scale);
+                trainY = Y(trainIndx);
+
+                devX = X(devIndx, :);
+                testX = X(testIndx, :);
+                % accordingly center and scale test data
+                    [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
+                    [devX, ~, ~] = centerAndScaleData(devX, colMeans, colScales);
+                devY = Y(devIndx, :);    
+                testY = Y(testIndx);
+
+                % PCA after data center/scaling
+                if (PCAinFold == 1)
+                    [trainX, V, nPC] = getPCs(trainX, PCA);
+                    testX = testX*V;
+                    testX = testX(:,1:nPC);
+                    devX = devX*V;
+                    devX = devX(:,1:nPC);
+                end
+                trainXall = [trainXall {trainX}];
+                devXall = [devXall {devX}];
+                testXall = [testXall {testX}];
+                trainYall = [trainYall {trainY}];
+                devYall = [devXall {devX}];
+                testYall = [testYall {testY}];        
             end
 
         end
+    % DONT DO PCA
+    else
+        if (~isnan(center) && ~isnan(scale))
+            [X, ~, ~] = centerAndScaleData(X, center, scale);
+        end
+        for i = 1:nFolds
+            trainIndx = find(trainDevTestSplit.train{i});
+            devIndx = find(trainDevTestSplit.dev{i});
+            testIndx = find(trainDevTestSplit.test{i} == 0);
+            trainX = X(trainIndx, :);
+            trainY = Y(trainIndx);
+            devX = X(devIndx, :);
+            devY = Y(devIndx, :);
+            testX = X(testIndx, :);
+            testY = Y(testIndx);
 
-        obj.trainXall = trainXall;
-        obj.testXall = testXall;
-        obj.trainYall = trainYall;
-        obj.testYall = testYall;
+            trainXall = [trainXall {trainX}];
+            devXall = [devXall {devX}];
+            testXall = [testXall {testX}];
+            trainYall = [trainYall {trainY}];
+            devYall = [devXall {devX}];
+            testYall = [testYall {testY}];
+        end
 
-        %delete(gcp('nocreate'));
-
-
-  end
+    end
+    obj.trainXall = trainXall;
+    obj.devXall = devXall;
+    obj.testXall = testXall;
+    obj.trainYall = trainYall;
+    obj.devYall = devYall;
+    obj.testYall = testYall;
+end
       

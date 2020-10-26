@@ -137,6 +137,8 @@
 % TODO : FINISH DOCSTRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    tic
+
     % Initialize the input parser
     st = dbstack;
     namestr = st.name;
@@ -220,16 +222,20 @@
         ipCenter = true;
     end
     
-    tic
-    if ( ~ip.Results.nestedCV )
-        tdtSplit = processTrainDevTestSplit(ip.Results.trainDevTestSplit, X, ip.Results.nFolds)
-        partition = trainDevTestPart(r, ip.Results.nFolds, tdtSplit);
-        cvDataObj = cvData_opt(X,Y, partition, ip, ipCenter, ipScale);
-    else
-        partition = cvpart(r, ip.Results.nFolds);
-        cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
+
+
+    partition = trainDevTestPart(X, ip.Results.nFolds, ip.Results.trainDevTestSplit);
+    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
+    
+    %PERMUTATION TEST (assigning)
+    tic    
+    if ip.Results.permutations > 0
+        % return distribution of accuracies (Correct clasification percentage)
+        accDist = permuteModel(X, Y, cvDataObj, 1, ip.Results.permutations , ...
+                    ip.Results.classifier, partition, ip);
     end
     toc
+
     
     % CROSS VALIDATION
     disp('Cross Validating')
@@ -239,6 +245,7 @@
         % Special case of fitting model with no test set (argh)
         error('nFolds must be a integer value greater than 1');
     end
+    
 
     % if nFolds < 0 | ceil(nFolds) ~= floor(nFolds) | nFolds > nTrials
     %   error, nFolds must be an integer between 2 and nTrials to perform CV
@@ -267,10 +274,9 @@
     
         disp('Conducting CV w/ train/dev/test split');
 
-        tic
         for i = 1:ip.Results.nFolds
 
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+            disp(['Processing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
 
             trainX = cvDataObj.trainXall{i};
             trainY = cvDataObj.trainYall{i};
@@ -280,7 +286,7 @@
             testY = cvDataObj.testYall{i};
 
             % conduct grid search here
-            [gamma_opt, C_opt] = trainTestGridSearch(trainX, trainY, devX, devY, ...
+            [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ...
                 ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
 
             %[mdl, scale] = fitModel(trainX, trainY, ip);
@@ -295,6 +301,8 @@
             modelsConcat{i} = M.mdl;
 
             C.CM = confusionmat(labelsConcat, predictionsConcat); 
+            C.gamma_opt = gamma_opt;
+            C.C_opt = C_opt;
 
         end
 
@@ -329,18 +337,24 @@
             modelsConcat{i} = M.mdl;
 
             C.CM = confusionmat(labelsConcat, predictionsConcat);
+            C.gamma_opt = gamma_opt;
+            C.C_opt = C_opt;
             
         % END INNER CV FOLD
 
         end
 
     end
-    toc
     
     C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.classificationInfo = classificationInfo;
+    C.elapsedTime = toc;
+    if ip.Results.permutations > 0
+        C.pVal = permTestPVal(C.accuracy, accDist);
+    end
     disp('classifyCrossValidate() Finished!')
+    disp(['Elapsed time: ' num2str(C.elapsedTime)])
     
  end

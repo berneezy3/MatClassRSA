@@ -30,6 +30,15 @@ tic
 C_opt_nested = RSA.Classification.crossValidateMulti_opt(X_shuf, Y_shuf, ...
     'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'nestedCV', 1);
 toc
+
+%%
+C_opt_nested = RSA.Classification.crossValidateMulti_opt(X_shuf, Y_shuf, ...
+    'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'nestedCV', 1, 'permutations', 100);
+
+%%
+C_opt_tdt = RSA.Classification.crossValidateMulti_opt(X_shuf, Y_shuf, ...
+    'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'trainDevTestSplit', [.8 .1 .1], 'permutations', 100);
+
 %% run optimized SVM on Blair's S06 data 
 
 load 'S06.mat'

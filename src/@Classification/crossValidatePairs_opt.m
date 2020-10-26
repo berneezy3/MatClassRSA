@@ -218,6 +218,16 @@
     toc
     
     
+    %PERMUTATION TEST (assigning)
+    tic    
+    if ip.Results.permutations > 0
+        % return distribution of accuracies (Correct clasification percentage)
+        accDist = permuteModel(X, Y, cvDataObj, 1, ip.Results.permutations , ...
+                    ip.Results.classifier, ip);
+    end
+    toc
+    
+    
     % CROSS VALIDATION
     disp('Cross Validating')
     
@@ -260,10 +270,10 @@
         for cat1 = 1:numClasses-1
             for cat2 = (cat1+1):numClasses
                 disp([num2str(cat1) ' vs ' num2str(cat2)]) 
-                currUse = ismember(Y, [cat1 cat2]);
+                useTrials = ismember(Y, [cat1 cat2]);
       
-                tempX = X(currUse, :);
-                tempY = Y(currUse);
+                tempX = X(useTrials, :);
+                tempY = Y(useTrials);
                 tempStruct = struct();
                 % Store the accuracy in the accMatrix
                 [~, tempC] = evalc([' RSA.Classification.crossValidateMulti_opt(tempX, tempY, ' ...
@@ -274,7 +284,7 @@
                 
                 tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
                 tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
-%                 tempStruct.dataPoints = find(currUse);
+%                 tempStruct.dataPoints = find(useTrials);
                 tempStruct.actualY = tempY;
                 tempStruct.predY = tempC.predY;
                 

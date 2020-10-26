@@ -17,7 +17,7 @@ PCA = {'0'; '.99'};
 RSA = MatClassRSA;
 [X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
 tic
-C_pairs = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0);
+C_pairs = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0, 'permutations', 100);
 toc
 
 %% SVM (PCA)

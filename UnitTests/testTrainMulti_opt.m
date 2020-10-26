@@ -19,10 +19,15 @@ trainData = X_shuf(1:floor(r*9/10), :);
 trainLabels = Y_shuf(1:floor(r*9/10));
 testData = X_shuf(floor(r*9/10)+1:end, :);
 testLabels = Y_shuf(floor(r*9/10)+1:end);
+
+%%
+
 M = RSA.Classification.trainMulti_opt( trainData , trainLabels, ...
     'classifier', 'SVM', 'PCA', 0, 'randomSeed', 1);
-C_tt_multi_opt = RSA.Classification.predict( M, testData, testLabels);
 
+%%
+
+C_tt_multi_opt = RSA.Classification.predict( M, testData, testLabels, 'permutations', 100);
 accuracy(1) = C_tt_multi_opt.accuracy;
 
 %% S06 
@@ -41,9 +46,11 @@ trainLabels = Y_avg(1:floor(r*9/10));
 testData = X_avg(floor(r*9/10)+1:end, :);
 testLabels = Y_avg(floor(r*9/10)+1:end);
 
-M = RSA.classify.trainMulti_opt( trainData, trainLabels, ...
+%%
+
+M = RSA.Classification.trainMulti_opt( trainData, trainLabels, ...
     'classifier', 'SVM', 'PCA', .99);
-C = RSA.classify.predict( M, testData, testLabels);
+C = RSA.Classification.predict( M, testData, testLabels);
 accuracy(2) = C.accuracy;
 
 %% log results

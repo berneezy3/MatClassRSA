@@ -76,6 +76,9 @@ function [P, varargout] = predict(obj, M, X, varargin)
     ip = inputParser;
     ip.CaseSensitive = false;
     
+    st = dbstack;
+    namestr = st.name;
+    
     addRequired(ip, 'M');
     addRequired(ip, 'X', @is2Dor3DMatrix);
     defaultY = NaN;
@@ -85,11 +88,10 @@ function [P, varargout] = predict(obj, M, X, varargin)
     addOptional(ip, 'actualLabels', defaultY, @isvector);
     addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
         || isequal('shuffle', x) || (isnumeric(x) && x > 0));
-    
+    addParameter(ip, 'permutations', 0);
 
     parse(ip, M, X, varargin{:});
 
-    
     tempInfo = M.classifierInfo;
     if length(M.classifierInfo) > 1 && iscell(M.classifierInfo)
         tempInfo = M.classifierInfo{1};
@@ -139,6 +141,27 @@ function [P, varargout] = predict(obj, M, X, varargin)
         else
             testData = X;
         end
+
+        %PERMUTATION TEST (assigning)
+        tic    
+        trainData = M.trainData;
+        trainLabels = M.trainLabels;
+        testData = X;
+        testLabels = ip.Results.actualLabels;
+        % partition data for cross validation 
+        trainTestSplit = [length(trainLabels) length(testLabels)];
+        partition = trainDevTestPart([trainData; testData], 1, trainTestSplit); 
+        cvDataObj = cvData([trainData; testData], [trainLabels; testLabels], ...
+                        partition, M.classifierInfo.ip, M.classifierInfo.colMeans, ...
+                        M.classifierInfo.colScales, 1);
+        if (ip.Results.permutations > 0) && sum(~isnan(ip.Results.actualLabels))
+            % return distribution of accuracies (Correct clasification percentage)
+            accDist = permuteModel(M.functionName, [trainData; testData], ...
+                        [trainLabels; testLabels], ...
+                        cvDataObj, 1, ip.Results.permutations , ...
+                        M.classifier, trainTestSplit, M.classifierInfo.ip);
+        end
+        toc
         
         P.predY = modelPredict(testData, M.mdl, M.scale);
     
@@ -213,8 +236,6 @@ function [P, varargout] = predict(obj, M, X, varargin)
             end
             
             predY{i} = modelPredict(testData, M.mdl{i}, M.scale{i});
-%             P.classBoundary{i} = [num2str(firstClass(i)) ' vs. ' num2str(secondClass(i))];
-%             P.predictionInfo{i}.classBoundary = decMatchups(i, :);
             P.classificationInfo.classBoundary{i} = [num2str(firstClass(i)) ' vs. ' num2str(secondClass(i))];
             
             tempStruct = struct();
@@ -238,18 +259,11 @@ function [P, varargout] = predict(obj, M, X, varargin)
             tempStruct.predY = predY';
             tempStruct.CM = thisCM;
                 
-                
-            %tempStruct.decision
-%             AM(class1, class2) = tempStruct.accuracy;
-%             AM(class2, class1) = tempStruct.accuracy;
-%             modelsConcat(:, classTuple2Nchoose2Ind([class1, class2], 6)) = ...
-%                 tempC.modelsConcat';
             pairwiseCell{class1, class2} = tempStruct;
             pairwiseCell{class2, class1} = tempStruct;
          
         end
         
-%         P.classificationInfo = M;
         P.pairwiseInfo = pairwiseCell;
         P.modelsConcat = M.mdl;
 

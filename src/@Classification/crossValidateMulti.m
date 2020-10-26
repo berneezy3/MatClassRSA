@@ -136,7 +136,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TODO : FINISH DOCSTRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    
+    tic
+    
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
@@ -198,27 +200,23 @@
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    partition = cvpart(r, ip.Results.nFolds);
-    tic 
+    % partition data for cross validation 
+    trainTestSplit = [1-1/ip.Results.nFolds 1/ip.Results.nFolds];
+    partition = trainDevTestPart(X, ip.Results.nFolds, trainTestSplit); 
     cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
+    
+
+    %PERMUTATION TEST (assigning)
+    tic    
+    if ip.Results.permutations > 0
+        % return distribution of accuracies (Correct clasification percentage)
+        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
+                    ip.Results.classifier, trainTestSplit, ip);
+    else
+        accDist = NaN;
+    end
     toc
-    
-% 
-%     %PERMUTATION TEST (assigning)
-%     [r c] = size(X);
-%     tic
-%     switch ip.Results.pValueMethod
-% %         case 'permuteTestLabels'
-% %             accDist = permuteTestLabels(Y, cvDataObj, ip);
-%         case 'permuteFullModel'
-%             accDist = permuteFullModel(Y, cvDataObj, ip);
-%         otherwise
-%             ;
-%     end
-%     toc
-    
-    
-    
+
     % CROSS VALIDATION
     disp('Cross Validating')
     
@@ -271,22 +269,6 @@
     end
     toc
 
-%{
-    % unshuffle predictions vector to return to user IF shuffle is on
-    predY = NaN;
-    if (ip.Results.shuffleData == 1)
-        predY = NaN(1, r);
-        for i = 1:r
-            predY(shuffledInd(i)) = predictionsConcat(i);
-        end
-    else
-        predY = predictionsConcat;
-    end
-%}
-
-%     pVal = permTestPVal(C.accuracy, accDist);
-
-
     % Initilize info struct for return
     classificationInfo = struct(...
                         'PCA', ip.Results.PCA, ...
@@ -299,7 +281,11 @@
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.dataPartitionObj = cvDataObj;
+    C.elapsedTime = toc;
+    C.pVal = permTestPVal(C.accuracy, accDist);
     disp('classifyCrossValidate() Finished!')
+    disp(['Elapsed time: ' num2str(C.elapsedTime)])
+
     
  end
     

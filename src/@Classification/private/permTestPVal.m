@@ -1,27 +1,21 @@
-function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, gammas, Cs, kernel)
+function p = permTestPVal(value, permVector, direction)
 %-------------------------------------------------------------------
-% (c) Bernard Wang and Blair Kaneshiro, 2020.
-% Published under a GNU General Public License (GPL)
-% Contact: bernardcwang@gmail.com
-%-------------------------------------------------------------------
-% mdl = gridSearch(X, Y, gammaRange, cRange)
-% --------------------------------
-% Bernard Wang, April 5, 2020
+% p = permTestPVal(value, permVector, [direction])
+% -------------------------------------------------
+% Blair - April 17, 2017
+% This function takes in the value of interest, a vector of other values
+% (presumably from a permutation test), and computes the percentile value
+% of the found value among the permutation test values.
+% From: https://www.mathworks.com/matlabcentral/answers/182131-percentile-of-a-value-based-on-array-of-data
 %
-% Given training data matrix X, label vector Y, and a vector of gamma's 
-% and C's to search over, this function runs cross validation over a grid 
-% of all possible combinations of gammas and C's.
-% 
-% INPUT ARGS:
-%   - gammas: 2D trial by feature training data matrix
-%   - Cs: label vector
-%   - kernel:  SVM classification kernel
-%
-% OUTPUT ARGS:
-%   - gamma_opt: gamma value that produces the highest cross validation
-%   accuracy
-%   - C_opt: C value that produces that highest cross validation accuracy
-%
+% Inputs:
+% - value: The computed value from intact data
+% - permVector: The vector of computed values from permutation tests
+% - direction (optional): The direction in which the value is compared.
+%   Enter -1 if the computed value is compared to the lower tail of the
+%   perm test distribution; enter 1 if to be compared to the upper tail of
+%   the perm test distribution. Default: Upper.
+
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------
@@ -53,30 +47,25 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, gammas, Cs, kernel)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-    accGrid = zeros(length(Cs), length(gammas));
-    cGrid = cell(length(Cs), length(gammas));
 
-    RSA = MatClassRSA;
-    for i = 1:length(Cs)
-        for j = 1:length(gammas)
-            
-            [~, tempC] = evalc(['RSA.Classification.crossValidateMulti(' ...
-                'X, Y, ''PCA'', -1, ''classifier'', ''SVM'',''C'', Cs(i), ' ...
-                ' ''gamma'', gammas(j), ''kernel'', kernel);']);
-            accGrid(i,j) = tempC.accuracy;
-            cGrid{i,j} = tempC;
-        end
-    end
-    
-    % get maximum accuracy, and return the gamma and C value for the
-    % maximum accuracy
-    
-    
-    [maxVal, maxIdx] = max(accGrid(:));
-    [xInd yInd] = ind2sub(size(accGrid), maxIdx);
-    
-    gamma_opt = gammas(yInd);
-    C_opt = Cs(xInd);
-    
-
+if ~exist('direction')
+    disp('No direction specified. Doing (default) upper tail calculation.')
+    direction = 1;
+elseif direction < 0
+    disp('Doing lower tail calculation.')
+    direction = -1;
+elseif direction > 0
+    disp('Doing upper tail calculation.')
+    direction = 1;
+elseif direction == 0
+    error('Please specify lower or upper tail calculation, or omit this argument to default to upper.')
 end
+
+switch direction
+    case 1
+        n_out = sum(permVector > value);   
+    case -1
+        n_out = sum(permVector < value);
+end
+nequal = sum(permVector == value);
+p = (n_out + 0.5*nequal) / length(permVector);

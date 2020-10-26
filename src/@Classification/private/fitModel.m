@@ -121,9 +121,9 @@ function [mdl, scale] = fitModel(X, Y, ip, gamma, C)
             scale = NaN;
             
         case 'RF'
-%             mdl = TreeBagger(ip.Results.numTrees, X, Y, ...
-%                 'OOBPrediction', 'on', 'minLeafSize', ip.Results.minLeafSize);
-            mdl = fitcensemble(X, Y, 'OptimizeHyperparameters','auto');
+            mdl = TreeBagger(ip.Results.numTrees, X, Y, ...
+                'OOBPrediction', 'on', 'minLeafSize', ip.Results.minLeafSize);
+%             mdl = fitcensemble(X, Y, 'OptimizeHyperparameters','auto');
             scale = NaN;
 
     end
