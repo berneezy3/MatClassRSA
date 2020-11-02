@@ -42,7 +42,8 @@ function y = initInputParser(functionName, ip)
     expectedScale = {0,1};
     
     
-    %Optional positional inputs
+    % Optional positional inputs
+    % The following parameters are added to every classification function
     if verLessThan('matlab', '8.2')
         addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
@@ -84,9 +85,12 @@ function y = initInputParser(functionName, ip)
         addParameter(ip, 'permutations', 0);
     end
     
+    
+    % The following parameters are individually added to each
+    % classification function
     switch functionName
        case 'crossValidateMulti'
-            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -94,8 +98,8 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'nFolds', defaultNFolds);
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
-       case 'crossValidatePairs'
-            addRequired(ip, 'X', @ismatrix);
+       case {'crossValidatePairs', 'crossValidatePairs_fast', 'crossValidatePairs_slow'}
+            addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -104,7 +108,7 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'crossValidateMulti_opt'
-            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'svm'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -115,9 +119,9 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'trainDevTestSplit', defaultTrainDevTestSplit);
             addParameter(ip, 'nestedCV', defaultNestedCV);
        case 'crossValidatePairs_opt'
-            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            expectedClassifier = {'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'nFolds', defaultNFolds);
@@ -126,7 +130,7 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'trainDevTestSplit', defaultTrainDevTestSplit);
             addParameter(ip, 'nestedCV', defaultNestedCV);
        case 'trainMulti'
-            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -134,7 +138,7 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'trainPairs'
-            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -142,16 +146,16 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'trainPairs_opt'
-            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            expectedClassifier = {'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
             addParameter(ip, 'nestedCV', defaultNestedCV);
        case 'trainMulti_opt'
-            addRequired(ip, 'X', @ismatrix);
+            addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
             defaultClassifier = 'SVM';

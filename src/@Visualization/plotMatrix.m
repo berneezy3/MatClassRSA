@@ -180,6 +180,7 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
     end
     
     
+
     
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -366,7 +367,8 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
         end
     end
         
-    
+    xlabel('Predicted Label');
+    ylabel('Actual Label');
     
 
 end

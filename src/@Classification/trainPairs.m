@@ -136,14 +136,11 @@
     %Required inputs
     ip = initInputParser(namestr, ip);
     parse(ip, X, Y, varargin{:});
-
-    [r c] = size(X);
             
     % Initilize info struct
     classifierInfo = struct(...
                         'PCA', ip.Results.PCA, ...
                         'PCAinFold', ip.Results.PCAinFold, ...
-                        'nFolds', ip.Results.nFolds, ...
                         'classifier', ip.Results.classifier);
 
     % throw error on missing data
@@ -173,14 +170,17 @@
         Y = Y';
     end
     
+    % Principal Componenet Analysis
+    tdtSplit = processTrainDevTestSplit([1 0 0], X);
+    partition = trainDevTestPart(X, 1, tdtSplit); 
+    [cvDataObj, V, nPC, colMeans, colScales] = cvData(X,Y, partition, ip, ...
+                                                ip.Results.center, ip.Results.scale, 1);
 
-    %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
-    % moving forward.
-    
     
     % Split data into pairs representing each combination of labels  
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses ,2);
+    classPairs = nchoosek(1:numClasses, 2);
     pairwiseMat3D = zeros(2,2, numDecBounds);
     % initialize the diagonal cell matrix of structs containing pairwise
     % classification infomration
@@ -195,23 +195,31 @@
     if (strcmp(upper(ip.Results.classifier), 'LDA') || ...
         strcmp(upper(ip.Results.classifier), 'RF') || ...
         strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA >0)
-    
-    j = 0;
-    
-    M.pairwise = 1;
-    M.classifier = ip.Results.classifier;
-    
-    % since we are returning multiple classification, we initialize the 
-    % return format to be cell array to hold multiple structs
-    M.mdl = {};
-    M.classifierInfo = {};
-    M.scale = {};
-    
-    for cat1 = 1:numClasses-1
-        for cat2 = (cat1+1):numClasses
-            j = j+1;
-            disp([num2str(cat1) ' vs ' num2str(cat2)]) 
-            currUse = ismember(Y, [cat1 cat2]);
+
+
+        M.pairwise = 1;
+        M.classifier = ip.Results.classifier;
+
+        % since we are returning multiple classification, we initialize the 
+        % return format to be cell array to hold multiple structs
+        M.mdl = {};
+        M.classifierInfo = {};
+        M.scale = {};
+        M.trainData = X;
+        M.trainLabels = Y;
+        M.functionName = namestr;
+        M.cvDataObj = cvDataObj;
+        M.ip = ip;
+
+        % Iterate through all combintaions of labels
+        for k = 1:numDecBounds
+                    
+        % class1 class2
+        class1 = classPairs(k, 1);
+        class2 = classPairs(k, 2);
+
+            disp([num2str(class1) ' vs ' num2str(class2)]) 
+            currUse = ismember(Y, [class1 class2]);
 
             tempX = X(currUse, :);
             tempY = Y(currUse);
@@ -227,11 +235,10 @@
                 ' ''scale'', ip.Results.scale, ' ...
                 ' ''randomSeed'', ''default'' ) ' ]);
             tempM.classifierInfo.numClasses = numClasses;
-            M.classifierInfo{j} =  tempM.classifierInfo;
-            M.mdl{j} = tempM.mdl;
-            M.scale{j} = tempM.scale;
+            M.classifierInfo{k} =  tempM.classifierInfo;
+            M.mdl{k} = tempM.mdl;
+            M.scale{k} = tempM.scale;
         end
-    end
     % END PAIRWISE LDA/RF
     % START SVM skipping the pairwise split to decrease runtime
     elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)

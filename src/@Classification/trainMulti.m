@@ -180,19 +180,21 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
     
     trainData = X;
     
+    tdtSplit = processTrainDevTestSplit([1 0 0], X);
+    partition = trainDevTestPart(X, 1, tdtSplit); 
+    
     % PCA
     if (ip.Results.PCA > 0)
         disp('Conducting Principal Component Analysis...')
-        % accordingly center and scale test data
-        [trainData, colMeans, colScales] = centerAndScaleData(trainData, ...
-            ipCenter, ipScale);
-        [trainData, V, nPC] = getPCs(trainData, ip.Results.PCA);
+        [cvDataObj, V, nPC, colMeans, colScales] = cvData(X,Y, partition, ip, ipCenter, ipScale);
     else 
         disp('Principal Component Analysis turned off')
-        V = NaN;
-        nPC = NaN;
-        colMeans = NaN;
-        colScales = NaN;
+%         V = NaN;
+%         nPC = NaN;
+%         colMeans = NaN;
+%         colScales = NaN;
+        [cvDataObj, V, nPC, colMeans, colScales] = cvData(X,Y, partition, ip, ipCenter, ipScale, 1);
+
     end
     
     % Train Model
@@ -233,44 +235,19 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
     disp(['classifying with ' ip.Results.classifier] )
     
     
-    if (ip.Results.pairwise == 0) || ...
-       ((ip.Results.pairwise == 1) && strcmp(ip.Results.classifier, 'SVM'))
+%     if ( strcmp(ip.Results.classifier, 'SVM'))
         
 
-        [mdl, scale] = fitModel(trainData, Y(:), ip, ip.Results.gamma, ip.Results.C);
-        M.classifierInfo = classifierInfo;
-        M.mdl = mdl;
-        M.scale = scale;
-        M.pairwise = 0;
-        M.classifier = ip.Results.classifier;
-        M.trainData = X;
-        M.trainLabels = Y;
-        M.functionName = namestr;
-
-        
-    elseif (ip.Results.pairwise == 1) && ...
-            (strcmp(ip.Results.classifier, 'LDA') || strcmp(ip.Results.classifier, 'RF'))
-        
-
-                
-%                 tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
-%                 tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
-%                 tempStruct.dataPoints = find(currUse);
-%                 tempStruct.predY = tempM.predY;
-%                 
-%                 %tempStruct.decision
-%                 pairwiseCell{cat1, cat2} = tempStruct;
-%                 pairwiseCell{cat2, cat1} = tempStruct;
-                
-%                 decInd = classTuple2Nchoose2Ind([cat1 cat2], numClasses);
-%                 if (tempC.predY)
-%                     
-%                 end
-                
-        end
-
-
-    
+    [mdl, scale] = fitModel(trainData, Y(:), ip, ip.Results.gamma, ip.Results.C);
+    M.classifierInfo = classifierInfo;
+    M.mdl = mdl;
+    M.scale = scale;
+    M.pairwise = 0;
+    M.classifier = ip.Results.classifier;
+    M.trainData = X;
+    M.trainLabels = Y;
+    M.functionName = namestr;
+    M.cvDataObj = cvDataObj;
     
     disp('Training Finished...')
     disp('Returning Model')

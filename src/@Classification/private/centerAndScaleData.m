@@ -2,7 +2,7 @@ function [xOut, centerOut, scaleOut] = centerAndScaleData(xIn, centering, scalin
 % [xOut, centerOut, scaleOut] = normalizeColumns(xIn, centering, scaling)
 % ------------------------------------------------------------------------
 % This function takes in a 2D data matrix, and optional centering/scaling
-% specifications, and centers and scales each data column as specified.
+% specifications, then centers and scales each data column as specified.
 %
 % Inputs
 % - xIn (required): 2D data matrix.

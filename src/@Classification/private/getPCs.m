@@ -65,6 +65,10 @@ function [y, V, nPC] = getPCs(X, PCs)
         nPC = find(cumsumDiagS>=explThresh, 1);
     elseif (PCs>=1)
         nPC = round(PCs);
+    elseif (PCs == 0)
+        [r c] = size(X);
+        V = 1;
+        nPC = c;
     end
 
     xPC = X * V;

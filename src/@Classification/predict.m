@@ -126,42 +126,47 @@ function [P, varargout] = predict(obj, M, X, varargin)
     RSA = MatClassRSA;    
     P = struct();
     
+    % Principal Component Analysis
+    %initialize variables
+    trainData = M.trainData;
+    trainLabels = M.trainLabels;
+    testLabels = ip.Results.actualLabels;        
+    trainTestSplit = [length(trainLabels) length(testLabels)];
+    
+    if (length(M.classifierInfo) > 1)
+        classifierInfo = M.classifierInfo{1};
+    else
+        classifierInfo = M.classifierInfo;
+    end
+
+    if (classifierInfo.PCA > 0) 
+        [X, ~, ~] = centerAndScaleData(X, M.classifierInfo.colMeans, M.classifierInfo.colScales);
+        testData = X*M.classifierInfo.PCA_V;
+        testData = testData(:,1:M.classifierInfo.PCA_nPC);
+    else
+        testData = X;
+    end
+
+        %PERMUTATION TEST (assigning)
+    if (ip.Results.permutations > 0) && sum(~isnan(ip.Results.actualLabels))
+        % return distribution of accuracies (Correct clasification percentage)
+
+        M.cvDataObj.testXall{1} = testData;
+        M.cvDataObj.testYall{1} = ip.Results.actualLabels;
+
+        accDist = permuteModel(M.functionName, [trainData; testData], ...
+                    [trainLabels; testLabels], ...
+                    M.cvDataObj, 1, ip.Results.permutations , ...
+                    M.classifier, trainTestSplit, M.ip);
+    end
+    
     % Predict Labels for Test Data
     disp('Predicting Model...')
         
     % CASE: multiclass classification
     if (M.pairwise == 0)
     
-        % If PCA was turned on for training, we will select principal
-        % compoenents for prediciton as well
-        if (M.classifierInfo.PCA > 0) 
-            [X, ~, ~] = centerAndScaleData(X, M.classifierInfo.colMeans, M.classifierInfo.colScales);
-            testData = X*M.classifierInfo.PCA_V;
-            testData = testData(:,1:M.classifierInfo.PCA_nPC);
-        else
-            testData = X;
-        end
 
-        %PERMUTATION TEST (assigning)
-        tic    
-        trainData = M.trainData;
-        trainLabels = M.trainLabels;
-        testData = X;
-        testLabels = ip.Results.actualLabels;
-        % partition data for cross validation 
-        trainTestSplit = [length(trainLabels) length(testLabels)];
-        partition = trainDevTestPart([trainData; testData], 1, trainTestSplit); 
-        cvDataObj = cvData([trainData; testData], [trainLabels; testLabels], ...
-                        partition, M.classifierInfo.ip, M.classifierInfo.colMeans, ...
-                        M.classifierInfo.colScales, 1);
-        if (ip.Results.permutations > 0) && sum(~isnan(ip.Results.actualLabels))
-            % return distribution of accuracies (Correct clasification percentage)
-            accDist = permuteModel(M.functionName, [trainData; testData], ...
-                        [trainLabels; testLabels], ...
-                        cvDataObj, 1, ip.Results.permutations , ...
-                        M.classifier, trainTestSplit, M.classifierInfo.ip);
-        end
-        toc
         
         P.predY = modelPredict(testData, M.mdl, M.scale);
     
@@ -170,6 +175,9 @@ function [P, varargout] = predict(obj, M, X, varargin)
             Y = ip.Results.actualLabels;
             P.accuracy = computeAccuracy(P.predY, Y); 
             P.CM = confusionmat(Y, P.predY);
+            if ( ip.Results.permutations ~= 0 )
+                P.pVal = permTestPVal(P.accuracy, accDist);
+            end
         else
             P.accuracy = NaN; 
             P.CM = NaN;
@@ -264,6 +272,17 @@ function [P, varargout] = predict(obj, M, X, varargin)
          
         end
         
+        % calculate pVal return matrix for all pairs. 
+        if (ip.Results.permutations > 0) && sum(~isnan(ip.Results.actualLabels))
+            P.pVal = nan(numClasses, numClasses);
+            for class1 = 1:numClasses-1
+                for class2 = (class1+1):numClasses
+                    thisAccDist = accDist(class1, class2, :);
+                    P.pVal(class1, class2) = permTestPVal(P.AM(class1, class2), thisAccDist);
+                    P.pVal(class2, class1) = P.pVal(class1, class2);
+                end
+            end
+        end
         P.pairwiseInfo = pairwiseCell;
         P.modelsConcat = M.mdl;
 
@@ -315,21 +334,10 @@ function [P, varargout] = predict(obj, M, X, varargin)
             decValues2PairwiseAcc(pairwiseMat3D, ip.Results.actualLabels, M.mdl.Label, decision_values, pairwiseCell);
         end
         
-        for i = 1:numDecBounds
-%             P.predY{i} = allPredictions(:, i);
-%             P.actualY{i} = ip.Results.actualLabels(currUse);
-
-%             P.classBoundary{i} = [ decMatchups(i,1) ' vs. ' decMatchups(i,2)];
-%             P.predictionInfo{i}.classBoundary = decMatchups(i,:);
-%             P.accuracy{i} = predictions/;
-        end
-        
         P.mdl = M.mdl;
         P.classificationInfo = struct(...
             'PCA', M.classifierInfo.PCA, ...
             'classifier', M.classifierInfo.classifier);
-%         P.predictionInfo = predictionInfo;
-%         P.pairwiseInfo = ;
         
     end
     

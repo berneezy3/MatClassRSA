@@ -1,4 +1,4 @@
- function C = crossValidatePairs(obj, X, Y, varargin)
+ function C = crossValidatePairs_slow(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % C = crossValidatePairs(X, Y, varargin)
 % -------------------------------------------------------------------------
@@ -217,11 +217,13 @@
     cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
 
     % Permutation Testing
+    tic    
     if ip.Results.permutations > 0
         % return distribution of accuracies (Correct clasification percentage)
         accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
                     ip.Results.classifier, trainTestSplit, ip);
     end
+    toc
     
     % CROSS VALIDATION
     disp('Cross Validating')
@@ -244,7 +246,6 @@
        
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses ,2);
-    classPairs = nchoosek(1:numClasses, 2);
     pairwiseMat3D = zeros(2,2, numDecBounds);
     % initialize the diagonal cell matrix of structs containing pairwise
     % classification infomration
@@ -255,130 +256,89 @@
     CM = NaN;
     RSA = MatClassRSA;
    
-    % PAIRWISE LDA/RF/SVM(w/ PCA)
-    if (strcmp(upper(ip.Results.classifier), 'LDA') || ...
-        strcmp(upper(ip.Results.classifier), 'RF') || ...
-        strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA > 0)
+    % PAIRWISE SVM(redoing the pairwise splitting)
+    decision_values = NaN(length(Y), numDecBounds);
+    AM = NaN(numClasses, numClasses);
     
-        AM = NaN(numClasses, numClasses);
-        predictionsCell = cell(numClasses);
-        actualLabelsCell = cell(numClasses);
-        
-        for i = 1:ip.Results.nFolds
+    % initialize variables for storing the predictions for each pair
+    % Each element of these cell array will contain a concatenated list of
+    % predictions/labels for each pair of classes
+    predictionsCell = cell(numClasses);
+    actualLabelsCell = cell(numClasses);
+    
+    for i = 1:ip.Results.nFolds
                  
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
-            trainX = cvDataObj.trainXall{i};
-            trainY = cvDataObj.trainYall{i};
-            testX = cvDataObj.testXall{i};
-            testY = cvDataObj.testYall{i};
-
-            % Iterate through all combintaions of labels
-            for k = 1:numDecBounds
-
-                % class1 class2
-                class1 = classPairs(k, 1);
-                class2 = classPairs(k, 2);
-                
-                    %disp([num2str(class1) ' vs ' num2str(class2)]); 
-                    trainInd = ismember(trainY, [class1 class2]);
-                    testInd = ismember(testY, [class1 class2]);
-
-                    % select trials/labels representing current pair of classes
-                    trainX_tmp = trainX(trainInd, :);
-                    testX_tmp = testX(testInd, :);
-                    trainY_tmp = trainY(trainInd, :);
-                    testY_tmp = testY(testInd, :);
-                    tempStruct = struct();
-                    
-                    [mdl, scale] = fitModel(trainX_tmp, trainY_tmp, ip, ip.Results.gamma, ip.Results.C);
-
-                    [predictions decision_values] = modelPredict(testX_tmp, mdl, scale);
-
-                    actualLabelsCell{class1, class2} = [actualLabelsCell{class1, class2} testY_tmp'];
-                    predictionsCell{class1, class2} = [predictionsCell{class1, class2} predictions];
-                    modelsConcat{i} = mdl; 
-
-%                     tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
-%                     tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
-%                     tempStruct.actualY = tempY;
-%                     tempStruct.predY = tempC.predY';
-% 
-% 
-%                     %tempStruct.decision
-%                     AM(class1, class2) = tempStruct.accuracy;
-%                     AM(class2, class1) = tempStruct.accuracy;
-%                     modelsConcat(:, classTuple2Nchoose2Ind([class1, class2], 6)) = ...
-%                         tempC.modelsConcat';
-%                     pairwiseCell{class1, class2} = tempStruct;
-%                     pairwiseCell{class2, class1} = tempStruct;
-% 
-%                     decInd = classTuple2Nchoose2Ind([class1 class2], numClasses);
-
-
-            end
-        end
+        disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+        trainX = cvDataObj.trainXall{i};
+        trainY = cvDataObj.trainYall{i};
+        testX = cvDataObj.testXall{i};
+        testY = cvDataObj.testYall{i};
         
+        % Iterate through all combintaions of labels
         for class1 = 1:numClasses-1
             for class2 = (class1+1):numClasses
-                actualLabels = actualLabelsCell{class1, class2};
-                predictions = predictionsCell{class1, class2};
-                AM(class1, class2) = computeAccuracy(actualLabels, predictions);
-                AM(class2, class1) = computeAccuracy(actualLabels, predictions);
+   
+                %disp([num2str(class1) ' vs ' num2str(class2)]); 
+                trainInd = ismember(trainY, [class1 class2]);
+                testInd = ismember(testY, [class1 class2]);
+
+                % select trials/labels representing current pair of classes
+                trainX_tmp = trainX(trainInd, :);
+                testX_tmp = testX(testInd, :);
+                trainY_tmp = trainY(trainInd, :);
+                testY_tmp = testY(testInd, :);
+                
+                [mdl, scale] = fitModel(trainX_tmp, trainY_tmp, ip, ip.Results.gamma, ip.Results.C);
+
+                [predictions decision_values] = modelPredict(testX_tmp, mdl, scale);
+                
+                actualLabelsCell{class1, class2} = [actualLabelsCell{class1, class2} testY_tmp'];
+                predictionsCell{class1, class2} = [predictionsCell{class1, class2} predictions];
+                modelsConcat{i} = mdl; 
+
+                % Store the accuracy in the accMatrix
+%                 [~, tempC] = evalc([' RSA.Classification.crossValidateMulti(' ...
+%                     ' tempX, tempY, ''classifier'', ip.Results.classifier, '...
+%                     ' ''randomSeed'', ''default'', ''PCAinFold'', ip.Results.PCAinFold, '...
+%                     ' ''nFolds'', ip.Results.nFolds, '...
+%                     ' ''gamma'', ip.Results.gamma , ''C'', ip.Results.C) ' ]);
+                
+%                 tempStruct.CM = confusionmat(testY_tmp, predictions);
+%                 tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
+%                 tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
+%                 tempStruct.actualY = testY_tmp;
+%                 tempStruct.predY = predictions;
+
+                %tempStruct.decision
+%                 AM(class1, class2) = computeAccuracy(testY_tmp, predictions);
+%                 AM(class2, class1) = computeAccuracy(testY_tmp, predictions);
+%                 modelsConcat(:, classTuple2Nchoose2Ind([class1, class2], 6)) = ...
+%                     tempC.modelsConcat';
+%                 pairwiseCell{class1, class2} = tempStruct;
+%                 pairwiseCell{class2, class1} = tempStruct;
+% 
+%                 decInd = classTuple2Nchoose2Ind([class1 class2], numClasses);
+
             end
         end
-
-        C.pairwiseInfo = pairwiseCell;
-        C.AM = AM;
-    % END PAIRWISE LDA/RF
-    % START SVM skipping the pairwise split to decrease runtime
-    elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
-        
-        for i = 1:ip.Results.nFolds
-
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
-
-            trainX = cvDataObj.trainXall{i};
-            trainY = cvDataObj.trainYall{i};
-            testX = cvDataObj.testXall{i};
-            testY = cvDataObj.testYall{i};
-
-            [mdl, scale] = fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
-
-            [predictions decision_values] = modelPredict(testX, mdl, scale);
-
-            labelsConcat = [labelsConcat testY];
-            predictionsConcat = [predictionsConcat predictions];
-            modelsConcat{i} = mdl; 
-
-
-            if strcmp(upper(ip.Results.classifier), 'SVM')
-                [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
-                    decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
-            end
-            
-        end
-        
-        %convert pairwiseMat3D to diagonal matrix
-        C.pairwiseInfo = pairwiseCell;
-        C.AM = pairwiseAccuracies;
-        
     end
-    % END SVM skipping the pairwise split to decrease runtime
+    
+    
+    for class1 = 1:numClasses-1
+        for class2 = (class1+1):numClasses
+            actualLabels = actualLabelsCell{class1, class2};
+            predictions = predictionsCell{class1, class2};
+            AM(class1, class2) = computeAccuracy(actualLabels, predictions);
+            AM(class2, class1) = computeAccuracy(actualLabels, predictions);
+        end
+    end
 
+    C.pairwiseInfo = pairwiseCell;
+    C.AM = AM;
+
+        
     C.modelsConcat = modelsConcat;
     C.classificationInfo = classifierInfo;
-    % calculate pVal return matrix for all pairs. 
-    if ip.Results.permutations > 0
-        C.pVal = nan(numClasses, numClasses);
-        for class1 = 1:numClasses-1
-            for class2 = (class1+1):numClasses
-                thisAccDist = accDist(class1, class2, :);
-                C.pVal(class1, class2) = permTestPVal(C.AM(class1, class2), thisAccDist);
-                C.pVal(class2, class1) = C.pVal(class1, class2);
-            end
-        end
-    end
-   
-    disp('classifyCrossValidate() Finished!')
+    disp('crossValidatePairs() Finished!')
     
  end

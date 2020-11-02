@@ -212,7 +212,7 @@
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    partition = cvpart(r, ip.Results.nFolds);
+    partition = trainDevTestPart(X, ip.Results.nFolds, ip.Results.trainDevTestSplit);
     tic 
     cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
     toc
@@ -222,8 +222,8 @@
     tic    
     if ip.Results.permutations > 0
         % return distribution of accuracies (Correct clasification percentage)
-        accDist = permuteModel(X, Y, cvDataObj, 1, ip.Results.permutations , ...
-                    ip.Results.classifier, ip);
+        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
+                    ip.Results.classifier, ip.Results.trainDevTestSplit, ip);
     end
     toc
     
@@ -349,6 +349,17 @@
     C.modelsConcat = modelsConcat;
 %     C.predY = predictionsConcat;
     C.classificationInfo = classifierInfo;
+    % calculate pVal return matrix for all pairs. 
+    if ip.Results.permutations > 0
+        C.pVal = nan(numClasses, numClasses);
+        for class1 = 1:numClasses-1
+            for class2 = (class1+1):numClasses
+                thisAccDist = accDist(class1, class2, :);
+                C.pVal(class1, class2) = permTestPVal(C.AM(class1, class2), thisAccDist);
+                C.pVal(class2, class1) = C.pVal(class1, class2);
+            end
+        end
+    end
     disp('classifyCrossValidate_opt() Finished!')
     
  end

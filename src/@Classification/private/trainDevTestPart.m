@@ -121,23 +121,25 @@ if remainder == 0
     end
 %case indivisible
 else
+    
     indexlocation = 0;
     
     % handle non-remainders
     for i = 1:nFolds
+        
         testIndices = zeros( numTrials,1 );
         for j = 1:testSize
-            testIndices(j+ (i-1)*testSize) = 1;
+            testIndices(j+(i-1)*testSize) = 1;
             indexlocation = indexlocation + 1;
         end
 
         % the train/dev indices indices should consist of the
         % non-test indices
         trainDevIndices = find(testIndices == 0);
-        trainIndices = testIndices == 0;
+        trainIndices = (testIndices == 0);
         trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize)) = 0;
-        devIndices = testIndices == 0;
-        trainIndices(trainDevIndices(1:trainSize)) = 0;
+        devIndices = (testIndices == 0);
+        devIndices(trainDevIndices(1:trainSize)) = 0;
         
         obj.train{end+1} = trainIndices;
         obj.dev{end+1} = devIndices;

@@ -75,7 +75,14 @@ function y = processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
     end
     
     % if the test/dev/train split is in decimal form, convert to integer
-    if any(trainDevTestSplit < 1)
+    decimalFlag = 0;
+    for i = 1:length(trainDevTestSplit)
+        if (trainDevTestSplit(i) < 1 && trainDevTestSplit(i) > 0)
+            decimalFlag = 1;
+        end
+    end
+    
+    if (decimalFlag)
         for i = 1:length(trainDevTestSplit)
             trainDevTestSplit(i) = round(trainDevTestSplit(i) * r);
         end

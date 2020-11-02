@@ -207,7 +207,7 @@
 
     % PCA 
     % Split Data into fold (w/ or w/o PCA)
-    if (ip.Results.PCA>0 && ip.Results.PCA>0)
+    if (ip.Results.PCA>0)
         disp('Conducting Principal Component Analysis');
     else
         disp('Skipping Principal Component Analysis');
@@ -221,9 +221,6 @@
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    
-
-
     partition = trainDevTestPart(X, ip.Results.nFolds, ip.Results.trainDevTestSplit);
     cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
     
@@ -231,7 +228,7 @@
     tic    
     if ip.Results.permutations > 0
         % return distribution of accuracies (Correct clasification percentage)
-        accDist = permuteModel(X, Y, cvDataObj, 1, ip.Results.permutations , ...
+        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
                     ip.Results.classifier, partition, ip);
     end
     toc
@@ -291,7 +288,7 @@
 
             %[mdl, scale] = fitModel(trainX, trainY, ip);
             M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
-                'gamma', gamma_opt, 'C', C_opt);
+                'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
 
             %[predictions decision_values] = modelPredict(testX, mdl, scale);
             P = RSA.Classification.predict(M, testX, testY);

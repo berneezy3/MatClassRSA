@@ -1,4 +1,4 @@
-function obj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
+function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
 % cvDataObj = cvData_opt(X,Y, partition, PCA, PCAinFold);
 % --------------------------------
 % Bernard Wang, August 17, 2017
@@ -67,6 +67,13 @@ function obj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
     trainYall = {};
     devYall = {};
     testYall = {};
+    
+    % initialize return variables for train functions
+    V = NaN;
+    nPC = NaN;
+    colMeans = NaN;
+    colScales = NaN;
+    
     %parpool;
     % DO PCA
     if (PCA >0)
@@ -74,14 +81,13 @@ function obj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
         if (PCAinFold == 0)
             %disp('Extracting principal components');
 %                     keyboard;
-            [X, ~, ~] = centerAndScaleData(X, center, scale);
-%                     keyboard
-            X = getPCs(X, PCA);
+            [X, colMeans, colScales] = centerAndScaleData(X, center, scale);
+            [X, V, nPC] = getPCs(X, PCA);
 
             for i = 1:trainDevTestSplit.NumTestSets
                 trainIndx = find(trainDevTestSplit.train{i});
                 devIndx = find(trainDevTestSplit.dev{i});
-                testIndx = find(trainDevTestSplit.test{i} == 0);
+                testIndx = find(trainDevTestSplit.test{i});
 
                 trainX = X(trainIndx, :);
                 trainY = Y(trainIndx);
@@ -118,7 +124,7 @@ function obj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
                 % accordingly center and scale test data
                     [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
                     [devX, ~, ~] = centerAndScaleData(devX, colMeans, colScales);
-                devY = Y(devIndx, :);    
+                devY = Y(devIndx);    
                 testY = Y(testIndx);
 
                 % PCA after data center/scaling
@@ -133,7 +139,7 @@ function obj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
                 devXall = [devXall {devX}];
                 testXall = [testXall {testX}];
                 trainYall = [trainYall {trainY}];
-                devYall = [devXall {devX}];
+                devYall = [devYall {devY}];
                 testYall = [testYall {testY}];        
             end
 
@@ -150,7 +156,7 @@ function obj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
             trainX = X(trainIndx, :);
             trainY = Y(trainIndx);
             devX = X(devIndx, :);
-            devY = Y(devIndx, :);
+            devY = Y(devIndx);
             testX = X(testIndx, :);
             testY = Y(testIndx);
 
@@ -158,7 +164,7 @@ function obj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
             devXall = [devXall {devX}];
             testXall = [testXall {testX}];
             trainYall = [trainYall {trainY}];
-            devYall = [devXall {devX}];
+            devYall = [devYall {devY}];
             testYall = [testYall {testY}];
         end
 

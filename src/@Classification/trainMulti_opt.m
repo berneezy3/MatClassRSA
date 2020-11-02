@@ -193,31 +193,41 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
         ipCenter = true;
     end
     
+
+%     % PCA
+%     if (ip.Results.PCA > 0)
+%         disp('Conducting Principal Component Analysis...')
+%         % accordingly center and scale test data
+%         [X, colMeans, colScales] = centerAndScaleData(X, ...
+%             ipCenter, ipScale);
+%         [X, V, nPC] = getPCs(X, ip.Results.PCA);
+%     else 
+%         disp('Principal Component Analysis turned off')
+%         V = NaN;
+%         nPC = NaN;
+%         colMeans = NaN;
+%         colScales = NaN;
+%     end
+%     
+
+    % initialie PCA and data centering/scaling related variables
+    V = NaN;
+    nPC = NaN;
+    colMeans = NaN;
+    colScales = NaN;
     if ( ~ip.Results.nestedCV )
         tdtSplit = processTrainDevTestSplit([ip.Results.trainDevSplit 0], X);
-        trainData = X(1:tdtSplit(1), :);
-        trainLabels = Y(1:tdtSplit(1));
-        devData = X(tdtSplit(1):end, :);
-        devLabels = Y(tdtSplit(1):end);
+        partition = trainDevTestPart(X, 1, tdtSplit); 
+        [cvDataObj, V, nPC, colMeans, colScales] = cvData(X,Y, partition, ip, ipCenter, ipScale);
+        trainData = cvDataObj.trainXall{1};
+        trainLabels = cvDataObj.trainYall{1};
+        devData = cvDataObj.devXall{1};
+        devLabels =cvDataObj.devYall{1};
     else
         trainData = X;
         trainLabels = Y;
     end
     
-    % PCA
-    if (ip.Results.PCA > 0)
-        disp('Conducting Principal Component Analysis...')
-        % accordingly center and scale test data
-        [trainData, colMeans, colScales] = centerAndScaleData(trainData, ...
-            ipCenter, ipScale);
-        [trainData, V, nPC] = getPCs(trainData, ip.Results.PCA);
-    else 
-        disp('Principal Component Analysis turned off')
-        V = NaN;
-        nPC = NaN;
-        colMeans = NaN;
-        colScales = NaN;
-    end
     
     % Train Model
     disp('Training Model...')
@@ -279,9 +289,10 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
     M.scale = scale;
     M.pairwise = 0;
     M.classifier = ip.Results.classifier;
-    M.trainData = X;
+    M.trainData = trainData;
     M.trainLabels = Y;
     M.functionName = namestr;
+    M.cvDataObj = cvDataObj;
 
     disp('Training Finished...')
     disp('Returning Model')

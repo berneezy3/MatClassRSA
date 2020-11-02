@@ -4,12 +4,14 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-    % initialize return variable
+    % initialize return variable for different classification functions
     switch funcName
         case {'crossValidateMulti', 'crossValidateMulti_opt', 'trainMulti', 'trainMulti_opt'}
             accArr = NaN(nPerms, 1);
         case {'crossValidatePairs', 'crossValidatePairs_opt', 'trainPairs', 'trainPairs_opt'}
-            accArr = cell(nPerms,1);
+            numClasses = length(unique(Y));
+            numDecBounds = nchoosek(numClasses ,2);
+            accArr = nan(numClasses, numClasses, nPerms);
     end
 
 
@@ -23,75 +25,114 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
         correctPreds = 0;
         incorrectPreds = 0;
 
+        % there is only always only one fold in our case
         for j = 1:nFolds
                         
             disp(['calculating ' num2str((i-1)*nFolds + j) ' of '...
-            num2str(nPerms*nFolds) ' fold-permutations']);
+            num2str(nPerms*nFolds) ' permutations']);
             trainX = cvDataObj.trainXall{j};
             trainY = cvDataObj.trainYall{j};
             testX = cvDataObj.testXall{j};
             testY = cvDataObj.testYall{j};
             
-            % randomize
-            [r c] = size(trainX);
-            pTrainX = trainX(randperm(r), :);
+
             
             % Train model for permutation test
             switch funcName
-                case 'crossValidateMulti'
+                case {'crossValidateMulti', 'trainMulti'}
+                    % permute training data
+                    [r c] = size(trainX);
+                    pTrainX = trainX(randperm(r), :);
+                    
                     mdl =  fitModel(pTrainX, trainY, ip);
-                case 'crossValidateMulti_opt'
+                case {'crossValidateMulti_opt', 'trainMulti_opt'}
                     devX = cvDataObj.trainXall{j};
                     devY = cvDataObj.trainYall{j};
+                    
+                    % scramble dev data and training data together
+                    [r c] = size(trainX);
+                    [rr cc] = size(devX);
+                    trainDevX = [trainX; devX];
+                    pTrainDevX = trainDevX(randperm(r+ rr), :);
+                    pTrainX = pTrainDevX(1:r, :);
+                    pDevX = pTrainDevX(r+1:r+rr, :);
+
                     % conduct grid search here
-                    [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ...
+                    [gamma_opt, C_opt] = trainDevGridSearch(pTrainX, trainY, pDevX, devY, ...
                         ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
                     mdl =  fitModel(pTrainX, trainY, ip, gamma_opt, C_opt);
-                case 'crossValidatePairs'
-
-                    numClasses = length(unique(Y));
-                    numDecBounds = nchoosek(numClasses ,2);
-                    pairwiseMat3D = zeros(2,2, numDecBounds);
-                    % initialize the diagonal cell matrix of structs containing pairwise
-                    % classification infomration
-                    pairwiseCell = initPairwiseCellMat(numClasses);
-                    C = struct();
-                    modelsConcat = cell(ip.Results.nFolds, numDecBounds);
-    
-                    decision_values = NaN(length(Y), numDecBounds);
-                    AM = NaN(numClasses, numClasses);
-
-                    j = 0;
-                    % Iterate through all combintaions of labels
-                    for cat1 = 1:numClasses-1
-                        for cat2 = (cat1+1):numClasses
-                            j = j+1;
-                            disp([num2str(cat1) ' vs ' num2str(cat2)]) 
-                            currUse = ismember(Y, [cat1 cat2]);
-
-                            tempX = X(currUse, :);
-                            tempY = Y(currUse);
-                            % Store the accuracy in the accMatrix
-                            [~, tempM] = evalc([' RSA.Classification.trainMulti(tempX, tempY, ' ...
-                                ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
-                                ' ''kernel'', ip.Results.kernel,'...
-                                ' ''gamma'', ip.Results.gamma, ' ...
-                                ' ''C'', ip.Results.C, ' ... 
-                                ' ''numTrees'', ip.Results.numTrees, ' ...
-                                ' ''minLeafSize'', ip.Results.minLeafSize, '...
-                                ' ''center'', ip.Results.center, ' ...
-                                ' ''scale'', ip.Results.scale, ' ...
-                                ' ''randomSeed'', ''default'' ) ' ]);
-                            tempM.classifierInfo.numClasses = numClasses;
-                            M.classifierInfo{j} =  tempM.classifierInfo;
-                            M.mdl{j} = tempM.mdl;
-                            M.scale{j} = tempM.scale;
-                        end
-                    end
-                    C.pairwiseInfo = pairwiseCell;
-                    C.AM = AM;
-                case 'crossValidatePairs_opt'
+                case {'crossValidatePairs', 'trainPairs'}
+                     % permute training data
+                    [r c] = size(trainX);
+                    pTrainX = trainX(randperm(r), :);
                     
+                    % precompute index values for class1, class2
+                    classPairs = nchoosek(1:numClasses, 2);
+                    numPairs = length(classPairs);
+
+                    % Iterate through all combintaions of labels
+                    for k = 1:numPairs
+                      
+                        % class1 class2
+                        class1 = classPairs(k, 1);
+                        class2 = classPairs(k, 2);
+
+                        % get indicies of class1 and class2 trials
+                        trainInd = ismember(trainY, [class1 class2]);
+
+                        % select trials/labels representing current pair of classes
+                        trainX_tmp = pTrainX(trainInd, :);
+                        trainY_tmp = trainY(trainInd, :);
+
+                        [mdl, scale] = fitModel(trainX_tmp, trainY_tmp, ip, ip.Results.gamma, ip.Results.C);
+                        modelsConcat{k} = mdl; 
+  
+                    end
+
+                case {'crossValidatePairs_opt', 'trainPairs_opt'}
+                    
+                    devX = cvDataObj.trainXall{j};
+                    devY = cvDataObj.trainYall{j};
+                    
+                    % scramble dev data and training data together
+                    [r c] = size(trainX);
+                    [rr cc] = size(devX);
+                    trainDevX = [trainX; devX];
+                    pTrainDevX = trainDevX(randperm(r+ rr), :);
+                    pTrainX = pTrainDevX(1:r, :);
+                    pDevX = pTrainDevX(r+1:r+rr, :);
+                    
+                    % precompute index values for class1, class2
+                    classPairs = nchoosek(1:numClasses, 2);
+                    numPairs = length(classPairs);
+
+                    % Iterate through all combintaions of labels
+                    for k = 1:numPairs
+                      
+                        % class1 class2
+                        class1 = classPairs(k, 1);
+                        class2 = classPairs(k, 2);
+
+                        % get indicies of class1 and class2 trials
+                        trainInd = ismember(trainY, [class1 class2]);
+                        devInd = ismember(devY, [class1 class2]);
+
+                        % select trials/labels representing current pair of classes
+                        pTrainX_tmp = pTrainX(trainInd, :);
+                        trainY_tmp = trainY(trainInd, :);
+                        pDevX_tmp = pTrainX(trainInd, :);
+                        devY_tmp = trainY(trainInd, :);
+
+                        % conduct grid search here
+                        [gamma_opt, C_opt] = trainDevGridSearch(pTrainX, trainY, pDevX, devY, ...
+                            ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
+                        [mdl, scale] = fitModel(pTrainX_tmp, trainY_tmp, ip, gamma_opt, C_opt);
+                        modelsConcat{k} = mdl; 
+  
+                    end
+
+                 
+                    %{
                 case 'trainMulti'
                     mdl =  fitModel(pTrainX, trainY, ip);
                 case 'trainMulti_opt'
@@ -105,6 +146,7 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
                 case 'trainPairs'
                     
                 case 'trainPairs_opt'
+                    %}
                     
                 otherwise
             end
@@ -125,67 +167,36 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
 
                 case {'crossValidatePairs', 'crossValidatePairs_opt', 'trainPairs', 'trainPairs_opt'}
                     
-                    P = struct();
-%                     numClasses = tempInfo.numClasses;
-%                     numDecBounds = length(M.mdl);
-                    predY = cell(1, numDecBounds);
-                    P.AM = NaN(numClasses, numClasses);
-                    Y = testY;    
+                    % initialize return variables
+                    AM = NaN(numClasses, numClasses);
+                    
+                    % precompute index values for class1, class2
+                    classPairs = nchoosek(1:numClasses, 2);
+                    numPairs = length(classPairs);
 
-                    [firstClass, secondClass] = getNChoose2Ind(numClasses);
-%                     P.classificationInfo = struct();
-                    P.pairwiseInfo = struct();
-                    pairwiseCell = initPairwiseCellMat(numClasses);
-                    decMatchups = nchoosek(1:numClasses, 2);
+                    for k = 1:numPairs
+                      
+                        class1 = classPairs(k, 1);
+                        class2 = classPairs(k, 2);
 
-%                     classifierInfo = struct(...
-%                         'PCA', M.classifierInfo{1}.PCA, ...
-%                         'classifier', M.classifierInfo{1}.classifier);
-%                     P.classificationInfo = classifierInfo;
+                        % select trials/labels representing current pair of classes
+                        testInd = ismember(testY, [class1 class2]);
+                        testX_tmp = testX(testInd, :);
+                        testY_tmp = testY(testInd, :);
 
-                    % Initilize info struct
-                    for i = 1:numDecBounds
-                        % If PCA was turned on for training, we will select principal
-                        % compoenents for prediciton as well
-                        class1 = firstClass(i);
-                        class2 = secondClass(i);
-                        currUse = ismember(Y, [class1 class2]);
-
-                        tempX = X(currUse, :);
-                        tempY = testY(currUse);
-
-                        tempInfo = M.classifierInfo{i};
-                        if (tempInfo.PCA > 0) 
-                            [tempX, ~, ~] = centerAndScaleData(tempX, tempInfo.colMeans, tempInfo.colScales);
-                            testData = tempX*tempInfo.PCA_V;
-                            testData = testData(:,1:tempInfo.PCA_nPC);
-                        else
-                            testData = tempX;
-                        end
-
-                        predY{i} = modelPredict(testData, M.mdl{i}, M.scale{i});
-                        P.classificationInfo.classBoundary{i} = [num2str(firstClass(i)) ' vs. ' num2str(secondClass(i))];
-
+                        predY = modelPredict(testX_tmp, modelsConcat{k}, scale);
+                        
                         tempStruct = struct();
                         % Get Accuracy and confusion matrix
-                        thisCM = confusionmat(tempY, predY{i});
-                        P.AM(class1, class2) = sum(diag(thisCM))/sum(sum(thisCM));
-                        P.AM(class2, class1) = P.AM(class1, class2); 
-
-                        tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
-                        tempStruct.accuracy = sum(diag(thisCM))/sum(sum(thisCM));
-                        tempStruct.actualY = tempY;
-                        tempStruct.predY = predY';
-                        tempStruct.CM = thisCM;
+                        thisCM = confusionmat(testY_tmp, predY);
+                        AM(class1, class2) = sum(diag(thisCM))/sum(sum(thisCM));
+                        AM(class2, class1) = AM(class1, class2); 
 
                         pairwiseCell{class1, class2} = tempStruct;
                         pairwiseCell{class2, class1} = tempStruct;
                     end
-                    
-                    P.pairwiseInfo = pairwiseCell;
-                    P.modelsConcat = M.mdl;
-                    
-                    accArr{i} = P;
+
+                    accArr(:,:, i) = AM;
       
                 otherwise
                     

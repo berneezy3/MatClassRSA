@@ -1,5 +1,4 @@
 % test classifyCrossValidateMulti
-clear
 load 'losorelli_500sweep_epoched.mat'
 
 functionName = {'crossValidateMulti_opt/predict'; 'crossValidate_opt/predict'};
@@ -17,13 +16,19 @@ PCA = {'0'; '.99'};
 RSA = MatClassRSA;
 [X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
 tic
-C_pairs = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0, 'permutations', 100);
+C_pairs = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'LDA', 'PCAinFold', 0);
 toc
 
 %% SVM (PCA)
 
 tic
 C = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
+toc
+
+%% SVM (no PCA)
+
+tic
+C = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'SVM', 'PCAinFold', 0);
 toc
 
 %% SVM (no PCA)
