@@ -62,10 +62,12 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
                         ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
                     mdl =  fitModel(pTrainX, trainY, ip, gamma_opt, C_opt);
                 case {'crossValidatePairs', 'trainPairs'}
-                     % permute training data
+                    
+                    % permute training data
                     [r c] = size(trainX);
                     pTrainX = trainX(randperm(r), :);
                     
+                    %{ 
                     % precompute index values for class1, class2
                     classPairs = nchoosek(1:numClasses, 2);
                     numPairs = length(classPairs);
@@ -88,6 +90,15 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
                         modelsConcat{k} = mdl; 
   
                     end
+                    %}
+                    
+                    % permute training data
+                    [r c] = size(X);
+                    pX = X(randperm(r), :);
+                    
+                    pM = RSA.Classification. trainPairs(pTrainX, trainY, 'classifier', ...
+                            ip.Results.classifier, 'gamma', ip.Results.gamma, ...
+                            'C', ip.Results.C);
 
                 case {'crossValidatePairs_opt', 'trainPairs_opt'}
                     
@@ -130,7 +141,6 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
                         modelsConcat{k} = mdl; 
   
                     end
-
                  
                     %{
                 case 'trainMulti'
@@ -167,34 +177,36 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
 
                 case {'crossValidatePairs', 'crossValidatePairs_opt', 'trainPairs', 'trainPairs_opt'}
                     
-                    % initialize return variables
-                    AM = NaN(numClasses, numClasses);
-                    
-                    % precompute index values for class1, class2
-                    classPairs = nchoosek(1:numClasses, 2);
-                    numPairs = length(classPairs);
+%                     % initialize return variables
+%                     AM = NaN(numClasses, numClasses);
+%                     
+%                     % precompute index values for class1, class2
+%                     classPairs = nchoosek(1:numClasses, 2);
+%                     numPairs = length(classPairs);
+% 
+%                     for k = 1:numPairs
+%                       
+%                         class1 = classPairs(k, 1);
+%                         class2 = classPairs(k, 2);
+% 
+%                         % select trials/labels representing current pair of classes
+%                         testInd = ismember(testY, [class1 class2]);
+%                         testX_tmp = testX(testInd, :);
+%                         testY_tmp = testY(testInd, :);
+% 
+%                         predY = modelPredict(testX_tmp, modelsConcat{k}, scale);
+%                         
+%                         tempStruct = struct();
+%                         % Get Accuracy and confusion matrix
+%                         thisCM = confusionmat(testY_tmp, predY);
+%                         AM(class1, class2) = sum(diag(thisCM))/sum(sum(thisCM));
+%                         AM(class2, class1) = AM(class1, class2); 
+% 
+%                         pairwiseCell{class1, class2} = tempStruct;
+%                         pairwiseCell{class2, class1} = tempStruct;
+%                     end
 
-                    for k = 1:numPairs
-                      
-                        class1 = classPairs(k, 1);
-                        class2 = classPairs(k, 2);
-
-                        % select trials/labels representing current pair of classes
-                        testInd = ismember(testY, [class1 class2]);
-                        testX_tmp = testX(testInd, :);
-                        testY_tmp = testY(testInd, :);
-
-                        predY = modelPredict(testX_tmp, modelsConcat{k}, scale);
-                        
-                        tempStruct = struct();
-                        % Get Accuracy and confusion matrix
-                        thisCM = confusionmat(testY_tmp, predY);
-                        AM(class1, class2) = sum(diag(thisCM))/sum(sum(thisCM));
-                        AM(class2, class1) = AM(class1, class2); 
-
-                        pairwiseCell{class1, class2} = tempStruct;
-                        pairwiseCell{class2, class1} = tempStruct;
-                    end
+                    predict(pM, testX, testY);
 
                     accArr(:,:, i) = AM;
       

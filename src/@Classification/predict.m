@@ -100,18 +100,6 @@ function [P, varargout] = predict(obj, M, X, varargin)
     % Check input data
     testDataSize = size(X);
     
-%     if (length(tempInfo.trainingDataSize == 2))
-%         assert(tempInfo.trainingDataSize(2) == testDataSize(2), ...
-%             'Dimension 2 (feature) of test data does not match Dimension 2 of training data used in classifyTrain().');
-%     elseif (length(tempInfo.trainingDataSize == 3))
-%         assert(tempInfo.trainingDataSize(1) == testDataSize(1), ...
-%             'Dimension 1 (space) of test data does not match Dimension 1 of training data used in classifyTrain().');
-%         assert(tempInfo.trainingDataSize(2) == testDataSize(2), ...
-%             'Dimension 2 (time) of test data does not match Dimension 2 of training data used in classifyTrain().');
-%     else
-%         error('Data formatting issue.  Check input data matrix to classifyTrain and to classifyPredict');
-%     end
-    
     % Subset data 
     [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
                                                 tempInfo.spaceUse, ...
@@ -139,15 +127,9 @@ function [P, varargout] = predict(obj, M, X, varargin)
         classifierInfo = M.classifierInfo;
     end
 
-    if (classifierInfo.PCA > 0) 
-        [X, ~, ~] = centerAndScaleData(X, M.classifierInfo.colMeans, M.classifierInfo.colScales);
-        testData = X*M.classifierInfo.PCA_V;
-        testData = testData(:,1:M.classifierInfo.PCA_nPC);
-    else
-        testData = X;
-    end
+    PCA = classifierInfo.PCA;
 
-        %PERMUTATION TEST (assigning)
+    %PERMUTATION TEST (assigning)
     if (ip.Results.permutations > 0) && sum(~isnan(ip.Results.actualLabels))
         % return distribution of accuracies (Correct clasification percentage)
 
@@ -166,7 +148,14 @@ function [P, varargout] = predict(obj, M, X, varargin)
     % CASE: multiclass classification
     if (M.pairwise == 0)
     
-
+        % PCA
+        if (classifierInfo.PCA > 0) 
+            [X, ~, ~] = centerAndScaleData(X, classifierInfo.colMeans, classifierInfo.colScales);
+            testData = X*M.classifierInfo.PCA_V;
+            testData = testData(:,1:M.classifierInfo.PCA_nPC);
+        else
+            testData = X;
+        end
         
         P.predY = modelPredict(testData, M.mdl, M.scale);
     
@@ -199,7 +188,9 @@ function [P, varargout] = predict(obj, M, X, varargin)
         disp('classifyPredict() Finished!')
         
     % CASE: pairwise classification for LDA, RF and SVM (w/ PCA)
-    elseif (M.pairwise == 1 && length(M.classifierInfo) > 1)
+    elseif (M.pairwise == 1 && length(M.classifierInfo) > 1 && ...
+             (strcmp(M.classifier, 'LDA') || strcmp(M.classifier, 'RF') || ...
+            (strcmp(M.classifier, 'SVM') && PCA > 0)))
       
         numClasses = tempInfo.numClasses;
         numDecBounds = length(M.mdl);
@@ -207,7 +198,9 @@ function [P, varargout] = predict(obj, M, X, varargin)
         P.AM = NaN(numClasses, numClasses);
         Y = ip.Results.actualLabels;    
 
-        [firstClass, secondClass] = getNChoose2Ind(numClasses);
+%         [firstClass, secondClass] = getNChoose2Ind(numClasses);
+        classPairs = nchoosek(1:numClasses, 2);
+
 %         P.predictionInfo = cell(1, numDecBounds);
 %         P.accuracy = cell(1, numDecBounds);
 %         P.CM = cell(numClasses, numClasses);
@@ -224,27 +217,24 @@ function [P, varargout] = predict(obj, M, X, varargin)
         
         % Initilize info struct
         for i = 1:numDecBounds
-            % If PCA was turned on for training, we will select principal
-            % compoenents for prediciton as well
-            class1 = firstClass(i);
-            class2 = secondClass(i);
+            
+            class1 = classPairs(i, 1);
+            class2 = classPairs(i, 2);
             currUse = ismember(Y, [class1 class2]);
             
-            
             tempX = X(currUse, :);
-            tempY =  ip.Results.actualLabels(currUse);
+            tempY = ip.Results.actualLabels(currUse);
+            
+            % PCA
+            [tempX_PCA, ~, ~] = centerAndScaleData(tempX, ...
+                M.classifierInfo{i}.colMeans, M.classifierInfo{i}.colScales);
+            testData = tempX_PCA*M.classifierInfo{i}.PCA_V;
+            testData = testData(:,1:M.classifierInfo{i}.PCA_nPC);
 
             tempInfo = M.classifierInfo{i};
-            if (tempInfo.PCA > 0) 
-                [tempX, ~, ~] = centerAndScaleData(tempX, tempInfo.colMeans, tempInfo.colScales);
-                testData = tempX*tempInfo.PCA_V;
-                testData = testData(:,1:tempInfo.PCA_nPC);
-            else
-                testData = tempX;
-            end
-            
+
             predY{i} = modelPredict(testData, M.mdl{i}, M.scale{i});
-            P.classificationInfo.classBoundary{i} = [num2str(firstClass(i)) ' vs. ' num2str(secondClass(i))];
+            P.classificationInfo.classBoundary{i} = [num2str(class1) ' vs. ' num2str(class2)];
             
             tempStruct = struct();
            % Get Accuracy and confusion matrix
@@ -287,7 +277,8 @@ function [P, varargout] = predict(obj, M, X, varargin)
         P.modelsConcat = M.mdl;
 
     % CASE: pairwise classification SVM w/ PCA off (correct AM!!!)
-    elseif (M.pairwise == 1 && length(M.classifierInfo) == 1 && strcmp(M.classifier, 'SVM'))
+    elseif (M.pairwise == 1 && length(M.classifierInfo) == 1 ...
+            && strcmp(M.classifier, 'SVM') && PCA<=0)
         
         numClasses = M.classifierInfo.numClasses;
         numDecBounds = nchoosek(numClasses, 2);

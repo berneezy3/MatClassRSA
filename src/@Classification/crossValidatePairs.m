@@ -194,28 +194,6 @@
     %rng(ip.Results.randomSeed);
     setUserSpecifiedRng(ip.Results.randomSeed);
 
-    % PCA 
-    % Split Data into fold (w/ or w/o PCA)
-    if (ip.Results.PCA>0 && ip.Results.PCA>0)
-        disp('Conducting Principal Component Analysis');
-    else
-        disp('Skipping Principal Component Analysis');
-    end
-    % Moving centering and scaling parameters out of ip, in case we need to
-    % override the user's centering specification
-    ipCenter = ip.Results.center; 
-    ipScale = ip.Results.scale;
-    if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
-        warning(['Data centering must be on if performing PCA. Overriding '...
-        'user input and removing the mean from each data feature.']);
-        ipCenter = true;
-    end
-
-    % partition data for cross validation 
-    trainTestSplit = [1-1/ip.Results.nFolds 1/ip.Results.nFolds];
-    partition = trainDevTestPart(X, ip.Results.nFolds, trainTestSplit); 
-    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
-
     % Permutation Testing
     if ip.Results.permutations > 0
         % return distribution of accuracies (Correct clasification percentage)
@@ -225,19 +203,6 @@
     
     % CROSS VALIDATION
     disp('Cross Validating')
-    
-    % Just partition, as shuffling (or not) was handled in previous step
-    if ip.Results.nFolds == 1
-        % Special case of fitting model with no test set (argh)
-        error('nFolds must be a integer value greater than 1');
-    end
-
-    % if nFolds < 0 | ceil(nFolds) ~= floor(nFolds) | nFolds > nTrials
-    %   error, nFolds must be an integer between 2 and nTrials to perform CV
-    assert(ip.Results.nFolds > 0 & ...
-        ceil(ip.Results.nFolds) == floor(ip.Results.nFolds) & ...
-        ip.Results.nFolds <= nTrials, ...
-        'nFolds must be an integer between 1 and nTrials to perform CV' );
         
     predictionsConcat = [];
     labelsConcat = [];
@@ -251,6 +216,11 @@
     pairwiseCell = initPairwiseCellMat(numClasses);
     C = struct();
     modelsConcat = cell(ip.Results.nFolds, numDecBounds);
+    
+    % Moving centering and scaling parameters out of ip, in case we need to
+    % override the user's centering specification
+    ipCenter = ip.Results.center; 
+    ipScale = ip.Results.scale;
 
     CM = NaN;
     RSA = MatClassRSA;
@@ -260,62 +230,68 @@
         strcmp(upper(ip.Results.classifier), 'RF') || ...
         strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA > 0)
     
+        % Data Partitioning, PCA, Centering and Sclaing
+        % Split Data into fold (w/ or w/o PCA)
+        if (ip.Results.PCA>0 && ip.Results.PCA>0)
+            disp('Conducting Principal Component Analysis');
+        else
+            disp('Skipping Principal Component Analysis');
+        end
+
+        if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
+            warning(['Data centering must be on if performing PCA. Overriding '...
+            'user input and removing the mean from each data feature.']);
+            ipCenter = true;
+        end
+
         AM = NaN(numClasses, numClasses);
         predictionsCell = cell(numClasses);
         actualLabelsCell = cell(numClasses);
         
-        for i = 1:ip.Results.nFolds
-                 
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
-            trainX = cvDataObj.trainXall{i};
-            trainY = cvDataObj.trainYall{i};
-            testX = cvDataObj.testXall{i};
-            testY = cvDataObj.testYall{i};
+        % Iterate through all pairs of classes
+        for k = 1:numDecBounds
+            
+            % class1 class2
+            class1 = classPairs(k, 1);
+            class2 = classPairs(k, 2);
+            
+            % store indices of the trials of the current class pair of
+            % interest
+            currIndx = ismember(Y, [class1 class2]);
+            currX = X(currIndx, :);
+            currY = Y(currIndx);
 
-            % Iterate through all combintaions of labels
-            for k = 1:numDecBounds
+%             % select trials/labels representing current pair of classes
+%             trainX_tmp = trainX(trainInd, :);
+%             testX_tmp = testX(testInd, :);
+%             trainY_tmp = trainY(trainInd, :);
+%             testY_tmp = testY(testInd, :);
 
-                % class1 class2
-                class1 = classPairs(k, 1);
-                class2 = classPairs(k, 2);
+            % partition data for cross validation 
+            trainTestSplit = [1-1/ip.Results.nFolds 1/ip.Results.nFolds];
+            partition = trainDevTestPart(currX, ip.Results.nFolds, trainTestSplit); 
+            cvDataObj = cvData(currX, currY, partition, ip, ipCenter, ipScale);
+
+            disp(['Cross Validating classes ' num2str(class1) ' and ' num2str(class2)]);
+
+            for i = 1:ip.Results.nFolds
+
+                trainX = cvDataObj.trainXall{i};
+                trainY = cvDataObj.trainYall{i};
+                testX = cvDataObj.testXall{i};
+                testY = cvDataObj.testYall{i};
+
+                [mdl, scale] = fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
+
+                [predictions decision_values] = modelPredict(testX, mdl, scale);
+
+                actualLabelsCell{class1, class2} = [actualLabelsCell{class1, class2} testY'];
+                predictionsCell{class1, class2} = [predictionsCell{class1, class2} predictions];
                 
-                    %disp([num2str(class1) ' vs ' num2str(class2)]); 
-                    trainInd = ismember(trainY, [class1 class2]);
-                    testInd = ismember(testY, [class1 class2]);
-
-                    % select trials/labels representing current pair of classes
-                    trainX_tmp = trainX(trainInd, :);
-                    testX_tmp = testX(testInd, :);
-                    trainY_tmp = trainY(trainInd, :);
-                    testY_tmp = testY(testInd, :);
-                    tempStruct = struct();
-                    
-                    [mdl, scale] = fitModel(trainX_tmp, trainY_tmp, ip, ip.Results.gamma, ip.Results.C);
-
-                    [predictions decision_values] = modelPredict(testX_tmp, mdl, scale);
-
-                    actualLabelsCell{class1, class2} = [actualLabelsCell{class1, class2} testY_tmp'];
-                    predictionsCell{class1, class2} = [predictionsCell{class1, class2} predictions];
-                    modelsConcat{i} = mdl; 
-
-%                     tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
-%                     tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
-%                     tempStruct.actualY = tempY;
-%                     tempStruct.predY = tempC.predY';
-% 
-% 
-%                     %tempStruct.decision
-%                     AM(class1, class2) = tempStruct.accuracy;
-%                     AM(class2, class1) = tempStruct.accuracy;
-%                     modelsConcat(:, classTuple2Nchoose2Ind([class1, class2], 6)) = ...
-%                         tempC.modelsConcat';
-%                     pairwiseCell{class1, class2} = tempStruct;
-%                     pairwiseCell{class2, class1} = tempStruct;
-% 
-%                     decInd = classTuple2Nchoose2Ind([class1 class2], numClasses);
-
-
+                modelsConcat{i} = mdl; 
+                
             end
+
         end
         
         for class1 = 1:numClasses-1
@@ -330,8 +306,13 @@
         C.pairwiseInfo = pairwiseCell;
         C.AM = AM;
     % END PAIRWISE LDA/RF
-    % START SVM skipping the pairwise split to decrease runtime
+    % SVM (no PCA, faster computation to rebutt reviewer comment on redundant pairwise partitioning)
     elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
+             
+        % partition data for cross validation 
+        trainTestSplit = [1-1/ip.Results.nFolds 1/ip.Results.nFolds];
+        partition = trainDevTestPart(X, ip.Results.nFolds, trainTestSplit); 
+        cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
         
         for i = 1:ip.Results.nFolds
 
@@ -361,10 +342,25 @@
         %convert pairwiseMat3D to diagonal matrix
         C.pairwiseInfo = pairwiseCell;
         C.AM = pairwiseAccuracies;
-        
     end
-    % END SVM skipping the pairwise split to decrease runtime
-
+    % END  of Cross Validation
+    
+    % Permutation testing
+    if ip.Results.permutations > 0
+        for i = 1:ip.Results.permutations
+            [r c] = size(X);
+            pX = X(randperm(r), :);
+            permC = trainPairs(pX, Y, 'classifier', ip.Results.classifier, ...
+                'nFolds', ip.Results.nFolds, 'C', ip.Results.C, 'gamma', ip.Results.gamma,...
+                'kernel', ip.Results.kernel, 'numTrees', ip.Results.numTrees, ...
+                'minLeafSize', ip.Results.minLeafSize);
+            
+        end
+        % return distribution of accuracies (Correct clasification percentage)
+        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
+                    ip.Results.classifier, trainTestSplit, ip);
+    end
+    
     C.modelsConcat = modelsConcat;
     C.classificationInfo = classifierInfo;
     % calculate pVal return matrix for all pairs. 
@@ -379,6 +375,6 @@
         end
     end
    
-    disp('classifyCrossValidate() Finished!')
+    disp('crossValidatePairs() Finished!')
     
  end

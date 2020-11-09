@@ -11,6 +11,9 @@ averageTrials = {'off'; 'on'};
 dataSplit = {'N/A'; 'N/A'};
 PCA = {'0'; '.99'};
 
+gamma_opt = 0.0032;
+C_opt =  316.2278
+
 %% LDA
 
 RSA = MatClassRSA;
@@ -22,25 +25,21 @@ toc
 %% SVM (PCA)
 
 tic
-C = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
+C_pairs = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, ...
+    'classifier', 'SVM', 'PCAinFold', 0, 'gamma', gamma_opt, 'C', C_opt);
 toc
 
 %% SVM (no PCA)
 
 tic
-C = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'SVM', 'PCAinFold', 0);
-toc
-
-%% SVM (no PCA)
-
-tic
-C = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'SVM', 'PCAinFold', 0);
+C_pairs = RSA.Classification.crossValidatePairs(X_shuf, Y_shuf, 'PCA', 0, ...
+    'classifier', 'SVM', 'PCAinFold', 0, 'gamma', gamma_opt, 'C', C_opt);
 toc
 
 %% RF
 
 tic
-C = RSA.classify.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'RF', 'PCAinFold', 0);
+C_pairs = RSA.classify.crossValidatePairs(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'RF', 'PCAinFold', 0);
 toc
 
 %% S06 

@@ -69,7 +69,7 @@ trainDevTestSplit = processTrainDevTestSplit(trainDevTestSplit, X);
 obj.optimize = 1;
 
 if length(trainDevTestSplit) == 2
-    trainDevTestSplit = [trainDevTestSplit(1) 0 trainDevTestSplit(2)];''
+    trainDevTestSplit = [trainDevTestSplit(1) 0 trainDevTestSplit(2)];
     obj.optimize = 0;
 end
 

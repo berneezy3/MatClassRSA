@@ -18,7 +18,9 @@ function [y, V, nPC] = getPCs(X, PCs)
 %     if value between 0 and 1
 %
 % OUTPUT ARGS:
-%       y - training data matrix with only principal compenents
+%   y - training data matrix with only principal compenents
+%   V - 
+%   PCs - number of PCs extracted
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

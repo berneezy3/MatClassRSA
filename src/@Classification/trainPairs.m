@@ -170,13 +170,6 @@
         Y = Y';
     end
     
-    % Principal Componenet Analysis
-    tdtSplit = processTrainDevTestSplit([1 0 0], X);
-    partition = trainDevTestPart(X, 1, tdtSplit); 
-    [cvDataObj, V, nPC, colMeans, colScales] = cvData(X,Y, partition, ip, ...
-                                                ip.Results.center, ip.Results.scale, 1);
-
-    
     % Split data into pairs representing each combination of labels  
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses ,2);
@@ -208,24 +201,34 @@
         M.trainData = X;
         M.trainLabels = Y;
         M.functionName = namestr;
-        M.cvDataObj = cvDataObj;
+        M.pairwise = 1;
         M.ip = ip;
+        
+        disp('training model for classes: ')
 
         % Iterate through all combintaions of labels
         for k = 1:numDecBounds
-                    
-        % class1 class2
-        class1 = classPairs(k, 1);
-        class2 = classPairs(k, 2);
+            
+            % class1 class2
+            class1 = classPairs(k, 1);
+            class2 = classPairs(k, 2);
 
-            disp([num2str(class1) ' vs ' num2str(class2)]) 
+            disp([num2str(class1) ' vs ' num2str(class2)]); 
             currUse = ismember(Y, [class1 class2]);
 
             tempX = X(currUse, :);
+%             tempX_PCA = getPCs(tempX, ip.Results.PCA);
             tempY = Y(currUse);
+            
+            % partition data for cross validation 
+            partition = trainDevTestPart(tempX, 1, [1 0]); 
+            cvDataObj = cvData(tempX, tempY, partition, ip, ...
+                ip.Results.center, ip.Results.scale, 1);
+            tempX_PCA = cvDataObj.trainXall{1};
+
             % Store the accuracy in the accMatrix
-            [~, tempM] = evalc([' RSA.Classification.trainMulti(tempX, tempY, ' ...
-                ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
+            [~, tempM] = evalc([' RSA.Classification.trainMulti(tempX_PCA, tempY, ' ...
+                ' ''classifier'', ip.Results.classifier, ''PCA'', 0, '...
                 ' ''kernel'', ip.Results.kernel,'...
                 ' ''gamma'', ip.Results.gamma, ' ...
                 ' ''C'', ip.Results.C, ' ... 
@@ -235,6 +238,8 @@
                 ' ''scale'', ip.Results.scale, ' ...
                 ' ''randomSeed'', ''default'' ) ' ]);
             tempM.classifierInfo.numClasses = numClasses;
+            
+            M.cvDataObj{k} = cvDataObj;
             M.classifierInfo{k} =  tempM.classifierInfo;
             M.mdl{k} = tempM.mdl;
             M.scale{k} = tempM.scale;
@@ -243,10 +248,11 @@
     % START SVM skipping the pairwise split to decrease runtime
     elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
         
-
+         X_PCA = getPCs(X, ip.Results.PCA);
+        
         [mdl, scale] = fitModel(X, Y, ip, ip.Results.gamma, ip.Results.C);
 
-        [~, tempM] = evalc([' RSA.Classification.trainMulti(X, Y, ' ...
+        [~, tempM] = evalc([' RSA.Classification.trainMulti(X_PCA, Y, ' ...
             ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
             ' ''kernel'', ip.Results.kernel,'...
             ' ''gamma'', ip.Results.gamma, ' ...

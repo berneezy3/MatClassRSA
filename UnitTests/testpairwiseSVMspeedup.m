@@ -23,9 +23,11 @@ gamma_opt = 0.0032;
 C_opt =  316.2278
 %%
 
+
+
 tic
     C_los_fast = RSA.Classification.crossValidatePairs_fast(X_shuf, Y_shuf, 'PCA', 0, ...
-        'classifier', 'SVM', 'gamma', gamma_opt, 'C', C_opt);
+        'classifier', 'SVM');
 runtime_los_fast = toc
 
 RSA.Visualization.plotMatrix(C_los_fast.AM, 'matrixLabels', 1)
@@ -39,8 +41,9 @@ ylabel('Class 2');
 
 tic
     C_los_slow = RSA.Classification.crossValidatePairs_slow(X_shuf, Y_shuf, 'PCA', 0, ...
-        'classifier', 'SVM', 'gamma', gamma_opt, 'C', C_opt);
+        'classifier', 'SVM');
 runtime_los_slow = toc
+figure
 figure
 RSA.Visualization.plotMatrix(C_los_slow.AM, 'matrixLabels', 1)
 colorbar

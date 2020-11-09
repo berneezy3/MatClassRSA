@@ -4,10 +4,10 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
 % Bernard Wang, August 17, 2017
 % 
 % cvData is an object that stores data to be used for cross validation.  It
-% takes as input the X, Y data matrices, the trainDevTestSplit object, then the PCA
-% parameters specificed in the classifyCrossValidate() function call.  It
-% formats the data into partitions to enable convineint cross validation
-% later.  
+% It takes as input the data matrix, X, and the label vector Y, the 
+% trainDevTestSplit object and the PCA parameters specificed in the 
+% classifyCrossValidate() function call.  It formats the data into 
+% partitions to enable convineint cross validationlater.  
 % 
 % INPUT ARGS:
 %   - X: training data (2D)
@@ -152,7 +152,7 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
         for i = 1:nFolds
             trainIndx = find(trainDevTestSplit.train{i});
             devIndx = find(trainDevTestSplit.dev{i});
-            testIndx = find(trainDevTestSplit.test{i} == 0);
+            testIndx = find(trainDevTestSplit.test{i});
             trainX = X(trainIndx, :);
             trainY = Y(trainIndx);
             devX = X(devIndx, :);
@@ -167,6 +167,11 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
             devYall = [devYall {devY}];
             testYall = [testYall {testY}];
         end
+        
+        colMeans = 0;
+        colScales = 0;
+        [r c] = size(X);
+        nPC = c;
 
     end
     obj.trainXall = trainXall;

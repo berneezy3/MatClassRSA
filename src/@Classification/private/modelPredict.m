@@ -79,10 +79,6 @@ function [predictions decision_values] = modelPredict(X, mdl, scale)
             
             
             predictions = predictions';
-        case 'ClassificationECOC' % multi-class SVM
-            [r c] = size(X);
-            [predictions, score] = predict(mdl, X);
-            predictions = predictions';
         case 'ClassificationDiscriminant'
             predictions = predict(mdl,X);
             predictions = predictions(:,end);

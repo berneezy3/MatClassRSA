@@ -212,7 +212,6 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
     classifierInfo.PCA_nPC = nPC;
 %     classifierInfo.trainingDataSize = dataSize;
     classifierInfo.numClasses = length(unique(Y));
-    classifierInfo.pairwise = ip.Results.pairwise;
     classifierInfo.colMeans = colMeans;
     classifierInfo.colScales = colScales;
     classifierInfo.ip = ip;
@@ -226,19 +225,12 @@ function [M, varargout] = trainMulti(obj, X, Y, varargin)
             classifierInfo.minLeafSize =  ip.Results.minLeafSize;
     end
     
-    if(ip.Results.pairwise == 0) 
-        disp('Conducting multiclass classification.  Pairwise turned off');
-    else 
-        disp('Conducting pairwise classification.  Multiclass turned off');
-    end
-    
     disp(['classifying with ' ip.Results.classifier] )
     
-    
-%     if ( strcmp(ip.Results.classifier, 'SVM'))
-        
 
     [mdl, scale] = fitModel(trainData, Y(:), ip, ip.Results.gamma, ip.Results.C);
+    
+    % set return struct fields
     M.classifierInfo = classifierInfo;
     M.mdl = mdl;
     M.scale = scale;
