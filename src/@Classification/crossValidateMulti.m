@@ -12,12 +12,13 @@
 % related options.  
 %
 % INPUT ARGS (REQUIRED)
-%   X - Brain imaging data matrix.  Either a 2D (trial-by-feature) matrix,
-%       or a 3D (space-by-time-by-trial) matrix. 
-%   Y - Classification label vector, which corresponds to the trials in X.
+%   X - Data matrix.  Either a 2D (trial-by-feature) matrix or a 3D 
+%       (space-by-time-by-trial) matrix. 
+%   Y - Vector of trial labels. The length of Y must match the length of
+%       the trial dimension of X. 
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   'timeUse' - If X is a 3D, space-by-time-by-trials matrix, then this
+%   'timeUse' - If X is a 3D, space-by-time-by-trial matrix, then this
 %       option will subset X along the time dimension.  The input
 %       argument should be passed in as a vector of indices that indicate the 
 %       time dimension indices that the user wants to subset.  This arugument 
@@ -37,36 +38,39 @@
 %       If not entered, rng will be assigned as ('shuffle', 'twister').
 %       For more info, check Matlab's documentation on the rng() function.
 %       (https://www.mathworks.com/help/matlab/ref/rng.html)
-%       --- Specifications for rand_seed ---
+%       --- Specifications for randomSeed ---
 %       - Single acceptable rng specification input (e.g., 1,
 %           'default', 'shuffle'); in these cases, the generator will
 %           be set to 'twister'.
 %       - Dual-argument specifications as either a 2-element cell
 %           array (e.g., {'shuffle', 'twister'}) or string array
 %       (   e.g., ["shuffle", "twister"].
-%       - rng struct as assigned by rand_seed = rng.
-%   'PCA' - Set principal component analysis on data matrix X.  To retrieve 
-%       components that explain a certain percetnage variance, enter a
-%       decimal value between 1 and 0.  To retrieve a certain number 
-%       of most significant features, enter an integer greater or equal to 
-%       1. Default value is .99, which selects principal components that 
-%       explain 99% of the variance.  Enter 0 to turn PCA off.  
+%       - rng struct as assigned by randomSeed = rng.
+%   'PCA' - Set principal component analysis on data matrix X.  To retain 
+%       components that explain a certain percentage of variance, enter a
+%       decimal value [0, 1).  To retain a certain number of principal 
+%       components, enter an integer greater or equal to 1. Default value 
+%       is .99, which selects principal components that explain 99% of the 
+%       variance.  Enter 0 to disable PCA. PCA is computed along the
+%       feature dimension -- that is, along the column dimension of the
+%       trial-by-feature matrix that is input to the classifier.
 %       --options--
-%       (decimal between 0 and 1, N) - Use most important features that
-%           explain N * 100% of the variance in input matrix X.
-%       (integer greater than or equal to 1, N) - Use N most important
-%       0 - PCA turned off
+%       - decimal between [0, 1): Use most important features that
+%           explain N/100 percent of the variance in input matrix X.
+%       - integer greater than or equal to 1: Use N most important
+%       - 0: Do not perform PCA.
 %   'PCAinFold' - This controls whether or not PCA is conducted in each
-%   fold duration cross validation , or if PCA is conducted once on the 
-%   entire dataset prior to cross validation.
+%   fold duration cross validation, or if PCA is conducted once on the 
+%   entire dataset prior to partitioning data for cross validation.
 %       --options--
-%       1 (default) - conduct PCA within each fold.
-%       0 - one PCA for entire training data matrix X.
+%       1 (default): Conduct PCA within each fold.
+%       0: One PCA for entire training data matrix X.
 %   'nFolds' - Number of folds in cross validation.  Must be integer
-%       greater than 1 and less than number of trials. Default is 10.
+%       greater than 1 and less than or equal to the number of trials. 
+%       Default is 10.
 %   'classifier' - Choose classifier for cross validation.  Supported
-%       classifier include support vector machine(SVM), linear discriminant 
-%       analysis(LDA) and random forest(RF) 
+%       classifier include support vector machine (SVM), linear discriminant 
+%       analysis (LDA) and random forest (RF) 
 %        --options--
 %       'SVM'
 %       'LDA' (default)
@@ -89,18 +93,20 @@
 %   'permutations' - this chooses the number of permutations to perform for
 %       permutation testing. If this value is set to 0, then permutation
 %       testing will be turned off.  If it is set to an integer n greater 
-%       than 0, then n permutation tests will conducted.  Default value is
-%       0 (off).  
+%       than 0, then classification will be performed over n permutation 
+%       iterations. Default value is 0 (off).  
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 
-%       off.
+%       off. If PCA is performed, data centering is required; if the user
+%       selects a PCA calculation but 'center' is off, the function
+%       will issue a warning and turn centering on.
 %        --options--
 %        0 - centering turned off
 %        1 (default) - centering turned on 
 %   'scale' - This variable controls data scaling, also known as data
-%       normalization.  Setting this to a non-zero value to scales the data
-%       between 1 and 0 along the feature dimension prior to PCA.  Setting 
+%       normalization.  Setting this to a non-zero value to scales each 
+%       feature to have unit variance prior to PCA.  Setting 
 %       it to 0 turns off data scaling.  
 %        --options--
 %        0 (default) - scaling turned off
@@ -125,9 +131,10 @@
 %       observations belonging to class i that the classifier labeled as
 %       belonging to class j.
 %   accuracy - classification accuracy
-%   predY - predicted label vector
+%   predY - vector of predicted labels. Ordering of vector elements
+%       corresponds to the order of elements in input labels vector Y.
 %   modelsConcat - Struct containing the nFold models used during cross
-%   validation.
+%       validation.
 %   elapsedTime - runtime in seconds
 %   pVal - the p-value calculated using the permutation testing results.
 %       This is set to NaN if permutation testing is turned off. 
