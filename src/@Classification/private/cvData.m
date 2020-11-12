@@ -56,6 +56,8 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
 
     if (isfield(ip.Results,'nFolds'))
         nFolds = ip.Results.nFolds;
+    else 
+        nFolds = 1;
     end
 
     obj = struct();

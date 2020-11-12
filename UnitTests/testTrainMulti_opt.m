@@ -23,11 +23,9 @@ testLabels = Y_shuf(floor(r*9/10)+1:end);
 %%
 
 M = RSA.Classification.trainMulti_opt( trainData , trainLabels, ...
-    'classifier', 'SVM', 'PCA', 0, 'randomSeed', 1);
+    'classifier', 'SVM', 'PCA', 0);
 
-%%
-
-C_tt_multi_opt = RSA.Classification.predict( M, testData, testLabels, 'permutations', 100);
+C_tt_multi_opt = RSA.Classification.predict( M, testData, testLabels);
 accuracy(1) = C_tt_multi_opt.accuracy;
 
 %% S06 

@@ -4,14 +4,25 @@
 % -------------------------------------------------------------------------
 % Bernard - Jun. 23, 2020
 %
-% Conduct pairwise cross validation with hyperparameter optimization.
+% Given a data matrix X and labels vector Y, this function will split the 
+% into pairs of classes, optimize the classifer hyperparameters, then 
+% conduct cross validation.  Then, an output struct will be passed out
+% containing the classification accuracies, confusion matrices, ano other 
+% info for each pair of labels.  Optional name-value parameters can be 
+% passed in to specify classification related options.  
+%
+% Currently, the only classifier compitable w/ this function is SVM.  
+% Optimization is done via a grid serach over the values specified in the 
+% gammaSpace and cSpace input parameters.
 %
 % INPUT ARGS (REQUIRED)
-%   X - training data
-%   Y - labels
+%   X - Data matrix.  Either a 2D (trial-by-feature) matrix or a 3D 
+%       (space-by-time-by-trial) matrix. 
+%   Y - Vector of trial labels. The length of Y must match the length of
+%       the trial dimension of X. 
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   'timeUse' - If X is a 3D, space-by-time-by-trials matrix, then this
+%   'timeUse' - If X is a 3D, space-by-time-by-trial matrix, then this
 %       option will subset X along the time dimension.  The input
 %       argument should be passed in as a vector of indices that indicate the 
 %       time dimension indices that the user wants to subset.  This arugument 
@@ -27,54 +38,95 @@
 %       feature dimension indices that the user wants to subset.  This arugument 
 %       will not do anything if input matrix X is a 3D,
 %       space-by-time-by-trials matrix.
-%   'randomSeed' - random seed for reproducibility. If not entered, rng
-%       will be assigned as ('shuffle', 'twister').
-%       --- Acceptable specifications for rand_seed ---
+%   'randomSeed' - Specifies the seed for MATLAB's randon number generator. 
+%       If not entered, rng will be assigned as ('shuffle', 'twister').
+%       For more info, check Matlab's documentation on the rng() function.
+%       (https://www.mathworks.com/help/matlab/ref/rng.html)
+%       --- Specifications for randomSeed ---
 %       - Single acceptable rng specification input (e.g., 1,
 %           'default', 'shuffle'); in these cases, the generator will
 %           be set to 'twister'.
 %       - Dual-argument specifications as either a 2-element cell
 %           array (e.g., {'shuffle', 'twister'}) or string array
 %       (   e.g., ["shuffle", "twister"].
-%       - rng struct as assigned by rand_seed = rng.
-%   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
-%       keep components that explan 90% of the variance. To retrieve
-%       components that explain a certain variance, enter the variance as a
-%       decimal between 1 and 0.  To retrieve a certain number of most
-%       significant features, enter an integer greater or equal to 1.
+%       - rng struct as assigned by randomSeed = rng.
+%   'PCA' - Set principal component analysis on data matrix X.  To retain 
+%       components that explain a certain percentage of variance, enter a
+%       decimal value [0, 1).  To retain a certain number of principal 
+%       components, enter an integer greater or equal to 1. Default value 
+%       is .99, which selects principal components that explain 99% of the 
+%       variance.  Enter 0 to disable PCA. PCA is computed along the
+%       feature dimension -- that is, along the column dimension of the
+%       trial-by-feature matrix that is input to the classifier.
 %       --options--
-%       (decimal between 0 and 1, N) - Use most important features that
-%           explain N * 100% of the variance in input matrix X.
-%       (integer greater than or equal to 1, N) - Use N most important
-%       0 - PCA turned off
-%       features of input matrix X.
-%   'PCAinFold' - whether or not to conduct PCA in each fold.
+%       - decimal between [0, 1): Use most important features that
+%           explain N/100 percent of the variance in input matrix X.
+%       - integer greater than or equal to 1: Use N most important
+%       - 0: Do not perform PCA.
+%   'PCAinFold' - This controls whether or not PCA is conducted in each
+%       fold duration cross validation, or if PCA is conducted once on the 
+%       entire dataset prior to partitioning data for cross validation.
 %       --options--
-%       1 (default) - conduct PCA within each fold.
-%       0 - one PCA for entire training data matrix X.
-%   'nFolds' - number of folds in cross validation.  Must be integer
-%       greater than 1 and less than number of trials. Default is 10.
-%   'classifier' - choose classifier. 
+%       'on' (default): Conduct PCA within each fold.
+%       'off': One PCA for entire training data matrix X.
+%   'nFolds' - Number of folds in cross validation.  Must be integer
+%       greater than 1 and less than or equal to the number of trials. 
+%       Default is 10.
+%   'classifier' - Choose classifier for cross validation.  Currently, only
+%        support vector machine (SVM) is supported for hyperparameter
+%        optimization
 %        --options--
 %       'SVM' (default)
-%       'LDA' 
-%       'RF' 
-%   'kernel' - Choose the kernel for decision function for SVM.  This input will do
-%       nothing if a classifier other than SVM is selected.
+%       * hyperparameter optimization for other classifiers 
+%         to be added in future updates
+%   'kernel' - Specification for SVM's decision function.  This input will 
+%       not do anything if a classifier other than SVM is selected.
 %        --options--
 %       'linear' 
-%       'polynomial' 
 %       'rbf' (default)
-%       'sigmoid' 
-%   'gammaSpace' - vector of gamma values to search over for the SVM rbf
-%   kernel
-%   'CSpace' - vector of C values to search over for the SVM rbf kernel
-%   'numTrees' - Choose the number of decision trees to grow.  Default is
-%   128.
-%   'minLeafSize' - Choose the minimum number of observations per tree leaf.
-%   Default is 1,
-%   'permutations' - Choose number of permutations to perform. Default value 
-%   is 0, where permutation testing is turned off.  
+%   'optimizationFolds': This parameter controls whether optimization is
+%       conducted via a full nFolds cross validation on the training data  
+%       or optimizing on a single development fold.  Entering a non-zero  
+%       value turns on nested cross validation, while entering zero uses a 
+%       development fold for CV. 
+%       --options--
+%       'single' (default)
+%       'full'
+%   'gammaSpace' - Vector of 'gamma' values to search over during 
+%       hyperparameter optimization.  Gamma is a hyperparameter of the rbf 
+%       kernel for SVM classification.  Default is 5 logarithmically spaced
+%       points between 10^-5 and 10^5
+%   'cSpace' - Vector of 'C' values to search over during hyperparameter 
+%       optimization.  'C' is a hyperparameter of both the rbf and linear 
+%       kernel for SVM classification.  Default is 5 logarithmically spaced
+%       points between 10^-5 and 10^5
+%   'permutations' - this chooses the number of permutations to perform for
+%       permutation testing. If this value is set to 0, then permutation
+%       testing will be turned off.  If it is set to an integer n greater 
+%       than 0, then classification will be performed over n permutation 
+%       iterations. Default value is 0 (off).  
+%   'center' - This variable controls data centering, also known as 
+%       mean centering.  Setting this to any non-zero value will set the
+%       mean along the feature dimension to be 0.  Setting to 0 turns it 
+%       off. If PCA is performed, data centering is required; if the user
+%       selects a PCA calculation but 'center' is off, the function
+%       will issue a warning and turn centering on.
+%        --options--
+%        'off' - centering turned off
+%        'on' (default) - centering turned on 
+%   'scale' - This variable controls data scaling, also known as data
+%       normalization.  Setting this to a non-zero value to scales each 
+%       feature to have unit variance prior to PCA.  Setting it to 0 turns 
+%       off data scaling.  
+%        --options--
+%        'off' (default) - scaling turned off
+%        'on' - centering turned on 
+%   
+%   For more info on SVM hyperparameters, see Hsu, Chang and Lin's 2003
+%   paper, "A Practical Guide to Support Vector Classification"
+%   For more info on hyperparamters for random forest, see Matlab
+%   documentaion for the treeBagger() class: 
+%       https://www.mathworks.com/help/stats/treebagger.html
 %
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
@@ -93,9 +145,6 @@
 %   predY - predicted label vector
 %   modelsConcat - Struct containing the N models used during cross
 %   validation.
-
-% TODO:
-%   Check when the folds = 1, what we should do 
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

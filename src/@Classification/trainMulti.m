@@ -1,7 +1,8 @@
 function M = trainMulti(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% C = RSA.Classification.trainMulti(X, Y)
+% M = RSA.Classification.trainMulti(trainData, testData); 
+% P = RSA.classify.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -93,20 +94,18 @@ function M = trainMulti(obj, X, Y, varargin)
 %       selects a PCA calculation but 'center' is off, the function
 %       will issue a warning and turn centering on.
 %        --options--
-%        0 - centering turned off
-%        1 (default) - centering turned on 
+%        'off' - centering turned off
+%        'on' (default) - centering turned on 
 %   'scale' - This variable controls data scaling, also known as data
 %       normalization.  Setting this to a non-zero value to scales each 
 %       feature to have unit variance prior to PCA.  Setting 
 %       it to 0 turns off data scaling.  
 %        --options--
-%        0 (default) - scaling turned off
-%        1 - centering turned on 
+%        'off' (default) - scaling turned off
+%        'on' - centering turned on 
 %
 % OUTPUT ARGS 
-%   M - Classification output struct, which contains the predicted labels
-%   vector (predY), accuracy, confusion matrix (CM), classification info
-%   struct, and classification model.
+%   M - Classification output to be passed into predict().
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

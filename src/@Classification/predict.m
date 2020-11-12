@@ -1,44 +1,44 @@
-function [P, varargout] = predict(obj, M, X, varargin)
+function P = predict(obj, M, X, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% [CM, accuracy, classifierInfo] = RSA.classify.predict(X, Y)
+% % any of the train functions could be used in the following line
+% M = RSA.Classification.trainModel(trainData, testData); 
+% P = RSA.classify.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
-% Given test data and a model trained by trainMulti or trainMulti_opt, this
-% function predicts the labels of the test data. 
+% Given a MatClassRSA classification model and input data X, this function
+% will predict the labels of the trials contained in X.
 %
 % INPUT ARGS 
-%   M (REQUIRED) - EEG Model (output from classifyTrain)
-%   X (REQUIRED) - training data
-%   actualLabels (OPTIONAl) - actual labels of test data X.  Length of this vector
-%   must equal the number of trials in X.
+%   M (REQUIRED) - EEG Model (output from either trainMulti(), 
+%       trainMulti_opt(), trainPairs(), or trainPairs_opt())
+%   X (REQUIRED) - Data matrix.  Either a 2D (trial-by-feature) matrix or a 3D 
+%       (space-by-time-by-trial) matrix. 
+%   actualLabels (OPTIONAl) - Vector of trial labels. The length of Y must match the length of
+%       the trial dimension of X. 
 %
-% INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   'randomSeed' - This option determines whether the randomization is to produce
-%       varying or unvarying results each different execution.  
-%        --options--
-%       'shuffle' (default option)
-%       'default' (option to replicate results)
 %
 % OUTPUT ARGS 
 %   P - Prediciton output produced by classifyPredict(), which may slightly 
-%   differ depending on which function is used to train the model M.  This 
-%   contains a few fields: 
+%   differ depending on which function is used to train the model M.  If
+%   the classification model M was created using trainMulti() or
+%   trainMulti_opt(), the P will contain the following fields:
 %       - P.predY, or the predicted labels for the input data
 %       - P.accuracy, accuracy of predicted values compared to actual labels
 %       - P.CM matrix of predicted values vs actual labels
-%       - P.predictionInfo contians classification related information
+%       - P.predictionInfo contians prediction related information
+%       - P.classificationInfo contains classification related info
+%       - P.model contains classification model(s)
 %   Note that unless optional input 'actualLabels' is set, P.accuracy and 
 %   P.confusionMatrix will be NaN.
-%
-%   If 'pairwise' was turned on for classifyTrain(), then the output will
-%   be a cell array of prediction outputs P.  P will additionally include
-%   the field "classBoundary", which contains length 2 array of which
-%   classes are being comapred in the said boundary.  
-
-% TODO:
-%   Check when the folds = 1, what we should do 
+%   If M was created using trainPairs() or trainPairs_opt(), then the
+%   following fields will be in P:
+%       - P.AM, a diagonal matrix containing the pairwise accuracies
+%       - modelsConcat contains a concatenated list of classifiation
+%       model(s)
+%       - P.predictionInfo contians prediction related information
+%       - P.classificationInfo contains classification related info
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -76,18 +76,10 @@ function [P, varargout] = predict(obj, M, X, varargin)
     ip = inputParser;
     ip.CaseSensitive = false;
     
-    st = dbstack;
-    namestr = st.name;
-    
     addRequired(ip, 'M');
     addRequired(ip, 'X', @is2Dor3DMatrix);
     defaultY = NaN;
-    defaultRandomSeed = 'shuffle';
-    expectedRandomSeed = {'default', 'shuffle'};
-    expectedAverageTrialsHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
     addOptional(ip, 'actualLabels', defaultY, @isvector);
-    addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-        || isequal('shuffle', x) || (isnumeric(x) && x > 0));
     addParameter(ip, 'permutations', 0);
 
     parse(ip, M, X, varargin{:});
@@ -105,11 +97,16 @@ function [P, varargout] = predict(obj, M, X, varargin)
                                                 tempInfo.spaceUse, ...
                                                 tempInfo.timeUse, ...
                                                 tempInfo.featureUse);
-                                     
+
+    if (length(M.classifierInfo) > 1)
+        classifierInfo = M.classifierInfo{1};
+    else
+        classifierInfo = M.classifierInfo;
+    end
     
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
-    rng(ip.Results.randomSeed);                                        
+    rng(classifierInfo.randomSeed);                                        
 
     RSA = MatClassRSA;    
     P = struct();
@@ -121,27 +118,10 @@ function [P, varargout] = predict(obj, M, X, varargin)
     testLabels = ip.Results.actualLabels;        
     trainTestSplit = [length(trainLabels) length(testLabels)];
     
-    if (length(M.classifierInfo) > 1)
-        classifierInfo = M.classifierInfo{1};
-    else
-        classifierInfo = M.classifierInfo;
-    end
+
 
     PCA = classifierInfo.PCA;
 
-    %PERMUTATION TEST (assigning)
-    if (ip.Results.permutations > 0) && sum(~isnan(ip.Results.actualLabels))
-        % return distribution of accuracies (Correct clasification percentage)
-
-        M.cvDataObj.testXall{1} = testData;
-        M.cvDataObj.testYall{1} = ip.Results.actualLabels;
-
-        accDist = permuteModel(M.functionName, [trainData; testData], ...
-                    [trainLabels; testLabels], ...
-                    M.cvDataObj, 1, ip.Results.permutations , ...
-                    M.classifier, trainTestSplit, M.ip);
-    end
-    
     % Predict Labels for Test Data
     disp('Predicting Model...')
         
@@ -179,7 +159,7 @@ function [P, varargout] = predict(obj, M, X, varargin)
                         'spaceUse', M.classifierInfo.spaceUse, ...
                         'timeUse', M.classifierInfo.timeUse, ...
                         'featureUse', M.classifierInfo.featureUse, ...
-                        'randomSeed', ip.Results.randomSeed);
+                        'randomSeed', M.classifierInfo.randomSeed);
 
         P.predictionInfo = predictionInfo;
         P.classifiationInfo = M.classifierInfo;
@@ -331,6 +311,20 @@ function [P, varargout] = predict(obj, M, X, varargin)
             'classifier', M.classifierInfo.classifier);
         
     end
+    
+%     %PERMUTATION TEST (assigning)
+%     if (ip.Results.permutations > 0) && sum(~isnan(ip.Results.actualLabels))
+%         % return distribution of accuracies (Correct clasification percentage)
+% 
+%         M.cvDataObj.testXall{1} = testData;
+%         M.cvDataObj.testYall{1} = ip.Results.actualLabels;
+% 
+%         accDist = permuteModel(M.functionName, [trainData; testData], ...
+%                     [trainLabels; testLabels], ...
+%                     M.cvDataObj, 1, ip.Results.permutations , ...
+%                     M.classifier, trainTestSplit, M.ip);
+%     end
+    
     
     disp('Prediction Finished')
     disp('classifyPredict() Finished!')

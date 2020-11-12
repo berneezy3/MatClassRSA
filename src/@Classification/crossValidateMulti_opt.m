@@ -1,4 +1,4 @@
- function C = classifyCrossValidateMulti_opt(obj, X, Y, varargin)
+ function C = crossValidateMulti_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % C = RSA.classify.crossValidateMulti_opt(X, Y, varargin)
@@ -67,8 +67,8 @@
 %       fold duration cross validation, or if PCA is conducted once on the 
 %       entire dataset prior to partitioning data for cross validation.
 %       --options--
-%       1 (default): Conduct PCA within each fold.
-%       0: One PCA for entire training data matrix X.
+%       'on' (default): Conduct PCA within each fold.
+%       'off': One PCA for entire training data matrix X.
 %   'nFolds' - Number of folds in cross validation.  Must be integer
 %       greater than 1 and less than or equal to the number of trials. 
 %       Default is 10.
@@ -84,25 +84,14 @@
 %        --options--
 %       'linear' 
 %       'rbf' (default)
-%   'trainDevTestSplit' - If 'nestedCV' is set to 0, the data matrix X 
-%       will be split into 3 sets for each cross validation fold: the 
-%       training set, development set and test set.  The development set
-%       will be used to optimize the classifier hyperparameters.  This
-%       argument must be a 3 element vector, where the first, second and 
-%       third element represent the training, development and test set 
-%       respectively.  The user can choose to either input a vector of 
-%       decimal values or integer values.  If the user inputs this vector 
-%       in decimal form, then the vector elements should sum to 1, and each 
-%       element represents the fraction of data to be split into its 
-%       corresponding set within each fold.  If the user inputs integers 
-%       values, then the vector elements should sum to the number of trials 
-%       in input data matrix X, and each element represents the number of 
-%       trials to be split into its corresponding set within each fold.
-%       Default value is [.8 .1 .1]
-%   'nestedCV' - This parameter controls whether optimization is
-%       conducted via an inner cross validation fold or optimizing on a
-%       development fold.  Entering a non-zero value turns on nested cross
-%       validation, while entering zero uses a development fold for CV. 
+%   'optimizationFolds': This parameter controls whether optimization is
+%       conducted via a full nFolds cross validation on the training data  
+%       or optimizing on a single development fold.  Entering a non-zero  
+%       value turns on nested cross validation, while entering zero uses a 
+%       development fold for CV. 
+%       --options--
+%       'single' (default)
+%       'full'
 %   'gammaSpace' - Vector of 'gamma' values to search over during 
 %       hyperparameter optimization.  Gamma is a hyperparameter of the rbf 
 %       kernel for SVM classification.  Default is 5 logarithmically spaced
@@ -123,15 +112,15 @@
 %       selects a PCA calculation but 'center' is off, the function
 %       will issue a warning and turn centering on.
 %        --options--
-%        0 - centering turned off
-%        1 (default) - centering turned on 
+%        'off' - centering turned off
+%        'on' (default) - centering turned on 
 %   'scale' - This variable controls data scaling, also known as data
 %       normalization.  Setting this to a non-zero value to scales each 
 %       feature to have unit variance prior to PCA.  Setting it to 0 turns 
 %       off data scaling.  
 %        --options--
-%        0 (default) - scaling turned off
-%        1 - centering turned on 
+%        'off' (default) - scaling turned off
+%        'on' - centering turned on 
 %   
 %   For more info on SVM hyperparameters, see Hsu, Chang and Lin's 2003
 %   paper, "A Practical Guide to Support Vector Classification"

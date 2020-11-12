@@ -1,7 +1,8 @@
  function M = trainPairs(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% C = RSA.classify.trainPairs(X, Y, varargin)
+% M = RSA.classify.trainPairs(X, Y, varargin)
+% P = RSA.classify.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -75,25 +76,7 @@
 %
 %
 % OUTPUT ARGS 
-%   C - output object containing all cross validation related
-%   information, including confucion matrix, accuracy, prediction results
-%   etc.  The structure of C will differ depending on the value of the 
-%   input value 'pairwise', which is set to 0 by default.  if 'pairwise' 
-%   is set to 1, then C will be a cell matrix of structs, symmetrical along 
-%   the diagonal.  If pairwise is 0, then C is a struct containing values:
-%   
-%   CM - Confusion matrix that summarizes the performance of the
-%       classification, in which rows represent actual labels and columns
-%       represent predicted labels.  Element i,j represents the number of 
-%       observations belonging to class i that the classifier labeled as
-%       belonging to class j.
-%   accuracy - Classification accuracy
-%   predY - predicted label vector
-%   modelsConcat - Struct containing the N models used during cross
-%   validation.
-
-% TODO:
-%   Check when the folds = 1, what we should do 
+%   M - Classification output to be passed into predict().
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
