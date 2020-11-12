@@ -4,16 +4,18 @@ classdef MatClassRSA
 % -------------------------------------------------------------------------
 % Bernard - July. 12, 2020
 %
-% Main class for MatClassRSA.  This class contains 5 member variables:
-% Classification, Preprocessing, RDM_Copmutation, Reliability,
-% Visualization.  The data processing functions are organized into these 5
-% member variables.  Please check the manual or the member variable
-% docstrings for a complete list of functions for a each category.  
+% Main class for MatClassRSA.  This class contains 5 member variables 
+% (also known as class properties): Classification, Preprocessing, 
+% RDM_Copmutation, Reliability, Visualization.  The data processing 
+% functions are organized via these 5 member variables.  Please check the 
+% manual or the member variable docstrings for a complete list of functions 
+% for each category.  
 %
-% To call a function, one would need to first create a MatClassRSA object,
-% access the relevent member variable containing the function of interest,
-% then finally make a call to that function.  For example, a call to the
-% classification function crossValidateMulti() would look like this:
+% To call a function, one would need to: first create a MatClassRSA object,
+% then access the relevent member variable containing the function of 
+% interest then finally make a call to the original function of interest.  
+% For example, a call to the classification function crossValidateMulti() 
+% would look like this:
 %
 % RSA = MatClassRSA;
 % RSA.Classification.crossValidateMulti(X, Y);
