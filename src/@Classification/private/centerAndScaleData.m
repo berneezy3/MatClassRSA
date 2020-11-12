@@ -59,6 +59,14 @@ function [xOut, centerOut, scaleOut] = centerAndScaleData(xIn, centering, scalin
 
 %disp('DEBUG: CENTER AND SCALE DATA!')
 
+% Convert 'on', 'off' input to boolean
+if (strcmp(centering, 'on')), centering = true;
+elseif (strcmp(centering, 'off')) centering = false; end
+
+if (strcmp(scaling, 'on')), scaling = true;
+elseif (strcmp(scaling, 'off')) scaling = false; end
+
+
 % Check for 2D or 3D input; if 3D, reshape to 2D and flag for end reshape.
 switch ndims(xIn)
     case 2
@@ -222,9 +230,9 @@ if size(xIn, 2) == 1
         %disp('DEBUG: single-column input, scaling in logical false --> scaling out logical false')
     end
     
-% For inputs with > 1 column, if input specification for centering or 
-% scaling was length 1 and logical or numeric false, return logical false
-% as corresponding output.
+    % For inputs with > 1 column, if input specification for centering or
+    % scaling was length 1 and logical or numeric false, return logical false
+    % as corresponding output.
 else
     if length(centering) == 1 && ~centering
         centerOut = false;
