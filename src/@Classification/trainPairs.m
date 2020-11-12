@@ -39,41 +39,65 @@
 %           array (e.g., {'shuffle', 'twister'}) or string array
 %       (   e.g., ["shuffle", "twister"].
 %       - rng struct as assigned by rand_seed = rng.
-%   'PCA' - Conduct Principal Component analysis on data matrix X. Default is to
-%       keep components that explan 99% of the variance. To retrieve
-%       components that explain a certain variance, enter the variance as a
-%       decimal between 1 and 0.  To retrieve a certain number of most
-%       significant features, enter an integer greater or equal to 1.
+%   'PCA' - Set principal component analysis on data matrix X.  To retain 
+%       components that explain a certain percentage of variance, enter a
+%       decimal value [0, 1).  To retain a certain number of principal 
+%       components, enter an integer greater or equal to 1. Default value 
+%       is .99, which selects principal components that explain 99% of the 
+%       variance.  Enter 0 to disable PCA. PCA is computed along the
+%       feature dimension -- that is, along the column dimension of the
+%       trial-by-feature matrix that is input to the classifier.  If the
+%       output struct is passed into predict() to classify other data,
+%       then the principal components from this function will be saved and
+%       applied to the data passed into predict().
 %       --options--
-%       (decimal between 0 and 1, N) - Use most important features that
-%           explain N * 100% of the variance in input matrix X.
-%       (integer greater than or equal to 1, N) - Use N most important
-%       0 - PCA turned off
-%       features of input matrix X.
+%       - decimal between [0, 1): Use most important features that
+%           explain N/100 percent of the variance in input matrix X.
+%       - integer greater than or equal to 1: Use N most important
+%       - 0: Do not perform PCA.
+%   'classifier' - Choose classifier for cross validation.  Supported
+%       classifier include support vector machine (SVM), linear discriminant 
+%       analysis (LDA) and random forest (RF) 
 %        --options--
-%       'SVM' 
+%       'SVM'
 %       'LDA' (default)
 %       'RF' 
-%   'kernel' - Choose the kernel for decision function for SVM.  This input will do
-%       nothing if a classifier other than SVM is selected.
+%   'kernel' - Specification for SVM's decision function.  This input will 
+%       not do anything if a classifier other than SVM is selected.
 %        --options--
 %       'linear' (default)
-%       'polynomial' 
 %       'rbf' 
-%       'sigmoid' 
-%   'gamma' - 
-%   'C' - 
-%   'numTrees' - Choose the number of decision trees to grow.  Default is
-%   128.
-%   'minLeafSize' - Choose the minimum number of observations per tree leaf.
-%   Default is 1,
-%   'permutations' - Choose number of permutations to perform. Default value 
-%   is 0, where permutation testing is turned off.  
-%   'center' - Specification for centering columns of the data.  If empty or 
-%   not specified, will default to true.
-%   'scale' - Specification for scaling columns of the data. If
-%   empty or not specified, will default to true.
-%
+%   'gamma' - Hyperparamter of the rbf kernel for SVM classification.  If
+%       SVM is selected as the classifier, and rbf is selected as the
+%       kernel, then gamma must be manually set by the user.
+%   'C' - Hyperparameter of both the rbf and linear kernel for SVM
+%       classification.  If SVM is selected as the classifier, then C must 
+%       be manually set by the user.
+%   'numTrees' - Hyperparameter of the random forest classifier.  This
+%       chooses the number of decision trees to grow.  Default is 128.  
+%   'minLeafSize' - Hyperparameter of the random forest classifier.  Choose 
+%       the minimum number of observations per tree leaf.  Default is 1.
+%   'permutations' - this chooses the number of permutations to perform for
+%       permutation testing. If this value is set to 0, then permutation
+%       testing will be turned off.  If it is set to an integer n greater 
+%       than 0, then classification will be performed over n permutation 
+%       iterations. Default value is 0 (off).  
+%   'center' - This variable controls data centering, also known as 
+%       mean centering.  Setting this to any non-zero value will set the
+%       mean along the feature dimension to be 0.  Setting to 0 turns it 
+%       off. If PCA is performed, data centering is required; if the user
+%       selects a PCA calculation but 'center' is off, the function
+%       will issue a warning and turn centering on.
+%        --options--
+%        false - centering turned off
+%        true (default) - centering turned on 
+%   'scale' - This variable controls data scaling, also known as data
+%       normalization.  Setting this to a non-zero value to scales each 
+%       feature to have unit variance prior to PCA.  Setting 
+%       it to 0 turns off data scaling.  
+%        --options--
+%        false (default) - scaling turned off
+%        true - scaling turned on 
 %
 % OUTPUT ARGS 
 %   M - Classification output to be passed into predict().

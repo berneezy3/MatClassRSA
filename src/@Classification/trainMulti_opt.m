@@ -109,15 +109,15 @@ function [M, varargout] = trainMulti_opt(obj, X, Y, varargin)
 %       selects a PCA calculation but 'center' is off, the function
 %       will issue a warning and turn centering on.
 %        --options--
-%        'off' - centering turned off
-%        'on' (default) - centering turned on 
+%        false - centering turned off
+%        true (default) - centering turned on 
 %   'scale' - This variable controls data scaling, also known as data
 %       normalization.  Setting this to a non-zero value to scales each 
 %       feature to have unit variance prior to PCA.  Setting it to 0 turns 
 %       off data scaling.  
 %        --options--
-%        'off' (default) - scaling turned off
-%        'on' - centering turned on 
+%        false (default) - scaling turned off
+%        true - scaling turned on 
 %
 % OUTPUT ARGS 
 %   M - Classification output to be passed into predict().

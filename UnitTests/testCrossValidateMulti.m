@@ -18,7 +18,7 @@ RSA = MatClassRSA;
 
 %%
 tic
-C_multi = RSA.Classification.crossValidateMulti(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'LDA', 'PCAinFold', 0);
+C_multi = RSA.Classification.crossValidateMulti(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'LDA', 'PCAinFold', true, 'center', true, 'scale', true);
 toc
 accuracy(1) = C_multi.accuracy;
 

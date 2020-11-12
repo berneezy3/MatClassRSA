@@ -67,8 +67,8 @@
 %       fold duration cross validation, or if PCA is conducted once on the 
 %       entire dataset prior to partitioning data for cross validation.
 %       --options--
-%       'on' (default): Conduct PCA within each fold.
-%       'off': One PCA for entire training data matrix X.
+%       true (default): Conduct PCA within each fold.
+%       false: One PCA for entire training data matrix X.
 %   'nFolds' - Number of folds in cross validation.  Must be integer
 %       greater than 1 and less than or equal to the number of trials. 
 %       Default is 10.
@@ -112,15 +112,15 @@
 %       selects a PCA calculation but 'center' is off, the function
 %       will issue a warning and turn centering on.
 %        --options--
-%        'off' - centering turned off
-%        'on' (default) - centering turned on 
+%        false - centering turned off
+%        true (default) - centering turned on 
 %   'scale' - This variable controls data scaling, also known as data
 %       normalization.  Setting this to a non-zero value to scales each 
 %       feature to have unit variance prior to PCA.  Setting it to 0 turns 
 %       off data scaling.  
 %        --options--
-%        'off' (default) - scaling turned off
-%        'on' - centering turned on 
+%        false (default) - scaling turned off
+%        true - scaling turned on 
 %   
 %   For more info on SVM hyperparameters, see Hsu, Chang and Lin's 2003
 %   paper, "A Practical Guide to Support Vector Classification"

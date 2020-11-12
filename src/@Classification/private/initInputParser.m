@@ -31,15 +31,17 @@ function y = initInputParser(functionName, ip)
     defaultNestedCV = 0;
 
     %Specify expected values
-    expectedPCAinFold = [0,1];
+    expectedPCAinFold = {'on', 'off'};
     expectedClassifier = {'SVM', 'LDA', 'RF', 'svm', 'lda', 'rf'};
     expectedPValueMethod = {'permuteFullModel'};
     expectedRandomSeed = {'default', 'shuffle'};
     expectedKernels = {'linear', 'sigmoid', 'rbf', 'polynomial'};
     expectedGamma = {'default'};
     expectedPairwise = {0,1};
-    expectedCenter = {0,1};
-    expectedScale = {0,1};
+    expectedCenter = {'on', 'off'};
+    expectedScale = {'on', 'off'};
+    onOrOff = {'on', 'off'};
+    trueOrFalse = {true, false};
     
     validateNFolds = @(x) assert(isinteger(int8(x) && x>1 ), ... 
         'nFolds must be integer greater than 1');
@@ -51,10 +53,12 @@ function y = initInputParser(functionName, ip)
         addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParamValue(ip, 'PCA', defaultPCA);
-        addParamValue(ip, 'PCAinFold', defaultPCAinFold);
-        addParamValue(ip, 'center', defaultCenter, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-        addParamValue(ip, 'scale', defaultScale, @(x) islogical(x) || (isnumeric(x) && isvetor(x)));
-%         addParamValue(ip, 'nFolds', defaultNFolds);
+        addParamValue(ip, 'PCAinFold', defaultPCAinFold, ...
+             @(x) validateattributes(x,{'logical'}, {'nonempty'}));
+        addParamValue(ip, 'center', defaultCenter, ...
+            @(x) validateattributes(x,{'logical'}, {'nonempty'}));
+        addParamValue(ip, 'scale', defaultScale,  ...
+            @(x) validateattributes(x,{'logical'}, {'nonempty'}));
         addParamValue(ip, 'classifier', defaultClassifier, ...
              @(x) any(validatestring(x, expectedClassifier)));
         addParamValue(ip, 'timeUse', defaultTimeUse, ...
@@ -71,9 +75,12 @@ function y = initInputParser(functionName, ip)
         addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
             || isequal('shuffle', x) || (isnumeric(x) && x > 0));
         addParameter(ip, 'PCA', defaultPCA);
-        addParameter(ip, 'PCAinFold', defaultPCAinFold);
-        addParameter(ip, 'center', defaultCenter);
-        addParameter(ip, 'scale', defaultScale);
+        addParameter(ip, 'PCAinFold', defaultPCAinFold, ...
+             @(x) validateattributes(x,{'logical'}, {'nonempty'}));
+        addParameter(ip, 'center', defaultCenter, ...
+             @(x) validateattributes(x,{'logical'}, {'nonempty'}));
+        addParameter(ip, 'scale', defaultScale, ...
+             @(x) validateattributes(x,{'logical'}, {'nonempty'}));
 %         addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'timeUse', defaultTimeUse, ...
             @(x) (assert(isvector(x))));
@@ -178,8 +185,6 @@ function y = initInputParser(functionName, ip)
     
 
     y=ip;
-    
-    
 
     
 end

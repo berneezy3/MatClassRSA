@@ -76,6 +76,18 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
     colMeans = NaN;
     colScales = NaN;
     
+
+    if (strcmp(center, 'on'))
+        center = true;
+    else
+        center = false;
+    end
+    if (strcmp(scale, 'on'))
+        scale = true;
+    else
+        scale = false;
+    end
+    
     %parpool;
     % DO PCA
     if (PCA >0)

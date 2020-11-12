@@ -21,7 +21,7 @@ testLabels = Y_shuf(floor(r*9/10)+1:end);
 
 %%  test w/ actual labels
 M_tt_multi = RSA.Classification.trainMulti( trainData , trainLabels, ...
-    'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1);
+    'classifier', 'LDA', 'PCA', 0, 'randomSeed', 1, 'center', true, 'scale', true);
 C_tt_multi = RSA.Classification.predict( M_tt_multi, testData, testLabels);
 
 accuracy(1) = C_tt_multi.accuracy;

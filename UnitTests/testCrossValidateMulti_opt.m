@@ -20,7 +20,8 @@ RSA = MatClassRSA;
 %%
 tic
 C_opt_tdt = RSA.Classification.crossValidateMulti_opt(X_shuf, Y_shuf, ...
-    'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'trainDevTestSplit', [.8 .1 .1]);
+    'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'trainDevTestSplit', [.8 .1 .1], ...
+    'center', true, 'scale', true);
 toc
 accuracy(1) = C_opt_tdt.accuracy;
 

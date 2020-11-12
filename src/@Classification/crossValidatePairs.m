@@ -59,6 +59,12 @@
 %           explain N/100 percent of the variance in input matrix X.
 %       - integer greater than or equal to 1: Use N most important
 %       - 0: Do not perform PCA.
+%   'PCAinFold' - This controls whether or not PCA is conducted in each
+%       fold duration cross validation, or if PCA is conducted once on the 
+%       entire dataset prior to partitioning data for cross validation.
+%       --options--
+%       true (default): Conduct PCA within each CV fold.
+%       false: One PCA for entire training data matrix X.
 %   'classifier' - Choose classifier for cross validation.  Supported
 %       classifier include support vector machine (SVM), linear discriminant 
 %       analysis (LDA) and random forest (RF) 
@@ -93,15 +99,15 @@
 %       selects a PCA calculation but 'center' is off, the function
 %       will issue a warning and turn centering on.
 %        --options--
-%        'off' - centering turned off
-%        'on' (default) - centering turned on 
+%        false - centering turned off
+%        true (default) - centering turned on 
 %   'scale' - This variable controls data scaling, also known as data
 %       normalization.  Setting this to a non-zero value to scales each 
 %       feature to have unit variance prior to PCA.  Setting 
 %       it to 0 turns off data scaling.  
 %        --options--
-%        'off' (default) - scaling turned off
-%        'on' - centering turned on 
+%        false (default) - scaling turned off
+%        true - scaling turned on 
 %
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
