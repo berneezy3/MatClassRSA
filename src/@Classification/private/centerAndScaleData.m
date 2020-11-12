@@ -60,11 +60,11 @@ function [xOut, centerOut, scaleOut] = centerAndScaleData(xIn, centering, scalin
 %disp('DEBUG: CENTER AND SCALE DATA!')
 
 % Convert 'on', 'off' input to boolean
-if (strcmp(centering, 'on')), centering = true;
-elseif (strcmp(centering, 'off')) centering = false; end
-
-if (strcmp(scaling, 'on')), scaling = true;
-elseif (strcmp(scaling, 'off')) scaling = false; end
+% if (strcmp(centering, 'on')), centering = true;
+% elseif (strcmp(centering, 'off')) centering = false; end
+% 
+% if (strcmp(scaling, 'on')), scaling = true;
+% elseif (strcmp(scaling, 'off')) scaling = false; end
 
 
 % Check for 2D or 3D input; if 3D, reshape to 2D and flag for end reshape.
