@@ -9,7 +9,7 @@ function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, P, rngType)
 % This function randomizes, in tandem, ordering of trials in data matrix X,
 % labels vector Y, and, optionally, participants vector P. Therefore,
 % ordering is disrupted, but mappings between trials, stimulus labels, and
-% participants is preserved. The function can be used in cases where users
+% participants are preserved. The function can be used in cases where users
 % wish to distribute trials across the course of a recording session or 
 % across participants, prior to trial averaging or cross-validation.
 %
@@ -89,7 +89,7 @@ assert(ndims(X) == 2 | ndims(X) == 3,...
 % Make sure labels input Y is a vector
 assert(isvector(Y), 'Input labels must be a vector.');
 
-% Make sure length of Y matches the trial length of X
+% Make sure length of Y matches length of trial dimension of X
 if ndims(X) == 3, [~, ~, nTrial] = size(X);
 else, [nTrial, ~] = size(X); end
 assert(length(Y) == nTrial, ...
