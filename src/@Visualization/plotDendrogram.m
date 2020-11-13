@@ -17,14 +17,15 @@ function fig = plotDendrogram(obj, RDM, varargin)
 %       of labels in the confusion matrix.  For example, if user inputs: 
 %        ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black'],  
 %       then class 1 would be yellow, class 2 would be magenta... class 8 
-%       would be black.  Colors can be expressed as an RGB triplet 
+%       would be black.  Each color can be expressed as an RGB triplet 
 %       ([1 1 0]), short name ('y') or long name ('yellow').  See Matlab 
 %       color specification documentation for more info: 
 %           https://www.mathworks.com/help/matlab/ref/colorspec.html
 %   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
 %       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
 %   'iconPath': A directory containing images files to use as labels. The
-%       image files must be ordered in the same order as the labels of the 
+%       alphabetical ordering of the image filenames must correspond to 
+%       the order of the labels as they are presented in the  
 %       confusion matrix.  For example, the first file in the iconPath
 %       directory will correspond to the confusion matrices' first label, 
 %       the second file will correspond to the second CM label etc.
@@ -32,8 +33,8 @@ function fig = plotDendrogram(obj, RDM, varargin)
 %       documentation page: 
 %           https://www.mathworks.com/help/matlab/ref/imread.html
 %   'fontSize': A number to specify the font size of labels.
-%   'orientation' - This parameter lets the user specify which side to plot
-%       the dendrogram leaves.
+%   'orientation' - This parameter lets the user specify which direction 
+%       to plot the dendrogram leaves.
 %       --options--
 %       'down' (default) 
 %       'up' 
@@ -41,7 +42,8 @@ function fig = plotDendrogram(obj, RDM, varargin)
 %       'right'
 %   'reorder' - Specify order of classes in the dendrogram.  Must be passed
 %       in as a length N vector, N being the number of classes in RDM.  
-%       Also, vector should contain values 1:N. 
+%       Also, vector should contain values 1:N. Note that custom orderings
+%       may disrupt the structure of the dendrogram.
 %   'yLim' - Set range of the Y-axis.  Pass in as an array of length 2, 
 %       e.g. [yMin yMax].
 %   'textRotation' - Amount in degrees to rotate the text labels.  For 
