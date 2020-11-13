@@ -5,38 +5,43 @@ function  fig = plotMST(obj, RDM, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 28, 2017
 %
-% This function creates a minimum spanning tree plot with the distance 
-% matrix passed in.  
+% This function, given a distance matrix input, plots a minimum spanning
+% tree(MST).  Optional name-value pair arugments are described below.
 %
 % Required Inputs:
-% - RDM: A distance matrix.  Diagonals must be 0, and must be
-%               symmetrical along the diagonal
+% - RDM: A distance matrix.  Diagonals must be 0, and must be symmetrical 
+%       along the diagonal.
 %
 % Optional name-value pairs:
-%   'nodeColors': a vector of colors, ordered by the order of labels in the 
-%       confusion matrix e.g. ['y' 'm' 'c' 'r' 'g' 'b' 'w' 'k'] or 
-%       ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black']            
-%   'nodeLabels': a matrix of alphanumeric labels, ordered by same order of
-%                   labels in the confusion matrix
-%                   e.g. ['cat' 'dog' 'fish']
-%   'iconPath': a directory containing images used to label, in which the
-%                   image files must be ordered in the same order as the 
-%                   labels of the confusion matrix
-%   'iconSize': set size of icon.  Default is 40
-%   'edgeLabelSize': set size of edge labels.  Default is 15
-%   'nodeLabelSize': set size of node labels.  Default is 15
-%   'nodeLabelRotation': set angle of node label.
-%   'lineWidth': set line width.  Default is 2
-%   'lineColor': Set line color.  Default is 15
+%   'nodeColors': a vector of colors, whose order corresponds to the order 
+%       of labels in the confusion matrix.  For example, if user inputs: 
+%        ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black'],  
+%       then class 1 would be yellow, class 2 would be magenta... class 8 
+%       would be black.  Colors can be expressed as an RGB triplet 
+%       ([1 1 0]), short name ('y') or long name ('yellow').  See Matlab 
+%       color specification documentation for more info: 
+%           https://www.mathworks.com/help/matlab/ref/colorspec.html
+%   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
+%       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
+%   'iconPath': a directory containing images used to label, where the
+%       image files must be ordered in the same order as the labels of the 
+%       confusion matrix
+%   'iconSize': If the user sets the 'iconPath' argument, then this 
+%       argument deterines the size of icon.  Default is 40.
+%   'edgeLabelSize': Set the size of the MST edge labels.  Default is 15.
+%   'nodeLabelSize': Set the size of node labels.  Default is 15.
+%   'nodeLabelRotation': Set the angle of the node label.
+%   'lineWidth': Set MST line color.  Default is 2
+%   'lineColor': Set MST line color.  Default is [.5 .5 .5]
 %
 % Outputs:
-% - img: figure corresponding to output plot
-%
+% - img: Figure corresponding to output plot
+
+
 % Notes:
 %   TODO - find out how to plot images on the coordinates
 %        - turn off labels for color case
 %    
-
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------
@@ -124,7 +129,6 @@ function  fig = plotMST(obj, RDM, varargin)
         plt = MSTplothelper(sourceNodes, destNodes, weights, ...
             ip.Results.nodeLabels, ip);
         MSTcolorhelper(ip.Results.nodeLabels, ip.Results.nodeColors, plt);
-%         highlight(P, T, 'LineWidth',  5, 'EdgeColor', ip.Results.lineColor);
         
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -233,8 +237,6 @@ function plt = MSTplothelper(sourceNodes, destNodes, weights, nodeLabels, ip)
 
         edgeCoord = NaN(edgeR, edgeC);
 
- 
-
 end
 
 
@@ -277,7 +279,8 @@ function plt = MSTimagehelper(sourceNodes, destNodes, weights, nodeLabels, ip)
         
         for i = 1:length(nodeLabels)
 
-            [thisIcon map] = imread([char(nodeLabels(i))]);
+            [thisIcon map] = imread([ip.Results.iconPath ...
+                char(nodeLabels(i))]);
             [height width] = size(thisIcon);
             %convert thisIcon to scale 0~1
             

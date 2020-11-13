@@ -5,11 +5,13 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
-% This function plots a confusion matrix with the
-% specified labels.
+% This function plots a matrix.  The matrix can either be an 
+% representational dissimilarity matrix (RDN )computed bye the functions in 
+% MatClassRSA.RDM_Computation, or a confusion matrix from the functions in
+% MatCLass.Classification.  
 %
 % INPUT ARGS:
-% - matrix: A matrix, e.g., a confusion matrix, RDM/distance matrix.
+% - Matrix: A matrix, e.g., a confusion matrix, RDM/distance matrix.
 %
 % Optional name-value pairs:
 %   'ranktype': specification for whether to convert matrix values to 
@@ -25,12 +27,17 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
 %       'rank', 'r' - convert matrix values to ranks
 %       'percentrank', 'p' - convert matrix values to percentile ranks
 %   'axisColors': a vector of colors, ordered by the order of labels in the 
-%       confusion matrix e.g. {'y' 'm' 'c' 'r'} or {'yellow' 'magenta' 'cyan' 'red'}
-%       or {'[1 1 0]' '[1 0 1]' '[0 1 1]' '[1 0 0]'}
+%       confusion matrix.  If this argument is passed in, then square color
+%       blocks will be used as the row/column labels.  Colors can be 
+%       expressed as an RGB triplet, short name or long name, e.g. 
+%       {'y' 'm' 'c' 'r'} or {'yellow' 'magenta' 'cyan' 'red'} or 
+%       {'[1 1 0]' '[1 0 1]' '[0 1 1]' '[1 0 0]'}. See Matlab color 
+%       specification documentation for more info: 
+%           https://www.mathworks.com/help/matlab/ref/colorspec.html
 %   'axisLabels': a matrix of alphanumeric labels, ordered by same order of
 %       items in the confusion matrix e.g., ['cat' 'dog' 'fish']
-%   'iconPath': a directory containing images to be used for labels, in which the
-%       image filenames must be ordered in the same order as the items of the 
+%   'iconPath': a directory containing images used to label, where the
+%       image files must be ordered in the same order as the labels of the 
 %       confusion matrix
 %   'colorMap' - This parameter can be used to call a default Matlab colormap, 
 %       or one specified by the user, to change the overall look of the plot. 

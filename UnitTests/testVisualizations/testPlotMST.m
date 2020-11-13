@@ -9,7 +9,7 @@ clear all; close all; clc
 rng('shuffle');
 
 % Load pre-computed cross-validated Euclidean RDMs and average across time and across subjects
-ec_rdms = load('euclidean_rdms.mat');
+ec_rdms = load('../euclidean_rdms.mat');
 ec_rdms = ec_rdms.euclidean_rdms;
 ec_rdms = squeeze(mean(ec_rdms, 1));
 ec_rdms = squeeze(mean(ec_rdms, 3));
@@ -22,30 +22,37 @@ end
 % Change as needed
 iconpath = './stimuli/';
 
+%Create MatClassRSA object
+RSA = MatClassRSA;
+
 %% Plot MST with no options
 % Looks good
 
 figure;
-img = plotMST(ec_rdms);
+img = RSA.Visualization.plotMST(ec_rdms);
 
 %% Plot MST with iconPath
-% Looks good. Need to check icon ordering!
+% Issue: iconSize corresponds to the resolution, not the actual size!
 
 figure;
-plotMST(ec_rdms, 'iconPath', iconpath, 'iconSize', 8);
+RSA.Visualization.plotMST(ec_rdms, 'iconPath', iconpath, 'iconSize', 40);
 
 %% Plot MST with nodeColors
-% This breaks.
+% Looks good!
 
 figure;
 colors = cell(1,72);
-for i=1:72
+for i=1:36
     colors{i} = 'm';
 end
-plotMST(ec_rdms, 'nodeColors', colors);
+for i=37:72
+    colors{i} = 'b';
+end
+RSA.Visualization.plotMST(ec_rdms, 'nodeColors', colors, ...
+    'nodeLabelSize', 8, 'edgeLabelSize', 8);
 
 %% Plot MST with nodeLabels
-% This breaks. Maybe due to the nodelabels but not sure.
+% Looks good!
 
 figure;
 nodelabels = cell(1,72);
@@ -55,9 +62,10 @@ for i=1:72
 end
 nodecolors = cell(1,size(ec_rdms,1));
 for i=1:size(ec_rdms,1)
-    nodecolors{i} = 'cyan';
+    nodecolors{i} = [.3 .7 .1];
 end
-plotMST(ec_rdms, 'nodeLabels', nodelabels, 'nodeColors', nodecolors);
+RSA.Visualization.plotMST(ec_rdms, 'nodeLabels', nodelabels, ...
+    'nodeColors', nodecolors, 'nodeLabelSize', 8, 'edgeLabelSize', 8);
 
 
 

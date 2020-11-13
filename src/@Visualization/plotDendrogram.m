@@ -5,55 +5,61 @@ function fig = plotDendrogram(obj, RDM, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
-% This function creates a dendrogram plot with the distance matrix
-% passed in.
+% Given a distance matrix as input, this function plots a dendorgram.  
+% Optional name-value pair arugments are described below.
 %
 % INPUT ARGS (REQUIRED):
-%   RDM: A distance matrix.  Diagonals must be 0, and must be
-%               symmetrical along the diagonal
+%   RDM: A distance matrix.  Diagonals must be 0, and the matrix must be
+%   	symmetrical along the diagonal.
 %
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
-%   'nodeColors': a vector of colors, ordered by the order of labels in the 
-%       confusion matrix e.g. {?y? ?m? ?c? ?r?} or {?yellow? ?magenta? ?cyan? ?red?}
-%       or {?[1 1 0]? ?[1 0 1]? ?[0 1 1]? ?[1 0 0]?}
-%       Can be used in conjuction with 'nodeLabels'.
-%   'nodeLabels': a matrix of alphanumeric labels, ordered by same order of
-%       labels in the confusion matrix e.g. ['cat' 'dog' 'fish'].  Can be
-%       used in conjunction with 'nodeColors'.
-%   'iconPath': a directory containing imaAges used to label, in which the
-%       image files must be ordered in the same order as the 
-%       labels of the confusion matrix
-%   'fontSize': a number to specify the size of fonts when plotting colored
-%   labels.
-%   'orientation' - Dendrogram orientation.  This parameter lets the user 
-%       specify which direction to point the dendrogram (orientation defined 
-%       here as the side that contains the dendrogram leaves).
+%   'nodeColors': a vector of colors, whose order corresponds to the order 
+%       of labels in the confusion matrix.  For example, if user inputs: 
+%        ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black'],  
+%       then class 1 would be yellow, class 2 would be magenta... class 8 
+%       would be black.  Colors can be expressed as an RGB triplet 
+%       ([1 1 0]), short name ('y') or long name ('yellow').  See Matlab 
+%       color specification documentation for more info: 
+%           https://www.mathworks.com/help/matlab/ref/colorspec.html
+%   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
+%       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
+%   'iconPath': A directory containing images files to use as labels. The
+%       image files must be ordered in the same order as the labels of the 
+%       confusion matrix.  For example, the first file in the iconPath
+%       directory will correspond to the confusion matrices' first label, 
+%       the second file will correspond to the second CM label etc.
+%       Supported image file formats can be found at the MATLAB imread()
+%       documentation page: 
+%           https://www.mathworks.com/help/matlab/ref/imread.html
+%   'fontSize': A number to specify the font size of labels.
+%   'orientation' - This parameter lets the user specify which side to plot
+%       the dendrogram leaves.
 %       --options--
 %       'down' (default) 
 %       'up' 
 %       'left'
 %       'right'
-%   'reorder' - Specify order of classes in the dendrogram.  Must pass in
-%       as a length N vector, N being the number of classes in RDM.  Also,
-%       vector should contain values 1:N. 
+%   'reorder' - Specify order of classes in the dendrogram.  Must be passed
+%       in as a length N vector, N being the number of classes in RDM.  
+%       Also, vector should contain values 1:N. 
 %   'yLim' - Set range of the Y-axis.  Pass in as an array of length 2, 
-%       [yMin yMax].
-%   'textRotation' - Set this parameter to an  amount in degrees to rotate 
-%       the text.  Default 0.
-%   'lineWidth' - Line width  Use this parameter to set the width of the 
-%       lines in the dendrogram.  Default 2.
-%   'lineColor' - Line color  Use this parameter to set the color of the 
-%       lines in the dendrogram.  Similar to 'nodeColors', we can either 
-%       pass in color abbreviations, full-length color names, or RGB color triplets.
+%       e.g. [yMin yMax].
+%   'textRotation' - Amount in degrees to rotate the text labels.  For 
+%       visibility purposes.  Default 0.
+%   'lineWidth' - Use this parameter to set the width of the lines in the 
+%       dendrogram.  Default 2.
+%   'lineColor' - Use this parameter to set the color of the lines in the
+%       dendrogram.  Similar to 'nodeColors', we can either pass in color 
+%       abbreviations, full-length color names, or RGB color triplets.  
 %       Default 'black'.
-%   'iconSize' - if parameter 'iconPath' is passed in, then this parameter
-%       will determine the size of each image icon.  Default 40.
+%   'iconSize' - If parameter 'iconPath' is passed in, this parameter will 
+%       determine the size of each image icon.  Default 40.
 %
 % OUTPUT ARGS:
-%   'img' - figure corresponding to output plot
+%   'img' - Figure corresponding to output plot.
 
 % Notes:
-%   - linkage order - inorder w/crossing, best order w/o crossing, dist
+%   - linkage order - inorder w/ crossing, best order w/o crossing, dist
 %   order
 %   - flip horizontal
 %   - make sure the side thin
@@ -178,9 +184,6 @@ function fig = plotDendrogram(obj, RDM, varargin)
 %         hold on;
 %         return;
     end
-
-    %iconPath(1).name
-
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
