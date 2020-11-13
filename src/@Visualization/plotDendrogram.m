@@ -152,6 +152,8 @@ function fig = plotDendrogram(obj, RDM, varargin)
     %set(gca,'xtick',[]);
     set(gcf,'color',[1 1 1]);
     
+    fig = gcf;
+    
     % Set dendrogram Y axis height
     if ~isempty(ip.Results.yLim)
         ylim(ip.Results.yLim);

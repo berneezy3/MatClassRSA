@@ -35,7 +35,7 @@ img = RSA.Visualization.plotMST(ec_rdms);
 % Issue: iconSize corresponds to the resolution, not the actual size!
 
 figure;
-RSA.Visualization.plotMST(ec_rdms, 'iconPath', iconpath, 'iconSize', 40);
+fig = RSA.Visualization.plotMST(ec_rdms, 'iconPath', iconpath, 'iconSize', 40);
 
 %% Plot MST with nodeColors
 % Looks good!

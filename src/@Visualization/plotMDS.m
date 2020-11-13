@@ -13,12 +13,17 @@ function fig = plotMDS(obj, RDM, varargin)
 %               symmetrical along the diagonal
 %
 % Optional name-value pairs:
-%   'nodeColors': a vector of colors, ordered by the order of labels in the 
-%       confusion matrix e.g. ['y' 'm' 'c' 'r' 'g' 'b' 'w' 'k'] or 
-%       ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black']            
-%   'nodeLabels': a matrix of alphanumeric labels, ordered by same order of
-%       labels in the confusion matrix e.g. ['cat' 'dog' 'fish']
-%   'iconPath': a directory containing images used to label, in which the
+%   'nodeColors': a vector of colors, whose order corresponds to the order 
+%       of labels in the confusion matrix.  For example, if user inputs: 
+%        ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black'],  
+%       then class 1 would be yellow, class 2 would be magenta... class 8 
+%       would be black.  Colors can be expressed as an RGB triplet 
+%       ([1 1 0]), short name ('y') or long name ('yellow').  See Matlab 
+%       color specification documentation for more info: 
+%           https://www.mathworks.com/help/matlab/ref/colorspec.html
+%   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
+%       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
+%   'iconPath': a directory containing images used to label, where the
 %       image files must be ordered in the same order as the labels of the 
 %       confusion matrix
 %   'dimensions': Choose which MDS dimensions to display (default [1 2]).

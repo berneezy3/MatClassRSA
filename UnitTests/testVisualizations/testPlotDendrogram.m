@@ -28,7 +28,7 @@ RSA = MatClassRSA;
 % Issue: changing orientation does not seem to do anything.
 
 figure;
-RSA.Visualization.plotDendrogram(ec_rdms, 'fontsize', 10, 'orientation', 'right');
+fig = RSA.Visualization.plotDendrogram(ec_rdms, 'fontsize', 10, 'orientation', 'right');
 
 %% Plot dendrogram with iconPath
 % Looks good. Need to check icon ordering!
