@@ -17,24 +17,26 @@ ec_rdms = squeeze(mean(ec_rdms, 3));
 % Change as needed
 iconpath = './stimuli/';
 
+RSA = MatClassRSA;
+
 %% Plot RDM with basic options -- font and colormap
 % Looks good
 
-plotMatrix(ec_rdms, 'colormap', 'jet', 'FontSize', 5, 'textRotation', 45, 'matrixLabels', 0, 'matrixLabelColor', 'white');
+RSA.Visualization.plotMatrix(ec_rdms, 'colormap', 'jet', 'FontSize', 5, 'textRotation', 45, 'matrixLabels', 0, 'matrixLabelColor', 'white');
 
 %% Plot RDM without any entry labels and colour bar
 % Looks good
 
-plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'colorbar', 1);
+RSA.Visualization.plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'colorbar', 1);
 
 %% Plot RDM with icons
 % Looks good. Need to check icon ordering!
 
-plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 8);
+RSA.Visualization.plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 8);
 
 %% 
 
-plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 15, 'textRotation', 45);
+RSA.Visualization.plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'iconPath', iconpath, 'iconSize', 15, 'textRotation', 45);
 
 %% Plot RDM with custom axis labels
 % Unexpected behaviour. I provide 72 labels, but the xticklabels do not
@@ -48,7 +50,7 @@ for i=1:72
     randomLabels{i} = randString;
 end
 
-[img] = plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'axisLabels', randomLabels, 'FontSize', 10, 'textRotation', 45);
+[img] = RSA.Visualization.plotMatrix(ec_rdms, 'colormap', 'jet', 'matrixLabels', 0, 'axisLabels', randomLabels, 'FontSize', 10, 'textRotation', 45);
 
 
 
