@@ -6,9 +6,9 @@ function xOut = normalizeMatrix(xIn, normType)
 %
 % This function normalizes a matrix by dividing each row by either its sum,
 % or the value on the diagonal.
-% Inputs: 
+% Inputs (required):
 % - xIn: The square confusion matrix
-% - normType: 
+% - normType:
 %   - Diagonal ('diagonal', 'diag', 'd')
 %   - Sum ('sum', 's')
 %   - None ('none', 'n')
@@ -16,56 +16,69 @@ function xOut = normalizeMatrix(xIn, normType)
 %
 % There is no default normalization approach, as normalization type is
 % assumed to be decided prior to calling this function. If none of the
-% above normType options are specified, the function returns an error. 
-% Currently if the divisor is zero, the function returns an error and it 
+% above normType options are specified, the function returns an error.
+% Currently if the divisor is zero, the function returns an error and it
 % is up to the user to adjust the input matrix.
 
-% This software is licensed under the 3-Clause BSD License (New BSD License), 
+% This software is licensed under the 3-Clause BSD License (New BSD License),
 % as follows:
 % -------------------------------------------------------------------------
 % Copyright 2017 Bernard C. Wang, Anthony M. Norcia, and Blair Kaneshiro
-% 
+%
 % Redistribution and use in source and binary forms, with or without
 % modification, are permitted provided that the following conditions are met:
-% 
-% 1. Redistributions of source code must retain the above copyright notice, 
+%
+% 1. Redistributions of source code must retain the above copyright notice,
 % this list of conditions and the following disclaimer.
-% 
-% 2. Redistributions in binary form must reproduce the above copyright notice, 
-% this list of conditions and the following disclaimer in the documentation 
+%
+% 2. Redistributions in binary form must reproduce the above copyright notice,
+% this list of conditions and the following disclaimer in the documentation
 % and/or other materials provided with the distribution.
-% 
-% 3. Neither the name of the copyright holder nor the names of its 
-% contributors may be used to endorse or promote products derived from this 
+%
+% 3. Neither the name of the copyright holder nor the names of its
+% contributors may be used to endorse or promote products derived from this
 % software without specific prior written permission.
-% 
+%
 % THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
-% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE 
-% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
-% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF 
-% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
-% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
-% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
+
+assert(nargin == 2, ...
+    '''normalizeMatrix'' function requires two inputs: Data matrix and normalization specification.')
 
 normType = lower(normType);
 
 switch normType
     case {'diagonal', 'diag', 'd'}
         disp('Normalize: diagonal')
+        
+        % Check for zeros on the diagonal
         if ismember(0, diag(xIn))
             error('Cannot divide by zero on the diagonal. Suggest using ''sum'' rather than ''diagonal'' for normalization.')
-        else
-            xOut = xIn ./ repmat(diag(xIn), 1, size(xIn, 2));
         end
+        
+        xOut = xIn ./ repmat(diag(xIn), 1, size(xIn, 2));
+        
+        % Check for off-diagonal elements > 1 after normalization
+        offDiag = xOut - diag(diag(xOut));
+        if any(offDiag(:) > 1)
+            warning(['Input matrix contains off-diagonal values exceeding the diagonal entry in at least one row, which produces off-diagonal elements greater than 1. '...
+                'Use caution when converting these similarities to distances, or use ''sum'' rather than ''diagonal'' for normalization.'])
+        end
+        
     case {'sum', 's'}
         disp('Normalize: sum')
         xOut = xIn ./ repmat(sum(xIn, 2), 1, size(xIn, 2));
         if ismember(0, sum(xIn, 2))
-            warning('Input matrix contains at least one zero-sum row. These output rows will be rows of zeros.')
+            warning('Input matrix contains at least one zero-sum row. These rows will be output as rows of zeros in the normalized matrix.')
             zeroRows = find(sum(xIn,2) == 0);
             xOut(zeroRows,:) = 0;
         end

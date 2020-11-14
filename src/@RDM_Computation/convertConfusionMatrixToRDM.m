@@ -28,19 +28,24 @@ function [RDM, params] = convertConfusionMatrixToRDM(obj, M, varargin)
 %   some value.
 %   --- options ---
 %   'sum' (default) - divide each matrix element by the sum of the 
-%       respective row, 
-%       so that each row sums to 1. Assuming confusion matrices with actual 
-%       labels as rows and predicted labels as columns, this procedure 
-%       computes the estimated conditional probabilities:  
-%       P(predicted|actual) (Shepard, 1958b). NOTE: If the sum of any row 
-%       is zero, the normalization subfunction will print a warning and the 
-%       outputs of all elements in those rows will be zeros.
+%       respective row, so that each row sums to 1. Assuming that confusion 
+%       matrices arrange actual labels as rows and predicted labels as 
+%       columns, this procedure computes the estimated conditional 
+%       probabilities: P(predicted|actual) (Shepard, 1958b). 
+%       NOTE: If the sum of any row is zero, the normalization subfunction 
+%       will print a warning and the outputs of all elements in those rows 
+%       will be zeros (not NaNs).
 %   'diagonal' - divide each matrix element by the diagonal value 
 %       in the respective row. For confusion matrices, this produces 
-%       self-similarity of one (Shepard, 1958a). NOTE: If any element along 
-%       the diagonal is zero, this option will introduce NaNs in the 
-%       output; in this case the function will print a warning and advise 
-%       the user to use 'sum' normalization instead.
+%       self-similarity of one (Shepard, 1958a). 
+%       NOTE: If any element along the diagonal is zero, this option will 
+%       introduce NaNs in the output; in this case the normalization 
+%       subfunction will issue an error and advise the user to use 'sum' 
+%       normalization instead.
+%       NOTE: If any off-diagonal element in a matrix row exceeds the
+%       diagonal value in that row (which would produce off-diagonal values
+%       greater than 1 after normalization), the the function will print a
+%       warning and advise the suer to use 'sum' normalization instead.
 %   'none' - do not perform any normalization of the matrix. 
 %
 % 'symmetrize' -- 'arithmetic' (default), 'geometric', 'harmonic', 'none'
@@ -110,7 +115,7 @@ function [RDM, params] = convertConfusionMatrixToRDM(obj, M, varargin)
 %   the generalization gradient from a trace model. Psychological Review 
 %   65(4):242?256. doi: 10.1037/h0043083
 % - Shepard RN (1958b). Stimulus and response generalization: Tests of a 
-%   model relating generalization to dis- tance in psychological space. 
+%   model relating generalization to distance in psychological space. 
 %   Journal of Experimental Psychology 55(6):509?523. doi: 10.1037/h0042354
 
 % This software is licensed under the 3-Clause BSD License (New BSD License),
