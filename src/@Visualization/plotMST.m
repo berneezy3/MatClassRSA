@@ -31,12 +31,13 @@ function  fig = plotMST(obj, RDM, varargin)
 %   'edgeLabelSize': Set the size of the MST edge labels.  Default is 15.
 %   'nodeLabelSize': Set the size of node labels.  Default is 15.
 %   'nodeLabelRotation': Set the angle of the node label.
-%   'lineWidth': Set MST line color.  Default is 2
-%   'lineColor': Set MST line color.  Default is [.5 .5 .5]
+%   'lineWidth': MST line color.  Default is 2
+%   'lineColor': MST line color.  Default is [.5 .5 .5].  Colors can be 
+%       expressed as an RGB triplet ([1 1 0]), short name ('y') or long 
+%       name ('yellow').
 %
 % Outputs:
 % - img: Figure corresponding to output plot
-
 
 % Notes:
 %   TODO - find out how to plot images on the coordinates
@@ -92,6 +93,7 @@ function  fig = plotMST(obj, RDM, varargin)
     
 
     % set up the nodes and connections between
+    RDM = processRDM(RDM);
     [r c] = size(RDM);
     numEdges = ((r-1) + (r-1)^2)/2;
     numNodes = r;

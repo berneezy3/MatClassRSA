@@ -126,6 +126,13 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
     ip.addParameter('iconSize', 40);
     parse(ip, RDM, varargin{:});
     
+    
+    % check for square matrix
+    [r c] = size(RDM);
+    if (r ~= c)
+        error('Input matrix must be square matrix.')
+    end
+    
     % Rank distances
     RDM = rankDistances(RDM, ip.Results.ranktype);
     

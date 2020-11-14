@@ -18,11 +18,13 @@ X_3D = rand(nSpace, nTime, nTrial);
 X_2D = rand(nTrial, nTime);
 P = randi(3, [1 nTrial]);
 
+RSA = MatClassRSA;
+
 %% SUCCESS: 3D input data matrix
 
 Y = randi(10, [1 nTrial]);
-[x3, y3, p3, o3] = averageTrials(X_3D, Y, 5, P, 'endShuffle', 0);
-
+[x3, y3, p3, o3] = RSA.Preprocessing.averageTrials(X_3D, Y, 5, P, 'endShuffle', 0);
+%%
 % Test that averaged data are as expected
 assert(length(y3) == length(o3), 'Lengths of output labels and pseudotrials unequal');
 assert(size(x3,3) == length(y3), 'Averaged data trials dimension mismatch.');

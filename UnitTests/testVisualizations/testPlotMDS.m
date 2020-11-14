@@ -9,7 +9,7 @@ clear all; close all; clc
 rng('shuffle');
 
 % Load pre-computed cross-validated Euclidean RDMs and average across time and across subjects
-ec_rdms = load('euclidean_rdms.mat');
+ec_rdms = load('../euclidean_rdms.mat');
 ec_rdms = ec_rdms.euclidean_rdms;
 ec_rdms = squeeze(mean(ec_rdms, 1));
 ec_rdms = squeeze(mean(ec_rdms, 3));

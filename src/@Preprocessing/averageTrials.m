@@ -63,8 +63,8 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(obj, X, Y, 
 %           as input to cross-validated classification). If not specified,
 %           defaults to 1.
 %           --- options ---
-%               0, 'false': Do not perform end shuffling
-%               1, 'true': Perform end shuffling (default)
+%               0 : Do not perform end shuffling
+%               1 : Perform end shuffling (default)
 %       'rngType' - specify random number generator (rng) if end shuffling
 %           is being performed. If not entered, rng will be assigned as
 %           ('shuffle', 'twister').

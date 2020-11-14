@@ -130,8 +130,9 @@ function fig = plotDendrogram(obj, RDM, varargin)
     
     parse(ip, RDM,varargin{:});
     
-    RDMmod = RDM(tril(true(size(RDM)),-1))';
-    tree = linkage(RDMmod, ip.Results.distMethod);
+    % extract RDM lower triangle
+    RDM = processRDM(RDM);
+    tree = linkage(RDM, ip.Results.distMethod);
     [r c] = size(tree);
     
     

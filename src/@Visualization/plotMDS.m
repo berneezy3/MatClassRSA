@@ -77,7 +77,7 @@ function fig = plotMDS(obj, RDM, varargin)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-
+    RDM = processRDM(RDM);
     if length(find(RDM<0)) > 0
         warning('Distance less than 0 detected, converting negative distances to 0');
         RDM(RDM<0) = 0;
