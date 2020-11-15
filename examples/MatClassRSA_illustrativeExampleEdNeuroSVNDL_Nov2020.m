@@ -1,3 +1,6 @@
+% MatClassRSA_illustrativeExampleEdNeuroSVNDL_Nov2020.m
+% ---------------
+
 %% 1. Define colors and category labels
 
 % a) create cell array to store colors for visualization
