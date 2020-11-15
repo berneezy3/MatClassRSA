@@ -1,10 +1,39 @@
 % MatClassRSA_illustrativeExampleEdNeuroSVNDL_Nov2020.m
-% ---------------
+% ------------------------------------------------------
+% November 17, 2020
+% Author: Bernard Wang
+%
+% This script covers basic functionalities of the MatClassRSA toolbox: 
+% - Instantiating the MatClassRSA class;
+% - Data preparation: Call shuffleData()
+% - Data prepraation: Call averageTrials()
+% - 
+%
+% This script is intended to be run cell by cell as a tutorial.
+%
+% The demo uses a set of time-domain visual evoked potentials from this
+% 	paper: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0135697
+% There are 72 visual stimuli, 12 in each of 6 object categories. Each
+%   participant viewed each stimulus 72 times. We will look at responses on
+%   the category level, meaning there are 
+%       12 stimuli x 72 viewings per stimulus = 864 trials per category.
+%
+% Requirements to run the tutorial: 
+% - The MatClassRSA toolbox, dev2 branch, is in your path: 
+%   https://github.com/berneezy3/MatClassRSA
+% - The S06.mat data file is in your path.
+
 
 %% 1. Define colors and category labels
 
 % a) create cell array to store colors for visualization
 rgb6 = {'blue', 'cyan', 'green', 'red', 'magenta', 'black'};
+rgb6 = [ 0.1216    0.4667    0.7059;   % Blue
+    1.0000    0.4980    0.0549;         % Orange
+    0.1725    0.6275    0.1725;         % Green
+    0.8392    0.1529    0.1569;         % Red
+    0.5804    0.4039    0.7412;         % Purple
+    0.7373    0.7412    0.1333];         % Chartreuse
 
 % b) create category label names
 catLabels = {'HB', 'HF', 'AB', 'AF', 'FV', 'IO'};
@@ -18,15 +47,22 @@ catLabels = {'HB', 'HF', 'AB', 'AF', 'FV', 'IO'};
 %   fs contains the sampling frequency
 %   subID contains the subject ID of the experiment
 %   
-load '../UnitTests/S06.mat'
+load 'S06.mat'
 Y = labels6;
 
 % b) plot histrogram to show that each category is evenly distributed
-histogram(labels6)
-title('Distribution of class labels')
+h = histogram(labels6) ;
+% Plot the number of observations for each category
+x = h.BinEdges + h.BinWidth/2;
+y = h.Values ;
+text(x(1:end-1),y,num2str(y'),'vert','top','horiz','center',...
+    'fontsize', 12); 
+
+title('Distribution of stimulus category labels')
 xticklabels(catLabels);
-xlabel('category name');
-ylabel('number of trials');
+xlabel('Category name');
+ylabel('Number of trials');
+set(gca, 'fontsize', 16)
 
 %% 3. visualize input data
 
@@ -98,7 +134,7 @@ for i = 1:6
     %       columns if given a matrix to plot)
     % Color by category
     % Thinner linewidth here since we have a lot of single trials
-    plot(t, temp(:, 1:50), 'color', rgb6{i},...
+    plot(t, temp(:, 1:50), 'color', rgb6(i, :),...
         'linewidth', 1);
     hold on;
     
