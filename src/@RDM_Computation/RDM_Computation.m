@@ -11,10 +11,10 @@ classdef RDM_Computation
 %
 % RSA = MatClassRSA;
 % C = RSA.Classification.crossValidateMulti(X, Y);
-% RDM = RSA.RDM_Computation.computeClassificationRDM(C.CM, 'CM')
+% RDM = RSA.RDM_Computation.computeCMRDM(C.CM, 'CM')
 %
 % Below are the list of classification functions contained in this class:
-%   - computeClassificationRDM()
+%   - computeCMRDM()
 %   - computeEuclideanRDM()
 %   - computePearsonRDM()    
     
