@@ -267,13 +267,12 @@
     cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
     
     %PERMUTATION TEST (assigning)
-    tic    
     if ip.Results.permutations > 0
         % return distribution of accuracies (Correct clasification percentage)
         accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
                     ip.Results.classifier, partition, ip);
     end
-    toc
+
 
     
     % CROSS VALIDATION

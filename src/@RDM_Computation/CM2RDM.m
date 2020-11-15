@@ -1,4 +1,4 @@
-function [RDM, params] = convertConfusionMatrixToRDM(obj, M, varargin)
+function [RDM, params] = CM2RDM(obj, M, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
 % [RDM, params] = RSA.computeRDM.computeClassificationRDM(M, varargin)

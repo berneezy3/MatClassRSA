@@ -176,6 +176,7 @@
     namestr = st.name;
     ip = inputParser;
     ip = initInputParser(namestr, ip);
+    
     %Required inputs
     [r c] = size(X);
     
@@ -207,7 +208,6 @@
     if (r1 < c1)
         Y = Y'
     end
-    
     
     %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
     % moving forward.
