@@ -65,9 +65,9 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(obj, X, Y, 
 %           --- options ---
 %               0 : Do not perform end shuffling
 %               1 : Perform end shuffling (default)
-%       'rngType' - specify random number generator (rng) if end shuffling
-%           is being performed. If not entered, rng will be assigned as
-%           ('shuffle', 'twister').
+%       'randomSeed' - specify random number generator (rng) if end 
+%           shuffling is being performed. If not entered, rng will be 
+%           assigned as ('shuffle', 'twister').
 %           --- options ---
 %               Single acceptable rng specification input (e.g., 1, 
 %                   'default', 'shuffle'); in these cases, the generator 
@@ -142,15 +142,15 @@ defaultHandleRemainder = 'discard';
 validHandleRemainder = {'discard','newGroup', 'append', 'distribute'};
 checkHandleRemainder = @(x) any(validatestring(x, validHandleRemainder));
 defaultEndShuffle = 1;
-defaultRngType = {'shuffle', 'twister'}; 
+defaultRandomSeed = {'shuffle', 'twister'}; 
 if verLessThan('matlab', '8.2')
     addParamValue(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder);
     addParamValue(ip, 'endShuffle', defaultEndShuffle);
-    addParamValue(ip, 'rngType', defaultRngType);
+    addParamValue(ip, 'randomSeed', defaultRandomSeed);
 else
     addParameter(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder);
     addParameter(ip, 'endShuffle', defaultEndShuffle);
-    addParameter(ip, 'rngType', defaultRngType);
+    addParameter(ip, 'randomSeed', defaultRandomSeed);
 end
 
 parse(ip, X, Y, groupSize, varargin{:});
@@ -375,7 +375,7 @@ end
 if ip.Results.endShuffle
     disp('averageTrials: Shuffling order of averaged data.')
     %%%% Set the random number generator %%%%
-    thisRng = ip.Results.rngType;
+    thisRng = ip.Results.randomSeed;
     setUserSpecifiedRng(thisRng);
     %%%% End set random number generator %%%%
     

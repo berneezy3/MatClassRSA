@@ -1,7 +1,7 @@
-function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, P, rngType)
+function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
-% [randX, randY, randP, randIdx] = shuffleData(X, Y, P, rngType)
+% [randX, randY, randP, randIdx] = shuffleData(X, Y, P, randomSeed)
 %-------------------------------------------------------------------
 % Bernard Wang - April 30, 2017
 % Revised by Blair Kaneshiro, August 2019
@@ -25,17 +25,17 @@ function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, P, rngType)
 %       is not entered or is empty, the function will return NaN as 
 %       randomized P. P can be a numeric vector, string array, or cell 
 %       array.
-%   rngType (optional) - Random number generator specification. If rngType
+%   randomSeed (optional) - Random number generator specification. If randomSeed
 %       is not entered or is empty, rng will be assigned as 
 %       ('shuffle', 'twister').
-%       --- Acceptable specifications for rngType ---
+%       --- Acceptable specifications for randomSeed ---
 %           - Single acceptable rng specification input (e.g., 1,
 %               'default', 'shuffle'); in these cases, the generator will
 %               be set to 'twister'.
 %           - Dual-argument specifications as either a 2-element cell
 %               array (e.g., {'shuffle', 'twister'}) or string array
 %               (e.g., ["shuffle", "twister"].
-%           - rng struct as assigned by rngType = rng.
+%           - rng struct as assigned by randomSeed = rng.
 %
 % OUTPUTS
 %   randX: Data matrix with its trials reordered (same size as X).
@@ -77,9 +77,29 @@ function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, P, rngType)
 %
 % MatClassRSA dependencies: setUserSpecifiedRng
 
+ip = inputParser;
+ip.FunctionName = 'shuffleData';
+ip.addRequired('X', @isnumeric);
+ip.addRequired('Y', @isvector);
+
+%parse optional participants vector
+defaultP = zeros(size(Y));
+addOptional(ip, 'P', defaultP);
+
+% parse optional inputs
+defaultEndShuffle = 1;
+defaultRandomSeed = {'shuffle', 'twister'}; 
+if verLessThan('matlab', '8.2')
+    addParamValue(ip, 'randomSeed', defaultRandomSeed);
+else
+    addParameter(ip, 'randomSeed', defaultRandomSeed);
+end
+
+parse(ip, X, Y, varargin{:});
+
 % Set random number generator
-if nargin < 4 || isempty(rngType), setUserSpecifiedRng();
-else, setUserSpecifiedRng(rngType);
+if nargin < 4 || isempty(ip.Results.randomSeed), setUserSpecifiedRng();
+else, setUserSpecifiedRng(ip.Results.randomSeed);
 end
 
 % Make sure data matrix X is a 2D or 3D matrix

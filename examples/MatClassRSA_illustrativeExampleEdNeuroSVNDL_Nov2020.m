@@ -27,13 +27,12 @@
 %% 1. Define colors and category labels
 
 % a) create cell array to store colors for visualization
-rgb6 = {'blue', 'cyan', 'green', 'red', 'magenta', 'black'};
-rgb6 = [ 0.1216    0.4667    0.7059;   % Blue
-    1.0000    0.4980    0.0549;         % Orange
-    0.1725    0.6275    0.1725;         % Green
-    0.8392    0.1529    0.1569;         % Red
-    0.5804    0.4039    0.7412;         % Purple
-    0.7373    0.7412    0.1333];         % Chartreuse
+rgb6 = {[0.1216    0.4667    0.7059],  ... % Blue
+    [1.0000    0.4980    0.0549] ,     ...   % Orange
+    [0.1725    0.6275    0.1725] ,   ...     % Green
+    [0.8392    0.1529    0.1569]  ,    ...   % Red
+    [0.5804    0.4039    0.7412]  ,   ...    % Purple
+    [0.7373    0.7412    0.1333]}   ,  ...   % Chartreuse
 
 % b) create category label names
 catLabels = {'HB', 'HF', 'AB', 'AF', 'FV', 'IO'};
@@ -134,14 +133,14 @@ for i = 1:6
     %       columns if given a matrix to plot)
     % Color by category
     % Thinner linewidth here since we have a lot of single trials
-    plot(t, temp(:, 1:50), 'color', rgb6(i, :),...
+    plot(t, temp(:, 1:50), 'color', rgb6{i},...
         'linewidth', 1);
     hold on;
     
     % Plot current mean and color by category
     % We take the mean across the 2nd (trial) dimension
     % Color the mean white and use a larger linewidth
-    plot(t, mean(temp,2), 'w',...
+    plot(t, mean(temp,2), 'k',...
         'linewidth', 2);
     
     % Our aesthetics from before
@@ -163,11 +162,11 @@ RSA = MatClassRSA;
 
 %% 6. call shuffleData()
 
-% a) we want to shuffle the data so that when our data is used for
+% a) we want to shuffle the data so that whsen our data is used for
 % classification, each class is represented in every cross validation fold.
 % b) Also, we set the random seed so the result is replicable across disparate 
 % calls to the function
-[X_shuf, Y_shuf] = RSA.Preprocessing.shuffleData(X, Y, NaN, 0);
+[X_shuf, Y_shuf] = RSA.Preprocessing.shuffleData(X, Y, 'randomSeed', 0);
 
 %% 7. call averageTrials()
 
@@ -180,72 +179,150 @@ RSA = MatClassRSA;
 % If number of trials are not divisible by the averaging factor, then we
 % discard the extra trials
 % b)
-[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(X_shuf, Y_shuf, 5);
+[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(X_shuf, Y_shuf, 5, 'randomSeed', 0);
 
 % c) show number of trials before and after averaging
 length(labels6)
 length(Y_avg)
 
-% d) visualization of single trial before and after averaging.  Trials
-% should be less noisy after averaging
+% d) visualization of 10 single trial before and after averaging. 
+% We can see that pseudotrials are less noisy than unaveraged single trials
 figure
-plot(t, X(1, :, 1))
-hold on
-plot(t, X_avg(1, :, 1))
-legend({'before averaging', 'after averaging'});
+
+stIndx = find(Y==1);
+stIndx = stIndx(1:10);
+ptIndx = find(Y_avg==1);
+ptIndx = ptIndx(1:10);
+
+subplot(2,1,1)
+plot(t, squeeze(X(96, :, stIndx)), 'color', rgb6{1},...
+    'linewidth', 1);
+ylabel('amplitude');
+title('10 Single Trials, electrode 96');
+legend({'before averaging'});
+set(gca, 'fontsize', 16)
+
+
+subplot(2,1,2)
+plot(t, squeeze(X_avg(96, :, ptIndx)), 'color', rgb6{1},...
+    'linewidth', 1);
+title('10 Pseudo Trials (5 single-trials averaged), electrode 96')
+legend({'after averaging'});
 xlabel('time');
 ylabel('amplitude');
+set(gca, 'fontsize', 16)
 
 
 %% 8. Multiclass classification (all electrodes, all time points)
 
 %% a, c)  LDA classification/visualization
 
+% We perform cross validation using the LDA classififier on X_avg and Y_avg.
+% PCA is specified to choose principal components that explain 99% of the 
+% variance of the data.
 C_LDA = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, 'classifier', 'LDA');
 
+% Plot the confusion matrix computed by the cross validation using the
+% visualization function, RSA.Visualization.plotMatrix()
 figure
 RSA.Visualization.plotMatrix(C_LDA.CM, 'colorbar', 1, 'matrixLabels', 1);
-RDM_LDA = RSA.RDM_Computation.CM2RDM(C_LDA.CM);
+title('Multiclass LDA Confusion Matrix');
+set(gca, 'fontsize', 16)
 
+% Next, we call the RSA.RSA.RDM_Computation.computeCMRDM() function to
+% convert the confusion matrix into a Representational Dissimilarity
+% Matrix(RDM).   
+RDM_LDA = RSA.RDM_Computation.computeCMRDM(C_LDA.CM);
+
+% We use plotMatrix() again to visualize the RDM. 
 figure
 RSA.Visualization.plotMatrix(RDM_LDA, 'colorbar', 1, 'matrixLabels', 1);
+title('Multiclass LDA RDM');
+set(gca, 'fontsize', 16)
 
+% We pass the previously computed RDM into the 
+% RSA.Visualization.plotDendrogram() function to create a dendrogram
+% visualiation.  The 'nodeLabels' and 'nodeColors' arguments set the
+% dendrogram leaf labels and colors, respectively.  
 figure
 RSA.Visualization.plotDendrogram(RDM_LDA, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
+title('Multiclass LDA Dendrogram Dendrogram');
+set(gca, 'fontsize', 16)
 
+% We pass the previously computed RDM into the 
+% RSA.Visualization.plotMDS() function to create a multidimentional scaling
+% visualiation.  The 'nodeLabels' and 'nodeColors' arguments set the
+% category coordinate labels and colors, respectively.  
 figure
 RSA.Visualization.plotMDS(RDM_LDA, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
+title('Multiclass LDA MDS Plot');
+set(gca, 'fontsize', 16)
 
 %% b, c) SVM classification/visualization
 
-C_SVM = RSA.Classification.crossValidateMulti_opt(X_avg, Y_avg, 'PCA', .99, 'classifier', 'SVM');
+% C_SVM = RSA.Classification.crossValidateMulti_opt(X_avg, Y_avg, 'PCA', .99, 'classifier', 'SVM');
 
-% gamma_opt = .0032;
-% C_opt = 100000;
-% C_SVM = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
-%    'classifier', 'SVM', 'gamma', gamma_opt, 'C', C_opt);
+% We perform cross validation using the SVM classififier on X_avg and Y_avg.
+% PCA is specified to choose principal components that explain 99% of the 
+% variance of the data.
+% 'gamma' and 'C' are hyperparameters of SVM's rbf kernel.  gamma_opt and 
+% C_opt were computed using the RSA.ClassificationcrossValidateMulti_opt() 
+% function.   
+gamma_opt = .0032;
+C_opt = 100000;
+C_SVM = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
+   'classifier', 'SVM', 'gamma', gamma_opt, 'C', C_opt);
 
+% Plot the confusion matrix computed by the cross validation using the
+% visualization function, RSA.Visualization.plotMatrix()
 figure
 RSA.Visualization.plotMatrix(C_SVM.CM, 'colorbar', 1, 'matrixLabels', 1);
-RDM_SVM = RSA.RDM_Computation.CM2RDM(C_SVM.CM);
+set(gca, 'fontsize', 16)
+title('Multiclass SVM Confusion Matrix');
 
+% Next, we call the RSA.RDM_Computation.computeCMRDM() function to convert
+% the confusion matrix into a Representational DissimilarityMatrix(RDM).
+RDM_SVM = RSA.RDM_Computation.computeCMRDM(C_SVM.CM);
+
+% We use plotMatrix() again to visualize the RDM. 
 figure
 RSA.Visualization.plotMatrix(RDM_SVM, 'colorbar', 1, 'matrixLabels', 1);
+set(gca, 'fontsize', 16)
+title('Multiclass SVM RDM');
 
+% We pass the previously computed RDM into the 
+% RSA.Visualization.plotDendrogram() function to create a dendrogram
+% visualiation.  The 'nodeLabels' and 'nodeColors' arguments set the
+% dendrogram leaf labels and colors, respectively.  
 figure
 RSA.Visualization.plotDendrogram(RDM_SVM, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
+set(gca, 'fontsize', 16)
+title('Multiclass SVM Dendrogram');
+ylabel('Similarity')
 
+% We pass the previously computed RDM into the 
+% RSA.Visualization.plotMDS() function to create a multidimentional scaling
+% visualiation.  The 'nodeLabels' and 'nodeColors' arguments set the
+% category coordinate labels and colors, respectively.  
 figure
 RSA.Visualization.plotMDS(RDM_SVM, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
-
+set(gca, 'fontsize', 16)
+title('Multiclass SVM MDS');
 
 
 %% 9. Multiclass classification: Spatially resolved
-% 96 is the good electrode, 122 is the bad one
+% Setting the 'spaceUse' input argument on 3D, space-by-time-by-trial data 
+% selects the electrode of interest, then uses data from that electrode exclusively 
+% to perform classification.
+% In this example, electrode #96 is the one which performs well, while #122
+% should not perform well.
+% In addition, we set the 'PCA' argument to .99 to conduct principal
+% component analysis, such that the components selected explain 99% of the
+% variance in the data
 
 % a), b) LDA classification on electrode 96
 C_96 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
@@ -255,49 +332,57 @@ C_96 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
 C_122 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'spaceUse', 122);
 
-% d) LDA classification on electrode 122
+% d) Compare the confusion matrices of electrode 122 and 96.  
 figure
 RSA.Visualization.plotMatrix(C_96.CM, 'colorbar', 1, 'matrixLabels', 1);
-title('Electrode 96 Confusion Matrix (Good)')
-colormap('cool');
+title('Electrode 96 Confusion Matrix (good electrode)')
+set(gca, 'fontsize', 16)
+
 figure
 RSA.Visualization.plotMatrix(C_122.CM, 'colorbar', 1, 'matrixLabels', 1);
-title('Electrode 122 Confusion Matrix (Bad)')
-colormap('cool');
+title('Electrode 122 Confusion Matrix (bad electrode)')
+set(gca, 'fontsize', 16)
+
 
 % e) If we repeat this process for every electrode on the brain, 
 %    per-electrode accuracies can be visualized on a head map 
 
 %% 10. Multiclass classification: temporally resolved 
-% 48-128 msec should separate HF/AF from other categories
-% 144-224 msec should separate HF from other categories
+% Setting the 'timeUse' input argument on 3D, space-by-time-by-trial 
+% data from the specified time samples to perform classification.
+% 48-128 msec should separate HF/AF from other categories.
+% 144-224 msec should separate HF from other categories.
+% Again, PCA is specified to choose principal components that explain 99%
+% of the variance of the data.
 
-% a), b) LDA classification on electrode 96
+% a), b) LDA cross validation on 48-128 msec
 C_HFAF = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'timeUse', 11:16);
 
-% a), c) LDA classification on electrode 122
+% a), c) LDA cross validation on 144-224 msec
 C_HF = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'spaceUse', 17:23);
 
-% d) LDA classification on electrode 122
+% d) Compare the confusion matrices of from 48-128 msec to 144-224 msec
 figure
 RSA.Visualization.plotMatrix(C_HFAF.CM, 'colorbar', 1, 'matrixLabels', 1, ...
     'axisLabels', catLabels);
-title('48-128 msec Confusion Matrix (HF/AF should separate)')
-colormap('cool');
+RDM_HFAF = RSA.RDM_Computation.computeCMRDM(C_HFAF.CM);
+title('48-128 msec Confusion Matrix (HF,AF should separate)')
 figure
-RSA.Visualization.plotDendrogram(C_HFAF.CM, 'nodeLabels', catLabels, ...
+RSA.Visualization.plotDendrogram(RDM_HFAF, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
-title('48-128 msec Dendrogram Matrix (HF/AF should separate)')
+title('48-128 msec Dendrogram Matrix (HF,AF should separate)')
+ylabel('Similarity')
+
 
 figure
 RSA.Visualization.plotMatrix(C_HF.CM, 'colorbar', 1, 'matrixLabels', 1, ...
     'axisLabels', catLabels);
+RDM_HF = RSA.RDM_Computation.computeCMRDM(C_HF.CM);
 title('144-224 msec Confusion Matrix (HF should separate)')
-colormap('cool');
 figure
-RSA.Visualization.plotDendrogram(C_HF.CM, 'nodeLabels', catLabels, ...
+RSA.Visualization.plotDendrogram(RDM_HF, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
 title('144-224 msec Dendrogram Matrix (HF should separate)')
-
+ylabel('Similarity')
