@@ -399,11 +399,12 @@ set(gca, 'fontsize', 16)
 %   plotDendrogram() function to create a tree visualiation.  
 figure(3)
 RSA.Visualization.plotDendrogram(RDM_LDA, 'nodeLabels', catLabels, ...
-    'nodeColors', rgb6);
+    'nodeColors', rgb6, 'yLim', [0 1.5]);
 title('Multiclass LDA Dendrogram Dendrogram');
 set(gca, 'fontsize', 16); ylabel('Distance')
 % The optional name-value 'nodeLabels' and 'nodeColors' arguments set the 
-%   dendrogram leaf labels and colors, respectively.  
+%   dendrogram leaf labels and colors, respectively.  We also specify the
+%   ylim for the plot.
 
 % How to interpret the dentrogram: Each node at the bottom of the plot is a
 %   stimulus category. The y-axis denotes distance. The distance between
@@ -601,7 +602,8 @@ set(gca, 'fontsize', 16)
 % categorizations along the diagonal  are lower when using electrode #122 
 % compared to #96.  This suggests that the brain region associated w/
 % electrode #96 contains more information relevent to the processing of
-% stimuli category than #122.  
+% stimuli category than #122. HF category classifies best for both
+% electrodes.
 
 % By repeating this process for every EEG electrode, per-electrode
 % accuracies can be visualized on a head map.
@@ -646,7 +648,7 @@ C_352to432 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
 % accuracy: 0.3369
 % Lower classifier accuracy.
 
-%% 11c) Compare the confusion matrices of 48-128 msec to 144-224 msec
+%% 11c) Compare the confusion matrices of 144-224 msec to 352-432 msec
 
 figure
 RSA.Visualization.plotMatrix(C_144to224.CM, 'colorbar', 1, 'matrixLabels', 1, ...
@@ -672,7 +674,7 @@ set(gca, 'fontsize', 16)
 RDM_144to224 = RSA.RDM_Computation.computeCMRDM(C_144to224.CM, 'normalize', 'diagonal');
 RDM_352to432 = RSA.RDM_Computation.computeCMRDM(C_352to432.CM, 'normalize', 'diagonal');
 
-%% 11c) Compare the dendrograms of 48-128 msec to 144-224 msec
+%% 11c) Compare the dendrograms of 144-224 msec to 352-432 msec
 
 figure
 RSA.Visualization.plotDendrogram(RDM_144to224, 'nodeLabels', catLabels, ...
