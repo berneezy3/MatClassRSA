@@ -170,7 +170,7 @@
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-    tic
+    cvMulti_time = tic;
     
     st = dbstack;
     namestr = st.name;
@@ -302,7 +302,7 @@
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.dataPartitionObj = cvDataObj;
-    C.elapsedTime = toc;
+    C.elapsedTime = toc(cvMulti_time);
     
     %PERMUTATION TEST (assigning)
     tic    
@@ -314,9 +314,8 @@
     else
         C.pVal = NaN;
     end
-    toc
-    disp('classifyCrossValidate() Finished!')
-    disp(['Elapsed time: ' num2str(C.elapsedTime)])
+    disp('crossValidateMulti() Finished!')
+    disp(['Elapsed time: ' num2str(C.elapsedTime) ' seconds'])
 
     
  end

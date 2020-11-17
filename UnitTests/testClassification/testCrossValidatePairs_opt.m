@@ -1,4 +1,4 @@
-% test classifyCrossValidatePairs_opt
+% test classifyCrossValidateMulti
 clear
 load 'losorelli_500sweep_epoched.mat'
 
@@ -12,18 +12,14 @@ averageTrials = {'off'; 'on'};
 dataSplit = {'N/A'; 'N/A'};
 PCA = {'0'; '.99'};
 
+%%
 
-%% SVM (PCA)
-
+RSA = MatClassRSA;
+[X_shuf,Y_shuf] = RSA.preprocess.shuffleData(X, Y);
 tic
-C_pairs_opt = RSA.Classification.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
+C = RSA.classify.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0);
 toc
 
-%% SVM (no PCA)
-
-tic
-C_pairs_opt_noPCA = RSA.Classification.crossValidatePairs_opt(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'SVM', 'PCAinFold', 0);
-toc
 
 
 %% S06 
@@ -36,15 +32,8 @@ X = X';
 [X_shuf,Y_shuf] = RSA.preprocess.shuffleData(X, labels6);
 [X_avg,Y_avg] = RSA.preprocess.averageTrials(X_shuf,Y_shuf, 5);
 [r c] = size(X_avg);
-
-%%
-
-C = RSA.Classification.crossValidatePairs_opt(X_avg, Y_avg, 'PCA', .99, 'classifier', 'SVM');
-
-%%
-
-C = RSA.Classification.crossValidatePairs_opt(X_avg, Y_avg, 'PCA', 0, 'classifier', 'SVM');
-
+C = RSA.classify.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, 'classifier', 'LDA');
+accuracy(2) = C.accuracy;
 
 %%
 

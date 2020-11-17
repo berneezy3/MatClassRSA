@@ -179,7 +179,7 @@
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
-    tic
+    cvMultiOpt_time = tic;
 
     % Initialize the input parser
     st = dbstack;
@@ -365,7 +365,7 @@
 
             %[mdl, scale] = fitModel(trainX, trainY, ip);
             M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
-                'gamma', gamma_opt, 'C', C_opt);
+                'gamma', gamma_opt, 'C', C_opt, 'randomSeed', 0);
 
             %[predictions decision_values] = modelPredict(testX, mdl, scale);
             P = RSA.Classification.predict(M, testX, testY);
@@ -388,11 +388,11 @@
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.classificationInfo = classificationInfo;
-    C.elapsedTime = toc;
+    C.elapsedTime = toc(cvMultiOpt_time);
     if ip.Results.permutations > 0
         C.pVal = permTestPVal(C.accuracy, accDist);
     end
-    disp('classifyCrossValidate() Finished!')
-    disp(['Elapsed time: ' num2str(C.elapsedTime)])
+    disp('crossValidateMulti_opt() Finished!')
+    disp(['Elapsed time: ' num2str(C.elapsedTime) ' seconds'])
     
  end

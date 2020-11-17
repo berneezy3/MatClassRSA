@@ -4,24 +4,28 @@
 % Author: Bernard Wang
 %
 % This script covers basic functionalities of the MatClassRSA toolbox: 
-% - Instantiating the MatClassRSA class;
-% - Data preparation: Call shuffleData()
-% - Data prepraation: Call averageTrials()
-% - 
+% - Instantiating the MatClassRSA class
+% - Data preparation: Call shuffleData(), averageTrials()
+% - Classification: Call crossValidateMulti(), crossValidateMulti_opt()
+% - RDM computation: computeCMRDM()
+% - Visualization: Call plotMatrix(), plotMDS() and plotDendrogram()
 %
 % This script is intended to be run cell by cell as a tutorial.
 %
 % Requirements to run the tutorial: 
 % - The MatClassRSA toolbox, dev2 branch, is in your path: 
 %   https://github.com/berneezy3/MatClassRSA
-% - The S06.mat data file is in your path.
+% - The S06.mat data file is in your path
+% * the matlab addpath() function can be used to add directories to your
+%   Matlab path
 %
 % Information about the data:
 % - The demo uses a set of time-domain visual evoked potentials from this
 % 	paper: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0135697
-% - There are 72 visual stimuli, 12 in each of 6 object categories. The
-%   participant viewed each stimulus 72 times. We will look at responses on
-%   the category level, meaning there are 
+% - There are 72 visual stimuli, 12 in each of 6 object categories (Human 
+%   body, human face, animal body, animal face, fruits/vegetables and 
+%   inanimate objects). The participant viewed each stimulus 72 times. We 
+%   will look at responses on the category level, meaning there are: 
 %       12 stimuli x 72 viewings per stimulus = 864 trials per category.
 %
 
@@ -30,12 +34,12 @@
 %% 1. Define colors and category labels
 
 % a) create cell array to store colors for visualization
-rgb6 = {[0.1216    0.4667    0.7059],  ... % Blue
-    [1.0000    0.4980    0.0549] ,     ...   % Orange
-    [0.1725    0.6275    0.1725] ,   ...     % Green
-    [0.8392    0.1529    0.1569]  ,    ...   % Red
-    [0.5804    0.4039    0.7412]  ,   ...    % Purple
-    [0.7373    0.7412    0.1333]}   ,  ...   % Chartreuse
+rgb6 = {[0.1216    0.4667    0.7059],  ...  % Blue
+    [1.0000    0.4980    0.0549] ,     ...  % Orange
+    [0.1725    0.6275    0.1725] ,     ...  % Green
+    [0.8392    0.1529    0.1569]  ,    ...  % Red
+    [0.5804    0.4039    0.7412]  ,    ...  % Purple
+    [0.7373    0.7412    0.1333]};          % Chartreuse
 
 % b) create category label names
 %   HB = Human Body
@@ -63,7 +67,8 @@ load 'S06.mat'
 % We'll work with category labels for the following examples --> Y.
 Y = labels6;
 
-%%% b) plot histrogram to show that each category is evenly distributed
+%%% b) plot histrogram to show that the trials are evenly distributed
+%%% amongst the different categories
 close all; 
 h = histogram(labels6);
 % Plot the number of observations for each category
@@ -107,7 +112,7 @@ for i = 1:6
     
 end
 
-% Aesthetics
+% Plot Aesthetics and Labels
 
 %%% Add grid, legend, axis labels, title; set font size %%%
 grid on
@@ -129,7 +134,9 @@ set(gca, 'fontsize', 16)
 
 %% 4. visualize input data pt 2
 
+% close existing figures
 close all
+
 %%% Here we extend previous 'for' loop to do one category per figure %%%
 %%% (Plot aesthetics will go inside the loop now) %%%
 % 'X' is the data frame (electrodes x time x trial)
@@ -167,11 +174,11 @@ for i = 1:6
     grid on
     xlabel('Time (msec)'); ylabel('Voltage (\muV)')
     ylim([-40 40])
+    xlim([-112 512])
+    set(gca, 'fontsize', 16)
     
     % We can programmatically include the category number in the title!
     title([catLabels{i} ' 6-class ERP, channel 96'])
-    
-    set(gca, 'fontsize', 16)
     
 end
 
@@ -278,7 +285,9 @@ set(gca, 'fontsize', 16)
 %% 9. Multiclass classification (all electrodes, all time points)
 
 % We will now perform some multi-category classifications on the
-% trial-averaged data. 
+% trial-averaged data. In this example, we will compare results using 2
+% different classifiers, support vector machine (SVM) and linear 
+% discriminant analysis.   
 
 %% 9a_i) Perform LDA classification
 
@@ -326,8 +335,8 @@ C_LDA
 %   Visualization module. 
 
 % First, we call plotMatrix() to display the confusion matrix in a figure.
-%   This function takes in the confusion matrix, and has a number of
-%   optional name-value pairs for plotting specifications. 
+%   This function takes in a square matrix, and has a number of optional 
+%   name-value pairs for plotting specifications. 
 close all
 figure(1)
 RSA.Visualization.plotMatrix(C_LDA.CM, 'colorbar', 1, 'matrixLabels', 1);
@@ -449,56 +458,74 @@ C_SVM_0 = RSA.Classification.crossValidateMulti_opt(X_avg, Y_avg,...
 %           modelsConcat: {1×10 cell}
 %                  predY: [1×1030 double]
 %     classificationInfo: [1×1 struct]
-%            elapsedTime: 0.6231
+%            elapsedTime: 229.7094
 
-% The above function call will take longer to run than LDA because it is
-%   trying out different parameters while training the model, and then
-%   using the ones that perform best to classify the testing data. 
-% This accuracy is slightly better than what we obtained with LDA (74.47%).
+% The above function call will take longer to run than LDA because it first
+% tests different hyperparameters to gauge which one produces the highest
+% classification accuracy, then uses the optimal hyperparameter for our
+% cross validation.  This accuracy is slightly better than what we obtained 
+% with LDA (74.47%).
 
-%% 9b_iii) Perform SVM classification with specified hyperparameters
+%% 9b_ii) Perform SVM classification with specified hyperparameters
 % 'gamma' and 'C' are hyperparameters of SVM's rbf kernel. gamma_opt and 
 %   C_opt were computed using the above function call.   
 gamma_opt = .0032;
 C_opt = 100000;
 C_SVM = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
-   'classifier', 'SVM',... 
-   'gamma', gamma_opt, 'C', C_opt);
+   'classifier', 'SVM', 'gamma', gamma_opt, 'C', C_opt, 'randomSeed', 0);
 
 % C_SVM = 
 % 
 %   struct with fields:
 % 
 %                     CM: [6×6 double]
-%               accuracy: 0.7796
+%               accuracy: 0.7767
 %     classificationInfo: [1×1 struct]
 %           modelsConcat: {1×10 cell}
 %                  predY: [1×1030 double]
 %       dataPartitionObj: [1×1 struct]
-%            elapsedTime: 6.8617
+%            elapsedTime: 9.1256
 %                   pVal: NaN
 
 % We get comparable results (should be identical -- we are working out a
 %   bug with the random seed).
 
-%% 9b_ii) Convert SVM confusion matrix to a distance matrix
+%% 9b_iii) Plot the SVM confusion matrix 
 
 % Plot the confusion matrix computed by the cross validation using the
 % visualization function, RSA.Visualization.plotMatrix()
 figure
-RSA.Visualization.plotMatrix(C_SVM.CM, 'colorbar', 1, 'matrixLabels', 1);
+RSA.Visualization.plotMatrix(C_SVM.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6);
 set(gca, 'fontsize', 16)
 title('Multiclass SVM Confusion Matrix');
 
+% We can see that the human face category produces the largest number of
+% correct classifications (158) of all the categories.
+
+%% 9b_iv) Convert SVM confusion matrix to a distance matrix
+
 % Next, we call the RSA.RDM_Computation.computeCMRDM() function to convert
-% the confusion matrix into a Representational DissimilarityMatrix(RDM).
-RDM_SVM = RSA.RDM_Computation.computeCMRDM(C_SVM.CM);
+% the confusion matrix into a Representational Dissimilarity Matrix(RDM).
+
+RDM_SVM = RSA.RDM_Computation.computeCMRDM(C_SVM.CM, 'normalize', 'diagonal');
+
+% RDM_SVM =
+%        0    0.9937    0.9637    0.9213    0.9470    0.8860
+%   0.9937         0    0.9873    0.9961    0.9785    0.9752
+%   0.9637    0.9873         0    0.8835    0.9578    0.9376
+%   0.9213    0.9961    0.8835         0    0.9414    0.9620
+%   0.9470    0.9785    0.9578    0.9414         0    0.7609
+%   0.8860    0.9752    0.9376    0.9620    0.7609         0
 
 % We use plotMatrix() again to visualize the RDM. 
 figure
-RSA.Visualization.plotMatrix(RDM_SVM, 'colorbar', 1, 'matrixLabels', 1);
+RSA.Visualization.plotMatrix(RDM_SVM, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6);
 set(gca, 'fontsize', 16)
 title('Multiclass SVM RDM');
+
+%% 9b_v) Visualize hierarchical structure of the RDM using a dendrogram
 
 % We pass the previously computed RDM into the 
 % RSA.Visualization.plotDendrogram() function to create a dendrogram
@@ -511,86 +538,145 @@ set(gca, 'fontsize', 16)
 title('Multiclass SVM Dendrogram');
 ylabel('Similarity')
 
-% We pass the previously computed RDM into the 
-% RSA.Visualization.plotMDS() function to create a multidimentional scaling
-% visualiation.  The 'nodeLabels' and 'nodeColors' arguments set the
-% category coordinate labels and colors, respectively.  
+%% 9b_vi) Visualize non-hierarchical structure of the RDM using MDS
+
+% We can also pass the RDM into the RSA.Visualization.plotMDS() function to 
+% create a multidimentional scaling plot.
 figure
 RSA.Visualization.plotMDS(RDM_SVM, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
 set(gca, 'fontsize', 16)
 title('Multiclass SVM MDS');
 
+% See steps 9a_iii and 9a_iv on how to interpret the dendrogram and MDS
+% plots.
+
 
 %% 10. Multiclass classification: Spatially resolved
-% Setting the 'spaceUse' input argument on 3D, space-by-time-by-trial data 
-% selects the electrode of interest, then uses data from that electrode exclusively 
-% to perform classification.
-% In this example, electrode #96 is the one which performs well, while #122
-% should not perform well.
+
+% In this step, we will perform classification using data from individual 
+% electrodes of our 3D input data matrix.  This is achieved by setting
+% the 'spaceUse' input argument, which subsets the data along the space
+% dimension prior to classification.  In this example, we will compare the
+% cross validation results from electrode #96, which produces a high 
+% classification accuracy, and electrode #122, which produces a relatively 
+% lower classification accuracy.  
+
 % In addition, we set the 'PCA' argument to .99 to conduct principal
 % component analysis, such that the components selected explain 99% of the
 % variance in the data
 
-% a), b) LDA classification on electrode 96
+%% 10a) Conduct cross validation using the LDA classifier on electrode 96
 C_96 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'spaceUse', 96);
 
-% a), c) LDA classification on electrode 122
+% C_96.accuracy: .5680;
+
+%% 10b) Conduct cross validation using the LDA classifier on electrode 122
 C_122 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'spaceUse', 122);
 
-% d) Compare the confusion matrices of electrode 122 and 96.  
+% C_122.accuracy: .3019;
+% We can see that the classification accuracy from electrode #122 is
+% considerably lower than that of electrode #96
+
+%% 10c) Compare the confusion matrices of electrode 122 and 96.  
+
 figure
-RSA.Visualization.plotMatrix(C_96.CM, 'colorbar', 1, 'matrixLabels', 1);
+RSA.Visualization.plotMatrix(C_96.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6);
 title('Electrode 96 Confusion Matrix (good electrode)')
 set(gca, 'fontsize', 16)
 
 figure
-RSA.Visualization.plotMatrix(C_122.CM, 'colorbar', 1, 'matrixLabels', 1);
+RSA.Visualization.plotMatrix(C_122.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6);
 title('Electrode 122 Confusion Matrix (bad electrode)')
 set(gca, 'fontsize', 16)
 
+% Except for the human body category, we can see that the number of correct 
+% categorizations along the diagonal  are lower when using electrode #122 
+% compared to #96.  This suggests that the brain region associated w/
+% electrode #96 contains more information relevent to the processing of
+% stimuli category than #122.  
 
-% e) If we repeat this process for every electrode on the brain, 
-%    per-electrode accuracies can be visualized on a head map 
+% By repeating this process for every EEG electrode, per-electrode
+% accuracies can be visualized on a head map.
 
 %% 11. Multiclass classification: temporally resolved 
-% Setting the 'timeUse' input argument on 3D, space-by-time-by-trial 
-% data from the specified time samples to perform classification.
-% 48-128 msec should separate HF/AF from other categories.
-% 144-224 msec should separate HF from other categories.
+% In this step, we will perform classification using data from specified 
+% time intervals.  This is achieved by setting the 'timeUse' input 
+% argument, which subsets the data along the time dimension prior to 
+% classification.  In this example, we will compare the
+% cross validation results from 48-128 msec, which should separate HF/AF 
+% from other categories, and electrode #122, which should separate HF from 
+% other categories.
+
 % Again, PCA is specified to choose principal components that explain 99%
 % of the variance of the data.
 
-% a), b) LDA cross validation on 48-128 msec
-C_HFAF = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
+%% 11a) LDA cross validation on 48-128 msec
+
+% The variable t from S06.mat contains the timepoints represented by the 
+% indices along the 2nd dimension (time dim.) of the input data matrix, X.
+% We can see that indices 11-16 represent 48-128 milliseconds, while 17023
+% represent 144-224 milliseconds
+t
+
+% We pass in an array with integers 11-16 into the 'timeUse' argument to 
+% subset data representing 48-128 milliseconds.   
+C_48to128 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'timeUse', 11:16);
 
-% a), c) LDA cross validation on 144-224 msec
-C_HF = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
-    'classifier', 'LDA', 'spaceUse', 17:23);
+%% 11b) LDA cross validation on 144-224 msec
 
-% d) Compare the confusion matrices of from 48-128 msec to 144-224 msec
+% We pass in an array with integers 17-23 into the 'timeUse' argument to 
+% subset data representing 144-224 milliseconds.   
+C_144to224 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
+    'classifier', 'LDA', 'timeUse', 17:23);
+
+%% 11c) Compare the confusion matrices of 48-128 msec to 144-224 msec
+
+% In both CMs, human faces achieve the highest number of correct
+% classification during cross validation.  However, the 144-224
+% msec data produces the highest classification accuracy overall.  
+
 figure
-RSA.Visualization.plotMatrix(C_HFAF.CM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels);
-RDM_HFAF = RSA.RDM_Computation.computeCMRDM(C_HFAF.CM);
+RSA.Visualization.plotMatrix(C_48to128.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6);
 title('48-128 msec Confusion Matrix (HF,AF should separate)')
+set(gca, 'fontsize', 16)
+
 figure
-RSA.Visualization.plotDendrogram(RDM_HFAF, 'nodeLabels', catLabels, ...
+RSA.Visualization.plotMatrix(C_144to224.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6);
+title('144-224 msec Confusion Matrix (HF should separate)')
+set(gca, 'fontsize', 16)
+
+%% 11d) Convert the confusion matrices into RDMs
+% We convert the CMs into RDMs to create dendrogram visualizations in the
+% next step.
+
+RDM_48to128 = RSA.RDM_Computation.computeCMRDM(C_48to128.CM, 'normalize', 'diagonal');
+RDM_144to224 = RSA.RDM_Computation.computeCMRDM(C_144to224.CM, 'normalize', 'diagonal');
+
+%% 11c) Compare the dendrograms of 48-128 msec to 144-224 msec
+
+% From the 48-128 msec dendrogram, we can see that the first two categories 
+% to be separated are human face and animal face.  On the other hand, in 
+% the 144-224 msec plot, human face is the first class to separate.  
+
+figure
+RSA.Visualization.plotDendrogram(RDM_48to128, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
 title('48-128 msec Dendrogram Matrix (HF,AF should separate)')
 ylabel('Similarity')
-
+set(gca, 'fontsize', 16)
 
 figure
-RSA.Visualization.plotMatrix(C_HF.CM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels);
-RDM_HF = RSA.RDM_Computation.computeCMRDM(C_HF.CM);
-title('144-224 msec Confusion Matrix (HF should separate)')
-figure
-RSA.Visualization.plotDendrogram(RDM_HF, 'nodeLabels', catLabels, ...
+RSA.Visualization.plotDendrogram(RDM_144to224, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6);
 title('144-224 msec Dendrogram Matrix (HF should separate)')
 ylabel('Similarity')
+set(gca, 'fontsize', 16)
+

@@ -93,9 +93,11 @@ function [mdl, scale] = fitModel(X, Y, ip, gamma, C)
             kernel_input = ['-t ' num2str(kernelNum) ' '];
             
             % SVM class weights
-            %figure
+            % figure
             h = histogram(Y, 'BinMethod', 'integers');
             hw = h.Values(1) ./ h.Values ;
+            clf
+            close
             nw  = length(hw);
             weights = [' -q '];
             for i = 1:nw

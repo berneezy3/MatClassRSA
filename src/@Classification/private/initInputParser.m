@@ -50,8 +50,7 @@ function y = initInputParser(functionName, ip)
     % Optional positional inputs
     % The following parameters are added to every classification function
     if verLessThan('matlab', '8.2')
-        addParamValue(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
+        addParamValue(ip, 'randomSeed', defaultRandomSeed);
         addParamValue(ip, 'PCA', defaultPCA);
         addParamValue(ip, 'PCAinFold', defaultPCAinFold, ...
              @(x) validateattributes(x,{'logical'}, {'nonempty'}));
@@ -72,8 +71,7 @@ function y = initInputParser(functionName, ip)
         addParamValue(ip, 'minLeafSize', 1);
         addParamValue(ip, 'permutations', 0);
     else
-        addParameter(ip, 'randomSeed', defaultRandomSeed,  @(x) isequal('default', x)...
-            || isequal('shuffle', x) || (isnumeric(x) && x > 0));
+        addParameter(ip, 'randomSeed', defaultRandomSeed);
         addParameter(ip, 'PCA', defaultPCA);
         addParameter(ip, 'PCAinFold', defaultPCAinFold, ...
              @(x) validateattributes(x,{'logical'}, {'nonempty'}));

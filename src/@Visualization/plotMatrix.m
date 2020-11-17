@@ -381,8 +381,10 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
         end
     end
         
-    xlabel('Predicted Label');
-    ylabel('Actual Label');
-    
+    xlh = xlabel('Predicted Label');
+    xlh.Position(2) = xlh.Position(2) + .35;  
+    ylh = ylabel('Actual Label');
+    ylh.Position(1) = ylh.Position(1) - .45;  
+
 
 end

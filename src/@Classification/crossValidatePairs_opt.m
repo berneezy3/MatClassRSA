@@ -181,6 +181,8 @@
 % TODO : FINISH DOCSTRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    cvPairsOpt_time = tic;
+
     % Initialize the input parser
     st = dbstack;
     namestr = st.name;
@@ -409,6 +411,9 @@
             end
         end
     end
-    disp('classifyCrossValidate_opt() Finished!')
+    C.elapsedTime = toc(cvPairsOpt_time);
+    
+    disp(['Elapsed time: ' num2str(C.elapsedTime) 'seconds'])
+    disp('crossValidatePairs_opt() Finished!')
     
  end
