@@ -128,27 +128,34 @@ else
     for i = 1:nFolds
         
         testIndices = zeros( numTrials,1 );
-        for j = 1:testSize
-            testIndices(j+(i-1)*testSize) = 1;
-            indexlocation = indexlocation + 1;
+        if (i ~= nFolds)
+            for j = 1:testSize
+                testIndices(j+(i-1)*testSize) = 1;
+                indexlocation = indexlocation + 1;
+            end
+        elseif  (i == nFolds)
+            for j = 1:testSize+remainder
+                testIndices(j+(i-1)*testSize) = 1;
+                indexlocation = indexlocation + 1;
+            end
         end
 
         % the train/dev indices indices should consist of the
         % non-test indices
         trainDevIndices = find(testIndices == 0);
         trainIndices = (testIndices == 0);
-        trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize)) = 0;
+        trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize-2)) = 0;
         devIndices = (testIndices == 0);
-        devIndices(trainDevIndices(1:trainSize)) = 0;
+        devIndices(trainDevIndices(1:trainSize-2)) = 0;
         
         obj.train{end+1} = trainIndices;
         obj.dev{end+1} = devIndices;
         obj.test{end+1} = testIndices;
         
     end
-    
+    %{
     % handle remainders
-    disp("numTrials not divisible by nFolds.  Putting remainder trials within a new fold");
+    disp("numTrials not divisible by nFolds.  Putting remainder trials within the last fold");
     testIndices = zeros( numTrials,1 );
     testIndices(nFolds * testSize + 1:end) = 1;
 
@@ -166,6 +173,8 @@ else
     obj.train{end+1} = trainIndices;
     obj.dev{end+1} = devIndices;
     obj.test{end+1} = testIndices;
+    %}
+%     obj.NumTestSets = obj.NumTestSets+1;
 end
 
 end

@@ -323,7 +323,7 @@ C_LDA
 %   struct with fields:
 % 
 %                     CM: [6×6 double]
-%               accuracy: 0.7447
+%               accuracy: 0.7442
 %     classificationInfo: [1×1 struct]
 %           modelsConcat: {1×10 cell}
 %                  predY: [1×1030 double]
@@ -341,7 +341,8 @@ C_LDA
 %   name-value pairs for plotting specifications. 
 close all
 figure(1)
-RSA.Visualization.plotMatrix(C_LDA.CM, 'colorbar', 1, 'matrixLabels', 1);
+RSA.Visualization.plotMatrix(C_LDA.CM, 'colorbar', 1, 'matrixLabels', 1,...
+                            'axisLabels', catLabels, 'axisColors', rgb6);
 title('Multiclass LDA Confusion Matrix');
 set(gca, 'fontsize', 16)
 
@@ -361,12 +362,12 @@ RDM_LDA = RSA.RDM_Computation.computeCMRDM(C_LDA.CM, ...
 RDM_LDA
 % RDM_LDA =
 % 
-%          0    0.9930    0.9428    0.9225    0.9014    0.8589
-%     0.9930         0    0.9963    0.9923    0.9856    0.9456
-%     0.9428    0.9963         0    0.9093    0.9378    0.9374
-%     0.9225    0.9923    0.9093         0    0.9221    0.9542
-%     0.9014    0.9856    0.9378    0.9221         0    0.6761
-%     0.8589    0.9456    0.9374    0.9542    0.6761         0
+%          0    0.9931    0.9391    0.9270    0.9023    0.8595
+%     0.9931         0    0.9932    0.9924    0.9857    0.9455
+%     0.9391    0.9932         0    0.9132    0.9378    0.9334
+%     0.9270    0.9924    0.9132         0    0.9228    0.9544
+%     0.9023    0.9857    0.9378    0.9228         0    0.6777
+%     0.8595    0.9455    0.9334    0.9544    0.6777         0
 
 
 % We use plotMatrix() again to visualize the RDM. 
@@ -483,12 +484,12 @@ C_SVM = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
 %   struct with fields:
 % 
 %                     CM: [6×6 double]
-%               accuracy: 0.7767
+%               accuracy: 0.7771
 %     classificationInfo: [1×1 struct]
 %           modelsConcat: {1×10 cell}
 %                  predY: [1×1030 double]
 %       dataPartitionObj: [1×1 struct]
-%            elapsedTime: 9.1256
+%            elapsedTime: 10.2226
 %                   pVal: NaN
 
 % We get comparable results (should be identical -- we are working out a
@@ -515,12 +516,12 @@ title('Multiclass SVM Confusion Matrix');
 RDM_SVM = RSA.RDM_Computation.computeCMRDM(C_SVM.CM, 'normalize', 'diagonal');
 
 % RDM_SVM =
-%        0    0.9937    0.9637    0.9213    0.9470    0.8860
-%   0.9937         0    0.9873    0.9961    0.9785    0.9752
-%   0.9637    0.9873         0    0.8835    0.9578    0.9376
-%   0.9213    0.9961    0.8835         0    0.9414    0.9620
-%   0.9470    0.9785    0.9578    0.9414         0    0.7609
-%   0.8860    0.9752    0.9376    0.9620    0.7609         0
+%          0    0.9937    0.9636    0.9213    0.9472    0.8960
+%     0.9937         0    0.9873    0.9961    0.9786    0.9753
+%     0.9636    0.9873         0    0.8757    0.9578    0.9381
+%     0.9213    0.9961    0.8757         0    0.9415    0.9624
+%     0.9472    0.9786    0.9578    0.9415         0    0.7641
+%     0.8960    0.9753    0.9381    0.9624    0.7641         0
 
 % We use plotMatrix() again to visualize the RDM. 
 figure
@@ -574,13 +575,18 @@ title('Multiclass SVM MDS');
 C_96 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'spaceUse', 96);
 
-% C_96.accuracy: .5680;
+% C_96.accuracy: 0.5688;
+% This classification accuracy is lower than the ~74% we obtain using the
+% full dataset, but still significantly larger than the 16.67% chance level
+% accuracy.  Nonetheless, this 56.88% classification is impressive,
+% considering the fact that we are using only a single electrode, which is
+% less than 1% of the entire dataset.
 
 %% 10b) Conduct cross validation using the LDA classifier on electrode 122
 C_122 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'spaceUse', 122);
 
-% C_122.accuracy: .3019;
+% C_122.accuracy: 0.3023;
 % We can see that the classification accuracy from electrode #122 is
 % considerably lower than that of electrode #96
 
