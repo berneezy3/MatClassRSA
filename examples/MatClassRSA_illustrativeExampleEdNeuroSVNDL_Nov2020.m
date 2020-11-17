@@ -33,6 +33,8 @@
 
 %% 1. Define colors and category labels
 
+clear all; close all; clc
+
 % a) create cell array to store colors for visualization
 rgb6 = {[0.1216    0.4667    0.7059],  ...  % Blue
     [1.0000    0.4980    0.0549] ,     ...  % Orange
@@ -620,64 +622,76 @@ set(gca, 'fontsize', 16)
 
 % The variable t from S06.mat contains the timepoints represented by the 
 % indices along the 2nd dimension (time dim.) of the input data matrix, X.
-% We can see that indices 11-16 represent 48-128 milliseconds, while 17023
-% represent 144-224 milliseconds
+
 t
+t(17:23)
+t(30:35)
+% We can see that indices 17-23 represent 144-224 milliseconds, while 30-35
+% represent 352 to 432 milliseconds.
 
-% We pass in an array with integers 11-16 into the 'timeUse' argument to 
-% subset data representing 48-128 milliseconds.   
-C_48to128 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
-    'classifier', 'LDA', 'timeUse', 11:16);
 
-%% 11b) LDA cross validation on 144-224 msec
+%% 11b) LDA with cross validation
 
-% We pass in an array with integers 17-23 into the 'timeUse' argument to 
+% We pass in the array 17:23 into the 'timeUse' argument to 
 % subset data representing 144-224 milliseconds.   
 C_144to224 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'timeUse', 17:23);
+% accuracy: 0.8204
+% Classifies better than using all time samples!
+
+% We pass in the array 30:35 into the 'timeUse' argument to 
+% subset data representing 352-432 milliseconds.   
+C_352to432 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
+    'classifier', 'LDA', 'timeUse', 30:35);
+% accuracy: 0.3369
+% Lower classifier accuracy.
 
 %% 11c) Compare the confusion matrices of 48-128 msec to 144-224 msec
-
-% In both CMs, human faces achieve the highest number of correct
-% classification during cross validation.  However, the 144-224
-% msec data produces the highest classification accuracy overall.  
-
-figure
-RSA.Visualization.plotMatrix(C_48to128.CM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels, 'axisColors', rgb6);
-title('48-128 msec Confusion Matrix (HF,AF should separate)')
-set(gca, 'fontsize', 16)
 
 figure
 RSA.Visualization.plotMatrix(C_144to224.CM, 'colorbar', 1, 'matrixLabels', 1, ...
     'axisLabels', catLabels, 'axisColors', rgb6);
-title('144-224 msec Confusion Matrix (HF should separate)')
+title('144-224 msec Confusion Matrix (N170 region)')
 set(gca, 'fontsize', 16)
+
+figure
+RSA.Visualization.plotMatrix(C_352to432.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6);
+title('352-432 msec Confusion Matrix (later response)')
+set(gca, 'fontsize', 16)
+
+% The confusion matrix for 144:224 msec is nearly completely diagonal. The
+%   greatest confusions occur between the FV / IO categories.
+% The confusion matrix for 352:432 msec shows greater confusion higher
+%   counts off the diagonal. But the HF category still classifies best.
 
 %% 11d) Convert the confusion matrices into RDMs
 % We convert the CMs into RDMs to create dendrogram visualizations in the
 % next step.
 
-RDM_48to128 = RSA.RDM_Computation.computeCMRDM(C_48to128.CM, 'normalize', 'diagonal');
 RDM_144to224 = RSA.RDM_Computation.computeCMRDM(C_144to224.CM, 'normalize', 'diagonal');
+RDM_352to432 = RSA.RDM_Computation.computeCMRDM(C_352to432.CM, 'normalize', 'diagonal');
 
 %% 11c) Compare the dendrograms of 48-128 msec to 144-224 msec
 
-% From the 48-128 msec dendrogram, we can see that the first two categories 
-% to be separated are human face and animal face.  On the other hand, in 
-% the 144-224 msec plot, human face is the first class to separate.  
-
-figure
-RSA.Visualization.plotDendrogram(RDM_48to128, 'nodeLabels', catLabels, ...
-    'nodeColors', rgb6);
-title('48-128 msec Dendrogram Matrix (HF,AF should separate)')
-ylabel('Similarity')
-set(gca, 'fontsize', 16)
-
 figure
 RSA.Visualization.plotDendrogram(RDM_144to224, 'nodeLabels', catLabels, ...
-    'nodeColors', rgb6);
-title('144-224 msec Dendrogram Matrix (HF should separate)')
-ylabel('Similarity')
+    'nodeColors', rgb6, 'yLim', [0 1.5]);
+title('144-224 msec Dendrogram')
+ylabel('Distance')
 set(gca, 'fontsize', 16)
 
+figure
+RSA.Visualization.plotDendrogram(RDM_352to432, 'nodeLabels', catLabels, ...
+    'nodeColors', rgb6, 'yLim', [0 1.5]);
+title('352-432 msec Dendrogram')
+ylabel('Distance')
+set(gca, 'fontsize', 16)
+
+% In the 144:224 msec dendrogram, the main split in the dendrogram 
+%   separates HF from the other categories. FV and IO have the lowest 
+%   distance. 
+% In the 352:432 msec dendrogram, the main split separates FV and IO from
+%   the other categories. However, these two categories no longer have the
+%   smallest distance (that is now HB / AB). Overall the distances are
+%   lower, due to more classifier confusions among the stimuli.
