@@ -369,7 +369,8 @@ RDM_LDA
 
 % We use plotMatrix() again to visualize the RDM. 
 figure(2)
-RSA.Visualization.plotMatrix(RDM_LDA, 'colorbar', 1, 'matrixLabels', 1);
+RSA.Visualization.plotMatrix(RDM_LDA, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6);
 title('Multiclass LDA RDM');
 set(gca, 'fontsize', 16)
 
