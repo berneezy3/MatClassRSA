@@ -619,20 +619,18 @@ set(gca, 'fontsize', 16)
 % time intervals.  This is achieved by setting the 'timeUse' input 
 % argument, which subsets the data along the time dimension prior to 
 % classification.  In this example, we will compare the
-% cross validation results from 48-128 msec, which should separate HF/AF 
-% from other categories, and electrode #122, which should separate HF from 
-% other categories.
+% cross validation results from 144-224 msecand 352-432 msec.
 
 % Again, PCA is specified to choose principal components that explain 99%
 % of the variance of the data.
 
-%% 11a) LDA cross validation on 48-128 msec
+%% 11a) Inspect time vector
 
 % The variable t from S06.mat contains the timepoints represented by the 
 % indices along the 2nd dimension (time dim.) of the input data matrix, X.
 
 t
-t(17:23)
+t(17:22)
 t(30:35)
 % We can see that indices 17-23 represent 144-224 milliseconds, while 30-35
 % represent 352 to 432 milliseconds.
@@ -643,15 +641,15 @@ t(30:35)
 % We pass in the array 17:23 into the 'timeUse' argument to 
 % subset data representing 144-224 milliseconds.   
 C_144to224 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
-    'classifier', 'LDA', 'timeUse', 17:23);
-% accuracy: 0.8204
+    'classifier', 'LDA', 'timeUse', 17:22);
+% accuracy: 0.7907
 % Classifies better than using all time samples!
 
 % We pass in the array 30:35 into the 'timeUse' argument to 
 % subset data representing 352-432 milliseconds.   
 C_352to432 = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
     'classifier', 'LDA', 'timeUse', 30:35);
-% accuracy: 0.3369
+% accuracy: 0.3372
 % Lower classifier accuracy.
 
 %% 11c) Compare the confusion matrices of 144-224 msec to 352-432 msec

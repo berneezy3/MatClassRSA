@@ -3,7 +3,7 @@ load '../losorelli_500sweep_epoched.mat'
 
 %% test CV once to get a good idea of runtime for single iteration
 
-C = classifyCrossValidate(X, Y, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'gamma', 'default','C', .000000001);
+C = RSA.Classification.rossValidate(X, Y, 'PCA', .99, 'classifier', 'SVM', 'PCAinFold', 0, 'gamma', 'default','C', .000000001);
 plotMatrix(C.CM)
 colorbar
 
