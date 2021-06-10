@@ -1,4 +1,4 @@
-function M = trainMulti(obj, X, Y, varargin)
+function [M, trainData] = trainMulti(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % M = RSA.Classification.trainMulti(trainData, testData); 
@@ -86,7 +86,10 @@ function M = trainMulti(obj, X, Y, varargin)
 %       permutation testing. If this value is set to 0, then permutation
 %       testing will be turned off.  If it is set to an integer n greater 
 %       than 0, then classification will be performed over n permutation 
-%       iterations. Default value is 0 (off).  
+%       iterations. Default value is 0 (off).  Note that only the training
+%       of the permutation models will be conducted in this function.  The
+%       actual permutation testing will take place if the output model from
+%       this function is passed into predict().
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 
@@ -105,8 +108,17 @@ function M = trainMulti(obj, X, Y, varargin)
 %        true - scaling turned on 
 %
 % OUTPUT ARGS 
-%   M - Classification output to be passed into predict().
-
+%   M - Classification output to be passed into predict().  
+%       --subfields--
+%       M.classifierInfo - additional parameters/info for classification
+%       M.mdl - classification model which is used in predict to predict
+%           the labels of new data
+%       M.classifier - classifier selected for training
+%       M.trainData - data used to train classification model
+%       M.trainLabels - labels used to train classification model
+%       M.functionName - the name of the current function in string format
+%       M.permutationMdls - cell array containing all permutation models
+%       M.cvDataObj - object containing data and labels after PCA
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------
@@ -142,17 +154,18 @@ function M = trainMulti(obj, X, Y, varargin)
 % TODO : FINISH DOCSTRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    tic
-    
+    train_time = tic;
+
     %initialize output struct C
-    C = struct;
+    M = struct;
+    trainData = struct;
     
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = false;
     st = dbstack;
     namestr = st.name;
-    ip = initInputParser(namestr, ip);
+    ip = initInputParser(namestr, ip, X, Y, varargin{:});
     
     % Parse Inputs
     parse(ip, X, Y, varargin{:});
@@ -165,13 +178,6 @@ function M = trainMulti(obj, X, Y, varargin)
     
     % If SVM is selected, then gamma and C parameters must be manually set
     verifySVMParameters(ip);
-    
-       
-    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
-                                        ip.Results.spaceUse, ...
-                                        ip.Results.timeUse, ...
-                                        ip.Results.featureUse);
-
     
     % this function contains input checking functions
     [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
@@ -215,11 +221,12 @@ function M = trainMulti(obj, X, Y, varargin)
 %         colMeans = NaN;
 %         colScales = NaN;
         [cvDataObj, V, nPC, colMeans, colScales] = cvData(X,Y, partition, ip, ipCenter, ipScale, 1);
-
     end
+    trainData = cvDataObj.trainXall{1};
     
     % Train Model
     disp('Training Model...')
+    
     
     % create classifier info struct
     classifierInfo = struct();
@@ -231,7 +238,6 @@ function M = trainMulti(obj, X, Y, varargin)
     classifierInfo.randomSeed = ip.Results.randomSeed;
     classifierInfo.PCA_V = V;
     classifierInfo.PCA_nPC = nPC;
-%     classifierInfo.trainingDataSize = dataSize;
     classifierInfo.numClasses = length(unique(Y));
     classifierInfo.colMeans = colMeans;
     classifierInfo.colScales = colScales;
@@ -247,25 +253,47 @@ function M = trainMulti(obj, X, Y, varargin)
     end
     
     disp(['classifying with ' ip.Results.classifier] )
-    
 
     [mdl, scale] = fitModel(trainData, Y(:), ip, ip.Results.gamma, ip.Results.C);
     
+    % if permutation testing is turned on
+%     if (ip.Results.permutations > 0)
+%         numTrials = length(Y);
+%         RSA = MatClassRSA;
+%         permutationMdls = cell(1, ip.Results.permutations);
+%         disp('Training models for permutation testing');
+%         disp('Training...');
+%         for i = 1:ip.Results.permutations
+%             disp(['Model' num2str(i) ' of ' num2str(ip.Results.permutations)]);
+%             pTrainLabels = Y(randperm(numTrials));
+%             [pMdl, ~] = fitModel(trainData, pTrainLabels, ip, ip.Results.gamma, ip.Results.C);         
+%             permutationMdls{i} = pMdl;
+% 
+%         end
+%         M.permutationMdls = permutationMdls;
+%     end
+        
     % set return struct fields
     M.classifierInfo = classifierInfo;
     M.mdl = mdl;
     M.scale = scale;
     M.pairwise = 0;
     M.classifier = ip.Results.classifier;
-    M.trainData = X;
-    M.trainLabels = Y;
     M.functionName = namestr;
+    M.pairwise = 0;
     M.cvDataObj = cvDataObj;
+    M.permutations = ip.Results.permutations;
+    M.ip = ip;
     
+    trainData = struct();
+    trainData.X = cvDataObj.trainXall{1};
+    trainData.Y = Y;
+    
+    M.elapsedTime = toc(train_time);
+
     disp('Training Finished...')
     disp('Returning Model')
 
-    toc    
     return;
 
 end

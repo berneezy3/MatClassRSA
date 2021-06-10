@@ -60,16 +60,20 @@ function y = processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
         error('X must have at least as many trials as data splits');
     end
     
+    if length(trainDevTestSplit) ~= 2 && length(trainDevTestSplit) ~= 3
+        error('trainDevTestSplit should contain either 2 or 3 values')
+    end
+    
     % test if the trainDevTestSplit values sum correctly
     % if integers passed in, trainDevTestSplit must sum to N
     if any(trainDevTestSplit > 1)
         if (sum(trainDevTestSplit) ~= r)
-            error('if trainDevTest is expressed as integers, then values must sum to number of trials');
+            error('if trainDevTest is expressed as integers greater than 1, then values must sum to number of trials');
         end
     
     % if decimals passed in, trainDevTestSplit must sum to 1
     elseif any(trainDevTestSplit < 1)
-        if (sum(trainDevTestSplit) ~= 1)
+        if (abs(sum(trainDevTestSplit) - 1) > .01)
             error('if trainDevTest is expressed as fractions, then values must sum to 1');
         end
     end
@@ -79,12 +83,16 @@ function y = processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
     for i = 1:length(trainDevTestSplit)
         if (trainDevTestSplit(i) < 1 && trainDevTestSplit(i) > 0)
             decimalFlag = 1;
+            break;
         end
+    end
+    if (sum(trainDevTestSplit) == 0)
+        
     end
     
     if (decimalFlag)
         for i = 1:length(trainDevTestSplit)
-            trainDevTestSplit(i) = round(trainDevTestSplit(i) * r);
+            trainDevTestSplit(i) = floor(trainDevTestSplit(i) * r);
         end
 
         %add remainders to training set
@@ -93,9 +101,7 @@ function y = processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
         end
     end
 
-    if length(trainDevTestSplit) ~= 2 && length(trainDevTestSplit) ~= 3
-        error('trainDevTestSplit should contain either 2 or 3 values')
-    end
+
     
     % return trainDevTestSplit as integers
     y = trainDevTestSplit;

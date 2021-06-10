@@ -1,6 +1,6 @@
 % test classifyCrossValidateMulti
 clear
-load 'losorelli_500sweep_epoched.mat'
+load '../losorelli_500sweep_epoched.mat'
 
 functionName = {'crossValidateMulti_opt/predict'; 'crossValidate_opt/predict'};
 accuracy = zeros(2, 1);
@@ -17,6 +17,7 @@ RSA = MatClassRSA;
 [X_shuf,Y_shuf] = RSA.Preprocessing.shuffleData(X, Y);
 
 %%
+
 tic
 C_multi = RSA.Classification.crossValidateMulti(X_shuf, Y_shuf, 'PCA', 0, 'classifier', 'LDA', 'PCAinFold', true, 'center', true, 'scale', true);
 toc

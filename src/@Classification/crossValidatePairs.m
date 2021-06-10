@@ -168,7 +168,7 @@
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip);
+    ip = initInputParser(namestr, ip, X, Y, varargin{:});
     
     %Required inputs
     [r c] = size(X);
@@ -227,13 +227,6 @@
     %rng(ip.Results.randomSeed);
     setUserSpecifiedRng(ip.Results.randomSeed);
 
-    % Permutation Testing
-    if ip.Results.permutations > 0
-        % return distribution of accuracies (Correct clasification percentage)
-        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
-                    ip.Results.classifier, trainTestSplit, ip);
-    end
-    
     % CROSS VALIDATION
     disp('Cross Validating')
         
@@ -257,19 +250,23 @@
 
     CM = NaN;
     RSA = MatClassRSA;
+    
+    %%%%% Data Partitioning, PCA, Centering and Scaling %%%%%
+    if (ip.Results.PCA > 0 && ip.Results.PCAinFold <= 0)
+        disp('Principal component analysis turned on, to be conducted outside of cross validation folds');
+    elseif (ip.Results.PCA > 0 && ip.Results.PCAinFold > 0)
+        disp('Principal component analysis turned on, to be conducted inside of cross validation folds');
+    else
+        disp('Prinical component analysis turned off');
+    end
+    
+    
    
-    % PAIRWISE LDA/RF/SVM(w/ PCA)
+    % PAIRWISE LDA/RF
     if (strcmp(upper(ip.Results.classifier), 'LDA') || ...
         strcmp(upper(ip.Results.classifier), 'RF') || ...
         strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA > 0)
-    
-        % Data Partitioning, PCA, Centering and Sclaing
-        % Split Data into fold (w/ or w/o PCA)
-        if (ip.Results.PCA>0 && ip.Results.PCA>0)
-            disp('Conducting Principal Component Analysis');
-        else
-            disp('Skipping Principal Component Analysis');
-        end
+   
 
         if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
             warning(['Data centering must be on if performing PCA. Overriding '...
@@ -280,6 +277,7 @@
         AM = NaN(numClasses, numClasses);
         predictionsCell = cell(numClasses);
         actualLabelsCell = cell(numClasses);
+        cvDataObj = cell(numDecBounds); % there will be numDecBounds of PCAs
         
         % Iterate through all pairs of classes
         for k = 1:numDecBounds
@@ -294,25 +292,22 @@
             currX = X(currIndx, :);
             currY = Y(currIndx);
 
-%             % select trials/labels representing current pair of classes
-%             trainX_tmp = trainX(trainInd, :);
-%             testX_tmp = testX(testInd, :);
-%             trainY_tmp = trainY(trainInd, :);
-%             testY_tmp = testY(testInd, :);
-
             % partition data for cross validation 
-            trainTestSplit = [1-1/ip.Results.nFolds 1/ip.Results.nFolds];
-            partition = trainDevTestPart(currX, ip.Results.nFolds, trainTestSplit); 
-            cvDataObj = cvData(currX, currY, partition, ip, ipCenter, ipScale);
+            trainTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
+            partition = trainDevTestPart(currX, ip.Results.nFolds, trainTestSplit);
+            
+            % This line handles PCA either in or out of folds
+            cvDataObj{k} = cvData(currX, currY, partition, ip, ipCenter, ipScale);
 
-            disp(['Cross Validating classes ' num2str(class1) ' and ' num2str(class2)]);
+            disp(['Conducting cross validation on classes ' num2str(class1) ' and ' num2str(class2)]);
 
             for i = 1:ip.Results.nFolds
-
-                trainX = cvDataObj.trainXall{i};
-                trainY = cvDataObj.trainYall{i};
-                testX = cvDataObj.testXall{i};
-                testY = cvDataObj.testYall{i};
+                                
+                % do PCA in folds
+                trainX = cvDataObj{k}.trainXall{i};
+                trainY = cvDataObj{k}.trainYall{i};
+                testX = cvDataObj{k}.testXall{i};
+                testY = cvDataObj{k}.testYall{i};
 
                 [mdl, scale] = fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
 
@@ -333,11 +328,62 @@
                 predictions = predictionsCell{class1, class2};
                 AM(class1, class2) = computeAccuracy(actualLabels, predictions);
                 AM(class2, class1) = computeAccuracy(actualLabels, predictions);
+                pairwiseCell{class1, class2}.CM = confusionmat(actualLabels, predictions);
+                pairwiseCell{class2, class1}.CM = pairwiseCell{class1, class2}.CM;
+                pairwiseCell{class1, class2}.actualLabels = actualLabels;
+                pairwiseCell{class1, class2}.predictions = predictions;
+                pairwiseCell{class2, class1}.actualLabels = actualLabels;
+                pairwiseCell{class2, class1}.predictions = predictions;
             end
         end
 
         C.pairwiseInfo = pairwiseCell;
         C.AM = AM;
+        
+        % Permutation testing
+        numClasses = length(unique(Y));
+        accMatDist = nan(numClasses, numClasses, ip.Results.permutations);
+        pValMat = nan(numClasses, numClasses);
+        RSA = MatClassRSA;
+        if ip.Results.permutations > 0
+        
+            for k = 1:numDecBounds
+                                                    
+                trainX = cvDataObj{k}.trainXall{1};
+                trainY = cvDataObj{k}.trainYall{1};
+                testX = cvDataObj{k}.testXall{1};
+                testY = cvDataObj{k}.testYall{1};
+                
+                % class1 class2
+                class1 = classPairs(k, 1);
+                class2 = classPairs(k, 2);
+
+                for i = 1:ip.Results.permutations
+                
+                    l = length(trainY);
+                    pY = trainY(randperm(l), :);
+                    evalc(['pM = RSA.Classification.trainMulti(trainX, pY,'  ...
+                        ' ''classifier'', ip.Results.classifier,' ...
+                        ' ''PCA'', 0,' ...
+                        ' ''C'', ip.Results.C, ''gamma'', ip.Results.gamma,' ...
+                        ' ''kernel'', ip.Results.kernel, ''numTrees'', ip.Results.numTrees,' ...
+                        ' ''minLeafSize'', ip.Results.minLeafSize);']);
+
+                    evalc(['pC = RSA.Classification.predict(pM, testX, ''actualLabels'',testY)']);
+                    accMatDist(class1, class2, i) = pC.accuracy;
+                    accMatDist(class2, class1, i) = pC.accuracy;
+
+                end
+                
+                pValMat(class1, class2) = permTestPVal(AM(class1, class2), ...
+                    squeeze(accMatDist(class1, class2, :)));
+                pValMat(class2, class1) = pValMat(class1, class2);
+                
+            end
+        end
+        C.pValMat = pValMat;
+    end
+    %{    
     % END PAIRWISE LDA/RF
     % SVM (no PCA, faster computation to rebutt reviewer comment on redundant pairwise partitioning)
     elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
@@ -375,41 +421,63 @@
         %convert pairwiseMat3D to diagonal matrix
         C.pairwiseInfo = pairwiseCell;
         C.AM = pairwiseAccuracies;
+        
+        % Permutation testing
+        numClasses = length(unique(Y));
+        accMatDist = zeros(numClasses, numClasses, ip.Results.permutations);
+        pValMat = zeros(numClasses, numClasses);
+        RSA = MatClassRSA;
+        if ip.Results.permutations > 0
+            
+            trainX = cvDataObj.trainXall{1};
+            trainY = cvDataObj.trainYall{1};
+            testX = cvDataObj.testXall{1};
+            testY = cvDataObj.testYall{1};
+            for i = 1:ip.Results.permutations
+
+                l = length(trainY);
+                pY = trainY(randperm(l), :);
+
+                [pMdl, scale] = fitModel(trainX, pY, ip, ip.Results.gamma, ip.Results.C);
+
+                [predictions decision_values] = modelPredict(testX, pMdl, scale);
+
+                labelsConcat = [labelsConcat testY];
+                predictionsConcat = [predictionsConcat predictions];
+                modelsConcat{i} = mdl; 
+
+                if strcmp(upper(ip.Results.classifier), 'SVM')
+                    [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
+                        decValues2PairwiseAcc(pairwiseMat3D, testY, pMdl.Label, decision_values, pairwiseCell);
+                end
+                accMatDist(:,:,i) = pairwiseAccuracies;
+                
+            end
+            
+            for k = 1:numDecBounds
+            
+                % class1 class2
+                class1 = classPairs(k, 1);
+                class2 = classPairs(k, 2);
+                pValMat(class1, class2) = permTestPVal(C.AM(class1, class2), ...
+                        accMatDist(class1, class2, :));
+                pValMat(class1, class2)  = pValMat(class2, class1);
+                
+            end
+                
+        end
     end
     % END  of Cross Validation
+    %}
     
-    % Permutation testing
-    if ip.Results.permutations > 0
-        for i = 1:ip.Results.permutations
-            [r c] = size(X);
-            pX = X(randperm(r), :);
-            permC = trainPairs(pX, Y, 'classifier', ip.Results.classifier, ...
-                'nFolds', ip.Results.nFolds, 'C', ip.Results.C, 'gamma', ip.Results.gamma,...
-                'kernel', ip.Results.kernel, 'numTrees', ip.Results.numTrees, ...
-                'minLeafSize', ip.Results.minLeafSize);
-            
-        end
-        % return distribution of accuracies (Correct clasification percentage)
-        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
-                    ip.Results.classifier, trainTestSplit, ip);
-    end
+
     
-    C.modelsConcat = modelsConcat;
+	C.modelsConcat = modelsConcat;
     C.classificationInfo = classifierInfo;
-    % calculate pVal return matrix for all pairs. 
-    if ip.Results.permutations > 0
-        C.pVal = nan(numClasses, numClasses);
-        for class1 = 1:numClasses-1
-            for class2 = (class1+1):numClasses
-                thisAccDist = accDist(class1, class2, :);
-                C.pVal(class1, class2) = permTestPVal(C.AM(class1, class2), thisAccDist);
-                C.pVal(class2, class1) = C.pVal(class1, class2);
-            end
-        end
-    end
-   C.elapsedTime = toc(cvPairs_time);
+
+    C.elapsedTime = toc(cvPairs_time);
    
-   disp(['Elapsed time: ' num2str(C.elapsedTime) 'seconds'])
-   disp('crossValidatePairs() Finished!')
+    disp(['Elapsed time: ' num2str(C.elapsedTime) 'seconds'])
+    disp('crossValidatePairs() Finished!')
     
  end

@@ -77,7 +77,6 @@ function [predictions decision_values] = modelPredict(X, mdl, scale)
             %pairwiseMat = cell(1, length(decision_values));
             pairwiseMat = zeros(2,2, length(decision_values));
             
-            
             predictions = predictions';
         case 'ClassificationDiscriminant'
             predictions = predict(mdl,X);

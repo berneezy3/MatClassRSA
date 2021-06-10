@@ -1,4 +1,4 @@
- function M = trainPairs_opt(obj, X, Y, varargin)
+ function [M, permTestData] = trainPairs_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % M = RSA.classify.trainPairs_opt(X, Y, varargin)
@@ -153,15 +153,11 @@
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% TODO : FINISH DOCSTRING
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+    %%%%% PARSE INPUT DATA %%%%%
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip);
-    %Required inputs
+    ip = initInputParser(namestr, ip, X, Y, varargin{:});
     [r c] = size(X);
     parse(ip, X, Y, varargin{:});
 
@@ -175,12 +171,12 @@
    % check if data is double, convert to double if it isn't
    [X,Y] = convert2double(X,Y);
     
+   %%%%% SUBSET DATA MATRICES %%%%%
    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
                                                 ip.Results.featureUse);
 
-    
     % let r and c store size of 2D matrix
     [r c] = size(X);
     [r1 c1] = size(Y);
@@ -206,9 +202,8 @@
     M = struct();
     RSA = MatClassRSA;
 
-    % PAIRWISE LDA/RF
-    if (strcmp(upper(ip.Results.classifier), 'RF') || ...
-        strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA >0)
+    % SVM w/ PCA
+    if (strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA > 0))
     
         M.pairwise = 1;
         M.classifier = ip.Results.classifier;
@@ -231,7 +226,7 @@
                 tempY = Y(currUse);
                 tempStruct = struct();
                 % Store the accuracy in the accMatrix
-                [~, tempM] = evalc([' RSA.classify.trainMulti_opt(tempX, tempY, ' ...
+                [~, tempM] = evalc([' RSA.Classification.trainMulti_opt(tempX, tempY, ' ...
                     ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
                     ' ''kernel'', ip.Results.kernel,'...
                     ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
@@ -257,8 +252,8 @@
         [~, tempM] = evalc([' RSA.Classification.trainMulti_opt(X, Y, ' ...
             ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
             ' ''kernel'', ip.Results.kernel,'...
-            ' ''gamma'', ip.Results.gammaSpace, ' ...
-            ' ''C'', ip.Results.cSpace, ' ... 
+            ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
+            ' ''cSpace'', ip.Results.cSpace, ' ... 
             ' ''numTrees'', ip.Results.numTrees, ' ...
             ' ''minLeafSize'', ip.Results.minLeafSize, '...
             ' ''center'', ip.Results.center, ' ...
@@ -272,6 +267,11 @@
         M.classifier = ip.Results.classifier;
         
     end
+    
+    permTestData = cvDataObj;
+    
+    disp('trainPairs_opt() Finished!')
+    
  end
 
  

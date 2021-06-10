@@ -1,4 +1,4 @@
-function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, testX, testY, gammas, Cs, kernel)
+function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2020.
 % Published under a GNU General Public License (GPL)
@@ -53,38 +53,66 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, testX, testY, g
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-    accGrid = zeros(length(Cs), length(gammas));
-    cGrid = cell(length(Cs), length(gammas));
-
+%     accGrid = zeros(length(ip.Results.cSpace), length(ip.Results.gammaSpace));
+    accVec = zeros(1, length(ip.Results.cSpace)*length(ip.Results.gammaSpace));
+    cGrid = cell(length(ip.Results.cSpace), length(ip.Results.gammaSpace));
+    cLen = length(ip.Results.cSpace);
+    gammaLen = length(ip.Results.gammaSpace);
+    flatLen = cLen * gammaLen; 
+    cSpace = ip.Results.cSpace;
+    gammaSpace = ip.Results.gammaSpace;
     RSA = MatClassRSA;
-%     for i = 1:length(Cs)
-%         for j = 1:length(gammas)
-%             tempC = RSA.Classification.crossValidateMulti(X, Y, 'PCA', -1, ...
-%                 'classifier', 'SVM','C', Cs(i), 'gamma', gammas(j), 'kernel', kernel);
-%             accGrid(i,j) = tempC.accuracy;
-%             cGrid{i,j} = tempC;
-%         end
-%     end
     
-    for i = 1:length(Cs)
-        for j = 1:length(gammas)
-            [~, tempM] = evalc(['RSA.Classification.trainMulti(' ... 
-                'trainX, trainY, ''PCA'', -1, ''classifier'', ''SVM'',''C'', '...
-                'Cs(i), ''gamma'', gammas(j), ''kernel'', kernel);']);
-            [~, tempC] = evalc( 'RSA.Classification.predict(tempM, testX, testY);');
-            accGrid(i,j) = tempC.accuracy;
-            cGrid{i,j} = tempC;
+    % initialize parallel worker pool
+    try
+        matlabpool;
+        closePool=1;
+    catch
+        try 
+            parpool;
+            closePool=0;
+        catch
+            % do nothing if no parpool functions exist
+        end
+    end
+    % parallelized grid search
+    parfor i = 1:cLen*gammaLen
+        cInd = mod(i-1, gammaLen)+1;
+        gammaInd = ceil(i/gammaLen);
+        tempM = trainMultiEvalc(trainX, trainY, 0, 'SVM', ...
+            cSpace(cInd), gammaSpace(gammaInd));
+        tempC = predictEvalc(tempM, devX, devY);
+        accVec(i) = tempC.accuracy;
+        cVec{i} = tempC;
+    end
+    % close parallel workers
+    if exist('closePool', 'var')
+        if closePool
+            matlabpool close;
+        else
+            delete(gcp('nocreate'));
         end
     end
     
-    % get maximum accuracy, and return the gamma and C value for the
-    % maximum accuracy
-    
-    [maxVal, maxIdx] = max(accGrid(:));
-    [xInd yInd] = ind2sub(size(accGrid), maxIdx);
-    
-    gamma_opt = gammas(yInd);
-    C_opt = Cs(xInd);
-    
+    [maxVal, maxIdx] = max(accVec(:));
+    [xInd yInd] = ind2sub([cLen gammaLen], maxIdx);
 
+    gamma_opt = gammaSpace(yInd);
+    C_opt = cSpace(xInd);  
+
+end
+
+
+function M = trainMultiEvalc(trainData, trainLabels, PCA, classifier, C, gamma)
+    RSA = MatClassRSA;
+    [~, M] = evalc(['RSA.Classification.trainMulti(' ... 
+        'trainData, trainLabels, ''PCA'', PCA, ''classifier'', classifier, ' ...
+        ' ''C'', C, ' ...
+        ' ''gamma'', gamma);']);
+end
+
+function C = predictEvalc(M, testData, testLabels)
+    RSA = MatClassRSA;
+    [~, C] = evalc(['RSA.Classification.predict(M, testData,' ...
+        ' ''actualLabels'', testLabels);']);
 end

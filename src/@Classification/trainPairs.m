@@ -1,4 +1,4 @@
- function M = trainPairs(obj, X, Y, varargin)
+ function [M, permTestData] = trainPairs(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % M = RSA.classify.trainPairs(X, Y, varargin)
@@ -81,7 +81,10 @@
 %       permutation testing. If this value is set to 0, then permutation
 %       testing will be turned off.  If it is set to an integer n greater 
 %       than 0, then classification will be performed over n permutation 
-%       iterations. Default value is 0 (off).  
+%       iterations. Default value is 0 (off).  Note that only the training
+%       of the permutation models will be conducted in this function.  The
+%       actual permutation testing will take place if the output model from
+%       this function is passed into predict().
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 
@@ -137,11 +140,12 @@
 % TODO : FINISH DOCSTRING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+    trainPairs_time = tic;
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
     %Required inputs
-    ip = initInputParser(namestr, ip);
+    ip = initInputParser(namestr, ip, X, Y, varargin{:});
     parse(ip, X, Y, varargin{:});
             
     % Initilize info struct
@@ -211,6 +215,9 @@
         M.pairwise = 1;
         M.ip = ip;
         
+        permTestData = cell(1, numDecBounds);
+        cvDataObj = cell(1, numDecBounds);
+        
         disp('training model for classes: ')
 
         % Iterate through all combintaions of labels
@@ -222,20 +229,18 @@
 
             disp([num2str(class1) ' vs ' num2str(class2)]); 
             currUse = ismember(Y, [class1 class2]);
-
             tempX = X(currUse, :);
-%             tempX_PCA = getPCs(tempX, ip.Results.PCA);
             tempY = Y(currUse);
             
             % partition data for cross validation 
-            partition = trainDevTestPart(tempX, 1, [1 0]); 
-            cvDataObj = cvData(tempX, tempY, partition, ip, ...
-                ip.Results.center, ip.Results.scale, 1);
-            tempX_PCA = cvDataObj.trainXall{1};
+%             partition = trainDevTestPart(tempX, 1, [1 0]); 
+%             [cvDataObj{k}, V, ~, colMean, colScale] = cvData(tempX, tempY, ...
+%                 partition, ip, ip.Results.center, ip.Results.scale, 1);
+%             tempX_PCA = cvDataObj{k}.trainXall{1};
 
             % Store the accuracy in the accMatrix
-            [~, tempM] = evalc([' RSA.Classification.trainMulti(tempX_PCA, tempY, ' ...
-                ' ''classifier'', ip.Results.classifier, ''PCA'', 0, '...
+            [~, tempM] = evalc([' RSA.Classification.trainMulti(tempX, tempY, ' ...
+                ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
                 ' ''kernel'', ip.Results.kernel,'...
                 ' ''gamma'', ip.Results.gamma, ' ...
                 ' ''C'', ip.Results.C, ' ... 
@@ -245,12 +250,57 @@
                 ' ''scale'', ip.Results.scale, ' ...
                 ' ''randomSeed'', ''default'' ) ' ]);
             tempM.classifierInfo.numClasses = numClasses;
-            
-            M.cvDataObj{k} = cvDataObj;
+            M.cvDataObj = cvDataObj;
             M.classifierInfo{k} =  tempM.classifierInfo;
             M.mdl{k} = tempM.mdl;
             M.scale{k} = tempM.scale;
+            permTestData{k} = tempM.cvDataObj;
         end
+
+    end
+
+    
+
+    
+    disp('trainPairs() finished');
+    
+%        if (ip.Results.permutations > 0) 
+%             disp('Training permutation testing models...');
+%             permutationMdls = cell(numClasses, numClasses, ip.Results.permutations);
+% 
+%             for k = 1:numDecBounds
+%                                                     
+%                 trainX = cvDataObj{k}.trainXall{1};
+%                 trainY = cvDataObj{k}.trainYall{1};
+%                 
+%                 % class1 class2
+%                 class1 = classPairs(k, 1);
+%                 class2 = classPairs(k, 2);
+% 
+%                 for i = 1:ip.Results.permutations
+%                 
+%                     l = length(trainY);
+%                     pY = trainY(randperm(l), :);
+%                     evalc(['pM = RSA.Classification.trainMulti(trainX, pY,'  ...
+%                         ' ''classifier'', ip.Results.classifier,' ...
+%                         ' ''PCA'', 0,' ...
+%                         ' ''C'', ip.Results.C, ''gamma'', ip.Results.gamma,' ...
+%                         ' ''kernel'', ip.Results.kernel, ''numTrees'', ip.Results.numTrees,' ...
+%                         ' ''minLeafSize'', ip.Results.minLeafSize);']);
+%                         
+%                     permutationMdls{class1, class2, i} = pM;
+%                     permutationMdls{class2, class1, i} = pM;
+% 
+%                 end
+%                   
+%             end
+%             
+%         end
+%         M.permutationMdls = permutationMdls;
+%         disp('Finished training permutation testing models');
+%         
+    
+    %{
     % END PAIRWISE LDA/RF
     % START SVM skipping the pairwise split to decrease runtime
     elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
@@ -260,7 +310,7 @@
         [mdl, scale] = fitModel(X, Y, ip, ip.Results.gamma, ip.Results.C);
 
         [~, tempM] = evalc([' RSA.Classification.trainMulti(X_PCA, Y, ' ...
-            ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
+            ' ''classifier'', ip.Results.classifier, ''PCA'', 0, '...
             ' ''kernel'', ip.Results.kernel,'...
             ' ''gamma'', ip.Results.gamma, ' ...
             ' ''C'', ip.Results.C, ' ... 
@@ -275,8 +325,15 @@
         
         M.pairwise = 1;
         M.classifier = ip.Results.classifier;
+        
+        if (ip.Results.permutations > 0) 
+        end
 
     end
+    %}        
+    M.elapsedTime = toc(trainPairs_time);
+
+    
  end
 
  

@@ -93,7 +93,7 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
     if (PCA >0)
         % outside of folds
         if (PCAinFold == 0)
-            %disp('Extracting principal components');
+            disp('Conducting PCA on once on entire dataset');
 %                     keyboard;
             [X, colMeans, colScales] = centerAndScaleData(X, center, scale);
             [X, V, nPC] = getPCs(X, PCA);
@@ -121,11 +121,11 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
         else
             [r c] = size(X);
 
-            for i = 1:ip.Results.nFolds
+            for i = 1:nFolds
                 disp(['conducting PCA on fold ' num2str(i) ' of ' num2str(trainDevTestSplit.NumTestSets)]);                
                 trainIndx = find(trainDevTestSplit.train{i});
                 devIndx = find(trainDevTestSplit.dev{i});
-                testIndx = find(trainDevTestSplit.test{i} == 0);
+                testIndx = find(trainDevTestSplit.test{i});
 
                 trainX = X(trainIndx, :);
                 % center and scale training data

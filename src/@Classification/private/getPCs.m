@@ -76,6 +76,6 @@ function [y, V, nPC] = getPCs(X, PCs)
     xPC = X * V;
     y = xPC(:,1:nPC);
     
-    disp(['got ' num2str(nPC) ' PCs']);
+%     disp(['got ' num2str(nPC) ' PCs']);
 
 end

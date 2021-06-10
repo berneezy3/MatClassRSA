@@ -1,4 +1,4 @@
-function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, gammas, Cs, kernel)
+function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeIndx)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2020.
 % Published under a GNU General Public License (GPL)
@@ -16,6 +16,7 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, gammas, Cs, kernel)
 %   - gammas: 2D trial by feature training data matrix
 %   - Cs: label vector
 %   - kernel:  SVM classification kernel
+%   - optFolds: number of folds used for optimization
 %
 % OUTPUT ARGS:
 %   - gamma_opt: gamma value that produces the highest cross validation
@@ -53,30 +54,139 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, gammas, Cs, kernel)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-    accGrid = zeros(length(Cs), length(gammas));
-    cGrid = cell(length(Cs), length(gammas));
+    gammaSpace = ip.Results.gammaSpace;
+    cSpace = ip.Results.cSpace;
+    kernel = ip.Results.kernel;
 
-    RSA = MatClassRSA;
-    for i = 1:length(Cs)
-        for j = 1:length(gammas)
-            
-            [~, tempC] = evalc(['RSA.Classification.crossValidateMulti(' ...
-                'X, Y, ''PCA'', -1, ''classifier'', ''SVM'',''C'', Cs(i), ' ...
-                ' ''gamma'', gammas(j), ''kernel'', kernel);']);
-            accGrid(i,j) = tempC.accuracy;
-            cGrid{i,j} = tempC;
-        end
+    accGrid = zeros(length(cSpace), length(gammaSpace));
+    cGrid = cell(length(cSpace), length(gammaSpace));
+    
+    nFolds = NaN;
+    if (sum(contains(ip.Parameters, 'nFolds_opt')))
+        nFolds = ip.Results.nFolds_opt;
+    elseif (sum(contains(ip.Parameters, 'nFolds')))
+        nFolds = ip.Results.nFolds;
     end
     
-    % get maximum accuracy, and return the gamma and C value for the
-    % maximum accuracy
+    try
+        matlabpool
+        closePool=1;
+    catch
+        parpool
+        closePool=0;
+    end
     
-    
+    if ( (exist('excludeIndx', 'var') == 0) )
+        
+        RSA = MatClassRSA;
+        % initialize parallel worker pool
+        try
+            matlabpool;
+            closePool=1;
+        catch
+            try 
+                parpool;
+                closePool=0;
+            catch
+                % do nothing if no parpool functions exist
+            end
+        end
+        cLen = length(ip.Results.cSpace);
+        gammaLen = length(ip.Results.gammaSpace);
+        flatLen = cLen * gammaLen; 
+        % parallel grid search
+        parfor i = 1:cLen*gammaLen
+            cInd = mod(i-1, gammaLen)+1;
+            gammaInd = ceil(i/gammaLen);
+            tempM = cvMuliEvalc(X, Y, 0, 'SVM', cSpace(cInd), gammaSpace(gammaInd), 3, 'rbf');
+            accVec(i) = tempM.accuracy;
+        end
+        accGrid = reshape(accVec, cLen, gammaLen);
+        % close parallel workers
+        if exist('closePool', 'var')
+            if closePool
+                matlabpool close;
+            else
+                delete(gcp('nocreate'));
+            end
+        end
+                
+
+    elseif ( exist('cvDataObj') && (exist('excludeIndx', 'var')==1))
+
+        XFolds = cvDataObj.testXall;
+        XFolds(excludeIndx) = [];
+        YFolds = cvDataObj.testYall;
+        YFolds(excludeIndx) = [];
+
+        RSA = MatClassRSA;
+        for i = 1:length(Cs)
+            for j = 1:length(gammaSpace)
+
+                labelsConcat = [];
+                predictionsConcat = [];
+
+                for k = 1:nFolds
+
+                    trainIndx = [1:nFolds];
+                    trainIndx(k) = [];
+                    testIndx = k;
+
+                    trainX = [];
+                    trainY = [];
+
+                    for l = 1:nFolds-1
+                        trainX = [trainX; XFolds{trainIndx(l)}];
+                        trainY = [trainY; YFolds{trainIndx(l)}];
+                    end
+
+                    testX = XFolds{k};
+                    testY = YFolds{k};
+
+                    [mdl, scale] = fitModel(trainX, trainY, ip, gammaSpace(j), cSpace(i));
+
+                    [predictions decision_values] = modelPredict(testX, mdl, scale);
+
+                    labelsConcat = [labelsConcat testY'];
+                    predictionsConcat = [predictionsConcat predictions];
+                    modelsConcat{i} = mdl;  
+
+
+    %                 [~, tempC] = evalc(['RSA.Classification.crossValidateMulti(' ...
+    %                     'trainX, trainY, ''PCA'', -1, ''classifier'', ''SVM'',''C'', Cs(i), ' ...
+    %                     ' ''gamma'', gammas(j), ''kernel'', kernel, ''nFolds'', optFolds);']);                
+
+                end
+
+                accGrid(i,j) = computeAccuracy(labelsConcat, predictionsConcat);
+                %cGrid{i,j} = tempC;
+
+            end
+        end
+
+        % get maximum accuracy, and return the gamma and C value for the
+        % maximum accuracy
+
+    end
+
     [maxVal, maxIdx] = max(accGrid(:));
     [xInd yInd] = ind2sub(size(accGrid), maxIdx);
-    
-    gamma_opt = gammas(yInd);
-    C_opt = Cs(xInd);
-    
 
+    gamma_opt = gammaSpace(yInd);
+    C_opt = cSpace(xInd);
+    
+    if closePool
+        matlabpool close
+    else
+        delete(gcp('nocreate'));
+    end
+
+
+end
+
+function tempC = cvMuliEvalc(X, Y, PCA, classifier, C, gamma, nFolds, kernel)
+    RSA = MatClassRSA;
+    [~, tempC] = evalc(['RSA.Classification.crossValidateMulti(' ...
+        ' X, Y, ''PCA'', 0, ''classifier'', ''SVM'',''C'', C, ' ...
+        ' ''gamma'', gamma, ''nFolds'', nFolds, ''kernel'', kernel);']);
 end

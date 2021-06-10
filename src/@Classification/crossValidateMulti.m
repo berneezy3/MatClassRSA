@@ -59,7 +59,7 @@
 %           explain N/100 percent of the variance in input matrix X.
 %       - integer greater than or equal to 1: Use N most important
 %       - 0: Do not perform PCA.
-%   'PCAinFold' - This controls whether or not PCA is conducted in each
+%   ' 444' - This controls whether or not PCA is conducted in each
 %   fold duration cross validation, or if PCA is conducted once on the 
 %   entire dataset prior to partitioning data for cross validation.
 %       --options--
@@ -175,7 +175,7 @@
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip);
+    ip = initInputParser(namestr, ip, X, Y, varargin{:});
     
     %Required inputs
     [r c] = size(X);
@@ -234,7 +234,7 @@
         ipCenter = 'on';
     end
     % partition data for cross validation 
-    trainTestSplit = [1-1/ip.Results.nFolds 1/ip.Results.nFolds];
+    trainTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
     partition = trainDevTestPart(X, ip.Results.nFolds, trainTestSplit); 
     cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
 
@@ -282,14 +282,13 @@
 
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat predictions];
-        modelsConcat{i} = mdl; 
-
-        C.CM = confusionmat(labelsConcat, predictionsConcat);
-        C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
+        modelsConcat{i} = mdl;  
 
     end
     toc
 
+    C.CM = confusionmat(labelsConcat, predictionsConcat);
+    C.accuracy = computeAccuracy(labelsConcat, predictionsConcat);
     % Initilize info struct for return
     classificationInfo = struct(...
                         'PCA', ip.Results.PCA, ...
@@ -302,18 +301,52 @@
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.dataPartitionObj = cvDataObj;
-    C.elapsedTime = toc(cvMulti_time);
+    
+    
     
     %PERMUTATION TEST (assigning)
     tic    
     if ip.Results.permutations > 0
-        % return distribution of accuracies (Correct clasification percentage)
-        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
-                    ip.Results.classifier, trainTestSplit, ip);
-        C.pVal = permTestPVal(C.accuracy, accDist);
+        
+        disp('Conducting permutation tests');
+
+        % create variable to store permutation testing accuracies
+        accArr = NaN(ip.Results.permutations, 1);
+        
+        for i = 1:ip.Results.permutations
+            disp(['  ' num2str(i) ' of ' num2str(ip.Results.permutations)]);
+
+            
+            % get data from single fold for permutation testing
+            permTestTrainX = cvDataObj.trainXall{1};
+            permTestTrainY = cvDataObj.trainYall{1};
+            permTestTestX = cvDataObj.testXall{1};
+            permTestTestY = cvDataObj.testYall{1};
+
+            % permute training labels
+            permTestTrainY = permTestTrainY(randperm(length(permTestTrainY)), :);
+            
+            % Train permutation model and predict test data
+            RSA = MatClassRSA;
+            evalc(['permTestM = RSA.Classification.trainMulti(' ...
+                ' permTestTrainX, permTestTrainY, '...
+                ' ''classifier'', ip.Results.classifier, ' ...
+                ' ''PCA'', 0, ''scale'', false, ' ...
+                ' ''randomSeed'', ip.Results.randomSeed, ' ...
+                ' ''gamma'', ip.Results.gamma, ''C'', ip.Results.C, ' ...
+                ' ''kernel'', ip.Results.kernel, ' ...
+                ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
+
+            evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+                'permTestTestX, ''actualLabels'', permTestTestY);' ]);
+            accArr(i) = permTestOutput.accuracy;
+        end
+        C.pVal = permTestPVal(C.accuracy, accArr);
     else
         C.pVal = NaN;
     end
+    
+    C.elapsedTime = toc(cvMulti_time);
     disp('crossValidateMulti() Finished!')
     disp(['Elapsed time: ' num2str(C.elapsedTime) ' seconds'])
 

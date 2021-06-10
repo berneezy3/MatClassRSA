@@ -34,8 +34,7 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
             trainY = cvDataObj.trainYall{j};
             testX = cvDataObj.testXall{j};
             testY = cvDataObj.testYall{j};
-            
-
+           
             
             % Train model for permutation test
             switch funcName
@@ -96,7 +95,7 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
                     [r c] = size(X);
                     pX = X(randperm(r), :);
                     
-                    pM = RSA.Classification. trainPairs(pTrainX, trainY, 'classifier', ...
+                    pM = RSA.Classification.trainPairs(pTrainX, trainY, 'classifier', ...
                             ip.Results.classifier, 'gamma', ip.Results.gamma, ...
                             'C', ip.Results.C);
 
@@ -136,7 +135,7 @@ function accArr = permuteModel(funcName, X, Y, cvDataObj, nFolds, nPerms, ...
 
                         % conduct grid search here
                         [gamma_opt, C_opt] = trainDevGridSearch(pTrainX, trainY, pDevX, devY, ...
-                            ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
+                            ip);
                         [mdl, scale] = fitModel(pTrainX_tmp, trainY_tmp, ip, gamma_opt, C_opt);
                         modelsConcat{k} = mdl; 
   

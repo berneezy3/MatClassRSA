@@ -70,8 +70,9 @@
 %       true (default): Conduct PCA within each fold.
 %       false: One PCA for entire training data matrix X.
 %   'nFolds' - Number of folds in cross validation.  Must be integer
-%       greater than 1 and less than or equal to the number of trials. 
-%       Default is 10.
+%       greater than 2 and less than or equal to the number of trials. 
+%       Default is 10.  This parameter is only used is the 'nestedCV'
+%       option is set for 'optimization' parameter.   
 %   'classifier' - Choose classifier for cross validation.  Currently, only
 %        support vector machine (SVM) is supported for hyperparameter
 %        optimization
@@ -84,14 +85,18 @@
 %        --options--
 %       'linear' 
 %       'rbf' (default)
-%   'optimizationFolds': This parameter controls whether optimization is
-%       conducted via a full nFolds cross validation on the training data  
-%       or optimizing on a single development fold.  Entering a non-zero  
-%       value turns on nested cross validation, while entering zero uses a 
-%       development fold for CV. 
+%   'optimization': This parameter controls whether optimization is
+%       conducted using a full nFolds cross validation on the training data  
+%       or using a single development fold.  
 %       --options--
-%       'single' (default)
-%       'full'
+%       'singleFold' (default)
+%       'nestedCV'
+%   'trainDevSplit': This parameter is a 2 element vector which controls 
+%       how each each fold further split into a training and development 
+%       data.  For each fold, a (1/nFolds) fraction of the data becomes the 
+%       test data, and a (1 - 1/nFolds) fraction of the data is further 
+%       split into training and development data.  The elements must be 
+%       decimals which sum to 1.  
 %   'gammaSpace' - Vector of 'gamma' values to search over during 
 %       hyperparameter optimization.  Gamma is a hyperparameter of the rbf 
 %       kernel for SVM classification.  Default is 5 logarithmically spaced
@@ -138,7 +143,7 @@
 %   CM - Confusion matrix that summarizes the performance of the
 %       classification, in which rows represent actual labels and columns
 %       represent predicted labels.  Element i,j represents the number of 
-%       observations belonging to class i that the classifier labeled as
+%       observations belonging to clC_tt_multiass i that the classifier labeled as
 %       belonging to class j.
 %   accuracy - classification accuracy
 %   predY - vector of predicted labels. Ordering of vector elements
@@ -185,7 +190,8 @@
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip);
+    ip = initInputParser(namestr, ip, X, Y, varargin{:});
+%     checkInputData(namestr, ip, X, Y);
 
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
@@ -200,11 +206,8 @@
 
 
     % Parse
-    try 
-        parse(ip, X, Y, varargin{:});
-    catch ME
-        disp(getReport(ME,'extended'));
-    end
+    parse(ip, X, Y, varargin{:});
+ 
             
     % Initilize info struct
     classificationInfo = struct(...
@@ -263,18 +266,15 @@
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    partition = trainDevTestPart(X, ip.Results.nFolds, ip.Results.trainDevTestSplit);
+    if ( strcmp(ip.Results.optimization, 'nestedCV'))
+        trainDevTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
+    elseif (strcmp(ip.Results.optimization, 'singleFold'))
+        trainDevTestSplit = ip.Results.trainDevSplit;
+    end
+    partition = trainDevTestPart(X, ip.Results.nFolds, trainDevTestSplit);
     cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
     
-    %PERMUTATION TEST (assigning)
-    if ip.Results.permutations > 0
-        % return distribution of accuracies (Correct clasification percentage)
-        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
-                    ip.Results.classifier, partition, ip);
-    end
 
-
-    
     % CROSS VALIDATION
     disp('Cross Validating')
     
@@ -306,92 +306,159 @@
     CM = NaN;
     RSA = MatClassRSA;
     
-    % Inner CV fold vs. train/dev/test split
-    if ( ~ip.Results.nestedCV )
+    % Single optimization fold vs. full optimization folds
     % Train/Dev/Test Split
     
-        disp('Conducting CV w/ train/dev/test split');
+    disp('Conducting CV w/ train/dev/test split');
 
-        for i = 1:ip.Results.nFolds
+    for i = 1:ip.Results.nFolds
 
-            disp(['Processing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+        disp(['Processing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
 
-            trainX = cvDataObj.trainXall{i};
-            trainY = cvDataObj.trainYall{i};
+        trainX = cvDataObj.trainXall{i};
+        trainY = cvDataObj.trainYall{i};
+        testX = cvDataObj.testXall{i};
+        testY = cvDataObj.testYall{i};
+
+        % conduct grid search here
+        if ( strcmp(ip.Results.optimization, 'singleFold') || ...
+            ip.Results.nFolds == 2)
             devX = cvDataObj.devXall{i};
             devY= cvDataObj.devYall{i};
-            testX = cvDataObj.testXall{i};
-            testY = cvDataObj.testYall{i};
-
-            % conduct grid search here
-            [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ...
-                ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
-
-            %[mdl, scale] = fitModel(trainX, trainY, ip);
-            M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
-                'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
-
-            %[predictions decision_values] = modelPredict(testX, mdl, scale);
-            P = RSA.Classification.predict(M, testX, testY);
-
-            labelsConcat = [labelsConcat testY'];
-            predictionsConcat = [predictionsConcat P.predY];
-            modelsConcat{i} = M.mdl;
-
-            C.CM = confusionmat(labelsConcat, predictionsConcat); 
-            C.gamma_opt = gamma_opt;
-            C.C_opt = C_opt;
-
+            [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, ...
+                devX, devY, ip);
+        elseif ( strcmp(ip.Results.optimization, 'nestedCV'))
+            [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ip, cvDataObj);
         end
 
-    else
-    % NESTED CV FOLD
-         
-        disp('Conducting nested CV');
-        % Cross validation
+        %[mdl, scale] = fitModel(trainX, trainY, ip);
+        M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+            'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
 
-        for i = 1:ip.Results.nFolds
+        %[predictions decision_values] = modelPredict(testX, mdl, scale);
+        P = RSA.Classification.predict(M, testX, 'actualLabels',testY);
 
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+        labelsConcat = [labelsConcat testY'];
+        predictionsConcat = [predictionsConcat P.predY];
+        modelsConcat{i} = M.mdl;
 
-            trainX = cvDataObj.trainXall{i};
-            trainY = cvDataObj.trainYall{i};
-            testX = cvDataObj.testXall{i};
-            testY = cvDataObj.testYall{i};
+        C.CM = confusionmat(labelsConcat, predictionsConcat); 
+        C.gamma_opt = gamma_opt;
+        C.C_opt = C_opt;
 
-            % conduct grid search here
-            [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ...
-                ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
+    end
 
-            %[mdl, scale] = fitModel(trainX, trainY, ip);
-            M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
-                'gamma', gamma_opt, 'C', C_opt, 'randomSeed', 0);
-
-            %[predictions decision_values] = modelPredict(testX, mdl, scale);
-            P = RSA.Classification.predict(M, testX, testY);
-
-            labelsConcat = [labelsConcat testY'];
-            predictionsConcat = [predictionsConcat P.predY];
-            modelsConcat{i} = M.mdl;
-
-            C.CM = confusionmat(labelsConcat, predictionsConcat);
-            C.gamma_opt = gamma_opt;
-            C.C_opt = C_opt;
+    
+    %PERMUTATION TEST (assigning)
+    tic    
+    if (ip.Results.permutations > 0)
+        
+        % create variable to store permutation testing accuracies
+        accArr = NaN(ip.Results.permutations, 1);
+        permutationTestInfo = struct();
+        
+        % store hyperparameter distributions
+        gammaDist = zeros(1, ip.Results.permutations);
+        cDist = zeros(1, ip.Results.permutations);
+        
+        if ( strcmp(ip.Results.optimization, 'singleFold') || ...
+             ip.Results.nFolds == 2)
+            permTestTestX = cvDataObj.testXall{1};
+            permTestTestY = cvDataObj.testYall{1};
             
-        % END INNER CV FOLD
+            disp('Conducting permutation tests');
+            for (i = 1:ip.Results.permutations)
+                
+                disp(['  ' num2str(i) ' of ' num2str(ip.Results.permutations)]);
 
+                % permuate training/dev data
+                permTestTrainX = cvDataObj.trainXall{1};
+                trainY = cvDataObj.trainYall{1};
+                permTestDevX = cvDataObj.devXall{1};
+                devY = cvDataObj.devYall{1};
+                
+                trainDevY = [trainY; devY];
+                permTestTrainDevY = trainDevY(randperm(length(trainDevY)), :);
+
+                permTestTrainY = permTestTrainDevY(1:length(trainY));
+                permTestDevY = permTestTrainDevY(length(trainY)+1:end);
+                
+                % conduct grid search here
+                [gamma_opt_perm, C_opt_perm] = trainDevGridSearch(permTestTrainX, permTestTrainY, ...
+                    permTestDevX, permTestDevY, ip);
+                
+                gammaDist(i) = gamma_opt_perm;
+                cDist(i) = C_opt_perm;
+                
+                % Train permutation model and predict test data
+                RSA = MatClassRSA;
+                evalc(['permTestM = RSA.Classification.trainMulti(' ...
+                    ' permTestTrainX, permTestTrainY, '...
+                    ' ''classifier'', ip.Results.classifier, ' ...
+                    ' ''PCA'', 0, ''scale'', false, ' ...
+                    ' ''randomSeed'', ip.Results.randomSeed, ' ...
+                    ' ''gamma'', gamma_opt_perm, ''C'', C_opt_perm, ' ...
+                    ' ''kernel'', ip.Results.kernel, ' ...
+                    ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
+
+                evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+                    'permTestTestX, ''actualLabels'', permTestTestY);' ]);
+                accArr(i) = permTestOutput.accuracy;
+            end
+            
+            
+        elseif ( strcmp(ip.Results.optimization, 'nestedCV') )
+            permTestTestX = cvDataObj.testXall{1};
+            permTestTestY = cvDataObj.testYall{1};
+            disp('Conducting permutation tests');
+        	for i = 1:ip.Results.permutations
+                disp(['  ' num2str(i) ' of ' num2str(ip.Results.permutations)]);
+                % permute training/dev data
+                permTestTrainX = cvDataObj.trainXall{1};
+                trainY = cvDataObj.trainYall{1};
+                permTestTrainY = trainY(randperm(length(trainY)), :);
+                permCvDataObj = cvDataObj;
+                permCvDataObj.trainYall{1} = permTestTrainY;
+                
+                % conduct grid search here
+                [gamma_opt_perm, C_opt_perm] = nestedCvGridSearch(...
+                     X, Y, ip, cvDataObj);
+
+                gammaDist(i) = gamma_opt_perm;
+                cDist(i) = C_opt_perm;
+                 
+                % Train permutation model and predict test data
+                RSA = MatClassRSA;
+                evalc(['permTestM = RSA.Classification.trainMulti(' ...
+                    ' permTestTrainX, permTestTrainY, '...
+                    ' ''classifier'', ip.Results.classifier, ' ...
+                    ' ''PCA'', 0, ''scale'', false, ' ...
+                    ' ''randomSeed'', ip.Results.randomSeed, ' ...
+                    ' ''gamma'', gamma_opt_perm, ''C'', C_opt_perm, ' ...
+                    ' ''kernel'', ip.Results.kernel, ' ...
+                    ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
+
+                evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+                    '  permTestTestX, ''actualLabels'', permTestTestY);' ]);
+                accArr(i) = permTestOutput.accuracy;
+            end
         end
-
+        permutationTestInfo.accDist = accArr;
+        permutationTestInfo.gammaDist = gammaDist;
+        permutationTestInfo.cDist = cDist;
+        C.permutationTestInfo = permutationTestInfo;
+    else
+        C.pVal = NaN;
     end
     
     C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.classificationInfo = classificationInfo;
-    C.elapsedTime = toc(cvMultiOpt_time);
     if ip.Results.permutations > 0
-        C.pVal = permTestPVal(C.accuracy, accDist);
+        C.pVal = permTestPVal(C.accuracy, accArr);
     end
+    C.elapsedTime = toc(cvMultiOpt_time);
     disp('crossValidateMulti_opt() Finished!')
     disp(['Elapsed time: ' num2str(C.elapsedTime) ' seconds'])
     

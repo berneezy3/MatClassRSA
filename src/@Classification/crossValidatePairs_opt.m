@@ -1,4 +1,4 @@
- function C = crossValidatePairs_opt(obj, X, Y, varargin)
+function C = crossValidatePairs_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % C = crossValidatePairs_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
@@ -183,11 +183,11 @@
 
     cvPairsOpt_time = tic;
 
-    % Initialize the input parser
+    %%%%% PARSE INPUT DATA %%%%%
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip);
+    ip = initInputParser(namestr, ip, X, Y);
     
     %Required inputs
     [r c] = size(X);
@@ -197,7 +197,6 @@
     if (find(isnan(X(:))))
         error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
     end
-
 
     % Parse
     try 
@@ -223,6 +222,8 @@
        warning('Y label vector not in double format.  Converting Y labels to double.')
        Y = double(Y);
    end
+   
+   %%%%% SUBSET DATA MATRICES %%%%%
    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
@@ -242,12 +243,13 @@
     % moving forward.
     
     
-    % SET RANDOM SEED
+    %%%%% SET RANDOM SEED %%%%%
     % for Random forest purposes
     %rng(ip.Results.randomSeed);
     setUserSpecifiedRng(ip.Results.randomSeed);
 
-    % PCA 
+    
+    %%%%% PCA, CENTERING, SCALING and CV DATA PARTITIONING %%%%% 
     % Split Data into fold (w/ or w/o PCA)
     if (ip.Results.PCA>0 && ip.Results.PCA>0)
         disp('Conducting Principal Component Analysis');
@@ -259,27 +261,23 @@
     ipCenter = ip.Results.center; 
     ipScale = ip.Results.scale;
     if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
-        warning(['Data centering must be on if performing PCA. Overriding '...
+        warning(['Data centering must be turned on if performing PCA. Overriding '...
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    partition = trainDevTestPart(X, ip.Results.nFolds, ip.Results.trainDevTestSplit);
-    tic 
-    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
-    toc
     
-    
-    %PERMUTATION TEST (assigning)
-    tic    
-    if ip.Results.permutations > 0
-        % return distribution of accuracies (Correct clasification percentage)
-        accDist = permuteModel(namestr, X, Y, cvDataObj, 1, ip.Results.permutations , ...
-                    ip.Results.classifier, ip.Results.trainDevTestSplit, ip);
+    if (ip.Results.PCA > 0 || strcmp(ip.Results.optimization, 'nestedCV'))
+        disp('No development set needed, setting trainDevSplit to [1 0]');
+    	trainDevSplit = [1 0];
+    else
+        trainDevSplit = ip.Results.trainDevSplit;
     end
-    toc
+    
+    partition = trainDevTestPart(X, ip.Results.nFolds, trainDevSplit);
+    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
     
     
-    % CROSS VALIDATION
+    %%%%% CROSS VALIDATION %%%%%
     disp('Cross Validating')
     
     % Just partition, as shuffling (or not) was handled in previous step
@@ -302,7 +300,7 @@
     numDecBounds = nchoosek(numClasses ,2);
     pairwiseMat3D = zeros(2,2, numDecBounds);
     % initialize the diagonal cell matrix of structs containing pairwise
-    % classification infomration
+    % classification information
     pairwiseCell = initPairwiseCellMat(numClasses);
     C = struct();
     modelsConcat = cell(ip.Results.nFolds, numDecBounds);
@@ -310,45 +308,51 @@
     CM = NaN;
     RSA = MatClassRSA;
    
-    % PAIRWISE LDA/RF
-    if (strcmp(upper(ip.Results.classifier), 'LDA') || ...
-        strcmp(upper(ip.Results.classifier), 'RF') || ...
-        (strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA >0))
+    % PAIRWISE SVM w/ PCA
+    if (strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA >0)
     
         decision_values = NaN(length(Y), numDecBounds);
         AM = NaN(numClasses, numClasses);
     
-        for cat1 = 1:numClasses-1
-            for cat2 = (cat1+1):numClasses
-                disp([num2str(cat1) ' vs ' num2str(cat2)]) 
-                useTrials = ismember(Y, [cat1 cat2]);
+        % partition data into pairs
+        for class1 = 1:numClasses-1
+            for class2 = (class1+1):numClasses
+                disp([num2str(class1) ' vs ' num2str(class2)]) 
+                useTrials = ismember(Y, [class1 class2]);
       
                 tempX = X(useTrials, :);
                 tempY = Y(useTrials);
                 tempStruct = struct();
                 % Store the accuracy in the accMatrix
-                [~, tempC] = evalc([' RSA.Classification.crossValidateMulti_opt(tempX, tempY, ' ...
-                    ' ''classifier'', ip.Results.classifier, ''randomSeed'',' ...
-                    ' ''default'', ''PCAinFold'', ip.Results.PCAinFold, '...
-                    ' ''nFolds'', ip.Results.nFolds) ' ]);
+                [~, tempC] = evalc([' RSA.Classification.crossValidateMulti_opt(' ...
+                        '   tempX, tempY, ' ...
+                        ' ''classifier'', ip.Results.classifier, ' ...
+                        ' ''randomSeed'', ''default'', ' ...
+                        ' ''PCAinFold'', ip.Results.PCAinFold, '...
+                        ' ''optimization'', ip.Results.optimization, ' ...
+                        ' ''nFolds'', ip.Results.nFolds, ' ...
+                        ' ''center'', ip.Results.center, ' ...
+                        ' ''scale'', ip.Results.scale, ' ...
+                        ' ''cSpace'', ip.Results.cSpace, ' ...
+                        ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
+                        ' ''trainDevSplit'', ip.Results.trainDevSplit)' ]);
                 tempStruct.CM = tempC.CM;
                 
-                tempStruct.classBoundary = [num2str(cat1) ' vs. ' num2str(cat2)];
-                tempStruct.accuracy = sum(diag(tempStruct.CM))/sum(sum(tempStruct.CM));
+                tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
+                tempStruct.accuracy = tempC.accuracy;
 %                 tempStruct.dataPoints = find(useTrials);
                 tempStruct.actualY = tempY;
                 tempStruct.predY = tempC.predY;
                 
-                
                 %tempStruct.decision
-                AM(cat1, cat2) = tempStruct.accuracy;
-                AM(cat2, cat1) = tempStruct.accuracy;
-                modelsConcat(:, classTuple2Nchoose2Ind([cat1, cat2], 6)) = ...
+                AM(class1, class2) = tempStruct.accuracy;
+                AM(class2, class1) = tempStruct.accuracy;
+                modelsConcat(:, classTuple2Nchoose2Ind([class1, class2], 6)) = ...
                     tempC.modelsConcat';
-                pairwiseCell{cat1, cat2} = tempStruct;
-                pairwiseCell{cat2, cat1} = tempStruct;
+                pairwiseCell{class1, class2} = tempStruct;
+                pairwiseCell{class2, class1} = tempStruct;
                 
-                decInd = classTuple2Nchoose2Ind([cat1 cat2], numClasses);
+                decInd = classTuple2Nchoose2Ind([class1 class2], numClasses);
                 
             end
         end
@@ -359,9 +363,51 @@
         C.classificationInfo = tempStruct;
         
         disp('classifyCrossValidate_opt() Finished!')
-        return
-    % END PAIRWISE LDA/RF
-    % START PAIRWISE SVM 
+        
+        %Permutation Testing
+        if ( ip.Results.permutations>0 ) 
+            accMatDist = nan(numClasses, numClasses, ip.Results.permutations);
+            pValMat = nan(numClasses, numClasses);
+            classPairs = nchoosek(1:numClasses, 2);
+
+            disp('Conducting permutation testing...');
+            for k = 1:numDecBounds
+                class1 = classPairs(k, 1);
+                class2 = classPairs(k, 2);
+                disp([num2str(class1) ' vs ' num2str(class2)]) 
+
+                for i = 1:ip.Results.permutations
+                
+                    useTrials = ismember(Y, [class1 class2]);
+
+                    tempX = X(useTrials, :);
+                    tempY = Y(useTrials);
+                    pTempY = Y(randperm(length(Y)), :); % permuate Y labels
+                    [~, tempC] = evalc([' RSA.Classification.crossValidateMulti_opt(' ...
+                        ' tempX, pTempY, ' ...
+                        ' ''classifier'', ip.Results.classifier, ' ...
+                        ' ''randomSeed'', ''default'', ' ...
+                        ' ''PCAinFold'', ip.Results.PCAinFold, '...
+                        ' ''optimization'', ip.Results.optimization, ' ...
+                        ' ''nFolds'', ip.Results.nFolds, ' ...
+                        ' ''center'', ip.Results.center, ' ...
+                        ' ''scale'', ip.Results.scale, ' ...
+                        ' ''cSpace'', ip.Results.cSpace, ' ...
+                        ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
+                        ' ''trainDevSplit'', ip.Results.trainDevSplit)' ]);
+                    accMatDist(class1, class2, i) = tempC.accuracy;
+                    accMatDist(class2, class1, i) = tempC.accuracy;
+
+                end
+                pValMat(class1, class2) = permTestPVal(AM(class1, class2), ...
+                    squeeze(accMatDist(class1, class2, :)));
+                pValMat(class2, class1) = pValMat(class1, class2);
+            end
+            C.pValMat = pValMat;
+        end        
+        
+    % END PAIRWISE SVM w/ PCA
+    % START PAIRWISE SVM w/o PCA
     elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
         
         for i = 1:ip.Results.nFolds
@@ -372,45 +418,112 @@
             trainY = cvDataObj.trainYall{i};
             testX = cvDataObj.testXall{i};
             testY = cvDataObj.testYall{i};
-            
-             % conduct grid search here
-            [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ...
-                ip.Results.gammaSpace, ip.Results.cSpace, ip.Results.kernel);
-
-            [mdl, scale] = fitModel(trainX, trainY, ip, gamma_opt, C_opt);
-
-            [predictions decision_values] = modelPredict(testX, mdl, scale);
-
-            labelsConcat = [labelsConcat testY];
-            predictionsConcat = [predictionsConcat predictions];
-            modelsConcat{i} = mdl; 
-
-                if strcmp(upper(ip.Results.classifier), 'SVM')
-                    [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
-                        decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
-                end
+%             
+%              % conduct grid search here
+%              if (strcmp(ip.Results.optimization, 'nestedCV'))
+%                 [gamma_opt, C_opt] = nestedCvGridSearch(cvDataObj, ip);
+%              elseif (strcmp(ip.Results.optimization, 'singleFold'))
+%                 devX = cvDataObj.devXall{i};
+%                 devY = cvDataObj.devYall{i};
+%                 [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, ...
+%                     devX, devY, ip);
+%              end
+% 
+%             [mdl, scale] = fitModel(trainX, trainY, ip, gamma_opt, C_opt);
+% 
+%             [predictions decision_values] = modelPredict(testX, mdl, scale);
+% 
+%             labelsConcat = [labelsConcat testY];
+%             predictionsConcat = [predictionsConcat predictions];
+%             modelsConcat{i} = mdl; 
+% 
+%             if strcmp(upper(ip.Results.classifier), 'SVM')
+%                 [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
+%                     decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
+%             end
+%             
+            [~, tempC] = evalc([' RSA.Classification.crossValidateMulti_opt(' ...
+                        ' trainX, pTempY, ' ...
+                        ' ''classifier'', ip.Results.classifier, ' ...
+                        ' ''randomSeed'', ''default'', ' ...
+                        ' ''PCAinFold'', ip.Results.PCAinFold, '...
+                        ' ''optimization'', ip.Results.optimization, ' ...
+                        ' ''nFolds'', ip.Results.nFolds, ' ...
+                        ' ''center'', ip.Results.center, ' ...
+                        ' ''scale'', ip.Results.scale, ' ...
+                        ' ''cSpace'', ip.Results.cSpace, ' ...
+                        ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
+                        ' ''trainDevSplit'', ip.Results.trainDevSplit)' ]);
         end
         
         %convert pairwiseMat3D to diagonal matrix
         C.pairwiseInfo = pairwiseCell;
         C.AM = pairwiseAccuracies;
         
-    end
+        %Permutation Testing
+        if ip.Results.permutations > 0
+            
+            numClasses = length(unique(Y));
+            accMatDist = zeros(numClasses, numClasses, ip.Results.permutations);
+            pValMat = nan(numClasses, numClasses);
+            RSA = MatClassRSA;
+            classPairs = nchoosek(1:numClasses, 2);
 
+            trainX = cvDataObj.trainXall{1};
+            trainY = cvDataObj.trainYall{1};
+            testX = cvDataObj.testXall{1};
+            testY = cvDataObj.testYall{1};
+            
+            for i = 1:ip.Results.permutations
+
+                l = length(trainY);
+                pTrainY = trainY(randperm(l), :);
+                 % conduct grid search here
+                 if (strcmp(ip.Results.optimization, 'nestedCV'))
+                    [gamma_opt, C_opt] = nestedCvGridSearch(trainX, pTrainY, cvDataObj, ip);
+                 elseif (strcmp(ip.Results.optimization, 'singleFold'))
+                    devX = cvDataObj.devXall{1};
+                    devY = cvDataObj.devYall{1};
+                    trainDevY = [trainY; devY];
+                    pTrainDevY = trainDevY(randperm(length(trainDevY)), :);
+                    pTrainY = pTrainDevY(1:length(trainY));
+                    pDevY = pTrainDevY(length(trainY)+1:end);
+
+                    [gamma_opt, C_opt] = trainDevGridSearch(trainX, pTrainY, ...
+                        devX, pDevY, ip);
+                 end
+                [pMdl, scale] = fitModel(trainX, pTrainY, ip, gamma_opt, C_opt);
+
+                [predictions decision_values] = modelPredict(testX, pMdl, scale);
+
+                if strcmp(upper(ip.Results.classifier), 'SVM')
+                    [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
+                        decValues2PairwiseAcc(pairwiseMat3D, testY, pMdl.Label, decision_values, pairwiseCell);
+                end
+                accMatDist(:,:,i) = pairwiseAccuracies;
+                
+            end
+            
+            for k = 1:numDecBounds
+            
+                % class1 class2
+                class1 = classPairs(k, 1);
+                class2 = classPairs(k, 2);
+                pValMat(class1, class2) = permTestPVal(C.AM(class1, class2), ...
+                        accMatDist(class1, class2, :));
+                pValMat(class2, class1)  = pValMat(class1, class2);
+                
+            end
+                
+        end
+
+        C.pValMat = pValMat;
+        
+    end
+    
     C.modelsConcat = modelsConcat;
 %     C.predY = predictionsConcat;
     C.classificationInfo = classifierInfo;
-    % calculate pVal return matrix for all pairs. 
-    if ip.Results.permutations > 0
-        C.pVal = nan(numClasses, numClasses);
-        for class1 = 1:numClasses-1
-            for class2 = (class1+1):numClasses
-                thisAccDist = accDist(class1, class2, :);
-                C.pVal(class1, class2) = permTestPVal(C.AM(class1, class2), thisAccDist);
-                C.pVal(class2, class1) = C.pVal(class1, class2);
-            end
-        end
-    end
     C.elapsedTime = toc(cvPairsOpt_time);
     
     disp(['Elapsed time: ' num2str(C.elapsedTime) 'seconds'])

@@ -8,7 +8,7 @@ function obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
 % --------------------------------
 % Bernard Wang, June 27, 2017
 % 
-% This class stores a cross-validation partition for data.  This constructor
+% This class stores a cross-validation partition.  This constructor
 % of this class takes in the number of train samples n and number of
 % train k folds, then creates k partitions in the data.  This object is
 % to be passed into the constructor cvData() later.
@@ -64,14 +64,26 @@ function obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
     
 assert(numTrials >= nFolds, 'first parameter, k, must be lager than second parameter, n');
 
-trainDevTestSplit = processTrainDevTestSplit(trainDevTestSplit, X);
 
 obj.optimize = 1;
 
 if length(trainDevTestSplit) == 2
-    trainDevTestSplit = [trainDevTestSplit(1) 0 trainDevTestSplit(2)];
-    obj.optimize = 0;
+%     trainDevTestSplit = [trainDevTestSplit(1) 0 trainDevTestSplit(2)];
+%     obj.optimize = 0;
+    if (nFolds > 1) 
+        trainSplit = (1 - 1/nFolds) * trainDevTestSplit(1);
+        devSplit = (1 - 1/nFolds) * trainDevTestSplit(2);
+        testSplit = 1/nFolds;
+        trainDevTestSplit = [trainSplit devSplit testSplit];
+    else
+        trainSplit = trainDevTestSplit(1);
+        devSplit = trainDevTestSplit(2);
+%         testSplit = 1/nFolds;
+        trainDevTestSplit = [trainSplit devSplit 0];
+    end
 end
+
+trainDevTestSplit = processTrainDevTestSplit(trainDevTestSplit, X);
 
 obj.train = {};
 obj.dev = {};
@@ -111,9 +123,8 @@ if remainder == 0
         trainIndices = testIndices == 0;
         % clear dev indices in train indices
         trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize)) = 0;
-        devIndices = testIndices == 0;
-        % clear train indices in dev indices
-        devIndices(trainDevIndices(1:trainSize)) = 0;
+        % create dev indices
+        devIndices = ((testIndices == 0) .* (trainIndices==0));
  
         obj.train{end+1} = trainIndices;
         obj.dev{end+1} = devIndices;
@@ -124,16 +135,16 @@ else
     
     indexlocation = 0;
     
-    % handle non-remainders
+     
     for i = 1:nFolds
         
         testIndices = zeros( numTrials,1 );
-        if (i ~= nFolds)
+        if (i ~= nFolds) % handle non-remainders here
             for j = 1:testSize
                 testIndices(j+(i-1)*testSize) = 1;
                 indexlocation = indexlocation + 1;
-            end
-        elseif  (i == nFolds)
+            end   
+        elseif  (i == nFolds) % handle remainders here
             for j = 1:testSize+remainder
                 testIndices(j+(i-1)*testSize) = 1;
                 indexlocation = indexlocation + 1;
@@ -145,8 +156,7 @@ else
         trainDevIndices = find(testIndices == 0);
         trainIndices = (testIndices == 0);
         trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize-2)) = 0;
-        devIndices = (testIndices == 0);
-        devIndices(trainDevIndices(1:trainSize-2)) = 0;
+        devIndices = ((testIndices == 0) .* (trainIndices==0));
         
         obj.train{end+1} = trainIndices;
         obj.dev{end+1} = devIndices;

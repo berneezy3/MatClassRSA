@@ -1,4 +1,4 @@
-function y = initInputParser(functionName, ip)
+function y = initInputParser(functionName, ip, X, Y, varargin)
 
     % Initialize the input parser
     ip = inputParser;
@@ -26,12 +26,13 @@ function y = initInputParser(functionName, ip)
     defaultG = 'default'; % (default value of G is 1/num_features)
     defaultCSpace = logspace((-5), 5, 5);
     defaultGammaSpace = logspace((-5), 5, 5);
-    defaultTrainDevTestSplit = [.8 .1 .1];
+    defaultTrainDevTestSplit = [.9 .1];
     defaultTrainDevSplit = [.9 .1];
     defaultNestedCV = 0;
+    defaultOptimization = 'singleFold';
 
     %Specify expected values
-    expectedPCAinFold = {'on', 'off'};
+    expectedPCAinFold = {0, 1};
     expectedClassifier = {'SVM', 'LDA', 'RF', 'svm', 'lda', 'rf'};
     expectedPValueMethod = {'permuteFullModel'};
     expectedRandomSeed = {'default', 'shuffle'};
@@ -42,9 +43,10 @@ function y = initInputParser(functionName, ip)
     expectedScale = {'on', 'off'};
     onOrOff = {'on', 'off'};
     trueOrFalse = {true, false};
+    expectedOptimization = {'singleFold', 'nestedCV'};
+
     
-    validateNFolds = @(x) assert(isinteger(int8(x) && x>1 ), ... 
-        'nFolds must be integer greater than 1');
+    validateNFolds = @(x) (isinteger(int8(x)) && x>1 );
     
     
     % Optional positional inputs
@@ -53,7 +55,7 @@ function y = initInputParser(functionName, ip)
         addParamValue(ip, 'randomSeed', defaultRandomSeed);
         addParamValue(ip, 'PCA', defaultPCA);
         addParamValue(ip, 'PCAinFold', defaultPCAinFold, ...
-             @(x) validateattributes(x,{'logical'}, {'nonempty'}));
+             @(x) isnumeric(x));
         addParamValue(ip, 'center', defaultCenter, ...
             @(x) validateattributes(x,{'logical'}, {'nonempty'}));
         addParamValue(ip, 'scale', defaultScale,  ...
@@ -74,7 +76,7 @@ function y = initInputParser(functionName, ip)
         addParameter(ip, 'randomSeed', defaultRandomSeed);
         addParameter(ip, 'PCA', defaultPCA);
         addParameter(ip, 'PCAinFold', defaultPCAinFold, ...
-             @(x) validateattributes(x,{'logical'}, {'nonempty'}));
+             @(x) isnumeric(x));
         addParameter(ip, 'center', defaultCenter, ...
              @(x) validateattributes(x,{'logical'}, {'nonempty'}));
         addParameter(ip, 'scale', defaultScale, ...
@@ -99,7 +101,7 @@ function y = initInputParser(functionName, ip)
        case 'crossValidateMulti'
             addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            expectedClassifier = {'LDA', 'RF', 'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'nFolds', defaultNFolds, validateNFolds);
@@ -108,7 +110,7 @@ function y = initInputParser(functionName, ip)
        case {'crossValidatePairs', 'crossValidatePairs_fast', 'crossValidatePairs_slow'}
             addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            expectedClassifier = {'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'nFolds', defaultNFolds, validateNFolds);
@@ -123,9 +125,12 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'nFolds', defaultNFolds, validateNFolds);
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
-            addParameter(ip, 'trainDevTestSplit', defaultTrainDevTestSplit);
-            addParameter(ip, 'nestedCV', defaultNestedCV);
-       case 'crossValidatePairs_opt'
+            addParameter(ip, 'trainDevSplit', defaultTrainDevSplit) %, ...
+                %@(x) abs(x(3) - 1/3) < .0001);
+            addParameter(ip, 'optimization', defaultOptimization,...
+                @(x) any(validatestring(x, expectedOptimization)));
+                %@(x) (floor(x == x) && x > 0));
+        case 'crossValidatePairs_opt'
             addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
@@ -134,12 +139,13 @@ function y = initInputParser(functionName, ip)
             addParameter(ip, 'nFolds', defaultNFolds, validateNFolds);
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
-            addParameter(ip, 'trainDevTestSplit', defaultTrainDevTestSplit);
-            addParameter(ip, 'nestedCV', defaultNestedCV);
+            addParameter(ip, 'trainDevSplit', defaultTrainDevSplit);
+            addParameter(ip, 'optimization', defaultOptimization,...
+                @(x) any(validatestring(x, expectedOptimization)));
        case 'trainMulti'
             addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            expectedClassifier = {'LDA', 'RF', 'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
@@ -147,7 +153,7 @@ function y = initInputParser(functionName, ip)
        case 'trainPairs'
             addRequired(ip, 'X', @is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'SVM', 'LDA', 'RF'};
+            expectedClassifier = {'LDA', 'RF', 'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
@@ -166,13 +172,14 @@ function y = initInputParser(functionName, ip)
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
             defaultClassifier = 'SVM';
+            addParameter(ip, 'nFolds_opt', defaultNFolds, validateNFolds);
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
-            addParameter(ip, 'nestedCV', defaultNestedCV);
             addParameter(ip, 'trainDevSplit', defaultTrainDevSplit);
-
+            addParameter(ip, 'optimization', defaultOptimization,...
+                @(x) any(validatestring(x, expectedOptimization)));
        otherwise
           error(['parseInputs() must be called from one of the following functions:' ...
           'trainMulti.m, predict.m, trainPairs.m,' ...
@@ -180,9 +187,7 @@ function y = initInputParser(functionName, ip)
           'crossValidateMulti_opt.m, crossValidatePairs_opt.m,' ...
           'trainPairs_opt.m, trainMulti_opt.m']);
     end
-    
 
+    parse(ip, X, Y, varargin{:});
     y=ip;
-
-    
 end
