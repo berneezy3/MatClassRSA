@@ -144,19 +144,24 @@ else
                 testIndices(j+(i-1)*testSize) = 1;
                 indexlocation = indexlocation + 1;
             end   
+            trainDevIndices = find(testIndices == 0);
+            trainIndices = (testIndices == 0);
+            trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize)) = 0;
+            devIndices = ((testIndices == 0) .* (trainIndices==0));
         elseif  (i == nFolds) % handle remainders here
             for j = 1:testSize+remainder
                 testIndices(j+(i-1)*testSize) = 1;
                 indexlocation = indexlocation + 1;
             end
+            trainDevIndices = find(testIndices == 0);
+            trainIndices = (testIndices == 0);
+            trainIndices(trainDevIndices(end-devSize:end)) = 0;
+            devIndices = ((testIndices == 0) .* (trainIndices==0));
         end
 
         % the train/dev indices indices should consist of the
         % non-test indices
-        trainDevIndices = find(testIndices == 0);
-        trainIndices = (testIndices == 0);
-        trainIndices(trainDevIndices(trainSize + 1:trainSize + devSize-2)) = 0;
-        devIndices = ((testIndices == 0) .* (trainIndices==0));
+
         
         obj.train{end+1} = trainIndices;
         obj.dev{end+1} = devIndices;
