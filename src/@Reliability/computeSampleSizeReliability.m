@@ -74,19 +74,19 @@ end
 
 assert(size(X, 2) == length(Y), 'Length of labels vector does not match number of trials in the data.');
 
-if nargin < 4
+if nargin < 5
     numTrialsPerHalf = 1;
     numPermutations = 10;
 end
-if nargin < 5 || isempty(numPermutations)
+if nargin < 6 || isempty(numPermutations)
     numPermutations = 10;
 end
-if nargin < 6 || isempty(numTrialPermutations)
+if nargin < 7 || isempty(numTrialPermutations)
     numTrialPermutations = 10;
 end
 
 % Set random number generator
-if nargin < 7 || isempty(rngType), setUserSpecifiedRng();
+if nargin < 8 || isempty(rngType), setUserSpecifiedRng();
 else, setUserSpecifiedRng(rngType);
 end
 
