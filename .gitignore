@@ -9,3 +9,4 @@ UnitTests/*.mat
 UnitTests/AllData.mat
 *.m~
 UnitTests/losorelli*.mat
+*.asv
