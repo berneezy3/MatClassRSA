@@ -60,7 +60,7 @@ SL100_slightlyImbalanced = SL100;
 for i = 1:6
     
     % Get indices of current stim
-    thisIdx = find(SL100.Y == i);
+    thisIdx = find(SL100_slightlyImbalanced.Y == i);
     
     % Vector of first however many observations to delete for this stim
     thisDelete = thisIdx(1:tempDelete(i)); % 0 value is ok -- returns empty vector
@@ -178,7 +178,7 @@ for i = 1:72
 end
 
 tempCounts = histcounts(S01_72class_slightlyUnbalanced.labels72, 'BinMethod', 'integers');
-% Looks right: [864   854   858   857   861   852]
+% Looks right
 S01_72class_slightlyUnbalanced = rmfield(S01_72class_slightlyUnbalanced, 'labels6')
 %                X: [124×40×5146 double]
 %     blCorrectIdx: [1 2 3 4 5 6 7 8 9 10 11 12]
@@ -188,3 +188,7 @@ S01_72class_slightlyUnbalanced = rmfield(S01_72class_slightlyUnbalanced, 'labels
 %                t: [1×40 double]
 
 clear temp* ans i
+
+
+
+
