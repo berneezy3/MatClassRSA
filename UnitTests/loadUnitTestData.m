@@ -220,7 +220,7 @@ for i = 1:6
     clear this*
 end
 
-tempCounts = histcounts(SL100_veryImbalanced.Y, 'BinMethod', 'integers')
+tempCounts = histcounts(SL100_veryImbalanced.Y, 'BinMethod', 'integers');
 % Looks right: [225   325   325   325   325   225]
 SL100_veryImbalanced
 %     P: [1×1750 double]
@@ -257,7 +257,7 @@ for i = 1:6
     clear this*
 end
 
-tempCounts = histcounts(SL500_veryImbalanced.Y, 'BinMethod', 'integers')
+tempCounts = histcounts(SL500_veryImbalanced.Y, 'BinMethod', 'integers');
 % Looks right: [35    65    65    65    65    35]
 SL500_veryImbalanced
 %     P: [330×1 double]
@@ -294,8 +294,8 @@ for i = 1:6
     
 end
 
-tempCounts = histcounts(S01_6class_veryUnbalanced.labels6, 'BinMethod', 'integers')
-% Looks right: [864   854   858   857   861   852]
+tempCounts = histcounts(S01_6class_veryUnbalanced.labels6, 'BinMethod', 'integers');
+% Looks right: [864   464   864   864   864   464]
 S01_6class_veryUnbalanced = rmfield(S01_6class_veryUnbalanced, 'labels72')
 %                X: [124×40×5146 double]
 %     blCorrectIdx: [1 2 3 4 5 6 7 8 9 10 11 12]
@@ -304,10 +304,9 @@ S01_6class_veryUnbalanced = rmfield(S01_6class_veryUnbalanced, 'labels72')
 %            subID: '01'
 %                t: [1×40 double]
 
-%%% TODO START HERE %%%
 %%%%%% S01 - 72 class %%%%%%
 unique(S01.labels72);         % Integers 1:72
-tempCounts = histcounts(S01.labels72, 'BinMethod', 'integers')
+tempCounts = histcounts(S01.labels72, 'BinMethod', 'integers');
 % Classes are balanced, all 72 observations
 
 % Initialize new data struct
@@ -331,7 +330,7 @@ for i = 1:72
     
 end
 
-tempCounts = histcounts(S01_72class_veryUnbalanced.labels72, 'BinMethod', 'integers')
+tempCounts = histcounts(S01_72class_veryUnbalanced.labels72, 'BinMethod', 'integers');
 % Looks right
 S01_72class_veryUnbalanced = rmfield(S01_72class_veryUnbalanced, 'labels6')
 %                X: [124×40×5146 double]
