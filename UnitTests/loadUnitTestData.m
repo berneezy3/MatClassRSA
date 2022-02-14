@@ -342,3 +342,158 @@ S01_72class_veryUnbalanced = rmfield(S01_72class_veryUnbalanced, 'labels6')
 
 clear temp* ans i
 
+%% Low trial counts with imbalances
+
+%%%%% SL100 %%%%%%
+unique(SL100.Y);        % Integers [1 2 3 4 5 6]
+tempCounts = histcounts(SL100.Y, 'BinMethod', 'integers');
+% Classes are balanced, all have 325 observations
+
+% Delete this many observations from each class
+tempDelete = 325 - [10 12 14 16 18 20];
+% [315   313   311   309   307   305]
+
+% Initialize the new data struct
+SL100_lowCountImbalanced = SL100;
+
+% Retain 10:2:20 observations per class
+for i = 1:6
+    
+    % Get indices of current stim
+    thisIdx = find(SL100_lowCountImbalanced.Y == i);
+    
+    % Vector of first however many observations to delete for this stim
+    thisDelete = thisIdx(1:tempDelete(i)); % 0 value is ok -- returns empty vector
+    
+    % Remove the first however many from P, X, Y
+    SL100_lowCountImbalanced.P(thisDelete) = [];
+    SL100_lowCountImbalanced.X(thisDelete, :) = [];
+    SL100_lowCountImbalanced.Y(thisDelete) = [];
+    
+    clear this*
+end
+
+tempCounts = histcounts(SL100_lowCountImbalanced.Y, 'BinMethod', 'integers');
+% Looks right: [10    12    14    16    18    20]
+SL100_lowCountImbalanced
+%     P: [1×90 double]
+%     X: [90×2801 double]
+%     Y: [1×90 double]
+%     t: [2801×1 double]
+
+%%%%%% SL500 %%%%%%
+unique(SL500.Y);        % Integers [1 2 3 4 5 6]'
+tempCounts = histcounts(SL500.Y, 'BinMethod', 'integers');
+% Classes are balanced, all have 65 observations
+
+% Delete this many observations from each class
+tempDelete = 65 - [10 12 14 16 18 20];
+% [55    53    51    49    47    45]
+
+% Initialize the new data struct
+SL500_lowCountImbalanced = SL500;
+
+% Retain 10:2:20 observations per class
+for i = 1:6
+    
+    % Get indices of current stim
+    thisIdx = find(SL500_lowCountImbalanced.Y == i);
+%     length(thisIdx)
+    
+    % Vector of first however many observations to delete for this stim
+    thisDelete = thisIdx(1:tempDelete(i)); % 0 value is ok -- returns empty vector
+    
+    % Remove the first however many from P, X, Y
+    SL500_lowCountImbalanced.P(thisDelete) = [];
+    SL500_lowCountImbalanced.X(thisDelete, :) = [];
+    SL500_lowCountImbalanced.Y(thisDelete) = [];
+    
+    clear this*
+end
+
+tempCounts = histcounts(SL500_lowCountImbalanced.Y, 'BinMethod', 'integers');
+% Looks right: [10    12    14    16    18    20]
+SL500_lowCountImbalanced
+%     P: [90×1 double]
+%     X: [90×2801 double]
+%     Y: [90×1 double]
+%     t: [2801×1 double]
+
+%%%%%% S01 - 6 class %%%%%%
+unique(S01.labels6);         % Integers [1 2 3 4 5 6]
+tempCounts = histcounts(S01.labels6, 'BinMethod', 'integers');
+% Classes are balanced, all 864 observations
+
+% Delete this many observations from each class
+tempDelete = 864 - [10 12 14 16 18 20];
+% [854   852   850   848   846   844]
+
+% Initialize new data struct
+S01_6class_lowCountUnbalanced = S01;
+
+% Retain 10:2:20 observations per class
+for i = 1:6
+    
+    % Get indices of current stim
+    thisIdx = find(S01_6class_lowCountUnbalanced.labels6 == i);
+    length(thisIdx);
+    
+    % Vector of first N obs to delete 
+    thisDelete = thisIdx(1:tempDelete(i));
+    
+    % Rm those obs
+    S01_6class_lowCountUnbalanced.X(:, :, thisDelete) = [];
+    S01_6class_lowCountUnbalanced.labels6(thisDelete) = [];
+    
+    clear this*
+    
+end
+
+tempCounts = histcounts(S01_6class_lowCountUnbalanced.labels6, 'BinMethod', 'integers');
+% Looks right: [10    12    14    16    18    20]
+S01_6class_lowCountUnbalanced = rmfield(S01_6class_lowCountUnbalanced, 'labels72')
+%                X: [124×40×90 double]
+%     blCorrectIdx: [1 2 3 4 5 6 7 8 9 10 11 12]
+%               fs: 62.5000
+%          labels6: [1×90 double]
+%            subID: '01'
+%                t: [1×40 double]
+
+%%%%%% S01 - 72 class %%%%%%
+unique(S01.labels72);         % Integers 1:72
+tempCounts = histcounts(S01.labels72, 'BinMethod', 'integers');
+% Classes are balanced, all 72 observations
+
+% Initialize new data struct
+S01_72class_lowCountUnbalanced = S01;
+
+% Retain 18 or 20 observations per class
+for i = 1:72
+    
+    % Get indices of current stim
+    thisIdx = find(S01_72class_lowCountUnbalanced.labels72 == i);
+    length(thisIdx);
+    
+    % Keep 20 or 18 observations per class
+    thisDelete = thisIdx(1:(54 - mod(i, 2) * 2));
+    72 - length(thisDelete);
+    
+    % Rm those obs
+    S01_72class_lowCountUnbalanced.X(:, :, thisDelete) = [];
+    S01_72class_lowCountUnbalanced.labels72(thisDelete) = [];
+    
+    clear this*
+    
+end
+
+tempCounts = histcounts(S01_72class_lowCountUnbalanced.labels72, 'BinMethod', 'integers');
+% Looks right: [20 18 20 18 ... 20 18]
+S01_72class_lowCountUnbalanced = rmfield(S01_72class_lowCountUnbalanced, 'labels6')
+%                X: [124×40×1368 double]
+%     blCorrectIdx: [1 2 3 4 5 6 7 8 9 10 11 12]
+%               fs: 62.5000
+%         labels72: [1×1368 double]
+%            subID: '01'
+%                t: [1×40 double]
+
+clear temp* ans i
