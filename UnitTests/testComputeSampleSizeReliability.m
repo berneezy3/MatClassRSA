@@ -3,7 +3,7 @@
 % Blair - Sep 02, 2019
 
 clear all; close all; clc
-load('/user/b/blairbo/Codebase/MatClassRSA/UnitTests/S06.mat')
+load('/Users/giffordr/Desktop/MATClassRSA/MatClassRSA Data/S06.mat')
 
 X2d = squeeze(X(96,:,:))';
 
