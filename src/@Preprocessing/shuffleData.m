@@ -1,10 +1,11 @@
 function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
-% [randX, randY, randP, randIdx] = shuffleData(X, Y, P, randomSeed)
+% [randX, randY, randP, randIdx] = RSA.Preprocessing.shuffleData(X, Y, P, randomSeed)
 %-------------------------------------------------------------------
 % Bernard Wang - April 30, 2017
 % Revised by Blair Kaneshiro, August 2019
+% Revised by Ray Gifford, Febuary 2022
 %
 % This function randomizes, in tandem, ordering of trials in data matrix X,
 % labels vector Y, and, optionally, participants vector P. Therefore,
@@ -98,7 +99,7 @@ end
 parse(ip, X, Y, varargin{:});
 
 % Set random number generator
-if nargin < 4 || isempty(ip.Results.randomSeed), setUserSpecifiedRng();
+if nargin < 5 || isempty(ip.Results.randomSeed), setUserSpecifiedRng();
 else, setUserSpecifiedRng(ip.Results.randomSeed);
 end
 
@@ -126,13 +127,13 @@ randY = Y(randIdx);
 
 % Handle participants randomization if specified as output
 if nargout > 2
-    if nargin < 3 || isempty(P), randP = NaN;
-    elseif ~isvector(P)
+    if nargin < 4 || isempty(ip.Results.P), randP = NaN;
+    elseif ~isvector(ip.Results.P)
         error('Input participant identifiers must be a vector.');
-    elseif length(P) ~= length(Y)
+    elseif length(ip.Results.P) ~= length(Y)
         error('Input labels vector and input participants vector must be the same length.');
     else
-        randP = P(randIdx);
+        randP = ip.Results.P(randIdx);
     end
 end
 

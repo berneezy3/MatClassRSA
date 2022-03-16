@@ -60,12 +60,12 @@ else
     error('Input data should be a 2D or 3D matrix.');
 end
 
-if nargin < 3 || isempty(numPermutations)
+if nargin < 4 || isempty(numPermutations)
     numPermutations = 10;
 end
 
 % Set random number generator
-if nargin < 4 || isempty(rngType), setUserSpecifiedRng();
+if nargin < 5 || isempty(rngType), setUserSpecifiedRng();
 else, setUserSpecifiedRng(rngType);
 end
 

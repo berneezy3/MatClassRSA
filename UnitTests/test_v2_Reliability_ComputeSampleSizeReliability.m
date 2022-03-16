@@ -86,7 +86,7 @@ disp('3D input single electrode equals 2D input')
 %% 3D input balanced, 6-class labels -- xx acting strange xx 
 close all; clear r;
 
-r = RSA.Reliability.computeSampleSizeReliability(S01.X, S01.labels6, 1, 1:20, [], [], 1);
+r = RSA.Reliability.computeSampleSizeReliability(S01.X, S01.labels6, 19, 1:20, [], [], 1);
 rMean = squeeze(mean(r,1));
 
 plot(rMean(:,96), 'linewidth', 2); grid on
@@ -150,11 +150,20 @@ ylabel('Reliability');
 %% Testing rng - not sure how to interpret
 
 close; clc
+%r = rng(1);
 rng(42, 'philox')
 rng
 r1 = RSA.Reliability.computeSampleSizeReliability(S01.X(96,:,:), S01.labels72, 19, [], [], [], 1);
 rng
 
+%% thing
+clc
+r = rng(42, 'philox');
+r
+
+r1 = RSA.Reliability.computeSampleSizeReliability(S01.X(96,:,:), S01.labels72, 19, [], [], [], r);
+r
+%% thing2
 rng(42, 'philox')
 rng
 r2 = RSA.Reliability.computeSampleSizeReliability(S01.X(96,:,:), S01.labels72, 19, [], [], [], 'default');
@@ -175,11 +184,11 @@ rng
 r5 = RSA.Reliability.computeSampleSizeReliability(S01.X(96,:,:), S01.labels72, 19, [], [], []);
 rng
 
-assert(isequal(r1, r2)); 
+assert(isequal(r1, r2)); % check this
 disp("Reliability using random number generator seed is replicable for 'default' and '1'")
-assert(isequal(r3, r4)); 
+assert(isequal(r3, r4)); %check this
 disp("Reliability using random number generator seed is replicable for '{' and '[' calls")
-assert(isequal(r1, r2, r3, r4, r5)); 
+assert(isequal(r1, r2, r3, r4, r5)); % check
 disp("Reliability replicable for both user specified and default calls")
 
 %% 3D input with ntrials in split too large -- ** feature request **

@@ -4,8 +4,8 @@
 
 clear all; close all; clc
 
-% Add the following datasets to "UnitTests" folder: "lsosorelli_100sweep_epoched.mat",
-% "lsosorelli_500sweep_epoched.mat","S01.mat"
+% The following datasets were added to "UnitTests" folder: "lsosorelli_100sweep_epoched.mat",
+% "lsosorelli_500sweep_epoched.mat", "S01.mat"
 run('loadUnitTestData.m') 
 
 RSA = MatClassRSA;
@@ -60,7 +60,7 @@ ylabel('Reliability');
 
 sgtitle('3D Balanced Space Time Reliability') 
 
-%% Visualize reliabilities on a topoplot
+%% Visualize reliabilities on a topoplot -- looks good
 
 t0 = find(S01.t==0);
 t80 = find(S01.t==80);
@@ -233,13 +233,9 @@ ylabel('Reliability');
 
 sgtitle('3D Low Count Unbalanced Space Time Reliability')
 
-%% 3D input balanced 72-class labels, blank for rng (3 input arguments) -- throws error for not enough input arguments
+%% 3D input balanced 72-class labels, blank for rng (3 input arguments) -- looks good
 close all; clear r;
 r = RSA.Reliability.computeSpaceTimeReliability(S01.X, S01.labels72, 100);
-
-% This error is not thrown for sample size reliability.
-% @Reliability.computeSpaceTimeReliability seems to be setup corretly for
-% nargin < 4 to set default rng.
 
 %% 3D input balanced 6-class labels -- to me this looks strange
 close all; clear r;
@@ -495,7 +491,7 @@ disp('2D and 3D single electrode input show same reliability') % OK
 assert(isequal(r3D, r3D_1));
 disp('3D full input and 3D single electrode input show same reliability') % Failed
 
-%% Test rng blank -- fails
+%% Test rng blank -- looks good
 r = RSA.Reliability.computeSpaceTimeReliability(S01.X, S01.labels72);
 rng
 
@@ -528,7 +524,7 @@ rng
 [r] = RSA.Reliability.computeSpaceTimeReliability(S01.X(:,20:25,:), S01.labels72, [], 25);
 rng
 
-%% Set number of permutations to nPerms -- fails with "Not enough input arguments"
+%% Set number of permutations to nPerms -- looks good
 nPerms = 16;
 
 [r] = RSA.Reliability.computeSpaceTimeReliability(S01.X(:,20:25,:), S01.labels72, nPerms);

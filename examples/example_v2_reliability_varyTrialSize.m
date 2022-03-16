@@ -14,9 +14,8 @@ n_trial_perm = 12; % Outer loop (sampling trials)
 trial_subset_size_array = 1:18;
 rnd_seed = 0;
 
-% Load data using dataloader. Add the following datasets to "UnitTests" folder: 
-%"lsosorelli_100sweep_epoched.mat", "lsosorelli_500sweep_epoched.mat","S01.mat"
-run('loadUnitTestData.m')
+%load three dimensional dataset (electrode x time X trial)
+load('S06.mat');
 
 % Make MatClassRSA object
 RSA = MatClassRSA;
@@ -24,8 +23,8 @@ RSA = MatClassRSA;
 % Compute reliability with varying number of trials from [2,4,...,36],
 % n_trial_perm trial permutations, n_perm permutations, rnd_seed random
 % seed.
-reliability_trials = RSA.Reliability.computeSampleSizeReliability(S01.X, ...
-    S01.labels72, ...
+reliability_trials = RSA.Reliability.computeSampleSizeReliability(X, ...
+    labels72, ...
     timepoint_idx, ...
     trial_subset_size_array, ...
     n_perm, ...
@@ -43,6 +42,6 @@ hold on; grid on
 plot(trial_subset_size_array .* 2, mean(avg_reliability_space, 1)+std(avg_reliability_space, [], 1), 'b');
 plot(trial_subset_size_array .* 2, mean(avg_reliability_space, 1)-std(avg_reliability_space, [], 1), 'b');
 xlabel('Number of Trials');
-ylabel(sprintf('Reliability at %d ms', S01.t(timepoint_idx)));
-title(sprintf('Average Reliability Across Space with Increasing Number of Trials at %d ms (+- SD)', S01.t(timepoint_idx)));
+ylabel(sprintf('Reliability at %d ms', t(timepoint_idx)));
+title(sprintf('Average Reliability Over Space with Increasing Number of Trials at %d ms (+- SD)', t(timepoint_idx)));
 
