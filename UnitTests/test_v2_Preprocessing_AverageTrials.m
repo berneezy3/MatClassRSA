@@ -212,9 +212,7 @@ for i=1:length(y3)
 end
 
 
-%%
 
-[x2, y2, p2, whichObs] = RSA.Preprocessing.averageTrials(X_2D, Y, 20, P, 'endShuffle', 0, 'handleRemainder', 'append');
 
 
 

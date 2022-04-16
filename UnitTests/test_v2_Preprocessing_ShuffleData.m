@@ -29,6 +29,7 @@ RSA = MatClassRSA;
 assert(isequal(size(x3), size(X_3D)));
 assert(isequal(size(y3), size(Y)));
 assert(isequal(size(p3), size(P)));
+assert(isequal(P(y3), p3));
 
 % Check to make sure the values match after the shuffling
 % We know that Y should contain the indices of the shuffling
@@ -48,6 +49,7 @@ end
 assert(isequal(size(x2), size(X_2D)))
 assert(isequal(size(y2), size(Y)));
 assert(isequal(size(p2), size(P)));
+assert(isequal(P(y2), p2));
 
 % Check to make sure the values match after the shuffling
 % We know that Y should contain the indices of the shuffling
@@ -170,7 +172,7 @@ h2 =histcounts(yShuf);
 assert(isequal(h1, h2));
 assert(isequal(yShuf, SL100_veryImbalanced.Y));
 
-%% SUCCESS: Testing random seed set
+%% SUCCESS: Testing random seed set '1'
 rng(1);
 xrtest = X_2D(randperm(nTrial),:);
 
@@ -180,6 +182,29 @@ assert(isequal(xrtest, xr));
 %requires name-value pairing to work... for example
 %RSA.Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
 %seems like it is not the case elsewhere.
+
+%% SUCCESS: Testing random seed set 'default'
+rng('default');
+xrtest = X_2D(randperm(nTrial),:);
+
+[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'randomSeed', 'default');
+assert(isequal(xrtest, xr));
+
+%requires name-value pairing to work... for example
+%RSA.Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
+%seems like it is not the case elsewhere.
+
+%% FAIL: Testing random seed set 'shuffle'
+rng('shuffle');
+xrtest = X_2D(randperm(nTrial),:);
+
+[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'randomSeed', 'shuffle');
+assert(isequal(xrtest, xr));
+
+%requires name-value pairing to work... for example
+%RSA.Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
+%seems like it is not the case elsewhere.
+
 
 %% SUCCESS: Testing return NaN if nargin < 3 or P not specified
 rng('shuffle')
