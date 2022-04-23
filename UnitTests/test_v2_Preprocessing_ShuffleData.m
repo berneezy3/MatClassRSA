@@ -25,11 +25,11 @@ run('loadUnitTestData.m')
 RSA = MatClassRSA;
 
 %% SUCCESS: 3D input data matrix
-[x3, y3, p3] = RSA.Preprocessing.shuffleData(X_3D, Y, P);
+[x3, y3, p3, rndIdx] = RSA.Preprocessing.shuffleData(X_3D, Y, P);
 assert(isequal(size(x3), size(X_3D)));
 assert(isequal(size(y3), size(Y)));
 assert(isequal(size(p3), size(P)));
-assert(isequal(P(y3), p3));
+assert(isequal(P(rndIdx), p3));
 
 % Check to make sure the values match after the shuffling
 % We know that Y should contain the indices of the shuffling
@@ -45,11 +45,11 @@ end
 %replace P with ip.Results.P. As P is defined explicitly as an input
 %parameter
 %% SUCCESS: 2D input data matrix
-[x2, y2, p2] = RSA.Preprocessing.shuffleData(X_2D, Y, P);
+[x2, y2, p2, rndIdx] = RSA.Preprocessing.shuffleData(X_2D, Y, P);
 assert(isequal(size(x2), size(X_2D)))
 assert(isequal(size(y2), size(Y)));
 assert(isequal(size(p2), size(P)));
-assert(isequal(P(y2), p2));
+assert(isequal(P(rndIdx), p2));
 
 % Check to make sure the values match after the shuffling
 % We know that Y should contain the indices of the shuffling
@@ -57,6 +57,12 @@ for i=1:nTrial
     idx = y2(i);
     assert(isequal(X_2D(idx,:), x2(i,:)));
 end
+
+%% SUCCESS: Testing P functionality on real dataset
+[x_shuf, y_shuf, p_shuf, rndIdx] = RSA.Preprocessing.shuffleData(SL100.X, SL100.Y, SL100.P);
+
+assert(isequal(SL100.P(rndIdx), p_shuf));
+
 %% SUCCESS: Testing 3D 6 class labels balanced 2 outputs only, no participants, no user specified randomization
 
 [xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01.X, S01.labels6);

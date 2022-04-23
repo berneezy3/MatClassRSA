@@ -1,21 +1,29 @@
 % example_reliability_varyTrialSize.m
-% ---------------------
-% Nathan - Sept 5, 2019, Edited by Ray - Febuary, 2022
-%
+% -----------------------------------
 % Example code for compute reliability varying the number of trials using
-% computeSampleSizeReliability.m.
+% computeSampleSizeReliability.m
+%  - Clear figures, console, and workspace
+%  - Set random number generator seed and sample size reliability function parameters 
+%  - Load 3D dataset
+%  - Instantiate MatClassRSA object
+%  - Compute reliability with varying number of trials	
+%  - Average reliability over space
+%  - Visualize reliability as function of varying trial subset size
 
+% Nathan - Sept 5, 2019, Edited by Ray - Febuary, 2022
+
+% Clear workspace
 clear all; close all; clc
 
-rng('shuffle');
+% Define function parameters and random number generator seed
 timepoint_idx = 17; % 144 ms
 n_perm = 10; % Inner loop (random split-half)
 n_trial_perm = 12; % Outer loop (sampling trials)
 trial_subset_size_array = 1:18;
 rnd_seed = 0;
 
-%load three dimensional dataset (electrode x time X trial)
-load('S06.mat');
+% Load three dimensional dataset (electrode x time X trial)
+load('S01.mat');
 
 % Make MatClassRSA object
 RSA = MatClassRSA;
@@ -32,7 +40,7 @@ reliability_trials = RSA.Reliability.computeSampleSizeReliability(X, ...
     rnd_seed ...
 );
 
-% Average across space
+% Average over space
 avg_reliability_space = mean(reliability_trials, 3);
 
 % Plot reliability as function of varying trial subset size

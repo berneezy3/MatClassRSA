@@ -1,27 +1,36 @@
 % example_reliability_timeResolved.m
-% ---------------------
-%Nathan- Sept 5, 2019, Edited by Ray- Feb, 2022
-%
-% Example code for compute reliability across time using
-% computeSpaceTimeReliability.m.
+% ----------------------------------
+% Example code for computing reliability across time using
+% computeSpaceTimeReliability.m
+%  - Clear figures, console, and workspace
+%  - Set random number generator seed and number of permutations 
+%  - Load 3D dataset
+%  - Instantiate MatClassRSA object
+%  - Compute reliability across space	
+%  - Average reliability over space
+%  - Visualize reliability across time with permutation standard deviation
 
+% Nathan- Sept 5, 2019, Edited by Ray- Feb, 2022
+
+% Clear workspace
 clear all; close all; clc
 
-rng('shuffle');
+% Define number of permutation (n_perm) and random number generator seed
+% (rnd_seed)
 n_perm = 10;
 rnd_seed = 0;
 
-%load three dimensional dataset (electrode x time X trial)
-load('S06.mat')
+% Load three dimensional dataset (electrode x time X trial)
+load('S01.mat')
 
 % Make MatClassRSA object
 RSA = MatClassRSA;
 
 % Run computeSpaceTimeReliability.m with 3D EEG data, 72 class labels
-% vector, n_perm permutations and random seed set to rnd_seed.
+% vector, n_perm permutations and random seed set to rnd_seed
 reliability_time = RSA.Reliability.computeSpaceTimeReliability(X, labels72, n_perm, rnd_seed);
 
-% Average reliabilities across space
+% Average reliabilities over space
 avg_space_reliability_time = squeeze(mean(reliability_time, 1));
 
 % Plot the reliability across time, with standard deviation across random

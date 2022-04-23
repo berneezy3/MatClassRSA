@@ -1,18 +1,27 @@
 % example_v2_reliability_singleElectrodes.m
-% ---------------------
-%Nathan - Sept 5, 2019, Edited by Ray - Febuary, 2022
-%
-% Example code for compute reliability across space using
-% computeSpaceTimeReliability.m.
+% -----------------------------------------
+% Example code for computing reliability across space using
+% computeSpaceTimeReliability.m
+%  - Clear figures, console, and workspace
+%  - Set random number generator seed and number of permutations 
+%  - Load 3D dataset
+%  - Instantiate MatClassRSA object
+%  - Compute reliability across space
+%  - Average reliability over time
+%  - Visualize reliability across space with permutation standard deviation
+%  - Visualize reliability across time on topographical map
 
+% Nathan - Sept 5, 2019, Edited by Ray - Febuary, 2022
+
+% Clear workspace
 clear all; close all; clc
 
-rng('shuffle');
+% Define number of permutations and random number generator seed
 n_perm = 10;
 rnd_seed = 0;
 
-%load three dimensional dataset (electrode x time X trial)
-load('S06.mat')
+% Load three dimensional dataset (electrode x time X trial)
+load('S01.mat')
 
 % Make MatClassRSA object
 RSA = MatClassRSA;
@@ -37,12 +46,12 @@ xlabel('Electrode Index');
 ylabel('Reliability');
 title('Average Reliability Over Time Shown Across Space (+- SD)');
 
-% Plot average reliability across time on scalp map
+% Plot average reliability across time, on scalp topographical map
 figure;
 cBarMin = min(mean(avg_space_reliability_space, 2));
 cBarMax = max(mean(avg_space_reliability_space, 2));
 plotOnEgi([mean(avg_space_reliability_space, 2); nan(4,1)], [cBarMin cBarMax], true);
-title('Average Reliability over Time Topographical Map');
+title('Average Reliability Over Time Topographical Map');
 ylabel(colorbar, "Reliability");
 
 
