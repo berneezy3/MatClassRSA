@@ -2,11 +2,13 @@
 % --------------------------------------
 % Example code for shuffling trials using
 % averageTrials.m
-%   - Clear workspace
-%   - Load 3D dataset
-%   - Instantiate MatClassRSA object
-%   - Normalize data
-%   - Visualize inverse square root of the covariance matrix.
+%
+% This script covers the following steps:
+%   - Clearing workspace
+%   - Loading 3D dataset
+%   - Instantiating MatClassRSA object
+%   - Normalizing data
+%   - Visualizing inverse square root of the covariance matrix
 
 % Ray - April, 2022
 

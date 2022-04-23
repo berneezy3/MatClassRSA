@@ -2,13 +2,15 @@
 % -----------------------------------
 % Example code for compute reliability varying the number of trials using
 % computeSampleSizeReliability.m
-%  - Clear figures, console, and workspace
-%  - Set random number generator seed and sample size reliability function parameters 
-%  - Load 3D dataset
-%  - Instantiate MatClassRSA object
-%  - Compute reliability with varying number of trials	
-%  - Average reliability over space
-%  - Visualize reliability as function of varying trial subset size
+%
+% This script covers the following steps:
+%  - Clearing figures, console, and workspace
+%  - Setting random number generator seed and sample size reliability function parameters 
+%  - Loading 3D dataset
+%  - Instantiating MatClassRSA object
+%  - Computing reliability with varying number of trials	
+%  - Averaging reliability over space
+%  - Visualizing reliability as function of varying trial subset size
 
 % Nathan - Sept 5, 2019, Edited by Ray - Febuary, 2022
 

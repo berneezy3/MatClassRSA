@@ -2,13 +2,15 @@
 % --------------------------------------
 % Example code for shuffling trials using
 % shuffleData.m
-%   - Clear workspace
-%   - Set random number generator type and seed
-%   - Load 2D data
-%   - Instantiate MatClassRSA object
-%   - Shuffle data
-%   - Visualize shuffled trials and grand average
-%   - Visualize shuffled participants and participant average
+%
+% This script covers the following steps:
+%   - Clearing workspace
+%   - Setting random number generator type and seed
+%   - Loading 2D data
+%   - Instantiating MatClassRSA object
+%   - Shuffling data
+%   - Visualizing shuffled trials and grand average
+%   - Visualizing shuffled participants and participant average
 
 % Ray - April, 2022
 

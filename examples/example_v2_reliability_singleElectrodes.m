@@ -2,14 +2,16 @@
 % -----------------------------------------
 % Example code for computing reliability across space using
 % computeSpaceTimeReliability.m
-%  - Clear figures, console, and workspace
-%  - Set random number generator seed and number of permutations 
-%  - Load 3D dataset
-%  - Instantiate MatClassRSA object
-%  - Compute reliability across space
-%  - Average reliability over time
-%  - Visualize reliability across space with permutation standard deviation
-%  - Visualize reliability across time on topographical map
+%
+% This script covers the following steps:
+%  - Clearing figures, console, and workspace
+%  - Setting random number generator seed and number of permutations 
+%  - Loading 3D dataset
+%  - Instantiating MatClassRSA object
+%  - Computing reliability across space
+%  - Averaging reliability over time
+%  - Visualizing reliability across space with permutation standard deviation
+%  - Visualizing reliability across time on topographical map
 
 % Nathan - Sept 5, 2019, Edited by Ray - Febuary, 2022
 

@@ -2,12 +2,14 @@
 % --------------------------------------
 % Example code for shuffling trials using
 % averageTrials.m
-%   - Clear workspace
-%   - Set random number generator seed and number of trials to average
-%   - Load 3D dataset
-%   - Instantiate MatClassRSA object
-%   - Average trials
-%   - Visualize 10 single trials vs 10 averaged pseudotrials
+%
+% This script covers the following steps:
+%   - Clearing workspace
+%   - Setting random number generator seed and number of trials to average
+%   - Loading 3D dataset
+%   - Instantiating MatClassRSA object
+%   - Averaging trials
+%   - Visualizing 10 single trials and 10 averaged pseudotrials
 
 % Ray - April, 2022
 
