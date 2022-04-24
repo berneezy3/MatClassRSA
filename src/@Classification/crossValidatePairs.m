@@ -42,7 +42,7 @@
 %       - Dual-argument specifications as either a 2-element cell
 %           array (e.g., {'shuffle', 'twister'}) or string array
 %           (e.g., ["shuffle", "twister"].
-% - rng struct as assigned by rand_seed = rng.
+%       - rng struct as assigned by rand_seed = rng.
 %   'PCA' - Set principal component analysis on data matrix X.  To retain 
 %       components that explain a certain percentage of variance, enter a
 %       decimal value [0, 1).  To retain a certain number of principal 
