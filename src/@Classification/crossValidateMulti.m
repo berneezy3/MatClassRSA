@@ -20,20 +20,22 @@
 % INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
 %   'timeUse' - If X is a 3D, space-by-time-by-trial matrix, then this
 %       option will subset X along the time dimension.  The input
-%       argument should be passed in as a vector of indices that indicate the 
-%       time dimension indices that the user wants to subset.  This arugument 
-%       will not do anything if input matrix X is a 2D, trials-by-feature matrix.
-%   'spaceUse' - If X is a 3D, space-by-time-by-trials matrix, then this
+%       argument should be passed in as a vector of indices that indicate 
+%       the time dimension indices that the user wants to subset.  This 
+%       arugument will not do anything if input matrix X is a 2D, 
+%       trial-by-feature matrix.
+%   'spaceUse' - If X is a 3D, space-by-time-by-trial matrix, then this
 %       option will subset X along the space dimension.  The input
-%       argument should be passed in as a vector of indices that indicate the 
-%       space dimension indices that the user wants to subset.  This arugument 
-%       will not do anything if input matrix X is a 2D, trials-by-feature matrix.
-%   'featureUse' - If X is a 2D, trials-by-features matrix, then this
+%       argument should be passed in as a vector of indices that indicate 
+%       the space dimension indices that the user wants to subset.  This 
+%       argument will not do anything if input matrix X is a 2D, 
+%       trial-by-feature matrix.
+%   'featureUse' - If X is a 2D, trial-by-feature matrix, then this
 %       option will subset X along the features dimension.  The input
-%       argument should be passed in as a vector of indices that indicate the 
-%       feature dimension indices that the user wants to subset.  This arugument 
-%       will not do anything if input matrix X is a 3D,
-%       space-by-time-by-trials matrix.
+%       argument should be passed in as a vector of indices that indicate 
+%       the feature dimension indices that the user wants to subset.  This 
+%       arugument will not do anything if input matrix X is a 3D,
+%       space-by-time-by-trial matrix.
 %   'randomSeed' - Specifies the seed for MATLAB's randon number generator. 
 %       If not entered, rng will be assigned as ('shuffle', 'twister').
 %       For more info, check Matlab's documentation on the rng() function.
