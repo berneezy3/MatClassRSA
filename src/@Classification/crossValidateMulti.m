@@ -61,7 +61,7 @@
 %           explain N/100 percent of the variance in input matrix X.
 %       - integer greater than or equal to 1: Use N most important
 %       - 0: Do not perform PCA.
-%   ' 444' - This controls whether or not PCA is conducted in each
+%   'PCAinFold' - This controls whether or not PCA is conducted in each
 %   fold duration cross validation, or if PCA is conducted once on the 
 %   entire dataset prior to partitioning data for cross validation.
 %       --options--
