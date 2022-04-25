@@ -44,6 +44,14 @@ function P = predict(obj, M, X, varargin)
 %       model(s)
 %       - P.predictionInfo contians prediction related information
 %       - P.classificationInfo contains classification related info
+%   permAccs - Permutation testing accuracies.  This field will be NaN if 
+%       permuatation testing is not specfied.  
+%   classificationInfo - This struct contains the specifications used
+%       during classification, including 'PCA', 'PCAinFold', 'nFolds', 
+%       'classifier' and 'dataPartitionObj'
+%   dataPartitionObj - This struct contains the train/test data partitions 
+%       for cross validation (and a dev data partition if hyperparameter 
+%       optimization is specified).
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

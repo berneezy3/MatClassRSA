@@ -200,7 +200,6 @@
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses, 2);
     M = struct();
-    RSA = MatClassRSA;
 
     % SVM w/ PCA
     if (strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA > 0))
@@ -215,7 +214,6 @@
         M.scale = {};
     
         j = 0;
-        RSA = MatClassRSA;
         for cat1 = 1:numClasses-1
             for cat2 = (cat1+1):numClasses
                 j = j+1;
@@ -226,7 +224,7 @@
                 tempY = Y(currUse);
                 tempStruct = struct();
                 % Store the accuracy in the accMatrix
-                [~, tempM] = evalc([' RSA.Classification.trainMulti_opt(tempX, tempY, ' ...
+                [~, tempM] = evalc([' obj.trainMulti_opt(tempX, tempY, ' ...
                     ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
                     ' ''kernel'', ip.Results.kernel,'...
                     ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
@@ -249,7 +247,7 @@
         
 %         [mdl, scale] = fitModel(X, Y, ip, ip.Results.gamma, ip.Results.C);
 
-        [~, tempM] = evalc([' RSA.Classification.trainMulti_opt(X, Y, ' ...
+        [~, tempM] = evalc([' obj.trainMulti_opt(X, Y, ' ...
             ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
             ' ''kernel'', ip.Results.kernel,'...
             ' ''gammaSpace'', ip.Results.gammaSpace, ' ...

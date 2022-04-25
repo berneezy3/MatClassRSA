@@ -67,7 +67,10 @@
 %       false: One PCA for entire training data matrix X.
 %   'classifier' - Choose classifier for cross validation.  Supported
 %       classifier include support vector machine (SVM), linear discriminant 
-%       analysis (LDA) and random forest (RF) 
+%       analysis (LDA) and random forest (RF).  For SVM, the user must 
+%       manually specify hyperparameter “C” (linear, rbf kernels) and 
+%       “gamma” (rbf kernel). Use the functions with the "_opt" subscript to 
+%       optimize SVM hyperparameters.
 %        --options--
 %       'SVM'
 %       'LDA' (default)
@@ -126,6 +129,16 @@
 %   predY - predicted label vector
 %   modelsConcat - Struct containing the N models used during cross
 %   validation.
+%   permAccMat - Permutation testing accuracies.  This field will be NaN if 
+%       permuatation testing is not specfied.  The first two dimensions
+%       represent pairwise classes, while the third dimension represent 
+%       permutation. 
+%   classificationInfo - This struct contains the specifications used
+%       during classification, including 'PCA', 'PCAinFold', 'nFolds', 
+%       'classifier' and 'dataPartitionObj'
+%   dataPartitionObj - This struct contains the train/test data partitions 
+%       for cross validation (and a dev data partition if hyperparameter 
+%       optimization is specified).
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -249,7 +262,6 @@
     ipScale = ip.Results.scale;
 
     CM = NaN;
-    RSA = MatClassRSA;
     
     %%%%% Data Partitioning, PCA, Centering and Scaling %%%%%
     if (ip.Results.PCA > 0 && ip.Results.PCAinFold <= 0)
@@ -342,9 +354,8 @@
         
         % Permutation testing
         numClasses = length(unique(Y));
-        accMatDist = nan(numClasses, numClasses, ip.Results.permutations);
+        permAccMat = nan(numClasses, numClasses, ip.Results.permutations);
         pValMat = nan(numClasses, numClasses);
-        RSA = MatClassRSA;
         if ip.Results.permutations > 0
         
             for k = 1:numDecBounds
@@ -362,26 +373,27 @@
                 
                     l = length(trainY);
                     pY = trainY(randperm(l), :);
-                    evalc(['pM = RSA.Classification.trainMulti(trainX, pY,'  ...
+                    evalc(['pM = obj.trainMulti(trainX, pY,'  ...
                         ' ''classifier'', ip.Results.classifier,' ...
                         ' ''PCA'', 0,' ...
                         ' ''C'', ip.Results.C, ''gamma'', ip.Results.gamma,' ...
                         ' ''kernel'', ip.Results.kernel, ''numTrees'', ip.Results.numTrees,' ...
                         ' ''minLeafSize'', ip.Results.minLeafSize);']);
 
-                    evalc(['pC = RSA.Classification.predict(pM, testX, ''actualLabels'',testY)']);
-                    accMatDist(class1, class2, i) = pC.accuracy;
-                    accMatDist(class2, class1, i) = pC.accuracy;
+                    evalc(['pC = obj.predict(pM, testX, ''actualLabels'',testY)']);
+                    permAccMat(class1, class2, i) = pC.accuracy;
+                    permAccMat(class2, class1, i) = pC.accuracy;
 
                 end
                 
                 pValMat(class1, class2) = permTestPVal(AM(class1, class2), ...
-                    squeeze(accMatDist(class1, class2, :)));
+                    squeeze(permAccMat(class1, class2, :)));
                 pValMat(class2, class1) = pValMat(class1, class2);
                 
             end
         end
         C.pValMat = pValMat;
+        C.permAccMat = permAccMat;
     end
     %{    
     % END PAIRWISE LDA/RF
@@ -424,7 +436,7 @@
         
         % Permutation testing
         numClasses = length(unique(Y));
-        accMatDist = zeros(numClasses, numClasses, ip.Results.permutations);
+        permAccMat = zeros(numClasses, numClasses, ip.Results.permutations);
         pValMat = zeros(numClasses, numClasses);
         RSA = MatClassRSA;
         if ip.Results.permutations > 0
@@ -450,7 +462,7 @@
                     [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
                         decValues2PairwiseAcc(pairwiseMat3D, testY, pMdl.Label, decision_values, pairwiseCell);
                 end
-                accMatDist(:,:,i) = pairwiseAccuracies;
+                permAccMat(:,:,i) = pairwiseAccuracies;
                 
             end
             
@@ -460,7 +472,7 @@
                 class1 = classPairs(k, 1);
                 class2 = classPairs(k, 2);
                 pValMat(class1, class2) = permTestPVal(C.AM(class1, class2), ...
-                        accMatDist(class1, class2, :));
+                        permAccMat(class1, class2, :));
                 pValMat(class1, class2)  = pValMat(class2, class1);
                 
             end

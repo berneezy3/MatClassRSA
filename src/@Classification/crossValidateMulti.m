@@ -72,7 +72,10 @@
 %       Default is 10.
 %   'classifier' - Choose classifier for cross validation.  Supported
 %       classifier include support vector machine (SVM), linear discriminant 
-%       analysis (LDA) and random forest (RF) 
+%       analysis (LDA) and random forest (RF).  For SVM, the user must 
+%       manually specify hyperparameter “C” (linear, rbf kernels) and 
+%       “gamma” (rbf kernel). Use the functions with the "_opt" subscript to 
+%       optimize SVM hyperparameters.
 %        --options--
 %       'SVM'
 %       'LDA' (default)
@@ -92,11 +95,11 @@
 %       chooses the number of decision trees to grow.  Default is 128.  
 %   'minLeafSize' - Hyperparameter of the random forest classifier.  Choose 
 %       the minimum number of observations per tree leaf.  Default is 1.
-%   'permutations' - this chooses the number of permutations to perform for
+%   'permutations' - This chooses the number of permutations to perform for
 %       permutation testing. If this value is set to 0, then permutation
 %       testing will be turned off.  If it is set to an integer n greater 
 %       than 0, then classification will be performed over n permutation 
-%       iterations. Default value is 0 (off).  
+%       iterations. Default value is 0 (off). 
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 
@@ -124,8 +127,7 @@
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
 %   information, including classification accuracy, confucion matrix,  
-%   prediction results etc.  The structure of C will differ depending on 
-%   the value of the input value 'pairwise', which is set to 0 by default.
+%   prediction results etc.
 %   --subfields--
 %   CM - Confusion matrix that summarizes the performance of the
 %       classification, in which rows represent actual labels and columns
@@ -140,6 +142,14 @@
 %   elapsedTime - runtime in seconds
 %   pVal - the p-value calculated using the permutation testing results.
 %       This is set to NaN if permutation testing is turned off. 
+%   permAccs - Permutation testing accuracies.  This field will be NaN if 
+%       permuatation testing is not specfied.  
+%   classificationInfo - This struct contains the specifications used
+%       during classification, including 'PCA', 'PCAinFold', 'nFolds', 
+%       'classifier' and 'dataPartitionObj'
+%   dataPartitionObj - This struct contains the train/test data partitions 
+%       for cross validation (and a dev data partition if hyperparameter 
+%       optimization is specified).
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -261,10 +271,6 @@
     modelsConcat = {1, ip.Results.nFolds};       
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses ,2);
-    pairwiseMat3D = zeros(2,2, numDecBounds);
-    % diagonal cell matrix of structs containing pairwise classification infomration
-    % 
-    pairwiseCell = initPairwiseCellMat(numClasses);
     CM = NaN;
    
 
@@ -329,8 +335,7 @@
             permTestTrainY = permTestTrainY(randperm(length(permTestTrainY)), :);
             
             % Train permutation model and predict test data
-            RSA = MatClassRSA;
-            evalc(['permTestM = RSA.Classification.trainMulti(' ...
+            evalc(['permTestM = obj.trainMulti(' ...
                 ' permTestTrainX, permTestTrainY, '...
                 ' ''classifier'', ip.Results.classifier, ' ...
                 ' ''PCA'', 0, ''scale'', false, ' ...
@@ -339,13 +344,15 @@
                 ' ''kernel'', ip.Results.kernel, ' ...
                 ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
 
-            evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+            evalc(['permTestOutput = obj.predict(permTestM, '...
                 'permTestTestX, ''actualLabels'', permTestTestY);' ]);
             accArr(i) = permTestOutput.accuracy;
         end
         C.pVal = permTestPVal(C.accuracy, accArr);
+        C.permAccs = accArr;
     else
         C.pVal = NaN;
+        C.permAccs = NaN;
     end
     
     C.elapsedTime = toc(cvMulti_time);

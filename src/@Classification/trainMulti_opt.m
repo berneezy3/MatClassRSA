@@ -71,7 +71,7 @@ function [M, permTestData] = trainMulti_opt(obj, X, Y, varargin)
 %       Default is 10.
 %   'classifier' - Choose classifier for cross validation.  Currently, only
 %        support vector machine (SVM) is supported for hyperparameter
-%        optimization
+%        optimization.
 %        --options--
 %       'SVM' (default)
 %       * hyperparameter optimization for other classifiers 
@@ -326,7 +326,6 @@ function [M, permTestData] = trainMulti_opt(obj, X, Y, varargin)
     
     % if permutation testing is turned on
     numTrials = length(trainLabels);
-    RSA = MatClassRSA;
     permutationMdls = cell(1, ip.Results.permutations);
     for i = 1:ip.Results.permutations
         % Train model

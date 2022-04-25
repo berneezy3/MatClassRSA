@@ -57,7 +57,10 @@
 %       - 0: Do not perform PCA.
 %   'classifier' - Choose classifier for cross validation.  Supported
 %       classifier include support vector machine (SVM), linear discriminant 
-%       analysis (LDA) and random forest (RF) 
+%       analysis (LDA) and random forest (RF).  For SVM, the user must 
+%       manually specify hyperparameter “C” (linear, rbf kernels) and 
+%       “gamma” (rbf kernel). Use the functions with the "_opt" subscript to 
+%       optimize SVM hyperparameters.
 %        --options--
 %       'SVM'
 %       'LDA' (default)
@@ -193,7 +196,6 @@
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses, 2);
     M = struct();
-    RSA = MatClassRSA;
 
     % PAIRWISE LDA/RF
     if (strcmp(upper(ip.Results.classifier), 'LDA') || ...
@@ -239,7 +241,7 @@
 %             tempX_PCA = cvDataObj{k}.trainXall{1};
 
             % Store the accuracy in the accMatrix
-            [~, tempM] = evalc([' RSA.Classification.trainMulti(tempX, tempY, ' ...
+            [~, tempM] = evalc([' obj.trainMulti(tempX, tempY, ' ...
                 ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
                 ' ''kernel'', ip.Results.kernel,'...
                 ' ''gamma'', ip.Results.gamma, ' ...

@@ -62,7 +62,10 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
 %       - 0: Do not perform PCA.
 %   'classifier' - Choose classifier for cross validation.  Supported
 %       classifier include support vector machine (SVM), linear discriminant 
-%       analysis (LDA) and random forest (RF) 
+%       analysis (LDA) and random forest (RF).  For SVM, the user must 
+%       manually specify hyperparameter “C” (linear, rbf kernels) and 
+%       “gamma” (rbf kernel). Use the functions with the "_opt" subscript to 
+%       optimize SVM hyperparameters.
 %        --options--
 %       'SVM'
 %       'LDA' (default)

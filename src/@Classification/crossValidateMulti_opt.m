@@ -75,7 +75,7 @@
 %       option is set for 'optimization' parameter.   
 %   'classifier' - Choose classifier for cross validation.  Currently, only
 %        support vector machine (SVM) is supported for hyperparameter
-%        optimization
+%        optimization.  
 %        --options--
 %       'SVM' (default)
 %       * hyperparameter optimization for other classifiers 
@@ -137,14 +137,15 @@
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
 %   information, including classification accuracy, confucion matrix,  
-%   prediction results etc.  The structure of C will differ depending on 
-%   the value of the input value 'pairwise', which is set to 0 by default.
+%   prediction results etc.  
 %   --subfields--
 %   CM - Confusion matrix that summarizes the performance of the
 %       classification, in which rows represent actual labels and columns
 %       represent predicted labels.  Element i,j represents the number of 
 %       observations belonging to clC_tt_multiass i that the classifier labeled as
 %       belonging to class j.
+%   C - SVM hyperparameter optimized grid search
+%   gamma - SVM hyperparameter optimized using grid search
 %   accuracy - classification accuracy
 %   predY - vector of predicted labels. Ordering of vector elements
 %       corresponds to the order of elements in input labels vector Y.
@@ -153,6 +154,14 @@
 %   elapsedTime - runtime in seconds
 %   pVal - the p-value calculated using the permutation testing results.
 %       This is set to NaN if permutation testing is turned off. 
+%   permAccs - Permutation testing accuracies.  This field will be NaN if 
+%       permuatation testing is not specfied.  
+%   classificationInfo - This struct contains the specifications used
+%       during classification, including 'PCA', 'PCAinFold', 'nFolds', 
+%       'classifier' and 'dataPartitionObj'
+%   dataPartitionObj - This struct contains the train/test data partitions 
+%       for cross validation (and a dev data partition if hyperparameter 
+%       optimization is specified).
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -298,19 +307,18 @@
        
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses ,2);
-    pairwiseMat3D = zeros(2,2, numDecBounds);
-    % initialize the diagonal cell matrix of structs containing pairwise
-    % classification infomration
-    pairwiseCell = initPairwiseCellMat(numClasses);
 
     CM = NaN;
-    RSA = MatClassRSA;
     
     % Single optimization fold vs. full optimization folds
     % Train/Dev/Test Split
     
     disp('Conducting CV w/ train/dev/test split');
-
+    numClasses = length(unique(Y));
+    CM_tmp = zeros(numClasses, numClasses, ip.Results.nFolds);
+    C.gamma_opt = zeros(1, ip.Results.nFolds);
+    C.C_opt = zeros(1, ip.Results.nFolds);
+    
     for i = 1:ip.Results.nFolds
 
         disp(['Processing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
@@ -332,22 +340,23 @@
         end
 
         %[mdl, scale] = fitModel(trainX, trainY, ip);
-        M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+        M = obj.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
             'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
 
         %[predictions decision_values] = modelPredict(testX, mdl, scale);
-        P = RSA.Classification.predict(M, testX, 'actualLabels',testY);
+        P = obj.predict(M, testX, 'actualLabels',testY);
 
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat P.predY];
         modelsConcat{i} = M.mdl;
 
-        C.CM = confusionmat(labelsConcat, predictionsConcat); 
-        C.gamma_opt = gamma_opt;
-        C.C_opt = C_opt;
+        CM_tmp(:,:,i) = confusionmat(labelsConcat, predictionsConcat); 
+        C.gamma_opt(i) = gamma_opt;
+        C.C_opt(i) = C_opt;
 
     end
 
+    C.CM = sum(CM_tmp, 3);
     
     %PERMUTATION TEST (assigning)
     tic    
@@ -391,8 +400,7 @@
                 cDist(i) = C_opt_perm;
                 
                 % Train permutation model and predict test data
-                RSA = MatClassRSA;
-                evalc(['permTestM = RSA.Classification.trainMulti(' ...
+                evalc(['permTestM = obj.trainMulti(' ...
                     ' permTestTrainX, permTestTrainY, '...
                     ' ''classifier'', ip.Results.classifier, ' ...
                     ' ''PCA'', 0, ''scale'', false, ' ...
@@ -401,7 +409,7 @@
                     ' ''kernel'', ip.Results.kernel, ' ...
                     ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
 
-                evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+                evalc(['permTestOutput = obj.predict(permTestM, '...
                     'permTestTestX, ''actualLabels'', permTestTestY);' ]);
                 accArr(i) = permTestOutput.accuracy;
             end
@@ -428,8 +436,7 @@
                 cDist(i) = C_opt_perm;
                  
                 % Train permutation model and predict test data
-                RSA = MatClassRSA;
-                evalc(['permTestM = RSA.Classification.trainMulti(' ...
+                evalc(['permTestM = obj.trainMulti(' ...
                     ' permTestTrainX, permTestTrainY, '...
                     ' ''classifier'', ip.Results.classifier, ' ...
                     ' ''PCA'', 0, ''scale'', false, ' ...
@@ -438,17 +445,17 @@
                     ' ''kernel'', ip.Results.kernel, ' ...
                     ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
 
-                evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+                evalc(['permTestOutput = obj.predict(permTestM, '...
                     '  permTestTestX, ''actualLabels'', permTestTestY);' ]);
                 accArr(i) = permTestOutput.accuracy;
             end
         end
-        permutationTestInfo.accDist = accArr;
-        permutationTestInfo.gammaDist = gammaDist;
-        permutationTestInfo.cDist = cDist;
-        C.permutationTestInfo = permutationTestInfo;
+        C.permAccs = accArr;
+        C.permGammas = gammaDist;
+        C.permCs = cDist;
     else
         C.pVal = NaN;
+        C.permAccs = NaN;
     end
     
     C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 

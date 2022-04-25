@@ -74,7 +74,7 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
 %       Default is 10.
 %   'classifier' - Choose classifier for cross validation.  Currently, only
 %        support vector machine (SVM) is supported for hyperparameter
-%        optimization
+%        optimization.
 %        --options--
 %       'SVM' (default)
 %       * hyperparameter optimization for other classifiers 
@@ -145,6 +145,16 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
 %   predY - predicted label vector
 %   modelsConcat - Struct containing the N models used during cross
 %   validation.
+%   permAccMat - Permutation testing accuracies.  This field will be NaN if 
+%       permuatation testing is not specfied.  The first two dimensions
+%       represent pairwise classes, while the third dimension represent 
+%       permutation.
+%   classificationInfo - This struct contains the specifications used
+%       during classification, including 'PCA', 'PCAinFold', 'nFolds', 
+%       'classifier' and 'dataPartitionObj'
+%   dataPartitionObj - This struct contains the train/test data partitions 
+%       for cross validation (and a dev data partition if hyperparameter 
+%       optimization is specified).
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -306,7 +316,6 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
     modelsConcat = cell(ip.Results.nFolds, numDecBounds);
     
     CM = NaN;
-    RSA = MatClassRSA;
    
     % PAIRWISE SVM w/ PCA
     if (strcmp(upper(ip.Results.classifier), 'SVM') && ip.Results.PCA >0)
@@ -324,7 +333,7 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
                 tempY = Y(useTrials);
                 tempStruct = struct();
                 % Store the accuracy in the accMatrix
-                [~, tempC] = evalc([' RSA.Classification.crossValidateMulti_opt(' ...
+                [~, tempC] = evalc([' obj.crossValidateMulti_opt(' ...
                         '   tempX, tempY, ' ...
                         ' ''classifier'', ip.Results.classifier, ' ...
                         ' ''randomSeed'', ''default'', ' ...
@@ -366,7 +375,7 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
         
         %Permutation Testing
         if ( ip.Results.permutations>0 ) 
-            accMatDist = nan(numClasses, numClasses, ip.Results.permutations);
+            permAccMat = nan(numClasses, numClasses, ip.Results.permutations);
             pValMat = nan(numClasses, numClasses);
             classPairs = nchoosek(1:numClasses, 2);
 
@@ -383,7 +392,7 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
                     tempX = X(useTrials, :);
                     tempY = Y(useTrials);
                     pTempY = Y(randperm(length(Y)), :); % permuate Y labels
-                    [~, tempC] = evalc([' RSA.Classification.crossValidateMulti_opt(' ...
+                    [~, tempC] = evalc([' obj.crossValidateMulti_opt(' ...
                         ' tempX, pTempY, ' ...
                         ' ''classifier'', ip.Results.classifier, ' ...
                         ' ''randomSeed'', ''default'', ' ...
@@ -395,12 +404,12 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
                         ' ''cSpace'', ip.Results.cSpace, ' ...
                         ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
                         ' ''trainDevSplit'', ip.Results.trainDevSplit)' ]);
-                    accMatDist(class1, class2, i) = tempC.accuracy;
-                    accMatDist(class2, class1, i) = tempC.accuracy;
+                    permAccMat(class1, class2, i) = tempC.accuracy;
+                    permAccMat(class2, class1, i) = tempC.accuracy;
 
                 end
                 pValMat(class1, class2) = permTestPVal(AM(class1, class2), ...
-                    squeeze(accMatDist(class1, class2, :)));
+                    squeeze(permAccMat(class1, class2, :)));
                 pValMat(class2, class1) = pValMat(class1, class2);
             end
             C.pValMat = pValMat;
@@ -442,7 +451,7 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
 %                     decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
 %             end
 %             
-            [~, tempC] = evalc([' RSA.Classification.crossValidateMulti_opt(' ...
+            [~, tempC] = evalc([' obj.crossValidateMulti_opt(' ...
                         ' trainX, pTempY, ' ...
                         ' ''classifier'', ip.Results.classifier, ' ...
                         ' ''randomSeed'', ''default'', ' ...
@@ -464,9 +473,8 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
         if ip.Results.permutations > 0
             
             numClasses = length(unique(Y));
-            accMatDist = zeros(numClasses, numClasses, ip.Results.permutations);
+            permAccMat = zeros(numClasses, numClasses, ip.Results.permutations);
             pValMat = nan(numClasses, numClasses);
-            RSA = MatClassRSA;
             classPairs = nchoosek(1:numClasses, 2);
 
             trainX = cvDataObj.trainXall{1};
@@ -500,7 +508,7 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
                     [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
                         decValues2PairwiseAcc(pairwiseMat3D, testY, pMdl.Label, decision_values, pairwiseCell);
                 end
-                accMatDist(:,:,i) = pairwiseAccuracies;
+                permAccMat(:,:,i) = pairwiseAccuracies;
                 
             end
             
@@ -510,7 +518,7 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
                 class1 = classPairs(k, 1);
                 class2 = classPairs(k, 2);
                 pValMat(class1, class2) = permTestPVal(C.AM(class1, class2), ...
-                        accMatDist(class1, class2, :));
+                        permAccMat(class1, class2, :));
                 pValMat(class2, class1)  = pValMat(class1, class2);
                 
             end
@@ -518,6 +526,7 @@ function C = crossValidatePairs_opt(obj, X, Y, varargin)
         end
 
         C.pValMat = pValMat;
+        C.permAccMat = permAccMat;
         
     end
     

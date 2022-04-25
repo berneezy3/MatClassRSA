@@ -75,7 +75,7 @@ if length(trainDevTestSplit) == 2
         devSplit = (1 - 1/nFolds) * trainDevTestSplit(2);
         testSplit = 1/nFolds;
         trainDevTestSplit = [trainSplit devSplit testSplit];
-    else
+    else % for trainMulti_opt, trainPairs_opt, there is only a single fold
         trainSplit = trainDevTestSplit(1);
         devSplit = trainDevTestSplit(2);
 %         testSplit = 1/nFolds;
