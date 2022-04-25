@@ -40,7 +40,7 @@ function P = predict(obj, M, X, varargin)
 %   If M was created using trainPairs() or trainPairs_opt(), then the
 %   following fields will be in P:
 %       - P.AM, a diagonal matrix containing the pairwise accuracies
-%       - modelsConcat contains a concatenated list of classifiation
+%       - P.modelsConcat contains a concatenated list of classifiation
 %       model(s)
 %       - P.predictionInfo contians prediction related information
 %       - P.classificationInfo contains classification related info
@@ -170,7 +170,7 @@ function P = predict(obj, M, X, varargin)
                         'decisionValues', decision_values);
 
         P.predictionInfo = predictionInfo;
-        P.classifiationInfo = M.classifierInfo;
+        P.classificationInfo = M.classifierInfo;
         P.model = M.mdl;
         disp('Prediction Finished')        
             
