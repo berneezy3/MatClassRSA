@@ -1,7 +1,7 @@
  function C = crossValidateMulti_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% C = RSA.classify.crossValidateMulti_opt(X, Y, varargin)
+% C = RSA.classification.crossValidateMulti_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -11,7 +11,7 @@
 % containing the classification accuracy, confusion matrix, and other 
 % related information.  Other optional name-value parameters can be passed in to specify classification related options. 
 %
-% Currently, the only classifier compitable w/ this function is SVM.  
+% Currently, the only classifier compatible w/ this function is SVM.  
 % Optimization is done via a grid serach over the values specified in the 
 % gammaSpace and cSpace input parameters.
 %
@@ -332,11 +332,11 @@
         end
 
         %[mdl, scale] = fitModel(trainX, trainY, ip);
-        M = RSA.Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+        M = obj.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
             'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
 
         %[predictions decision_values] = modelPredict(testX, mdl, scale);
-        P = RSA.Classification.predict(M, testX, 'actualLabels',testY);
+        P = obj.predict(M, testX, 'actualLabels',testY);
 
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat P.predY];
@@ -391,8 +391,7 @@
                 cDist(i) = C_opt_perm;
                 
                 % Train permutation model and predict test data
-                RSA = MatClassRSA;
-                evalc(['permTestM = RSA.Classification.trainMulti(' ...
+                evalc(['permTestM = obj.trainMulti(' ...
                     ' permTestTrainX, permTestTrainY, '...
                     ' ''classifier'', ip.Results.classifier, ' ...
                     ' ''PCA'', 0, ''scale'', false, ' ...
@@ -401,7 +400,7 @@
                     ' ''kernel'', ip.Results.kernel, ' ...
                     ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
 
-                evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+                evalc(['permTestOutput = obj.predict(permTestM, '...
                     'permTestTestX, ''actualLabels'', permTestTestY);' ]);
                 accArr(i) = permTestOutput.accuracy;
             end
@@ -428,8 +427,7 @@
                 cDist(i) = C_opt_perm;
                  
                 % Train permutation model and predict test data
-                RSA = MatClassRSA;
-                evalc(['permTestM = RSA.Classification.trainMulti(' ...
+                evalc(['permTestM = obj.trainMulti(' ...
                     ' permTestTrainX, permTestTrainY, '...
                     ' ''classifier'', ip.Results.classifier, ' ...
                     ' ''PCA'', 0, ''scale'', false, ' ...
@@ -438,7 +436,7 @@
                     ' ''kernel'', ip.Results.kernel, ' ...
                     ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
 
-                evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+                evalc(['permTestOutput = obj.predict(permTestM, '...
                     '  permTestTestX, ''actualLabels'', permTestTestY);' ]);
                 accArr(i) = permTestOutput.accuracy;
             end

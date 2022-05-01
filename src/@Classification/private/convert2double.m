@@ -6,7 +6,7 @@ function [X, Y] = convert2double(X, Y)
        disp('Converting X matrix to double')
        X = double(X); 
    end
-   if ~isa(Y, 'Converting Y matrix to double')
+   if ~isa(Y, 'double')
        warning('Y label vector not in double format.  Converting Y labels to double.')
        Y = double(Y);
    end

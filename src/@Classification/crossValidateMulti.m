@@ -1,7 +1,7 @@
  function C = crossValidateMulti(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% C = RSA.classify.crossValidateMulti(X, Y, varargin)
+% C = RSA.classification.crossValidateMulti(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -71,8 +71,11 @@
 %       greater than 1 and less than or equal to the number of trials. 
 %       Default is 10.
 %   'classifier' - Choose classifier for cross validation.  Supported
-%       classifier include support vector machine (SVM), linear discriminant 
-%       analysis (LDA) and random forest (RF) 
+%       classifiers include support vector machine (SVM), linear discriminant 
+%       analysis (LDA) and random forest (RF). For SVM, the user must
+%       manually specify hyperparamter "C" (linear, rbf kernels) and
+%       "gamma" (rbf kernel). Use the crossValidateMulti_opt function to
+%       optimize SVM hyperparameters.
 %        --options--
 %       'SVM'
 %       'LDA' (default)
@@ -123,7 +126,7 @@
 %
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
-%   information, including classification accuracy, confucion matrix,  
+%   information, including classification accuracy, confusion matrix,  
 %   prediction results etc.  The structure of C will differ depending on 
 %   the value of the input value 'pairwise', which is set to 0 by default.
 %   --subfields--
@@ -139,7 +142,11 @@
 %       validation.
 %   elapsedTime - runtime in seconds
 %   pVal - the p-value calculated using the permutation testing results.
-%       This is set to NaN if permutation testing is turned off. 
+%       This is set to NaN if permutation testing is turned off.
+%   classificationInfo - a struct containing summary of input values used
+%       for classification: 'PCA', 'PCAinFold', 'nFolds', and 'classifier'.
+%       Also contains struct with data partitions used for testing and
+%       training.
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -208,7 +215,7 @@
     [r1 c1] = size(Y);
     
     if (r1 < c1)
-        Y = Y'
+        Y = Y';
     end
     
     %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
@@ -302,7 +309,7 @@
     C.classificationInfo = classificationInfo;
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
-    C.dataPartitionObj = cvDataObj;
+    %C.dataPartitionObj = cvDataObj;
     
     
     
@@ -329,8 +336,7 @@
             permTestTrainY = permTestTrainY(randperm(length(permTestTrainY)), :);
             
             % Train permutation model and predict test data
-            RSA = MatClassRSA;
-            evalc(['permTestM = RSA.Classification.trainMulti(' ...
+            evalc(['permTestM = obj.trainMulti(' ...
                 ' permTestTrainX, permTestTrainY, '...
                 ' ''classifier'', ip.Results.classifier, ' ...
                 ' ''PCA'', 0, ''scale'', false, ' ...
@@ -339,7 +345,7 @@
                 ' ''kernel'', ip.Results.kernel, ' ...
                 ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
 
-            evalc(['permTestOutput = RSA.Classification.predict(permTestM, '...
+            evalc(['permTestOutput = obj.predict(permTestM, '...
                 'permTestTestX, ''actualLabels'', permTestTestY);' ]);
             accArr(i) = permTestOutput.accuracy;
         end
