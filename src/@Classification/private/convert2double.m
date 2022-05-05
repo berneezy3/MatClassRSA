@@ -9,6 +9,7 @@ function [X, Y] = convert2double(X, Y)
    if ~isa(Y, 'double')
        warning('Y label vector not in double format.  Converting Y labels to double.')
        Y = double(Y);
+       disp(Y);
    end
 
 end
