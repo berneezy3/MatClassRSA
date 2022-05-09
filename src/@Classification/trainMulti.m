@@ -89,10 +89,7 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
 %       permutation testing. If this value is set to 0, then permutation
 %       testing will be turned off.  If it is set to an integer n greater 
 %       than 0, then classification will be performed over n permutation 
-%       iterations. Default value is 0 (off).  Note that only the training
-%       of the permutation models will be conducted in this function.  The
-%       actual permutation testing will take place if the output model from
-%       this function is passed into predict().
+%       iterations. Default value is 0 (off).
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 
@@ -259,22 +256,6 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
 
     [mdl, scale] = fitModel(trainData, Y(:), ip, ip.Results.gamma, ip.Results.C);
     
-    % if permutation testing is turned on
-%     if (ip.Results.permutations > 0)
-%         numTrials = length(Y);
-%         RSA = MatClassRSA;
-%         permutationMdls = cell(1, ip.Results.permutations);
-%         disp('Training models for permutation testing');
-%         disp('Training...');
-%         for i = 1:ip.Results.permutations
-%             disp(['Model' num2str(i) ' of ' num2str(ip.Results.permutations)]);
-%             pTrainLabels = Y(randperm(numTrials));
-%             [pMdl, ~] = fitModel(trainData, pTrainLabels, ip, ip.Results.gamma, ip.Results.C);         
-%             permutationMdls{i} = pMdl;
-% 
-%         end
-%         M.permutationMdls = permutationMdls;
-%     end
         
     % set return struct fields
     M.classifierInfo = classifierInfo;

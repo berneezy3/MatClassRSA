@@ -1,7 +1,7 @@
  function C = crossValidateMulti_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% C = RSA.classify.crossValidateMulti_opt(X, Y, varargin)
+% C = RSA.classification.crossValidateMulti_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -11,7 +11,7 @@
 % containing the classification accuracy, confusion matrix, and other 
 % related information.  Other optional name-value parameters can be passed in to specify classification related options. 
 %
-% Currently, the only classifier compitable w/ this function is SVM.  
+% Currently, the only classifier compatible w/ this function is SVM.  
 % Optimization is done via a grid serach over the values specified in the 
 % gammaSpace and cSpace input parameters.
 %

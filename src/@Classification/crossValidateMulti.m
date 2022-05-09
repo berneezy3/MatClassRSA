@@ -1,7 +1,7 @@
  function C = crossValidateMulti(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% C = RSA.classify.crossValidateMulti(X, Y, varargin)
+% C = RSA.classification.crossValidateMulti(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -71,10 +71,17 @@
 %       greater than 1 and less than or equal to the number of trials. 
 %       Default is 10.
 %   'classifier' - Choose classifier for cross validation.  Supported
+<<<<<<< HEAD
 %       classifier include support vector machine (SVM), linear discriminant 
 %       analysis (LDA) and random forest (RF).  For SVM, the user must 
 %       manually specify hyperparameter “C” (linear, rbf kernels) and 
 %       “gamma” (rbf kernel). Use the functions with the "_opt" subscript to 
+=======
+%       classifiers include support vector machine (SVM), linear discriminant 
+%       analysis (LDA) and random forest (RF). For SVM, the user must
+%       manually specify hyperparamter "C" (linear, rbf kernels) and
+%       "gamma" (rbf kernel). Use the crossValidateMulti_opt function to
+>>>>>>> 3bed66d1d4829d3b4404af64ca33d91751aa74a5
 %       optimize SVM hyperparameters.
 %        --options--
 %       'SVM'
@@ -218,7 +225,7 @@
     [r1 c1] = size(Y);
     
     if (r1 < c1)
-        Y = Y'
+        Y = Y';
     end
     
     %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
@@ -248,7 +255,7 @@
     % partition data for cross validation 
     trainTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
     partition = trainDevTestPart(X, ip.Results.nFolds, trainTestSplit); 
-    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
+    [cvDataObj,V,nPCs] = cvData(X,Y, partition, ip, ipCenter, ipScale);
 
     % CROSS VALIDATION
     disp('Cross Validating')
@@ -303,12 +310,14 @@
                         'PCAinFold', ip.Results.PCAinFold, ...
                         'nFolds', ip.Results.nFolds, ...
                         'classifier', ip.Results.classifier, ...
-                        'dataPartitionObj', cvDataObj);
+                        'nPCs', nPCs, ...
+                        'dataPartitionObj', cvDataObj ...
+                        );
 
     C.classificationInfo = classificationInfo;
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
-    C.dataPartitionObj = cvDataObj;
+    %C.dataPartitionObj = cvDataObj;
     
     
     
@@ -342,7 +351,8 @@
                 ' ''randomSeed'', ip.Results.randomSeed, ' ...
                 ' ''gamma'', ip.Results.gamma, ''C'', ip.Results.C, ' ...
                 ' ''kernel'', ip.Results.kernel, ' ...
-                ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
+                ' ''minLeafSize'', ip.Results.minLeafSize, ' ...
+                ' ''numTrees'', ip.Results.numTrees)' ]);
 
             evalc(['permTestOutput = obj.predict(permTestM, '...
                 'permTestTestX, ''actualLabels'', permTestTestY);' ]);
