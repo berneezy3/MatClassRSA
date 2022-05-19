@@ -2,7 +2,7 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % M = RSA.Classification.trainMulti(trainData, testData); 
-% P = RSA.classify.predict(M, X, Y)
+% P = RSA.Classification.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %

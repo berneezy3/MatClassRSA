@@ -2,8 +2,8 @@ function P = predict(obj, M, X, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % % any of the train functions could be used in the following line
-% M = RSA.Classification.trainModel(trainData, testData); 
-% P = RSA.classify.predict(M, X, Y)
+% M = RSA.Classification.trainMulti(trainData, testData); 
+% P = RSA.Classification.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -131,7 +131,7 @@ function P = predict(obj, M, X, varargin)
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
     rng(classifierInfo.randomSeed);                                        
-    RSA = MatClassRSA;    
+    
 
     % Predict Labels for Test Data
     disp('Predicting Test Data Labels...')
@@ -189,7 +189,7 @@ function P = predict(obj, M, X, varargin)
             disp('Conducting Permutation Test...');
 
             numTrials = length(trainLabels);
-            RSA = MatClassRSA;
+           
             accDist = zeros(ip.Results.permutations, 1);
             trainData = ip.Results.permTestData.X;
             trainLabels = ip.Results.permTestData.Y;
@@ -247,13 +247,10 @@ function P = predict(obj, M, X, varargin)
         P.AM = NaN(numClasses, numClasses);
         Y = ip.Results.actualLabels;    
 
-%         [firstClass, secondClass] = getNChoose2Ind(numClasses);
+
         classPairs = nchoosek(1:numClasses, 2);
 
-%         P.predictionInfo = cell(1, numDecBounds);
-%         P.accuracy = cell(1, numDecBounds);
-%         P.CM = cell(numClasses, numClasses);
-%         P.CM(:,:) = {NaN};
+
         P.classificationInfo = struct();
         P.pairwiseInfo = struct();
         pairwiseCell = initPairwiseCellMat(numClasses);
@@ -277,8 +274,7 @@ function P = predict(obj, M, X, varargin)
             % PCA
             if (M.ip.Results.PCA > 0) 
                 [tempX_PCA, ~, ~] = centerAndScaleData(tempX, M.classifierInfo{i}.colMeans, M.classifierInfo{i}.colScales);
-                %testData = getPCs(tempX_PCA, M.classifierInfo{i}.PCA_nPC);
-                %testData
+               
                 testData = tempX_PCA*M.classifierInfo{i}.PCA_V;
                 testData = testData(:,1:M.classifierInfo{i}.PCA_nPC);
             else
@@ -293,9 +289,7 @@ function P = predict(obj, M, X, varargin)
             tempStruct = struct();
            % Get Accuracy and confusion matrix
             if ( ~isnan(ip.Results.actualLabels) )
-%                 P.accuracy{i} = computeAccuracy(predY{i}, tempY); 
-%                 P.CM{class1, class2} = confusionmat(tempY, predY{i});
-%                 P.CM{class2, class1} = P.CM{class1, class2};
+
                 thisCM = confusionmat(tempY, predY{i});
                 P.AM(class1, class2) = sum(diag(thisCM))/sum(sum(thisCM));
                 P.AM(class2, class1) = P.AM(class1, class2); 
@@ -383,13 +377,13 @@ function P = predict(obj, M, X, varargin)
             
                         tempX = X(currUse, :);
                         tempY = Y(currUse);
-                        evalc(['pM = RSA.Classification.trainMulti(trainX, pY,'  ...
+                        evalc(['pM = obj.trainMulti(trainX, pY,'  ...
                             ' ''classifier'', M.classifier,' ...
                             ' ''PCA'', 0,''numTrees'', M.ip.Results.numTrees,' ...
                             ' ''minLeafSize'', M.ip.Results.minLeafSize, ' ...
                             ' ''PCA'', M.ip.Results.PCA);']);
 
-                        evalc(['pC = RSA.Classification.predict(pM, tempX, ''actualLabels'', tempY)']);
+                        evalc(['pC = obj.predict(pM, tempX, ''actualLabels'', tempY)']);
                         accMatDist(class1, class2, i) = pC.accuracy;
                         accMatDist(class2, class1, i) = pC.accuracy;
 
@@ -434,9 +428,7 @@ function P = predict(obj, M, X, varargin)
 
         % convert decision values matrix into predictions
         P = struct();
-%         P.predY = {};
-%         P.predictionInfo = {};
-%         P = cell(1, numDecBounds);
+
 
         
         predictionInfo = struct(...
@@ -466,7 +458,7 @@ function P = predict(obj, M, X, varargin)
             numClasses = length(unique(M.trainLabels));
             accMatDist = zeros(numClasses, numClasses, ip.Results.permutations);
             pValMat = NaN(numClasses, numClasses);
-            RSA = MatClassRSA;
+            
             classPairs = nchoosek(1:numClasses, 2);
 
             trainX = M.cvDataObj.trainXall{1};

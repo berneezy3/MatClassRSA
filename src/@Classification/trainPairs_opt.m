@@ -1,8 +1,8 @@
  function [M, permTestData] = trainPairs_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% M = RSA.classify.trainPairs_opt(X, Y, varargin)
-% P = RSA.classify.predict(M, X, Y)
+% M = RSA.Classification.trainPairs_opt(X, Y, varargin)
+% P = RSA.Classification.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %

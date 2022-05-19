@@ -2,7 +2,7 @@ function [M, permTestData] = trainMulti_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % M = RSA.Classification.trainMulti_opt(trainData, testData); 
-% P = RSA.classify.predict(M, X, Y)
+% P = RSA.Classification.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -240,22 +240,6 @@ function [M, permTestData] = trainMulti_opt(obj, X, Y, varargin)
         ipCenter = true;
     end
     
-
-%     % PCA
-%     if (ip.Results.PCA > 0)
-%         disp('Conducting Principal Component Analysis...')
-%         % accordingly center and scale test data
-%         [X, colMeans, colScales] = centerAndScaleData(X, ...
-%             ipCenter, ipScale);
-%         [X, V, nPC] = getPCs(X, ip.Results.PCA);
-%     else 
-%         disp('Principal Component Analysis turned off')
-%         V = NaN;
-%         nPC = NaN;
-%         colMeans = NaN;
-%         colScales = NaN;
-%     end
-%     
 
     % initialize PCA and data centering/scaling related variables
     V = NaN;
