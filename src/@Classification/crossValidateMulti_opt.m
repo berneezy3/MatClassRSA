@@ -144,7 +144,7 @@
 %       represent predicted labels.  Element i,j represents the number of 
 %       observations belonging to clC_tt_multiass i that the classifier labeled as
 %       belonging to class j.
-%   C - SVM hyperparameter optimized grid search
+%   C - SVM hyperparameter optimized using grid search
 %   gamma - SVM hyperparameter optimized using grid search
 %   accuracy - classification accuracy
 %   predY - vector of predicted labels. Ordering of vector elements
