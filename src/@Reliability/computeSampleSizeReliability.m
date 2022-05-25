@@ -1,5 +1,4 @@
-function [reliabilities] = computeSampleSizeReliability(obj, X, Y, featureIdx, ...
-    numTrialsPerHalf, numPermutations, numTrialPermutations, rngType)
+function [reliabilities] = computeSampleSizeReliability(obj, X, Y, featureIdx, varargin)
 %---------------------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [reliabilities] = RSA.computeReliability.computeSampleSizeReliability(X, Y, featureIdx, ...
@@ -11,7 +10,7 @@ function [reliabilities] = computeSampleSizeReliability(obj, X, Y, featureIdx, .
 % the aggregated data as input into this function. Since split-half reliability is computed,
 % Spearman-Brown correction is applied.
 %
-% Required inputs:
+% Input Args (REQUIRED):
 %   X - data matrix. X is a 3D matrix, it is assumed to be of size
 %       nSpace x nTime x nTrial. If X is a 2D matrix, it is assumed to be of
 %       size nTrial x nFeature.
@@ -19,23 +18,23 @@ function [reliabilities] = computeSampleSizeReliability(obj, X, Y, featureIdx, .
 %   featureIdx - Feature (e.g., time) sample index to use in computing 
 %       reliability for a subset of trials.
 %
-% Optional inputs:
-%   numTrialsPerHalf (optional) - a vector of how many trials in a split half to
+% Input Args (OPTIONAL NAME-VALUE PAIRS):
+%   numTrialsPerHalf - a vector of how many trials in a split half to
 %       use for reliability computation. (e.g. [1,2,3] would 
 %       correspond to using 2, 4 and 6 trials in the reliability 
 %       computation). If numTrialsPerHalf is not entered or is empty, this
 %       defaults to [1], meaning that it uses 2 trials in total.
-%   numPermutations (optional) - how many permutations to split the trials 
+%   numPermutations - how many permutations to split the trials 
 %       for split half reliability? This is for inner loop to compute 
 %       reliability. If numPermutations is not entered or is empty, this 
 %       defaults to 10.
-%   numTrialPermutations (optional) - how many times to choose trials in 
+%   numTrialPermutations - how many times to choose trials in 
 %       the data set to compute reliability? This is for the outer loop.
 %       This is useful if we wanted to compute the variance of the 
 %       reliability across random draws of the trials. If 
 %       numTrialPermutations is not entered or is empty, this defaults to 
 %       10.
-%   rngType (optional) - Random number generator specification. If rngType
+%   rngType - Random number generator specification. If rngType
 %       is not entered or is empty, rng will be assigned as 
 %       ('shuffle', 'twister').
 %       --- Acceptable specifications for rngType ---
@@ -57,6 +56,18 @@ function [reliabilities] = computeSampleSizeReliability(obj, X, Y, featureIdx, .
 % MatClassRSA dependencies: setUserSpecifiedRng computeReliability
 % See also computeSpaceTimeReliability
 
+% parse inputs
+ip = inputParser;
+addRequired(ip, 'X');
+addRequired(ip, 'Y');
+addRequired(ip, 'featureIdx');
+addParameter(ip, 'numTrialsPerHalf', 1);
+addParameter(ip, 'numPermutations', 10);
+addParameter(ip, 'numTrialPermutations', 10);
+addParameter(ip, 'rngType', 'default');
+parse(ip, X, Y, featureIdx, varargin{:})
+
+
 assert(length(size(X)) == 3 || length(size(X)) == 2, 'Invalid number of dimensions in the data.');
 
 % If 3D matrix entered, dimensions are: space x time x trial
@@ -74,30 +85,19 @@ end
 
 assert(size(X, 2) == length(Y), 'Length of labels vector does not match number of trials in the data.');
 
-if nargin < 5
-    numTrialsPerHalf = 1;
-    numPermutations = 10;
-end
-if nargin < 6 || isempty(numPermutations)
-    numPermutations = 10;
-end
-if nargin < 7 || isempty(numTrialPermutations)
-    numTrialPermutations = 10;
-end
-
 % Set random number generator
-if nargin < 8 || isempty(rngType), setUserSpecifiedRng();
-else, setUserSpecifiedRng(rngType);
+if any(strcmp(ip.UsingDefaults, 'rngType')), setUserSpecifiedRng();
+else, setUserSpecifiedRng(ip.Results.rngType);
 end
 
 num_components = size(X, 1);
 total_trials = size(X, 2);
-num_trial_subsets = length(numTrialsPerHalf);
+num_trial_subsets = length(ip.Results.numTrialsPerHalf);
 num_images = length(unique(Y));
 
-reliabilities = nan(numTrialPermutations, num_trial_subsets, num_components);
+reliabilities = nan(ip.Results.numTrialPermutations, num_trial_subsets, num_components);
 time_data = squeeze(X(:,:,featureIdx));
-for k=1:numTrialPermutations
+for k=1:ip.Results.numTrialPermutations
     
     % Shuffle data and labels
     random_indices = randperm(total_trials);
@@ -105,10 +105,10 @@ for k=1:numTrialPermutations
     shuffled_labels = Y(random_indices);
     
     for i=1:num_trial_subsets
-        fprintf('Permutation %d: %d trials in subset\n', k, numTrialsPerHalf(i)*2);
+        fprintf('Permutation %d: %d trials in subset\n', k, ip.Results.numTrialsPerHalf(i)*2);
         
         % Acquire trials for each stimulus
-        num_trials_to_use = numTrialsPerHalf(i)*2;
+        num_trials_to_use = ip.Results.numTrialsPerHalf(i)*2;
         [curr_data, curr_data_labels] = acquire_data( ...
             shuffled_data, ...
             shuffled_labels, ...
@@ -118,7 +118,7 @@ for k=1:numTrialPermutations
         if sum(isnan(curr_data_labels)) == (num_trials_to_use * num_images)
             continue;
         end
-        rel = computeReliability(curr_data, curr_data_labels, numPermutations);
+        rel = computeReliability(curr_data, curr_data_labels, ip.Results.numPermutations);
         reliabilities(k,i,:) = mean(rel, 1);
     end % Trial subsets
 end % Random permutations of trials

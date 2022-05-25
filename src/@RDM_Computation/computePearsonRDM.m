@@ -1,4 +1,4 @@
-function [dissimilarities] = computePearsonRDM(obj,X, Y, num_permutations, rand_seed)
+function [dissimilarities] = computePearsonRDM(obj,X, Y, varargin)
 %----------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [dissimilarities] = ...
@@ -13,14 +13,17 @@ function [dissimilarities] = computePearsonRDM(obj,X, Y, num_permutations, rand_
 % nTimepoints x (nTrials*nImages).  In this case, the resulting RDM would be
 % computed using the time point values for a particular electrode as features.
 %
-% Input Args:
+% Input Args (REQUIRED):
 %   X - data matrix. The size of X should be nFeatures x
 %              (nTrials*nImages)
 %   Y - labels vector. The size of Y should be (nTrials*nImages)
+%
+% Input Args (OPTIONAL NAME-VALUE PAIRS):
 %   num_permutations (optional) - how many permutations to randomly select
-%                                 train and test data matrix.
-%   rand_seed (optional) - random seed for reproducibility. If not entered, rng
-%       will be assigned as ('shuffle', 'twister').
+%       train and test data matrix. If not entered or empty, this defaults 
+%       to 10.
+%   rand_seed - random seed for reproducibility. If not entered, 
+%       rng will be assigned as ('shuffle', 'twister').
 %       --- Acceptable specifications for rand_seed ---
 %           - Single acceptable rng specification input (e.g., 1,
 %               'default', 'shuffle'); in these cases, the generator will
@@ -34,24 +37,31 @@ function [dissimilarities] = computePearsonRDM(obj,X, Y, num_permutations, rand_
 %   dissimilarities - the dissimilarity matrix, dimensions: num_images
 %                     x num_images x num_permutations
 
+
+% parse inputs
+ip = inputParser;
+addRequired(ip, 'X');
+addRequired(ip, 'Y');
+addParameter(ip, 'num_permutations', 10);
+addParameter(ip, 'rand_seed', 'default');
+parse(ip, X, Y, varargin{:})
+
+
 num_dim = length(size(X));
 assert(num_dim == 2, 'Data of this size are not supported. A typical use case would be to provide a 2D matrix with dimensions of: nSpace-by-nTrials.');
 assert(size(X,2) == length(Y), 'Mismatch in number of trials in data and length of labels vector.');
 
-if nargin < 3 || isempty(num_permutations)
-    num_permutations = 10;
-end
 
 % Set random number generator
-if nargin < 4 || isempty(rand_seed), setUserSpecifiedRng();
-else, setUserSpecifiedRng(rand_seed);
+if any(strcmp(ip.UsingDefaults, 'rand_seed')), setUserSpecifiedRng();
+else, setUserSpecifiedRng(ip.Results.rand_seed);
 end
 
 unique_labels = unique(Y);
 num_images = length(unique_labels);
 num_features = size(X,1);
-dissimilarities = zeros(num_permutations, num_images, num_images);
-for p=1:num_permutations
+dissimilarities = zeros(ip.Results.num_permutations, num_images, num_images);
+for p=1:ip.Results.num_permutations
     
     for i=1:num_images
         curr_label_i = unique_labels(i);

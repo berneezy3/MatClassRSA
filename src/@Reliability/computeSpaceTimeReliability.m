@@ -1,4 +1,4 @@
-function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, numPermutations, rngType)
+function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, varargin)
 %------------------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [reliabilities] = ...
@@ -12,17 +12,17 @@ function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, numPermutation
 % one will be able to see how reliable each component is across time (on average). Since
 % split-half reliability is computed, Spearman-Brown correction is applied.
 %
-% Required inputs:
+% Input Args (REQUIRED):
 %   X - data matrix. 3D data matrices are assumed to be nSpace x nTime x
 %       nTrial.  If the data matrix is 2D, it is assumed to be nTrial x 
 %       nFeature.
 %   Y - labels vector. The length of labels should be equal to nTrials.
 %
-% Optional inputs:
-%   numPermutations (optional) - how many permutations to split the trials 
+% Input Args (OPTIONAL NAME-VALUE PAIRS):
+%   numPermutations - how many permutations to split the trials 
 %       for split-half reliability. If numPermutations is not entered or is 
 %       empty, this defaults to 10.
-%   rngType (optional) - Random number generator specification. If rngType 
+%   rngType - Random number generator specification. If rngType 
 %       is not entered or is empty, rng will be assigned as 
 %       {'shuffle', 'twister'}. 
 %       --- Acceptable specifications for rngType ---
@@ -46,6 +46,14 @@ function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, numPermutation
 % MatClassRSA dependencies: setUserSpecifiedRng computeReliability
 % See also computeSampleSizeReliability
 
+% parse inputs
+ip = inputParser;
+addRequired(ip, 'X');
+addRequired(ip, 'Y');
+addParameter(ip, 'num_permutations', 10);
+addParameter(ip, 'rngType', 'default');
+parse(ip, X, Y, varargin{:})
+
 % If 3D matrix entered, dimensions are: space x time x trial
 % We will permute so that it becomes space x trial x time
 if length(size(X)) == 3
@@ -60,24 +68,21 @@ else
     error('Input data should be a 2D or 3D matrix.');
 end
 
-if nargin < 4 || isempty(numPermutations)
-    numPermutations = 10;
-end
 
 % Set random number generator
-if nargin < 5 || isempty(rngType), setUserSpecifiedRng();
-else, setUserSpecifiedRng(rngType);
+if any(strcmp(ip.UsingDefaults, 'rngType')), setUserSpecifiedRng();
+else, setUserSpecifiedRng(ip.Results.rngType);
 end
 
 num_components = size(X, 1);
 num_timepoints = size(X, 3);
 
-reliabilities = zeros(num_timepoints, numPermutations, num_components);
+reliabilities = zeros(num_timepoints, ip.Results.num_permutations, num_components);
 for t=1:num_timepoints
     fprintf('Timepoint %d\n', t);
     curr_data = squeeze(X(:,:,t));
-    rels = computeReliability(curr_data, Y, numPermutations);
-    assert(isequal(size(rels), [numPermutations, num_components]));
+    rels = computeReliability(curr_data, Y, ip.Results.num_permutations);
+    assert(isequal(size(rels), [ip.Results.num_permutations, num_components]));
     reliabilities(t,:,:) = rels;
 end
 

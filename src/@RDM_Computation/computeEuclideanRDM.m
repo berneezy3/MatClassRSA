@@ -1,4 +1,4 @@
-function [dissimilarities] = computeEuclideanRDM(obj, X, Y, num_permutations, rand_seed)
+function [dissimilarities] = computeEuclideanRDM(obj, X, Y, varargin)
 %------------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [dissimilarities] = ...
@@ -13,16 +13,18 @@ function [dissimilarities] = computeEuclideanRDM(obj, X, Y, num_permutations, ra
 % nTimepoints x (nTrials*nImages).  In this case, the resulting RDM would be
 % computed using the time point values for a particular electrode as features.
 %
-% Input Args:
+% Input Args (REQUIRED):
 %   X - data matrix. The size of X should be nFeatures x nTrials. Users 
 %       working with 3D data matrices should already have subset the data 
 %       along a single sensor (along the space dimension) or time sample 
 %       (along the time dimension).
 %   Y - labels vector. The length of Y should be nTrials.
+%
+% Input Args (OPTIONAL NAME-VALUE PAIRS):
 %   num_permutations (optional) - how many permutations to randomly select
 %       train and test data matrix. If not entered or empty, this defaults 
 %       to 10.
-%   rand_seed (optional) - random seed for reproducibility. If not entered, 
+%   rand_seed - random seed for reproducibility. If not entered, 
 %       rng will be assigned as ('shuffle', 'twister').
 %       --- Acceptable specifications for rand_seed ---
 %           - Single acceptable rng specification input (e.g., 1,
@@ -36,6 +38,15 @@ function [dissimilarities] = computeEuclideanRDM(obj, X, Y, num_permutations, ra
 % Output Args:
 %   dissimilarities - the dissimilarity matrix, dimensions: num_labels
 %                     x num_labels x num_permutations
+
+
+% parse inputs
+ip = inputParser;
+addRequired(ip, 'X');
+addRequired(ip, 'Y');
+addParameter(ip, 'num_permutations', 10);
+addParameter(ip, 'rand_seed', 'default');
+parse(ip, X, Y, varargin{:})
 
 if nargin < 2
     error('At least two inputs are required: A 2D data matrix and a labels vector.');
@@ -61,20 +72,16 @@ end
 disp(['<a href="matlab: open(which(''computeEuclideanRDM.m''))">computeEuclideanRDM</a> input feature-by-trial data matrix is of size ' mat2str(size(X)) '.'])
 disp(['<a href="matlab: open(which(''computeEuclideanRDM.m''))">computeEuclideanRDM</a> input labels vector is of length ' num2str(length(Y)) '.'])
 
-if nargin < 3 || isempty(num_permutations)
-    num_permutations = 10;
-end
-
 % Set random number generator
-if nargin < 4 || isempty(rand_seed), setUserSpecifiedRng();
-else, setUserSpecifiedRng(rand_seed);
+if any(strcmp(ip.UsingDefaults, 'rand_seed')), setUserSpecifiedRng();
+else, setUserSpecifiedRng(ip.Results.rand_seed);
 end
 
 unique_labels = unique(Y);
 num_labels = length(unique_labels);
 num_features = size(X,1);
-dissimilarities = zeros(num_permutations, num_labels, num_labels);
-for p=1:num_permutations
+dissimilarities = zeros(ip.Results.num_permutations, num_labels, num_labels);
+for p=1:ip.Results.num_permutations
     
     for i=1:num_labels
         curr_label_i = unique_labels(i);
