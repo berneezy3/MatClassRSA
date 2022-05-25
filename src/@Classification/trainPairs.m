@@ -1,8 +1,8 @@
  function [M, permTestData] = trainPairs(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% M = RSA.classify.trainPairs(X, Y, varargin)
-% P = RSA.classify.predict(M, X, Y)
+% M = RSA.Classification.trainPairs(X, Y, varargin)
+% P = RSA.Classification.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -233,12 +233,7 @@
             currUse = ismember(Y, [class1 class2]);
             tempX = X(currUse, :);
             tempY = Y(currUse);
-            
-            % partition data for cross validation 
-%             partition = trainDevTestPart(tempX, 1, [1 0]); 
-%             [cvDataObj{k}, V, ~, colMean, colScale] = cvData(tempX, tempY, ...
-%                 partition, ip, ip.Results.center, ip.Results.scale, 1);
-%             tempX_PCA = cvDataObj{k}.trainXall{1};
+           
 
             % Store the accuracy in the accMatrix
             [~, tempM] = evalc([' obj.trainMulti(tempX, tempY, ' ...
@@ -261,78 +256,8 @@
 
     end
 
-    
-
-    
     disp('trainPairs() finished');
-    
-%        if (ip.Results.permutations > 0) 
-%             disp('Training permutation testing models...');
-%             permutationMdls = cell(numClasses, numClasses, ip.Results.permutations);
-% 
-%             for k = 1:numDecBounds
-%                                                     
-%                 trainX = cvDataObj{k}.trainXall{1};
-%                 trainY = cvDataObj{k}.trainYall{1};
-%                 
-%                 % class1 class2
-%                 class1 = classPairs(k, 1);
-%                 class2 = classPairs(k, 2);
-% 
-%                 for i = 1:ip.Results.permutations
-%                 
-%                     l = length(trainY);
-%                     pY = trainY(randperm(l), :);
-%                     evalc(['pM = RSA.Classification.trainMulti(trainX, pY,'  ...
-%                         ' ''classifier'', ip.Results.classifier,' ...
-%                         ' ''PCA'', 0,' ...
-%                         ' ''C'', ip.Results.C, ''gamma'', ip.Results.gamma,' ...
-%                         ' ''kernel'', ip.Results.kernel, ''numTrees'', ip.Results.numTrees,' ...
-%                         ' ''minLeafSize'', ip.Results.minLeafSize);']);
-%                         
-%                     permutationMdls{class1, class2, i} = pM;
-%                     permutationMdls{class2, class1, i} = pM;
-% 
-%                 end
-%                   
-%             end
-%             
-%         end
-%         M.permutationMdls = permutationMdls;
-%         disp('Finished training permutation testing models');
-%         
-    
-    %{
-    % END PAIRWISE LDA/RF
-    % START SVM skipping the pairwise split to decrease runtime
-    elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
-        
-         X_PCA = getPCs(X, ip.Results.PCA);
-        
-        [mdl, scale] = fitModel(X, Y, ip, ip.Results.gamma, ip.Results.C);
-
-        [~, tempM] = evalc([' RSA.Classification.trainMulti(X_PCA, Y, ' ...
-            ' ''classifier'', ip.Results.classifier, ''PCA'', 0, '...
-            ' ''kernel'', ip.Results.kernel,'...
-            ' ''gamma'', ip.Results.gamma, ' ...
-            ' ''C'', ip.Results.C, ' ... 
-            ' ''numTrees'', ip.Results.numTrees, ' ...
-            ' ''minLeafSize'', ip.Results.minLeafSize, '...
-            ' ''center'', ip.Results.center, ' ...
-            ' ''scale'', ip.Results.scale, ' ...
-            ' ''randomSeed'', ''default'' ) ' ]);
-        
-        tempM.classifierInfo.pairwise = 1;
-        M = tempM;
-        
-        M.pairwise = 1;
-        M.classifier = ip.Results.classifier;
-        
-        if (ip.Results.permutations > 0) 
-        end
-
-    end
-    %}        
+              
     M.elapsedTime = toc(trainPairs_time);
 
     

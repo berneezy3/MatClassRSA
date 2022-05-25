@@ -1,6 +1,7 @@
 function C = crossValidatePairs_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
-% C = crossValidatePairs_opt(X, Y, varargin)
+% RSA = MatClassRSA
+% C = RSA.Classification.crossValidatePairs_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Bernard - Jun. 23, 2020
 %

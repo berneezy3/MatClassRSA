@@ -20,6 +20,10 @@ M = RSA.Classification.crossValidateMulti(S01.X, S01.labels6);
 M.classificationInfo
 
 
+%%
+M = RSA.Classification.crossValidatePairs(S01.X, S01.labels6);
+M.classificationInfo
+
 %% Test generic classify cross-validate, with specified name-value pairs, LDA, 3D, 6-class lables
 % Issue:
 %

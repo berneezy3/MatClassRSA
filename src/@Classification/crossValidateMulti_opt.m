@@ -1,7 +1,7 @@
  function C = crossValidateMulti_opt(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
-% C = RSA.classification.crossValidateMulti_opt(X, Y, varargin)
+% C = RSA.Classification.crossValidateMulti_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -144,7 +144,7 @@
 %       represent predicted labels.  Element i,j represents the number of 
 %       observations belonging to clC_tt_multiass i that the classifier labeled as
 %       belonging to class j.
-%   C - SVM hyperparameter optimized grid search
+%   C - SVM hyperparameter optimized using grid search
 %   gamma - SVM hyperparameter optimized using grid search
 %   accuracy - classification accuracy
 %   predY - vector of predicted labels. Ordering of vector elements
@@ -256,7 +256,7 @@
     
     % SET RANDOM SEED
     % for Random forest purposes
-    %rng(ip.Results.randomSeed);
+
     setUserSpecifiedRng(ip.Results.randomSeed);
 
     % PCA 
@@ -339,11 +339,11 @@
             [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ip, cvDataObj);
         end
 
-        %[mdl, scale] = fitModel(trainX, trainY, ip);
+        
         M = obj.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
             'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
 
-        %[predictions decision_values] = modelPredict(testX, mdl, scale);
+        
         P = obj.predict(M, testX, 'actualLabels',testY);
 
         labelsConcat = [labelsConcat testY'];
