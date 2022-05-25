@@ -1,4 +1,4 @@
- function C = crossValidateMulti(obj, X, Y, varargin)
+function C = crossValidateMulti(obj, X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % C = RSA.classification.crossValidateMulti(X, Y, varargin)
