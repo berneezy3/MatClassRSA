@@ -22,7 +22,31 @@ M.classificationInfo
 
 %%
 M = RSA.Classification.crossValidatePairs(S01.X, S01.labels6);
-M.classificationInfo
+M.classificationInfo;
+%% test PCA = 0, 72 class -- ERROR
+M2 = RSA.Classification.crossValidateMulti(S01.X, S01.labels72, ...
+    'classifier', 'LDA', ...
+    'PCA', 0, ...
+    'nFolds', 3 ...
+    );
+M2.classificationInfo
+M2.accuracy
+figure
+imagesc(M2.CM)
+colorbar
+
+%% test PCA = 0, 6 class -- looks good
+M2 = RSA.Classification.crossValidateMulti(S01.X, S01.labels6, ...
+    'classifier', 'LDA', ...
+    'PCA', 0, ...
+    'nFolds', 3 ...
+    );
+M2.classificationInfo
+M2.accuracy
+figure
+imagesc(M2.CM)
+colorbar
+
 
 %% Test generic classify cross-validate, with specified name-value pairs, LDA, 3D, 6-class lables
 % Issue:
@@ -306,9 +330,164 @@ M.accuracy
 imagesc(M.CM)
 colorbar
 
+%% Test before and after Preprocessing 3D Input: Noise Normalization -- ERROR with array exceding maximum array size
+[Xnorm, sigma] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
+M = RSA.Classification.crossValidateMulti(S01.X, S01.labels72, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M.classificationInfo
+M.accuracy
+imagesc(M.CM)
+colorbar
+
+%"Error using zeros. Requested 2897x2897x2556 (159.8GB) array exceeds maximum array size preference (64.0GB). This might cause MATLAB to become
+% unresponsive"
+%% Test before and after Preprocessing 3D Input 6-class: Noise Normalization -- 
+[Xnorm, sigma] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels6);
+M = RSA.Classification.crossValidateMulti(Xnorm, S01.labels6, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M.classificationInfo
+M.accuracy
+imagesc(M.CM)
+colorbar
+
+M2 = RSA.Classification.crossValidateMulti(Xnorm, S01.labels6, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M2.classificationInfo
+M2.accuracy
+figure
+imagesc(M.CM)
+colorbar
+%% Test before and after Preprocessing 2D Input: Noise Normalization -- Doesn't Classify well at all
+[Xnorm, sigma] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
+M = RSA.Classification.crossValidateMulti(Xnorm, SL100.Y, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M.classificationInfo
+M.accuracy
+figure
+imagesc(M.CM)
+colorbar
+
+
+M2 = RSA.Classification.crossValidateMulti(SL100.X, SL100.Y, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M2.classificationInfo
+M2.accuracy
+figure
+imagesc(M2.CM)
+colorbar
+
+%% Test before and after Preprocessing 72-class: Averaging -- averaging with, makes classification way worse
+
+[Xavg, Yavg] = RSA.Preprocessing.averageTrials(S01.X, S01.labels72, 5);
+
+M = RSA.Classification.crossValidateMulti(Xavg, Yavg, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M.classificationInfo
+M.accuracy
+figure
+imagesc(M.CM)
+colorbar
+
+M2 = RSA.Classification.crossValidateMulti(S01.X, S01.labels72, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M2.classificationInfo
+M2.accuracy
+figure
+imagesc(M2.CM)
+colorbar
+
+%% Test before and after Preprocessing 6-class: Averaging -- averaging with, makes classification way worse
+
+[Xavg, Yavg] = RSA.Preprocessing.averageTrials(S01.X, S01.labels6, 5);
+
+M = RSA.Classification.crossValidateMulti(Xavg, Yavg, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M.classificationInfo
+M.accuracy
+figure
+imagesc(M.CM)
+colorbar
+
+M2 = RSA.Classification.crossValidateMulti(S01.X, S01.labels6, ...
+    'classifier', 'LDA', ...
+    'PCA', 0.99, ...
+    'nFolds', 3 ...
+    );
+M2.classificationInfo
+M2.accuracy
+figure
+imagesc(M2.CM)
+colorbar
+
+%% Test before and after Preprocessing, without PCA: Averaging -- makes classification worse
+[Xavg, Yavg] = RSA.Preprocessing.averageTrials(S01.X, S01.labels72, 5);
+M = RSA.Classification.crossValidateMulti(Xavg, Yavg, ...
+    'classifier', 'LDA', ...
+    'nFolds', 3 ...
+    );
+M.classificationInfo
+M.accuracy
+figure
+imagesc(M.CM)
+colorbar
+
+M2 = RSA.Classification.crossValidateMulti(S01.X, S01.labels72, ...
+    'classifier', 'LDA', ...
+    'nFolds', 3 ...
+    );
+M2.classificationInfo
+M2.accuracy
+figure
+imagesc(M2.CM)
+colorbar
+
+
+%% Test SL100 averaged vs SL500  -- 
+[Xavg, Yavg] = RSA.Preprocessing.averageTrials(SL100.X, SL100.Y, 5, SL100.P);
+M = RSA.Classification.crossValidateMulti(Xavg, Yavg, ...
+    'classifier', 'LDA', ...
+    'nFolds', 3 ...
+    );
+M.classificationInfo
+M.accuracy
+figure
+imagesc(M.CM)
+colorbar
+
+M2 = RSA.Classification.crossValidateMulti(SL500.X, SL500.Y, ...
+    'classifier', 'LDA', ...
+    'nFolds', 3 ...
+    );
+M2.classificationInfo
+M2.accuracy
+figure
+imagesc(M2.CM)
+colorbar
 %%
-
-
 M3 = classifyTrain( X_2D(1:floor(dim3/5), :) , labels6(1:floor(dim3/5)), ...
     'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 1000);
 C = classifyPredict( M_CC.modelsConcat{3}, X_2D(3457:end, :),  labels6( 3457:end));

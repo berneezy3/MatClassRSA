@@ -119,7 +119,7 @@ function [mdl, scale] = fitModel(X, Y, ip, gamma, C)
             %mdl = svmtrain(Y, X, ['-t ' num2str(kernelNum) ' -q ' weights  ' -c ' num2str(1000000000)] );
             mdl = svmtrain(Y, X, [kernel_input weights gamma_input C_input]);           
         case 'LDA'
-            mdl = fitcdiscr(X, Y', 'DiscrimType', 'linear');
+            mdl = fitcdiscr(X, Y', 'DiscrimType', 'diagLinear');
             scale = NaN;
             
         case 'RF'

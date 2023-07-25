@@ -55,7 +55,7 @@ catLabels = {'HB', 'HF', 'AB', 'AF', 'FV', 'IO'};
 
 %% 2. load input data
 
-load 'S06.mat'
+%load 'TestData2016Paper.mat'
 
 %%% a) Variables from input .mat file: 
 %   - X: 3D EEG electrode-by-time-by-trial data matrix (124 x 40 x 5184)
@@ -186,7 +186,7 @@ end
 
 % Category means are visible to some extent in the single trials.
 
-%% 5. instantiating the an instance of the MatClassRSA class
+%% 5. instantiating an instance of the MatClassRSA class
 
 % a) MatClassRSA functions are called via an instance of the MatClassRSA 
 %   class. Therefore, we first need to instantiate the class and assign it 

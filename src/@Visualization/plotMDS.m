@@ -1,4 +1,4 @@
-function fig = plotMDS(obj, RDM, varargin)
+function [fig Kclustering] = plotMDS(obj, RDM, varargin)
 %-------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  RSA.visualize.plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
@@ -184,7 +184,26 @@ function fig = plotMDS(obj, RDM, varargin)
             text(Y(i,xDim), Y(i,yDim), num2str(labels(i)), ...
                 'FontSize', 30);
         end
-  
+        figure(14);
+        evaluation = evalclusters(Y,"kmeans","silhouette","KList",1:8); 
+        plot(evaluation);
+        
+        [idx2 C] = kmeans(Y, 4,'MaxIter',10000,...
+    'Display','final','Replicates',100000);
+        figure(15)
+        plot(Y(idx2==1,1),Y(idx2==1,2),'r.','MarkerSize',12)
+        hold on
+        plot(Y(idx2==2,1),Y(idx2==2,2),'b.','MarkerSize',12)
+        hold on
+        plot(Y(idx2==3,1),Y(idx2==3,2),'g.','MarkerSize',12)
+        hold on
+        plot(Y(idx2==4,1),Y(idx2==4,2),'k.','MarkerSize',12)
+        hold on
+        plot(Y(idx2==5,1),Y(idx2==5,2),'m.','MarkerSize',12)
+        disp(size(Y));
+        
+        Kclustering = [idx2 Y];
+
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -295,8 +314,7 @@ function fig = plotMDS(obj, RDM, varargin)
             imagesc([Y(i,xDim), Y(i,xDim) + plotLength], ...
                 [Y(i,yDim), Y(i,yDim) - plotHeight], thisIcon);
         end
-        
-       
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -313,6 +331,8 @@ function fig = plotMDS(obj, RDM, varargin)
     end
     
     hold on;
+    
+    
 
     
 end

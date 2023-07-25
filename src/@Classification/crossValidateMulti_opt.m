@@ -349,8 +349,10 @@
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat P.predY];
         modelsConcat{i} = M.mdl;
-
-        CM_tmp(:,:,i) = confusionmat(labelsConcat, predictionsConcat); 
+        
+        CM_tmp(:,:,i) = confusionmat(labelsConcat, predictionsConcat, 'Order', 1:numClasses);
+        %TEMP = confusionmat(labelsConcat, predictionsConcat);
+        %CM_tmp(1:length(TEMP),1:length(TEMP),i) = TEMP; 
         C.gamma_opt(i) = gamma_opt;
         C.C_opt(i) = C_opt;
 

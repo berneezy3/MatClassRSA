@@ -70,7 +70,7 @@ unique(X2d ./ a2d1)
 
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
 
-C_LDA = RSA.Classification.crossValidateMulti(Xnorm, Ynorm,... 
+C_LDA = RSA.Classification.crossValidateMulti(Xnorm, S01.labels72,... 
     'PCA', .99, 'classifier', 'LDA');
 
 %'Y' is invalid. It must satisfy the function: isvector.
@@ -79,7 +79,7 @@ C_LDA = RSA.Classification.crossValidateMulti(Xnorm, Ynorm,...
 
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
 
-[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(Xnorm, Ynorm, 5, ... 
+[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(Xnorm, S01.labels72, 5, ... 
     'randomSeed', 0);
 
 %'Y' is invalid. It must satisfy the function: isvector.
@@ -87,7 +87,7 @@ C_LDA = RSA.Classification.crossValidateMulti(Xnorm, Ynorm,...
 %% SUCCESS: Using 2D Normalization outputs as X and Y inputs for subsequent processes (Shuffle)
 
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
-[Xshuff, Yshuff] = RSA.Preprocessing.shuffleData(Xnorm, Ynorm);
+[Xshuff, Yshuff] = RSA.Preprocessing.shuffleData(Xnorm, SL100.Y);
 
 % 'Length of input labels vector must equal length of trial dimension of
 % input data.'
@@ -96,7 +96,7 @@ C_LDA = RSA.Classification.crossValidateMulti(Xnorm, Ynorm,...
 
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
 
-C_LDA = RSA.Classification.crossValidateMulti(Xnorm, Ynorm,... 
+C_LDA = RSA.Classification.crossValidateMulti(Xnorm, SL100.Y,... 
     'PCA', .99, 'classifier', 'LDA');
 
 % 'Index exceeds the number of array elements (1).'
@@ -105,7 +105,7 @@ C_LDA = RSA.Classification.crossValidateMulti(Xnorm, Ynorm,...
 
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
 
-[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(Xnorm, Ynorm, 5, ... 
+[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(Xnorm, SL100.Y, 5, ... 
     'randomSeed', 0);
 
 %'number of trials in X does not equal number of labels in Y'
