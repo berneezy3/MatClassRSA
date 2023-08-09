@@ -20,7 +20,7 @@ clear all; close all; clc
 
 % Define number of permutations and random number generator seed
 n_perm = 10;
-rnd_seed = 0;
+rnd_seed = 3;
 
 % Load three dimensional dataset (electrode x time X trial)
 load('S01.mat')
@@ -30,7 +30,7 @@ RSA = MatClassRSA;
 
 % Run computeSpaceTimeReliability.m with 3D EEG data, 72 class labels
 % vector, n_perm permutations and random seed set to rnd_seed.
-reliability_time = RSA.Reliability.computeSpaceTimeReliability(X, labels72, n_perm, rnd_seed);
+reliability_time = RSA.Reliability.computeSpaceTimeReliability(X, labels72, 'numPermutations', n_perm, 'rngType', rnd_seed);
 
 % Average reliabilities across time
 avg_space_reliability_space = squeeze(mean(reliability_time, 2));

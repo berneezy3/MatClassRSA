@@ -38,13 +38,18 @@ function [reliabilities] = computeSampleSizeReliability(obj, X, Y, featureIdx, v
 %       is not entered or is empty, rng will be assigned as 
 %       ('shuffle', 'twister').
 %       --- Acceptable specifications for rngType ---
-%           - Single acceptable rng specification input (e.g., 1,
-%               'default', 'shuffle'); in these cases, the generator will
-%               be set to 'twister'.
-%           - Dual-argument specifications as either a 2-element cell
-%               array (e.g., {'shuffle', 'twister'}) or string array
-%               (e.g., ["shuffle", "twister"].
-%           - rng struct as assigned by rngType = rng.
+%           - Single acceptable rng specification input (e.g., 4, 
+%               'default', 'shuffle'); in these cases, the generator will 
+%               be set to 'twister'. If a number is entered, this number will 
+%               be set as the seed, If 'default' is entered, the seed will
+%               be set to 0. If 'shuffle' is entered, the seed will be 
+%               based on the current time.
+%           - Dual-argument specifications as either a 2-element cell 
+%               array (e.g., {'shuffle', 'twister'}, {6, 'twister'}) or string array 
+%               (e.g., ["shuffle", "twister"]). The second string sets the
+%               generator to the specified generator type. The fist
+%               argument sets the seed.
+%           - rng struct as previously assigned by rngType = rng.
 %
 % Outputs:
 %   reliabilities - If input matrix was 3D, dimensions are 

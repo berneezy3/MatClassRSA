@@ -26,14 +26,17 @@ function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, varargin)
 %       is not entered or is empty, rng will be assigned as 
 %       {'shuffle', 'twister'}. 
 %       --- Acceptable specifications for rngType ---
-%           - Single acceptable rng specification input (e.g., 1, 
+%           - Single acceptable rng specification input (e.g., 4, 
 %               'default', 'shuffle'); in these cases, the generator will 
-%               be set to 'twister'. If 'default' is entered, the seed will
+%               be set to 'twister'. If a number is entered, this number will 
+%               be set as the seed, If 'default' is entered, the seed will
 %               be set to 0. If 'shuffle' is entered, the seed will be 
 %               based on the current time.
 %           - Dual-argument specifications as either a 2-element cell 
-%               array (e.g., {'shuffle', 'twister'}) or string array 
-%               (e.g., ["shuffle", "twister"]).
+%               array (e.g., {'shuffle', 'twister'}, {6, 'twister'}) or string array 
+%               (e.g., ["shuffle", "twister"]). The second string sets the
+%               generator to the specified generator type. The fist
+%               argument sets the seed.
 %           - rng struct as previously assigned by rngType = rng.
 %
 % Output Args:
@@ -50,7 +53,7 @@ function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, varargin)
 ip = inputParser;
 addRequired(ip, 'X');
 addRequired(ip, 'Y');
-addParameter(ip, 'num_permutations', 10);
+addParameter(ip, 'numPermutations', 10);
 addParameter(ip, 'rngType', 'default');
 parse(ip, X, Y, varargin{:})
 
@@ -77,12 +80,12 @@ end
 num_components = size(X, 1);
 num_timepoints = size(X, 3);
 
-reliabilities = zeros(num_timepoints, ip.Results.num_permutations, num_components);
+reliabilities = zeros(num_timepoints, ip.Results.numPermutations, num_components);
 for t=1:num_timepoints
     fprintf('Timepoint %d\n', t);
     curr_data = squeeze(X(:,:,t));
-    rels = computeReliability(curr_data, Y, ip.Results.num_permutations);
-    assert(isequal(size(rels), [ip.Results.num_permutations, num_components]));
+    rels = computeReliability(curr_data, Y, ip.Results.numPermutations);
+    assert(isequal(size(rels), [ip.Results.numPermutations, num_components]));
     reliabilities(t,:,:) = rels;
 end
 
