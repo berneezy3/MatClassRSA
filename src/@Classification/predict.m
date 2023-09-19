@@ -130,7 +130,8 @@ function P = predict(obj, M, X, varargin)
     
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
-    rng(classifierInfo.randomSeed);                                        
+    % rng(classifierInfo.rngType);
+    setUserSpecifiedRng(classifierInfo.rngType);
     
 
     % Predict Labels for Test Data
@@ -174,7 +175,7 @@ function P = predict(obj, M, X, varargin)
                         'spaceUse', M.classifierInfo.spaceUse, ...
                         'timeUse', M.classifierInfo.timeUse, ...
                         'featureUse', M.classifierInfo.featureUse, ...
-                        'randomSeed', M.classifierInfo.randomSeed ,...
+                        'rngType', M.classifierInfo.rngType ,...
                         'decisionValues', decision_values);
 
         P.predictionInfo = predictionInfo;
@@ -438,7 +439,7 @@ function P = predict(obj, M, X, varargin)
                 'spaceUse', M.classifierInfo.spaceUse, ...
                 'timeUse', M.classifierInfo.timeUse, ...
                 'featureUse', M.classifierInfo.featureUse, ...
-                'randomSeed', M.ip.Results.randomSeed);
+                'rngType', M.ip.Results.rngType);
         
         pairwiseMat3D = zeros(2,2, numDecBounds);
         

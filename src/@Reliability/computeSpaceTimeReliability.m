@@ -22,23 +22,23 @@ function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, varargin)
 %   numPermutations - how many permutations to split the trials 
 %       for split-half reliability. If numPermutations is not entered or is 
 %       empty, this defaults to 10.
-%   rngType - Random number generator specification. If rngType 
-%       is not entered or is empty, rng will be assigned as 
-%       {'shuffle', 'twister'}. 
+%   rngType - Random number generator specification. Here you can set the
+%       the rng seed and the rng generator, in the form {'rngSeed','rngGen'}.
+%       If rngType is not entered, or is empty, rng will be assigned as 
+%       rngSeed: 'shuffle', rngGen: 'twister'. Where 'shuffle' generates a 
+%       seed based on the current time.
 %       --- Acceptable specifications for rngType ---
-%           - Single acceptable rng specification input (e.g., 4, 
-%               'default', 'shuffle'); in these cases, the generator will 
-%               be set to 'twister'. If a number is entered, this number will 
-%               be set as the seed, If 'default' is entered, the seed will
-%               be set to 0. If 'shuffle' is entered, the seed will be 
+%           - Single-argument specification, sets only the rng seed
+%               (e.g., 4, 0, 'shuffle'); in these cases, the rng generator  
+%               will be set to 'twister'. If a number is entered, this number will 
+%               be set as the seed. If 'shuffle' is entered, the seed will be 
 %               based on the current time.
 %           - Dual-argument specifications as either a 2-element cell 
 %               array (e.g., {'shuffle', 'twister'}, {6, 'twister'}) or string array 
-%               (e.g., ["shuffle", "twister"]). The second string sets the
-%               generator to the specified generator type. The fist
-%               argument sets the seed.
+%               (e.g., ["shuffle", "philox"]). The first argument sets the
+%               The first argument set the rng seed. The second argument
+%               sets the generator to the specified rng generator type.
 %           - rng struct as previously assigned by rngType = rng.
-%
 % Output Args:
 %   reliabilities - reliability for each electrode across time. The 
 %       dimensions of this matrix are nSpace x nTime x nPermutations if a 

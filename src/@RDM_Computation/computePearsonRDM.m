@@ -2,7 +2,7 @@ function [dissimilarities] = computePearsonRDM(obj,X, Y, varargin)
 %----------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [dissimilarities] = ...
-%  RSA.computeRDM.computePearsonRDM(X, Y, num_permutations, rand_seed)
+%  RSA.computeRDM.computePearsonRDM(X, Y, num_permutations, rngType)
 %----------------------------------------------------------------------------------
 %
 % Returns pairwise dissimilarities with respect to cross-validated Pearson
@@ -22,16 +22,23 @@ function [dissimilarities] = computePearsonRDM(obj,X, Y, varargin)
 %   num_permutations (optional) - how many permutations to randomly select
 %       train and test data matrix. If not entered or empty, this defaults 
 %       to 10.
-%   rand_seed - random seed for reproducibility. If not entered, 
-%       rng will be assigned as ('shuffle', 'twister').
-%       --- Acceptable specifications for rand_seed ---
-%           - Single acceptable rng specification input (e.g., 1,
-%               'default', 'shuffle'); in these cases, the generator will
-%               be set to 'twister'.
-%           - Dual-argument specifications as either a 2-element cell
-%               array (e.g., {'shuffle', 'twister'}) or string array
-%               (e.g., ["shuffle", "twister"].
-%           - rng struct as assigned by rand_seed = rng.
+%   rngType - Random number generator specification. Here you can set the
+%       the rng seed and the rng generator, in the form {'rngSeed','rngGen'}.
+%       If rngType is not entered, or is empty, rng will be assigned as 
+%       rngSeed: 'shuffle', rngGen: 'twister'. Where 'shuffle' generates a 
+%       seed based on the current time.
+%       --- Acceptable specifications for rngType ---
+%           - Single-argument specification, sets only the rng seed
+%               (e.g., 4, 0, 'shuffle'); in these cases, the rng generator  
+%               will be set to 'twister'. If a number is entered, this number will 
+%               be set as the seed. If 'shuffle' is entered, the seed will be 
+%               based on the current time.
+%           - Dual-argument specifications as either a 2-element cell 
+%               array (e.g., {'shuffle', 'twister'}, {6, 'twister'}) or string array 
+%               (e.g., ["shuffle", "philox"]). The first argument sets the
+%               The first argument set the rng seed. The second argument
+%               sets the generator to the specified rng generator type.
+%           - rng struct as previously assigned by rngType = rng.
 %
 % Output Args:
 %   dissimilarities - the dissimilarity matrix, dimensions: num_images
@@ -43,7 +50,7 @@ ip = inputParser;
 addRequired(ip, 'X');
 addRequired(ip, 'Y');
 addParameter(ip, 'num_permutations', 10);
-addParameter(ip, 'rand_seed', 'default');
+addParameter(ip, 'rngType', 'default');
 parse(ip, X, Y, varargin{:})
 
 
@@ -53,8 +60,8 @@ assert(size(X,2) == length(Y), 'Mismatch in number of trials in data and length 
 
 
 % Set random number generator
-if any(strcmp(ip.UsingDefaults, 'rand_seed')), setUserSpecifiedRng();
-else, setUserSpecifiedRng(ip.Results.rand_seed);
+if any(strcmp(ip.UsingDefaults, 'rngType')), setUserSpecifiedRng();
+else, setUserSpecifiedRng(ip.Results.rngType);
 end
 
 unique_labels = unique(Y);

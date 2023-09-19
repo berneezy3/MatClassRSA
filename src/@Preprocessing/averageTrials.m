@@ -65,17 +65,23 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(obj, X, Y, 
 %           --- options ---
 %               0 : Do not perform end shuffling
 %               1 : Perform end shuffling (default)
-%       'randomSeed' - specify random number generator (rng) if end 
-%           shuffling is being performed. If not entered, rng will be 
-%           assigned as ('shuffle', 'twister').
-%           --- options ---
-%               Single acceptable rng specification input (e.g., 1, 
-%                   'default', 'shuffle'); in these cases, the generator 
-%                   will be set to 'twister'.
-%               Dual-argument specifications as either a 2-element cell 
-%                   array (e.g., {'shuffle', 'twister'}) or string array 
-%                   (e.g., ["shuffle", "twister"].
-%               rng struct as assigned by r = rng.
+%       'rngType' - Random number generator specification. Here you can set the
+%           the rng seed and the rng generator, in the form {'rngSeed','rngGen'}.
+%           If rngType is not entered, or is empty, rng will be assigned as 
+%           rngSeed: 'shuffle', rngGen: 'twister'. Where 'shuffle' generates a 
+%           seed based on the current time.
+%       --- Acceptable specifications for rngType ---
+%           - Single-argument specification, sets only the rng seed
+%               (e.g., 4, 0, 'shuffle'); in these cases, the rng generator  
+%               will be set to 'twister'. If a number is entered, this number will 
+%               be set as the seed. If 'shuffle' is entered, the seed will be 
+%               based on the current time.
+%           - Dual-argument specifications as either a 2-element cell 
+%               array (e.g., {'shuffle', 'twister'}, {6, 'twister'}) or string array 
+%               (e.g., ["shuffle", "philox"]). The first argument sets the
+%               The first argument set the rng seed. The second argument
+%               sets the generator to the specified rng generator type.
+%           - rng struct as previously assigned by rngType = rng.
 %
 % Output Args:
 %       averagedX - the data matrix after trial averaging. Will match the
@@ -146,11 +152,11 @@ defaultRandomSeed = {'shuffle', 'twister'};
 if verLessThan('matlab', '8.2')
     addParamValue(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder);
     addParamValue(ip, 'endShuffle', defaultEndShuffle);
-    addParamValue(ip, 'randomSeed', defaultRandomSeed);
+    addParamValue(ip, 'rngType', defaultRandomSeed);
 else
     addParameter(ip, 'handleRemainder', defaultHandleRemainder, checkHandleRemainder);
     addParameter(ip, 'endShuffle', defaultEndShuffle);
-    addParameter(ip, 'randomSeed', defaultRandomSeed);
+    addParameter(ip, 'rngType', defaultRandomSeed);
 end
 
 parse(ip, X, Y, groupSize, varargin{:});
@@ -375,7 +381,7 @@ end
 if ip.Results.endShuffle
     disp('averageTrials: Shuffling order of averaged data.')
     %%%% Set the random number generator %%%%
-    thisRng = ip.Results.randomSeed;
+    thisRng = ip.Results.rngType;
     setUserSpecifiedRng(thisRng);
     %%%% End set random number generator %%%%
     

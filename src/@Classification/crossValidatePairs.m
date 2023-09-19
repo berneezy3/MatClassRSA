@@ -34,16 +34,23 @@
 %       feature dimension indices that the user wants to subset.  This arugument 
 %       will not do anything if input matrix X is a 3D,
 %       space-by-time-by-trials matrix.
-%   'randomSeed' - random seed for reproducibility. If not entered, rng
-%       will be assigned as ('shuffle', 'twister').
-%       --- Acceptable specifications for rand_seed ---
-%       - Single acceptable rng specification input (e.g., 1,
-%           'default', 'shuffle'); in these cases, the generator will
-%           be set to 'twister'.
-%       - Dual-argument specifications as either a 2-element cell
-%           array (e.g., {'shuffle', 'twister'}) or string array
-%           (e.g., ["shuffle", "twister"].
-%       - rng struct as assigned by rand_seed = rng.
+%   'rngType' - Random number generator specification. Here you can set the
+%       the rng seed and the rng generator, in the form {'rngSeed','rngGen'}.
+%       If rngType is not entered, or is empty, rng will be assigned as 
+%       rngSeed: 'shuffle', rngGen: 'twister'. Where 'shuffle' generates a 
+%       seed based on the current time.
+%       --- Acceptable specifications for rngType ---
+%           - Single-argument specification, sets only the rng seed
+%               (e.g., 4, 0, 'shuffle'); in these cases, the rng generator  
+%               will be set to 'twister'. If a number is entered, this number will 
+%               be set as the seed. If 'shuffle' is entered, the seed will be 
+%               based on the current time.
+%           - Dual-argument specifications as either a 2-element cell 
+%               array (e.g., {'shuffle', 'twister'}, {6, 'twister'}) or string array 
+%               (e.g., ["shuffle", "philox"]). The first argument sets the
+%               The first argument set the rng seed. The second argument
+%               sets the generator to the specified rng generator type.
+%           - rng struct as previously assigned by rngType = rng.
 %   'PCA' - Set principal component analysis on data matrix X.  To retain 
 %       components that explain a certain percentage of variance, enter a
 %       decimal value [0, 1).  To retain a certain number of principal 
@@ -235,8 +242,8 @@
     
     % SET RANDOM SEED
     % for Random forest purposes
-    %rng(ip.Results.randomSeed);
-    setUserSpecifiedRng(ip.Results.randomSeed);
+    %rng(ip.Results.rngType);
+    setUserSpecifiedRng(ip.Results.rngType);
 
     % CROSS VALIDATION
     disp('Cross Validating')
