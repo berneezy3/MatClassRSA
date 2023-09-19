@@ -182,7 +182,7 @@ assert(isequal(yShuf, SL100_veryImbalanced.Y));
 rng(1);
 xrtest = X_2D(randperm(nTrial),:);
 
-[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'randomSeed', 1);
+[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 1);
 assert(isequal(xrtest, xr));
 
 %requires name-value pairing to work... for example
@@ -193,7 +193,7 @@ assert(isequal(xrtest, xr));
 rng('default');
 xrtest = X_2D(randperm(nTrial),:);
 
-[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'randomSeed', 'default');
+[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 'default');
 assert(isequal(xrtest, xr));
 
 %requires name-value pairing to work... for example
@@ -204,7 +204,7 @@ assert(isequal(xrtest, xr));
 rng('shuffle');
 xrtest = X_2D(randperm(nTrial),:);
 
-[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'randomSeed', 'shuffle');
+[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 'shuffle');
 assert(isequal(xrtest, xr));
 
 %requires name-value pairing to work... for example

@@ -80,7 +80,7 @@ C_LDA = RSA.Classification.crossValidateMulti(Xnorm, S01.labels72,...
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
 
 [X_avg, Y_avg] = RSA.Preprocessing.averageTrials(Xnorm, S01.labels72, 5, ... 
-    'randomSeed', 0);
+    'rngType', 0);
 
 %'Y' is invalid. It must satisfy the function: isvector.
 
@@ -106,7 +106,7 @@ C_LDA = RSA.Classification.crossValidateMulti(Xnorm, SL100.Y,...
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
 
 [X_avg, Y_avg] = RSA.Preprocessing.averageTrials(Xnorm, SL100.Y, 5, ... 
-    'randomSeed', 0);
+    'rngType', 0);
 
 %'number of trials in X does not equal number of labels in Y'
 
