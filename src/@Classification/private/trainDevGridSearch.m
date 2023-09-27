@@ -13,9 +13,11 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
 % of all possible combinations of gammas and C's.
 % 
 % INPUT ARGS:
-%   - gammas: 2D trial by feature training data matrix
-%   - Cs: label vector
-%   - kernel:  SVM classification kernel
+%   - trainX: 2D trial by feature training data matrix
+%   - trainY: label vector
+%   - devX: 2D trial by feature training data matrix
+%   - devY:label vector
+%   - ip: input parser passed from parent script, which calls this function
 %
 % OUTPUT ARGS:
 %   - gamma_opt: gamma value that produces the highest cross validation
@@ -63,18 +65,7 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
     gammaSpace = ip.Results.gammaSpace;
     RSA = MatClassRSA;
     
-    % initialize parallel worker pool
-    try
-        matlabpool;
-        closePool=1;
-    catch
-        try 
-            parpool;
-            closePool=0;
-        catch
-            % do nothing if no parpool functions exist
-        end
-    end
+    
     % parallelized grid search
     parfor i = 1:cLen*gammaLen
         cInd = mod(i-1, gammaLen)+1;
@@ -85,14 +76,7 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
         accVec(i) = tempC.accuracy;
         cVec{i} = tempC;
     end
-    % close parallel workers
-    if exist('closePool', 'var')
-        if closePool
-            matlabpool close;
-        else
-            delete(gcp('nocreate'));
-        end
-    end
+    
     
     [maxVal, maxIdx] = max(accVec(:));
     [xInd yInd] = ind2sub([cLen gammaLen], maxIdx);

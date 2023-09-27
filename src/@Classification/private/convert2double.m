@@ -1,5 +1,5 @@
 function [X, Y] = convert2double(X, Y)
-% Bernard - June. 27, 2020
+% Bernard - June. 27, 2020, Ray - Edit Sept, 2023
 
    if ~isa(X, 'double')
        warning('X data matrix not in double format.  Converting X values to double.')

@@ -79,11 +79,7 @@ function C = crossValidateMulti(obj, X, Y, varargin)
 %       classifier include support vector machine (SVM), linear discriminant 
 %       analysis (LDA) and random forest (RF).  For SVM, the user must 
 %       manually specify hyperparameter “C” (linear, rbf kernels) and 
-%       “gamma” (rbf kernel). Use the functions with the "_opt" subscript to 
-%       classifiers include support vector machine (SVM), linear discriminant 
-%       analysis (LDA) and random forest (RF). For SVM, the user must
-%       manually specify hyperparamter "C" (linear, rbf kernels) and
-%       "gamma" (rbf kernel). Use the crossValidateMulti_opt function to
+%       “gamma” (rbf kernel). Use the crossValidateMulti_opt function to
 %       optimize SVM hyperparameters.
 %        --options--
 %       'SVM'

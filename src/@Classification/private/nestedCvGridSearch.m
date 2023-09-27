@@ -13,8 +13,11 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
 % of all possible combinations of gammas and C's.
 % 
 % INPUT ARGS:
-%   - gammas: 2D trial by feature training data matrix
-%   - Cs: label vector
+%   - X: 2D trial by feature training data matrix
+%   - Y: label vector
+%   - ip: inputParser pass from parent script which called this function
+%   - cvDataObj: ?e
+%   - excludeIndx: ?
 %   - kernel:  SVM classification kernel
 %   - optFolds: number of folds used for optimization
 %
@@ -25,7 +28,7 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
-% -------------------------------------------------------------------------
+% ---------------------------------------C----------------------------------
 % Copyright 2017 Bernard C. Wang, Anthony M. Norcia, and Blair Kaneshiro
 % 
 % Redistribution and use in source and binary forms, with or without
@@ -68,32 +71,14 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
         nFolds = ip.Results.nFolds;
     end
     
-    try
-        matlabpool
-        closePool=1;
-    catch
-        parpool
-        closePool=0;
-    end
+    
     
     if ( (exist('excludeIndx', 'var') == 0) )
         
-        RSA = MatClassRSA;
-        % initialize parallel worker pool
-        try
-            matlabpool;
-            closePool=1;
-        catch
-            try 
-                parpool;
-                closePool=0;
-            catch
-                % do nothing if no parpool functions exist
-            end
-        end
         cLen = length(ip.Results.cSpace);
         gammaLen = length(ip.Results.gammaSpace);
         flatLen = cLen * gammaLen; 
+        
         % parallel grid search
         parfor i = 1:cLen*gammaLen
             cInd = mod(i-1, gammaLen)+1;
@@ -102,14 +87,6 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
             accVec(i) = tempM.accuracy;
         end
         accGrid = reshape(accVec, cLen, gammaLen);
-        % close parallel workers
-        if exist('closePool', 'var')
-            if closePool
-                matlabpool close;
-            else
-                delete(gcp('nocreate'));
-            end
-        end
                 
 
     elseif ( exist('cvDataObj') && (exist('excludeIndx', 'var')==1))
@@ -119,7 +96,6 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
         YFolds = cvDataObj.testYall;
         YFolds(excludeIndx) = [];
 
-        RSA = MatClassRSA;
         for i = 1:length(Cs)
             for j = 1:length(gammaSpace)
 
@@ -175,11 +151,7 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
     gamma_opt = gammaSpace(yInd);
     C_opt = cSpace(xInd);
     
-    if closePool
-        matlabpool close
-    else
-        delete(gcp('nocreate'));
-    end
+   
 
 
 end

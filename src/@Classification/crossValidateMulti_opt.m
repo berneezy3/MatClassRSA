@@ -76,7 +76,7 @@
 %       false: One PCA for entire training data matrix X.
 %   'nFolds' - Number of folds in cross validation.  Must be integer
 %       greater than 2 and less than or equal to the number of trials. 
-%       Default is 10.  This parameter is only used is the 'nestedCV'
+%       Default is 10.  This parameter is only used if the 'nestedCV'
 %       option is set for 'optimization' parameter.   
 %   'classifier' - Choose classifier for cross validation.  Currently, only
 %        support vector machine (SVM) is supported for hyperparameter
@@ -141,7 +141,7 @@
 %
 % OUTPUT ARGS 
 %   C - output object containing all cross validation related
-%   information, including classification accuracy, confucion matrix,  
+%   information, including classification accuracy, confusion matrix,  
 %   prediction results etc.  
 %   --subfields--
 %   CM - Confusion matrix that summarizes the performance of the
@@ -199,6 +199,19 @@
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
     cvMultiOpt_time = tic;
+    
+    % initialize parallel worker pool
+    try
+        matlabpool;
+        closePool=1;
+    catch
+        try 
+            parpool;
+            closePool=0;
+        catch
+            % do nothing if no parpool functions exist
+        end
+    end
 
     % Initialize the input parser
     st = dbstack;
@@ -206,7 +219,10 @@
     ip = inputParser;
     ip = initInputParser(namestr, ip, X, Y, varargin{:});
 %     checkInputData(namestr, ip, X, Y);
-
+    
+    % Hardcode SVM for now
+    %classifier = 'SVM';
+    
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
     %Required inputs
@@ -236,7 +252,7 @@
        disp('Converting X matrix to double')
        X = double(X); 
    end
-   if ~isa(Y, 'Converting Y matrix to double')
+   if ~isa(Y, 'double')
        warning('Y label vector not in double format.  Converting Y labels to double.')
        Y = double(Y);
    end
@@ -251,7 +267,7 @@
     [r1 c1] = size(Y);
     
     if (r1 < c1)
-        Y = Y'
+        Y = Y';
     end
     
     
@@ -334,20 +350,26 @@
         testY = cvDataObj.testYall{i};
 
         % conduct grid search here
-        if ( strcmp(ip.Results.optimization, 'singleFold') || ...
-            ip.Results.nFolds == 2)
-            devX = cvDataObj.devXall{i};
-            devY= cvDataObj.devYall{i};
-            [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, ...
-                devX, devY, ip);
-        elseif ( strcmp(ip.Results.optimization, 'nestedCV'))
-            [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ip, cvDataObj);
+        if ( ~strcmp(ip.Results.classifier, 'LDA'))
+            if ( strcmp(ip.Results.optimization, 'singleFold') || ...
+                ip.Results.nFolds == 2 )
+                devX = cvDataObj.devXall{i};
+                devY= cvDataObj.devYall{i};
+                [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, ...
+                    devX, devY, ip);
+            elseif ( strcmp(ip.Results.optimization, 'nestedCV'))
+                [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ip, cvDataObj);
+            end
+            
+            C.gamma_opt(i) = gamma_opt;
+            C.C_opt(i) = C_opt;
+            
+            M = obj.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+                'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
+        else
+            M = obj.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+                'PCA', 0);
         end
-
-        
-        M = obj.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
-            'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
-
         
         P = obj.predict(M, testX, 'actualLabels',testY);
 
@@ -358,8 +380,7 @@
         CM_tmp(:,:,i) = confusionmat(labelsConcat, predictionsConcat, 'Order', 1:numClasses);
         %TEMP = confusionmat(labelsConcat, predictionsConcat);
         %CM_tmp(1:length(TEMP),1:length(TEMP),i) = TEMP; 
-        C.gamma_opt(i) = gamma_opt;
-        C.C_opt(i) = C_opt;
+        
 
     end
 
@@ -472,6 +493,16 @@
     if ip.Results.permutations > 0
         C.pVal = permTestPVal(C.accuracy, accArr);
     end
+    
+    % close parallel workers
+    if exist('closePool', 'var')
+        if closePool
+            matlabpool close;
+        else
+            delete(gcp('nocreate'));
+        end
+    end
+    
     C.elapsedTime = toc(cvMultiOpt_time);
     disp('crossValidateMulti_opt() Finished!')
     disp(['Elapsed time: ' num2str(C.elapsedTime) ' seconds'])

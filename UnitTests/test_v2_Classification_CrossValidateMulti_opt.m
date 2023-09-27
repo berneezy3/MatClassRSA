@@ -1,6 +1,6 @@
-% test_v2_Classification_CrossValidateMulti.m
+% test_v2_Classification_CrossValidateMulti_opt.m
 % ---------------------------
-% Testing expected successful and unsuccessful calls to crossValidateMulti.m.
+% Testing expected successful and unsuccessful calls to crossValidateMulti_opt.m.
 
 % Nathan - Aug 26, 2019; Edited by Ray April, 2022
 clear all; close all; clc
@@ -12,21 +12,23 @@ RSA = MatClassRSA;
 
 %% Test default input parameters, 3D data, 6-class labels -- looks good
 % default classifier should be LDA
+% default rng should be ('shuffle', 'twister')
 % default PCA should be .99
 % default PCAinFold should be 0
 % nFolds 10
 
-M = RSA.Classification.crossValidateMulti(S01.X, S01.labels6);
-M.classificationInfo
+C = RSA.Classification.crossValidateMulti_opt(S01.X, S01.labels6);
+C.classificationInfo
 
 %% Test default input parameters, 3D data, 6-class labels, rng -- looks good
-% default classifier should be LDA
+% default classifier should be SVM
 % default PCA should be .99
 % default PCAinFold should be 0
-% nFolds 10
+% nFolds 3
 % setting {0,'twister'} for rng. This should be the same as "default"
+% kernel set to 'linear', should not have a gamma hyperparameter
 
-M = RSA.Classification.crossValidateMulti(S01.X, S01.labels6, 'rngType', {0,'twister'});
+M = RSA.Classification.crossValidateMulti_opt(S01.X, S01.labels6, 'rngType', {0,'twister'}, 'nFolds', 3, 'classifier', 'SVM');
 M.classificationInfo
 
 %% Test default input parameters, 3D data, 6-class labels, rng -- looks good
@@ -37,7 +39,7 @@ M.classificationInfo
 % setting {0,'twister'} for rng. This should be the same as "default"
 
 M = RSA.Classification.crossValidateMulti_opt(S01.X, S01.labels6, 'rngType', {4,'twister'}, 'nFolds', 4);
-M.classificationInfo
+M.classificationInfo;
 
 
 
