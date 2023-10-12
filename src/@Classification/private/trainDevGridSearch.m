@@ -63,6 +63,8 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
     flatLen = cLen * gammaLen; 
     cSpace = ip.Results.cSpace;
     gammaSpace = ip.Results.gammaSpace;
+    rngType = ip.Results.rngType;
+    display(rngType);
     RSA = MatClassRSA;
     
     
@@ -71,7 +73,7 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
         cInd = mod(i-1, gammaLen)+1;
         gammaInd = ceil(i/gammaLen);
         tempM = trainMultiEvalc(trainX, trainY, 0, 'SVM', ...
-            cSpace(cInd), gammaSpace(gammaInd));
+            cSpace(cInd), gammaSpace(gammaInd), rngType);
         tempC = predictEvalc(tempM, devX, devY);
         accVec(i) = tempC.accuracy;
         cVec{i} = tempC;
@@ -87,11 +89,11 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
 end
 
 
-function M = trainMultiEvalc(trainData, trainLabels, PCA, classifier, C, gamma)
+function M = trainMultiEvalc(trainData, trainLabels, PCA, classifier, C, gamma, rngType)
     RSA = MatClassRSA;
     [~, M] = evalc(['RSA.Classification.trainMulti(' ... 
         'trainData, trainLabels, ''PCA'', PCA, ''classifier'', classifier, ' ...
-        ' ''C'', C, ' ...
+        ' ''C'', C, ''rngType'', rngType,' ...
         ' ''gamma'', gamma);']);
 end
 

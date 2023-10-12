@@ -55,7 +55,7 @@ catLabels = {'HB', 'HF', 'AB', 'AF', 'FV', 'IO'};
 
 %% 2. load input data
 
-%load 'TestData2016Paper.mat'
+load 'TestData2016Paper.mat'
 
 %%% a) Variables from input .mat file: 
 %   - X: 3D EEG electrode-by-time-by-trial data matrix (124 x 40 x 5184)
@@ -214,7 +214,7 @@ whos RSA
 % Functions are called via the instance of MatClassRSA. Preprocessing
 % functions (like shuffleData()) are in the Preprocessing module and are
 % called via the following dot syntax: 
-[X_shuf, Y_shuf] = RSA.Preprocessing.shuffleData(X, Y, 'randomSeed', 0);
+[X_shuf, Y_shuf] = RSA.Preprocessing.shuffleData(X, Y, 'rngType', 0);
 
 % Note that in the above function call we are including an optional
 %   name-value pair to set the random seed. This is done so that the
@@ -241,7 +241,7 @@ whos RSA
 %   output. The function will split the available trials for each stimulus
 %   label and average accordingly.
 [X_avg, Y_avg] = RSA.Preprocessing.averageTrials(X_shuf, Y_shuf, 5, ... 
-    'randomSeed', 0);
+    'rngType', 0);
 % Note that we again set the random seed for reproducibility.
 
 % Whereas we had 5184 trials to begin with, we now have 1032 trials.
@@ -477,7 +477,7 @@ C_SVM_0 = RSA.Classification.crossValidateMulti_opt(X_avg, Y_avg,...
 gamma_opt = .0032;
 C_opt = 100000;
 C_SVM = RSA.Classification.crossValidateMulti(X_avg, Y_avg, 'PCA', .99, ...
-   'classifier', 'SVM', 'gamma', gamma_opt, 'C', C_opt, 'randomSeed', 0);
+   'classifier', 'SVM', 'gamma', gamma_opt, 'C', C_opt, 'rngType', 0);
 
 % C_SVM = 
 % 

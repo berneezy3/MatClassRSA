@@ -21,9 +21,7 @@ load('S01.mat')
 % Make MatClassRSA object
 RSA = MatClassRSA;
 
-% Run shuffleData.m with 3D EEG data, 6-class labels vector, number of 
-% trials averaged into pseudotrial set to n_trial_to_avg, random seed set 
-% to rnd_seed.
+% Normalize data
 [X_norm, sigma_inv] = RSA.Preprocessing.noiseNormalization(X, labels6);
 
 % Visualize inverse square root of the covariance matrix.

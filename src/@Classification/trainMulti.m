@@ -170,6 +170,7 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = false;
+    display(ip.Results.rngType);
     st = dbstack;
     namestr = st.name;
     ip = initInputParser(namestr, ip, X, Y, varargin{:});
@@ -179,7 +180,7 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
     
     [r c] = size(X);
     
-    
+    display(ip.Results.rngType);
     % check input data 
     checkInputDataShape(X, Y);
     
@@ -200,6 +201,7 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
     %rng(ip.Results.randomSeed);
+    display(ip.Results.rngType);
     setUserSpecifiedRng(ip.Results.rngType);
 
     % Moving centering and scaling parameters out of ip, in case we need to
