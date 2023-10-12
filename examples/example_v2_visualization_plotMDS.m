@@ -1,7 +1,7 @@
-% example_v2_visualization_plotDendrogram.m
+% example_v2_visualization_plotMDS.m
 % -----------------------------------
-% Example code for visualization of heirarchical dendrogram
-% plotDendrogram.m
+% Example code for visualization of multidimensional scaling
+% plotMDS.m
 %
 % This script covers the following steps:
 %  - Clearing figures, console, and workspace
@@ -10,7 +10,7 @@
 %  - Instantiating MatClassRSA object
 %  - Proprocess Data	
 %  - Classify Data
-%  - Visualize Classification with heirarchical representation
+%  - Visualize confusion matrix and multidimensional scaling
 
 %Ray - October, 2023
 
@@ -22,7 +22,7 @@ clear all; close all; clc
 % category labeles
 timepoint_idx = 17:22; % 144:224 ms
 n_trials_to_avg = 15;
-rnd_seed = 4;
+rnd_seed = 5;
 rgb6 = {[0.1216    0.4667    0.7059],  ...  % Blue
     [1.0000    0.4980    0.0549] ,     ...  % Orange
     [0.1725    0.6275    0.1725] ,     ...  % Green
@@ -53,14 +53,12 @@ RSA.Visualization.plotMatrix(M.CM, 'colorbar', 1, 'matrixLabels', 1,...
 title('Multiclass LDA Confusion Matrix');
 set(gca, 'fontsize', 16)
 
-%Visualize heirarchical structure of RDM
+%Convert CM to RDM, Visualize RDM
 RDM_LDA = RSA.RDM_Computation.computeCMRDM(M.CM, ...
     'normalize', 'diagonal');
 
 figure(2)
-RSA.Visualization.plotDendrogram(RDM_LDA, 'nodeLabels', catLabels, ...
-    'nodeColors', rgb6, 'yLim', [0 1.5]);
-title('Multiclass LDA Dendrogram Dendrogram');
-set(gca, 'fontsize', 16); ylabel('Distance')
-
-
+RSA.Visualization.plotMDS(RDM_LDA, 'nodeLabels', catLabels, ...
+    'nodeColors', rgb6);
+set(gca, 'fontsize', 16)
+title('Multiclass LDA MDS');

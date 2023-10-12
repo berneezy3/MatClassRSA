@@ -1,6 +1,7 @@
 % example_v2_visualization_plotMatrix.m
 % -----------------------------------
-% Example code for visualization of heirarchical dendrogram
+% Example code for visualization confusion matrix and representational
+% dissimilarity matrix
 % plotMatrix.m
 %
 % This script covers the following steps:
@@ -38,12 +39,12 @@ RSA = MatClassRSA;
 
 % Data preprocessing (noise normalization, shuffling, pseudo-averaging),
 % where the random seed is set to rnd_seed
-[X_norm, sigma_inv] = RSA.Preprocessing.noiseNormalization(X, labels6);
-[X_shufNorm, Y_shuf,rndIdx] = RSA.Preprocessing.shuffleData(X_norm, labels6,'rngType', rnd_seed);
-[X_avgShufNorm, Y_avgShuf] = RSA.Preprocessing.averageTrials(X_shufNorm, Y_shuf, n_trials_to_avg, 'rngType', rnd_seed);
+[X_shuf, Y_shuf,rndIdx] = RSA.Preprocessing.shuffleData(X, labels6,'rngType', rnd_seed);
+[X_shufNorm, sigma_inv] = RSA.Preprocessing.noiseNormalization(X_shuf, Y_shuf);
+[X_shufNormAvg, Y_shufAvg] = RSA.Preprocessing.averageTrials(X_shufNorm, Y_shuf, n_trials_to_avg, 'rngType', rnd_seed);
 
 %Classify data with LDA with PCA
-M = RSA.Classification.crossValidateMulti(X_avgShufNorm, Y_avgShuf, 'PCA', .99, 'rngType', rnd_seed);
+M = RSA.Classification.crossValidateMulti(X_shufNormAvg, Y_shufAvg, 'PCA', .99, 'rngType', rnd_seed);
 
 %Visualize confusion matrix
 figure(1)
