@@ -12,7 +12,7 @@
 %  - Classify Data
 %  - Visualize Classification with heirarchical representation
 
-%Ray - October, 2023
+% Ray - October, 2023
 
 
 % Clear workspace
@@ -48,16 +48,19 @@ M = RSA.Classification.crossValidateMulti(X_shufNormAvg, Y_shufAvg, 'PCA', .99, 
 
 %Visualize confusion matrix
 figure(1)
+subplot(2,1,1)
+
 RSA.Visualization.plotMatrix(M.CM, 'colorbar', 1, 'matrixLabels', 1,...
                             'axisLabels', catLabels, 'axisColors', rgb6);
 title('Multiclass LDA Confusion Matrix');
 set(gca, 'fontsize', 16)
 
 %Visualize heirarchical structure of RDM
+
 RDM_LDA = RSA.RDM_Computation.computeCMRDM(M.CM, ...
     'normalize', 'diagonal');
 
-figure(2)
+subplot(2,1,2)
 RSA.Visualization.plotDendrogram(RDM_LDA, 'nodeLabels', catLabels, ...
     'nodeColors', rgb6, 'yLim', [0 1.5]);
 title('Multiclass LDA Dendrogram Dendrogram');

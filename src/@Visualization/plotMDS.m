@@ -140,6 +140,8 @@ function [fig Kclustering] = plotMDS(obj, RDM, varargin)
     %img = imagesc(RDM);
         
     [r c] = size(Y);
+    set(gca, 'YAxisLocation', 'origin');
+    set(gca, 'XAxisLocation', 'origin');
     
     % set dimensions
     xDim = ip.Results.dimensions(1);

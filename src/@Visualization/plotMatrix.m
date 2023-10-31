@@ -6,7 +6,7 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
 % Bernard Wang - April 23, 2017
 %
 % This function plots a matrix.  The matrix can either be an 
-% representational dissimilarity matrix (RDN )computed bye the functions in 
+% representational dissimilarity matrix (RDM)computed by the functions in 
 % MatClassRSA.RDM_Computation, or a confusion matrix from the functions in
 % MatCLass.Classification.  
 %
@@ -214,8 +214,11 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
             && isempty(ip.Results.iconPath)
         
         disp('Plotting with user defined colored labels...')
-
+        
+        set(gca,'xTick', [1:length(RDM)]);
+        set(gca,'yTick',  [1:length(RDM)]);
         [xTickCoords yTickCoords] = getTickCoord;
+        
         set(gca,'xTickLabel', '');
         set(gca,'yTickLabel', '');
         numLabels = length(labels);
@@ -249,7 +252,9 @@ function  [img, fig] = plotMatrix(obj, RDM, varargin)
     elseif isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
             && isempty(ip.Results.iconPath)
         disp('Plotting with user defined labels...')
-
+        
+        set(gca,'xTick', [1:length(RDM)]);
+        set(gca,'yTick',  [1:length(RDM)]);
         set(gca,'xTickLabel', '');
         set(gca,'yTickLabel', '');
 
