@@ -97,11 +97,11 @@
 %       'singleFold' (default)
 %       'nestedCV'
 %   'trainDevSplit': This parameter is a 2 element vector which controls 
-%       how each each fold further split into a training and development 
+%       how each fold further split into a training and development 
 %       data.  For each fold, a (1/nFolds) fraction of the data becomes the 
 %       test data, and a (1 - 1/nFolds) fraction of the data is further 
 %       split into training and development data.  The elements must be 
-%       decimals which sum to 1.  
+%       decimals which sum to 1. What is the default? Is it also (1/nFolds) and (1-1/nFolds)? 
 %   'gammaSpace' - Vector of 'gamma' values to search over during 
 %       hyperparameter optimization.  Gamma is a hyperparameter of the rbf 
 %       kernel for SVM classification.  Default is 5 logarithmically spaced
@@ -213,6 +213,9 @@
         end
     end
 
+    % check that X and Y have same number of trials
+    assert(size(X,1) == length(Y), "X and Y vectors must have same number of trials");
+    
     % Initialize the input parser
     st = dbstack;
     namestr = st.name;
@@ -299,12 +302,30 @@
     if ( strcmp(ip.Results.optimization, 'nestedCV'))
         trainDevTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
     elseif (strcmp(ip.Results.optimization, 'singleFold'))
-        trainDevTestSplit = ip.Results.trainDevSplit;
+        trainDevTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
     end
-    partition = trainDevTestPart(X, ip.Results.nFolds, trainDevTestSplit);
-    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
     
+    % initialize areEqualArray with at least one element being false
+    areEqualArray = false;
+    
+    % set temp rng to use in loop
+    tempRNG = ip.Results.rngType - 1;
+    
+    % repeat partitioning until all unique values in trainY match unique
+    % values of Y
+    while any(~areEqualArray)
+        
+        rng(tempRNG+1);
+        partition = trainDevTestPart(X, ip.Results.nFolds, trainDevTestSplit);
+        [cvDataObj,V,nPCs] = cvData(X,Y, partition, ip, ipCenter, ipScale);
 
+        % Check uniqueness for each cell of trainYall and compare with unique values of Y
+        areEqualArray = cellfun(@(x) isequal(unique(x), unique(Y)), cvDataObj.trainYall);
+    end
+    
+    % restore rng to original
+    rng(ip.Results.rngType);
+    
     % CROSS VALIDATION
     disp('Cross Validating')
     
@@ -377,14 +398,14 @@
         predictionsConcat = [predictionsConcat P.predY];
         modelsConcat{i} = M.mdl;
         
-        CM_tmp(:,:,i) = confusionmat(labelsConcat, predictionsConcat, 'Order', 1:numClasses);
+        %CM_tmp(:,:,i) = confusionmat(labelsConcat, predictionsConcat);
         %TEMP = confusionmat(labelsConcat, predictionsConcat);
         %CM_tmp(1:length(TEMP),1:length(TEMP),i) = TEMP; 
         
 
     end
 
-    C.CM = sum(CM_tmp, 3);
+    C.CM = confusionmat(labelsConcat, predictionsConcat);
     
     %PERMUTATION TEST (assigning)
     tic    

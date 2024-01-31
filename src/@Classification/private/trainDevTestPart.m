@@ -4,7 +4,7 @@ function obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% obj = trainDevTestPart(numTrials, nFolds,)
+% obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
 % --------------------------------
 % Bernard Wang, June 27, 2017
 % 
@@ -23,7 +23,7 @@ function obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
 %   - trainDevTestSplit: %   'trainDevTestSplit' - This determines the size 
 %       of the train, developement (AKA validation) and test set sizes 
 %       for each fold of cross validation.  
-%   - numTrials: number of train samples
+%   - X: input data matrix
 %   - nFolds: number of folds
 %
 % OUTPUT ARGS:
@@ -61,11 +61,13 @@ function obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
 % POSSIBILITY OF SUCH DAMAGE.
 
 [numTrials c] = size(X);
+
     
 assert(numTrials >= nFolds, 'first parameter, k, must be lager than second parameter, n');
 
 
 obj.optimize = 1;
+
 
 if length(trainDevTestSplit) == 2
 %     trainDevTestSplit = [trainDevTestSplit(1) 0 trainDevTestSplit(2)];
@@ -106,16 +108,33 @@ remainder = rem(numTrials, nFolds);
 % foldSize is the number of trials each test fold
 foldSize = floor(numTrials/nFolds);
 
+
+
 %case divisible
 if remainder == 0
     for i = 1:nFolds
         
+        if i==1
+            % randomly select indices for test trials, driven by random seed, of
+            % number testSize
+            randomIndices = randperm(numTrials, testSize);
+        else
+            % available indices
+            availableIndices = setdiff(1:numTrials, randomIndices);
+
+            % update random indices based on those left over
+            randomIndices = availableIndices(randperm(length(availableIndices), testSize));
+        end
+        
         % indices of test trials for this fold
         testIndices = zeros( numTrials,1 );
         
-        for j = 1:testSize
-            testIndices(j+(i-1)*testSize) = 1;
-        end
+        % set indices to use for testing as 1
+        testIndices(randomIndices)=1;
+        
+        %for j = 1:testSize
+            %testIndices(j+(i-1)*testSize) = 1;
+       % end
         
         % the train/dev indices indices should consist of the
         % non-test indices

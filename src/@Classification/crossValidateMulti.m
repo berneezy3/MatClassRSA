@@ -300,7 +300,7 @@ function C = crossValidateMulti(obj, X, Y, varargin)
     end
     toc
 
-    C.CM = confusionmat(labelsConcat, predictionsConcat);
+    C.CM = confusionmat(labelsConcat, predictionsConcat); 
     C.accuracy = computeAccuracy(labelsConcat, predictionsConcat);
     % Initilize info struct for return
     classificationInfo = struct(...

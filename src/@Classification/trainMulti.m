@@ -163,6 +163,9 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
 
     train_time = tic;
 
+    
+
+
     %initialize output struct C
     M = struct;
     trainData = struct;
@@ -170,7 +173,7 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
     % Initialize the input parser
     ip = inputParser;
     ip.CaseSensitive = false;
-    display(ip.Results.rngType);
+    %display(ip.Results.rngType);
     st = dbstack;
     namestr = st.name;
     ip = initInputParser(namestr, ip, X, Y, varargin{:});
@@ -180,7 +183,7 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
     
     [r c] = size(X);
     
-    display(ip.Results.rngType);
+    %display(ip.Results.rngType);
     % check input data 
     checkInputDataShape(X, Y);
     
@@ -197,11 +200,12 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
     defaultRandomSeed = 'shuffle';
     defaultAverageTrials = -1;
     defaultAverageTrialsHandleRemainder = 'discard';
+    
 
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
     %rng(ip.Results.randomSeed);
-    display(ip.Results.rngType);
+    %display(ip.Results.rngType);
     setUserSpecifiedRng(ip.Results.rngType);
 
     % Moving centering and scaling parameters out of ip, in case we need to
@@ -217,7 +221,9 @@ function [M, trainData] = trainMulti(obj, X, Y, varargin)
     trainData = X;
     
     tdtSplit = processTrainDevTestSplit([1 0 0], X);
-    partition = trainDevTestPart(X, 1, tdtSplit); 
+    partition = trainDevTestPart(X, 1, tdtSplit);
+    
+    % Check that all lables in train set are also in test set.
     
     % PCA
     if (ip.Results.PCA > 0)

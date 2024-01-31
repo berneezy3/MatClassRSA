@@ -50,12 +50,26 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
     
+    nbins = length(unique(Y));
+    counts = histcounts(Y, nbins);
+    display(length(Y));
+    display(counts);
+
+    % check that length of counts is the same as nClasses
+    assert(length(counts) == length(unique(Y)), 'length of counts is not the same as the number of unique classes');
+    
+    % check that there are no classes with only 1 observation
+    assert(min(counts) > 1, 'The number of observations for each class must be larger than 1');
+    
+   
 
     PCA = ip.Results.PCA;
     PCAinFold = ip.Results.PCAinFold;
 
     if (isfield(ip.Results,'nFolds'))
         nFolds = ip.Results.nFolds;
+         % check that nObservationsPerClass > nFolds
+        assert(min(counts) >= nFolds, 'the number of observations for each class must be larger than nFolds');
     else 
         nFolds = 1;
     end
@@ -108,7 +122,11 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
                 devY = Y(devIndx);
                 testX = X(testIndx, :);
                 testY = Y(testIndx);
-
+                
+                % test that all classes are in trainY, if not then re-split
+                % data by shuffling data and 
+                assert(length(unique(Y)) == length(unique(trainY)), 'Try re-shuffling your data, the training partition does not have every class represented');
+                
                 trainXall = [trainXall {trainX}];
                 devXall = [devXall {devX}];
                 testXall = [testXall {testX}];
@@ -127,6 +145,7 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
                 testIndx = find(trainDevTestSplit.test{i});
 
                 trainX = X(trainIndx, :);
+                
                 % center and scale training data
                 [trainX, colMeans, colScales] = ...
                     centerAndScaleData(trainX, center, scale);

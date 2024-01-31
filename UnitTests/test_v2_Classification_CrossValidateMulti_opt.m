@@ -10,6 +10,70 @@ run('loadUnitTestData.m');
 RSA = MatClassRSA;
 
 
+
+%% Test with sequential labels -- looks good
+
+%"X must have more observations than the number of class labels."
+
+y = int32(round(linspace(1,5184,5184)));
+C = RSA.Classification.crossValidateMulti_opt(S01.X, y);
+
+%% Test with few but unequal number of observations per class -- this is too large to process
+
+y = int32(round(linspace(1,5180,5184)));
+C = RSA.Classification.crossValidateMulti_opt(S01.X, y);
+
+
+%% Test with unequal lengths of x and y vectors -- fails; this should check to make sure that they are the same length
+
+C = RSA.Classification.crossValidateMulti_opt(S01_6class_lowCountUnbalanced.X, S01.labels6);
+
+
+%% Try again but with reasonable number of classes/trials
+
+%"Unable to perform assignment because the size of the left side is 80-by-80 and the size of the right side is 11-by-11."
+
+y = int32(round(linspace(1,6,100)));
+y = y(randperm(length(y)));
+
+%[xShuf yShuf] = RSA.Preprocessing.shuffleData(S01_6class_lowCountUnbalanced.X, y);
+C = RSA.Classification.crossValidateMulti_opt(S01_6class_lowCountUnbalanced.X, y);
+imagesc(C.CM);
+C.accuracy;
+
+
+%% Test crossValidateMulti_opt with LDA classification using low count imbalanced dataset; singleFold -- Success
+
+tempY = SL100_lowCountImbalanced.Y;
+%[xShuf yShuf] = RSA.Preprocessing.shuffleData(SL100_lowCountImbalanced.X, SL100_lowCountImbalanced.Y);
+C = RSA.Classification.crossValidateMulti_opt(SL100_lowCountImbalanced.X, SL100_lowCountImbalanced.Y, 'rngType', 3);
+imagesc(C.CM);
+C.accuracy;
+
+%% Test crossValidateMulti_opt with LDA classification using low count imbalanced dataset; nestedCV -- Success
+
+tempY = SL100_lowCountImbalanced.Y;
+C = RSA.Classification.crossValidateMulti_opt(SL100_lowCountImbalanced.X, SL100_lowCountImbalanced.Y, 'optimization', 'nestedCV');
+imagesc(C.CM);
+C.accuracy;
+
+%% Test crossValidateMulti with LDA classification using low count imbalanced dataset -- Success
+
+
+tempY = SL100_lowCountImbalanced.Y;
+C = RSA.Classification.crossValidateMulti(SL100_lowCountImbalanced.X, SL100_lowCountImbalanced.Y);
+
+%% Test crossValidateMulti with 2 permutations, LDA classification using low count imbalanced dataset -- Success
+
+
+tempY = SL100_lowCountImbalanced.Y;
+C = RSA.Classification.crossValidateMulti(SL100_lowCountImbalanced.X, SL100_lowCountImbalanced.Y, 'permutations', 5);
+
+%% Test with one class having only one observation
+
+
+tempY = SL100_lowCountImbalanced.Y;
+C = RSA.Classification.crossValidateMulti(SL100_lowCountImbalanced.X, SL100_lowCountImbalanced.Y, 'nFolds' , 10);
 %% Test default input parameters, 3D data, 6-class labels -- looks good
 % default classifier should be LDA
 % default rng should be ('shuffle', 'twister')
