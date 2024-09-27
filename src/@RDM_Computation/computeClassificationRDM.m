@@ -1,9 +1,10 @@
-function [RDM, params] = computeCMRDM(obj, M, varargin)
+function [RDM, params] = computeClassificationRDM(obj, M, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
 % [RDM, params] = RSA.RDM_Computation.computeClassificationRDM(M, varargin)
 % ------------------------------------------------------------------
-% Blair - January 31, 2017, revised September 2019
+% Blair - January 31, 2017, revised September 2019; Ray - revised April
+% 2024
 %
 % This function transforms and scales a generalized square proximity 
 %   matrix. The default specifications assume a square multicategory 
@@ -99,6 +100,18 @@ function [RDM, params] = computeCMRDM(obj, M, varargin)
 %       subfunction will issue a warning and operate only on the lower 
 %       triangle of the matrix, returning a symmetric matrix.
 %
+%  'matrixtype' - 'auto' (default), 'cm', 'pairwise'
+%   typically thought to be a multicategory confusion 
+%   Input matrix could be a confusion matrix or a matrix of pairwise 
+%   correlations. The script will default to autodetect which matrix type
+%   is being used. The user may override this autodection, by
+%   explicitly specifying the matrixType.
+%   --- options ---
+%   'auto' (default) - autodetect matrix type, by destinguishing between 
+%   whole number and non-whole number containing matrices.
+%   'cm' - to specify input matrix is a confusion matrix of observations
+%   'pairwise' - to specify input matrix is a matrix of pairwise accuracies
+%
 % OUTPUTS
 % RDM -- The Representational Dissimilarity (distance) Matrix. RDM is a
 %   square matrix of the same size as the input matrix M.
@@ -168,6 +181,7 @@ defaultSymmetrize = 'arithmetic';
 defaultDistance = 'linear';
 defaultDistpower = 1;
 defaultRankdistances = 'none';
+defaultMatrixtype = 'auto';
 
 % Specify expected values
 expectedNormalize = {'diagonal', 'sum', 'none'};
@@ -175,6 +189,7 @@ expectedSymmetrize = {'arithmetic', 'mean',...
     'geometric', 'harmonic', 'none'};
 expectedDistance = {'linear', 'power', 'logarithmic', 'none'};
 expectedRankdistances = {'none', 'rank', 'percentrank'};
+expectedMatrixtype = {'auto', 'cm', 'pairwise'};
 
 % Required inputs
 addRequired(ip, 'M', @isnumeric)
@@ -192,6 +207,8 @@ if verLessThan('matlab', '8.2')
         @(x) any(validatestring(x, expectedRankdistances)));
     addParamValue(ip, 'distpower', defaultDistpower,...
         @(x) floor(x)==x);
+    addParamValue(ip, 'matrixtype', defaultMatrixtype,...
+        @(x) any(validatestring(x, expectedMatrixtype)));
 else
     addParameter(ip, 'normalize', defaultNormalize,...
         @(x) any(validatestring(x, expectedNormalize)));
@@ -203,6 +220,8 @@ else
         @(x) any(validatestring(x, expectedRankdistances)));
     addParameter(ip, 'distpower', defaultDistpower,...
         @(x) floor(x)==x);
+    addParameter(ip, 'matrixtype', defaultMatrixtype,...
+        @(x) any(validatestring(x, expectedMatrixtype)));
 end
 
 % Parse
@@ -224,18 +243,24 @@ params.symmetrize = ip.Results.symmetrize;
 params.distance = ip.Results.distance;
 params.distpower = ip.Results.distpower;
 params.rankdistances = ip.Results.rankdistances;
-%params.matrixtype = ip.Results.matrixtype;
+params.matrixtype = ip.Results.matrixtype;
 
-% NORMALIZE
-NM = normalizeMatrix(M, params.normalize);
+if ip.Results.matrixtype == 'auto'
+    isPairwise = any(mod(M(:), 1) ~= 0);
 
-% SYMMETRIZE
-SM = symmetrizeMatrix(NM, params.symmetrize);
+elseif ip.Results.matrixtype == 'pairwise'
+    isPairwise = true;
 
-% DISTANCE
-DM = convertSimToDist(SM, params.distance, params.distpower);
+elseif ip.Results.matrixtype == 'cm'
+    isPairwise = false;   
+end
 
-% RANKDISTANCES
-RDM = rankDistances(DM, params.rankdistances);
+if isPairwise
+    RSA.RDM_Computation.shiftPairwiseAccuracy(M)
+    params.matrixtype = 'pairwise';
+else
+    RSA.RDM_Computation.computeCMRDM(M, ip.Results)
+    params.matrixtype = 'cm';
+end
 
 

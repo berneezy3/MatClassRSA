@@ -305,23 +305,8 @@
         trainDevTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
     end
     
-    % initialize areEqualArray with at least one element being false
-    areEqualArray = false;
-    
-    % set temp rng to use in loop
-    tempRNG = ip.Results.rngType - 1;
-    
-    % repeat partitioning until all unique values in trainY match unique
-    % values of Y
-    while any(~areEqualArray)
-        
-        rng(tempRNG+1);
-        partition = trainDevTestPart(X, ip.Results.nFolds, trainDevTestSplit);
-        [cvDataObj,V,nPCs] = cvData(X,Y, partition, ip, ipCenter, ipScale);
-
-        % Check uniqueness for each cell of trainYall and compare with unique values of Y
-        areEqualArray = cellfun(@(x) isequal(unique(x), unique(Y)), cvDataObj.trainYall);
-    end
+    partition = trainDevTestPart(X, ip.Results.nFolds, trainDevTestSplit);
+    [cvDataObj,V,nPCs] = cvData(X,Y, partition, ip, ipCenter, ipScale);
     
     % restore rng to original
     rng(ip.Results.rngType);

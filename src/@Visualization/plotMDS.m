@@ -1,7 +1,7 @@
-function [fig Kclustering] = plotMDS(obj, RDM, varargin)
+function fig = plotMDS(obj, RDM, varargin)
 %-------------------------------------------------------------------
 %  RSA = MatClassRSA;
-%  RSA.visualize.plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
+%  RSA.Visualization.plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
@@ -23,7 +23,7 @@ function [fig Kclustering] = plotMDS(obj, RDM, varargin)
 %           https://www.mathworks.com/help/matlab/ref/colorspec.html
 %   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
 %       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
-%   'iconPath': a directory containing images used to label, where the
+%   'iconPath': path to a directory containing images used to label, where the
 %       image files must be ordered in the same order as the labels of the 
 %       confusion matrix
 %   'dimensions': Choose which MDS dimensions to display (default [1 2]).
@@ -186,25 +186,8 @@ function [fig Kclustering] = plotMDS(obj, RDM, varargin)
             text(Y(i,xDim), Y(i,yDim), num2str(labels(i)), ...
                 'FontSize', 30);
         end
-        figure(14);
-        evaluation = evalclusters(Y,"kmeans","silhouette","KList",1:8); 
-        plot(evaluation);
         
-        [idx2 C] = kmeans(Y, 4,'MaxIter',10000,...
-    'Display','final','Replicates',100000);
-        figure(15)
-        plot(Y(idx2==1,1),Y(idx2==1,2),'r.','MarkerSize',12)
-        hold on
-        plot(Y(idx2==2,1),Y(idx2==2,2),'b.','MarkerSize',12)
-        hold on
-        plot(Y(idx2==3,1),Y(idx2==3,2),'g.','MarkerSize',12)
-        hold on
-        plot(Y(idx2==4,1),Y(idx2==4,2),'k.','MarkerSize',12)
-        hold on
-        plot(Y(idx2==5,1),Y(idx2==5,2),'m.','MarkerSize',12)
-        disp(size(Y));
         
-        Kclustering = [idx2 Y];
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE

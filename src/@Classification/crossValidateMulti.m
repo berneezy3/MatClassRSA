@@ -210,7 +210,7 @@ function C = crossValidateMulti(obj, X, Y, varargin)
     verifySVMParameters(ip);
    
    % check if data is double, convert to double if it isn't
-    [X, Y] = convert2double(X,Y);
+   [X, Y] = convert2double(X,Y);
    
    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...

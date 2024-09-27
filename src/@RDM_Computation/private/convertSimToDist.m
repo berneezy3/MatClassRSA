@@ -11,6 +11,7 @@ function xOut = convertSimToDist(xIn, distType, distPower)
 %   - Linear ('linear', 'lin)
 %   - Power ('power', 'p')
 %   - Logarithmic ('logarithmic', 'log')
+%   - Pairwise ('pairwise', 'pw')
 %   - None ('none', 'n')
 % - distPower:
 %   - Distance power (used in power and logarithmic computations)
@@ -81,6 +82,9 @@ switch distType
         end
         disp(['Distance power: ' num2str(distPower)])
         xOut = 1 - log2(distPower * xIn + 1) ./ log2(distPower + 1);
+    case {'pairwise', 'pw'}
+        disp('Distance: pairwise')
+        xOut = 0.5 - xIn;
     case {'none', 'n'}
         disp('Distance: none')
         xOut = xIn;

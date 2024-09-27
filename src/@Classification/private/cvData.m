@@ -123,9 +123,7 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
                 testX = X(testIndx, :);
                 testY = Y(testIndx);
                 
-                % test that all classes are in trainY, if not then re-split
-                % data by shuffling data and 
-                assert(length(unique(Y)) == length(unique(trainY)), 'Try re-shuffling your data, the training partition does not have every class represented');
+                
                 
                 trainXall = [trainXall {trainX}];
                 devXall = [devXall {devX}];
