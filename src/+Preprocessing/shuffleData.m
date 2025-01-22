@@ -1,7 +1,6 @@
-function [randX, randY, randP, randIdx] = shuffleData(obj, X, Y, varargin)
+function [randX, randY, randP, randIdx] = shuffleData(X, Y, varargin)
 %-------------------------------------------------------------------
-% RSA = MatClassRSA;
-% [randX, randY, randP, randIdx] = RSA.Preprocessing.shuffleData(X, Y, P, rngType)
+% [randX, randY, randP, randIdx] = Preprocessing.shuffleData(X, Y, P, rngType)
 %-------------------------------------------------------------------
 % Bernard Wang - April 30, 2017
 % Revised by Blair Kaneshiro, August 2019
@@ -105,8 +104,8 @@ end
 parse(ip, X, Y, varargin{:});
 
 % Set random number generator
-if nargin < 5 || isempty(ip.Results.rngType), setUserSpecifiedRng();
-else, setUserSpecifiedRng(ip.Results.rngType);
+if nargin < 5 || isempty(ip.Results.rngType), Utils.setUserSpecifiedRng();
+else, Utils.setUserSpecifiedRng(ip.Results.rngType);
 end
 
 % Make sure data matrix X is a 2D or 3D matrix
@@ -133,7 +132,7 @@ randY = Y(randIdx);
 
 % Handle participants randomization if specified as output
 if nargout > 2
-    if nargin < 4 || isempty(ip.Results.P), randP = NaN;
+    if nargin < 3 || isempty(ip.Results.P), randP = NaN;
     elseif ~isvector(ip.Results.P)
         error('Input participant identifiers must be a vector.');
     elseif length(ip.Results.P) ~= length(Y)

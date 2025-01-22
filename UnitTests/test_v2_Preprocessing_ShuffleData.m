@@ -22,10 +22,9 @@ P = randi(5, [1 nTrial]);
 % "lsosorelli_500sweep_epoched.mat","S01.mat"
 run('loadUnitTestData.m') 
 
-RSA = MatClassRSA;
 
 %% SUCCESS: 3D input data matrix
-[x3, y3, p3, rndIdx] = RSA.Preprocessing.shuffleData(X_3D, Y, P);
+[x3, y3, p3, rndIdx] = Preprocessing.shuffleData(X_3D, Y, P);
 assert(isequal(size(x3), size(X_3D)));
 assert(isequal(size(y3), size(Y)));
 assert(isequal(size(p3), size(P)));
@@ -45,7 +44,7 @@ end
 %replace P with ip.Results.P. As P is defined explicitly as an input
 %parameter
 %% SUCCESS: 2D input data matrix
-[x2, y2, p2, rndIdx] = RSA.Preprocessing.shuffleData(X_2D, Y, P);
+[x2, y2, p2, rndIdx] = Preprocessing.shuffleData(X_2D, Y, P);
 assert(isequal(size(x2), size(X_2D)))
 assert(isequal(size(y2), size(Y)));
 assert(isequal(size(p2), size(P)));

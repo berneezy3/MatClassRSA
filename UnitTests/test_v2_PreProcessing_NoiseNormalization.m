@@ -22,16 +22,14 @@ clear all; close all; clc;
 % "lsosorelli_500sweep_epoched.mat","S01.mat"
 run('loadUnitTestData.m') 
 
-RSA = MatClassRSA;
-
 
 %% SUCCESS: Call the function with 3D input matrix
 clc
-[a3, b3] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
+[a3, b3] = Preprocessing.noiseNormalization(S01.X, S01.labels72);
 
 %% SUCCESS Call the function with 2D input matrix
 clc
-[a2, b2] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
+[a2, b2] = Preprocessing.noiseNormalization(SL100.X, SL100.Y);
 
 %% FAIL: Call the function with wrong-length labels vector
 clc
@@ -43,7 +41,7 @@ clc
 
 %% FAIL: Labels is not a vector
 clc
-[a, b] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.X);
+[a, b] = Preprocessing.noiseNormalization(SL100.X, SL100.X);
 %'Y' is not a vector
 
 %% SUCCESS 3D input single channel
@@ -114,7 +112,7 @@ C_LDA = RSA.Classification.crossValidateMulti(Xnorm, SL100.Y,...
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
 [Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(Xnorm, Ynorm);
 
-%number of trials in X does not equal number of labels in Y
+% number of trials in X does not equal number of labels in Y
 
 %% SUCCESS: Using 3D Normalization outputs as X and Y inputs for subsequent processes (Normalization)
 
@@ -138,7 +136,7 @@ disp('Success! renormalized data is the same')
 assert(isequal(Xnorm, SL100.X.*Ynorm))
 disp('Success');
 
-%output is a scaled version of input data. Scaled by factor 'Ynorm'
+% output is a scaled version of input data. Scaled by factor 'Ynorm'
 
 
 

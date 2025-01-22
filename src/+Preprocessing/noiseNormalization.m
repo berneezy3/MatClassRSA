@@ -1,7 +1,6 @@
-function [norm_data, sigma_inv] = noiseNormalization(obj, X, Y)
+function [norm_data, sigma_inv] = noiseNormalization(X, Y)
 %---------------------------------------------------------------------------
-%   RSA = MatClassRSA;
-%  [norm_data, sigma_inv] = RSA.preprocess.noiseNormalization(X, Y)
+%  [norm_data, sigma_inv] = Preprocessing.noiseNormalization(X, Y)
 %---------------------------------------------------------------------------
 %
 % Function to perform multivariate noise normalization on time varying data.
@@ -51,9 +50,9 @@ function [norm_data, sigma_inv] = noiseNormalization(obj, X, Y)
         for j=1:num_timepoints
             curr_label = unique_labels(i);
             if num_components > 1
-                all_time_covs(j,:,:) = cov1para(squeeze(X(:,j,Y==curr_label))');
+                all_time_covs(j,:,:) = Utils.cov1para(squeeze(X(:,j,Y==curr_label))');
             elseif num_components == 1
-                all_time_covs(j,:,:) = cov1para(squeeze(X(:,j,Y==curr_label)));
+                all_time_covs(j,:,:) = Utils.cov1para(squeeze(X(:,j,Y==curr_label)));
             else
                 assert(0, 'Condition should not be reached.');
             end
