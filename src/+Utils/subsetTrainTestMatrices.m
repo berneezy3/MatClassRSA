@@ -129,7 +129,7 @@ function [W, nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, spaceUse, t
            nFeature = size(X_subset, 2);
        end
        % Reshape the X_subset matrix
-       X_subset = cube2trRows(X_subset); % NOW IT'S 2D
+       X_subset = Utils.cube2trRows(X_subset); % NOW IT'S 2D
 
     %%% 2D input matrix
     elseif ndims(X) == 2

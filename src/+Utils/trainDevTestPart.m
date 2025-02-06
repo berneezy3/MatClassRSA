@@ -85,7 +85,7 @@ if length(trainDevTestSplit) == 2
     end
 end
 
-trainDevTestSplit = processTrainDevTestSplit(trainDevTestSplit, X);
+trainDevTestSplit = Utils.processTrainDevTestSplit(trainDevTestSplit, X);
 
 obj.train = {};
 obj.dev = {};

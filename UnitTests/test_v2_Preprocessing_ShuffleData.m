@@ -58,13 +58,13 @@ for i=1:nTrial
 end
 
 %% SUCCESS: Testing P functionality on real dataset
-[x_shuf, y_shuf, p_shuf, rndIdx] = RSA.Preprocessing.shuffleData(SL100.X, SL100.Y, SL100.P);
+[x_shuf, y_shuf, p_shuf, rndIdx] = Preprocessing.shuffleData(SL100.X, SL100.Y, SL100.P);
 
 assert(isequal(SL100.P(rndIdx), p_shuf));
 
 %% SUCCESS: Testing 3D 6 class labels balanced 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01.X, S01.labels6);
+[xShuf, yShuf] = Preprocessing.shuffleData(S01.X, S01.labels6);
 assert(isequal(size(xShuf,3), size(yShuf,2)))
 
 
@@ -76,7 +76,7 @@ assert(isequal(yShuf, S01.labels6));
 
 %% SUCCESS: Testing 3D 6 class labels slightly unbalanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01_6class_slightlyUnbalanced.X, S01_6class_slightlyUnbalanced.labels6);
+[xShuf, yShuf] = Preprocessing.shuffleData(S01_6class_slightlyUnbalanced.X, S01_6class_slightlyUnbalanced.labels6);
 
 
 h1Dist=histcounts(S01_6class_slightlyUnbalanced.labels6);
@@ -89,7 +89,7 @@ assert(isequal(yShuf, S01_6class_slightlyUnbalanced.labels6));
 
 %% SUCCESS: Testing 3D 6 class labels very unbalanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01_6class_veryUnbalanced.X, S01_6class_veryUnbalanced.labels6);
+[xShuf, yShuf] = Preprocessing.shuffleData(S01_6class_veryUnbalanced.X, S01_6class_veryUnbalanced.labels6);
 
 h1 =histcounts(S01_6class_veryUnbalanced.labels6);
 h2 =histcounts(yShuf);
@@ -99,7 +99,7 @@ assert(isequal(yShuf, S01_6class_veryUnbalanced.labels6));
 
 %% SUCCESS: Testing 3D 6 class labels low count unbalanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01_6class_lowCountUnbalanced.X, S01_6class_lowCountUnbalanced.labels6);
+[xShuf, yShuf] = Preprocessing.shuffleData(S01_6class_lowCountUnbalanced.X, S01_6class_lowCountUnbalanced.labels6);
 
 h1 =histcounts(S01_6class_lowCountUnbalanced.labels6);
 h2 =histcounts(yShuf);
@@ -109,7 +109,7 @@ assert(isequal(yShuf, S01_6class_lowCountUnbalanced.labels6));
 
 %% SUCCESS: Testing 3D 72 class labels balanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01.X, S01.labels72);
+[xShuf, yShuf] = Preprocessing.shuffleData(S01.X, S01.labels72);
 
 h1 =histcounts(S01.labels72);
 h2 =histcounts(yShuf);
@@ -119,7 +119,7 @@ assert(isequal(yShuf, S01.labels72));
 
 %% SUCCESS: Testing 3D 72 class labels slightly unbalanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01_72class_slightlyUnbalanced.X, S01_72class_slightlyUnbalanced.labels72);
+[xShuf, yShuf] = Preprocessing.shuffleData(S01_72class_slightlyUnbalanced.X, S01_72class_slightlyUnbalanced.labels72);
 
 h1 =histcounts(S01_72class_slightlyUnbalanced.labels72);
 h2 =histcounts(yShuf);
@@ -129,7 +129,7 @@ assert(isequal(yShuf, S01_72class_slightlyUnbalanced.labels72));
 
 %% SUCCESS: Testing 3D 72 class labels very unbalanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01_72class_veryUnbalanced.X, S01_72class_veryUnbalanced.labels72);
+[xShuf, yShuf] = Preprocessing.shuffleData(S01_72class_veryUnbalanced.X, S01_72class_veryUnbalanced.labels72);
 
 h1 =histcounts(S01_72class_veryUnbalanced.labels72);
 h2 =histcounts(yShuf);
@@ -139,7 +139,7 @@ assert(isequal(yShuf, S01_72class_veryUnbalanced.labels72));
 
 %% SUCCESS: Testing 3D 72 class labels low count unbalanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(S01_72class_lowCountUnbalanced.X, S01_72class_lowCountUnbalanced.labels72);
+[xShuf, yShuf] = Preprocessing.shuffleData(S01_72class_lowCountUnbalanced.X, S01_72class_lowCountUnbalanced.labels72);
 
 h1 =histcounts(S01_72class_lowCountUnbalanced.labels72);
 h2 =histcounts(yShuf);
@@ -149,7 +149,7 @@ assert(isequal(yShuf, S01_72class_lowCountUnbalanced.labels72));
 
 %% SUCCESS: Testing 2D balanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(SL100.X, SL100.Y);
+[xShuf, yShuf] = Preprocessing.shuffleData(SL100.X, SL100.Y);
 
 h1 =histcounts(SL100.Y);
 h2 =histcounts(yShuf);
@@ -159,7 +159,7 @@ assert(isequal(yShuf, SL100.Y));
 
 %% SUCCESS: Testing 2D slightly unbalanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(SL100_slightlyImbalanced.X, SL100_slightlyImbalanced.Y);
+[xShuf, yShuf] = Preprocessing.shuffleData(SL100_slightlyImbalanced.X, SL100_slightlyImbalanced.Y);
 
 h1 =histcounts(SL100_slightlyImbalanced.Y);
 h2 =histcounts(yShuf);
@@ -169,7 +169,7 @@ assert(isequal(yShuf, SL100_slightlyImbalanced.Y));
 
 %% SUCCESS: Testing 2D very unbalanced, 2 outputs only, no participants, no user specified randomization
 
-[xShuf, yShuf] = RSA.Preprocessing.shuffleData(SL100_veryImbalanced.X, SL100_veryImbalanced.Y);
+[xShuf, yShuf] = Preprocessing.shuffleData(SL100_veryImbalanced.X, SL100_veryImbalanced.Y);
 
 h1 =histcounts(SL100_veryImbalanced.Y);
 h2 =histcounts(yShuf);
@@ -181,40 +181,40 @@ assert(isequal(yShuf, SL100_veryImbalanced.Y));
 rng(1);
 xrtest = X_2D(randperm(nTrial),:);
 
-[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 1);
+[xr, yr, ~] = Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 1);
 assert(isequal(xrtest, xr));
 
 %requires name-value pairing to work... for example
-%RSA.Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
+%Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
 %seems like it is not the case elsewhere.
 
 %% SUCCESS: Testing random seed set 'default'
 rng('default');
 xrtest = X_2D(randperm(nTrial),:);
 
-[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 'default');
+[xr, yr, ~] = Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 'default');
 assert(isequal(xrtest, xr));
 
 %requires name-value pairing to work... for example
-%RSA.Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
+%Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
 %seems like it is not the case elsewhere.
 
 %% FAIL: Testing random seed set 'shuffle'
 rng('shuffle');
 xrtest = X_2D(randperm(nTrial),:);
 
-[xr, yr, ~] = RSA.Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 'shuffle');
+[xr, yr, ~] = Preprocessing.shuffleData(X_2D, Y, P, 'rngType', 'shuffle');
 assert(isequal(xrtest, xr));
 
 %requires name-value pairing to work... for example
-%RSA.Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
+%Preprocessing.shuffleData(X_2D, Y, P, 1); will not work here. This
 %seems like it is not the case elsewhere.
 
 
 %% SUCCESS: Testing return NaN if nargin < 3 or P not specified
 rng('shuffle')
-[~, ~, pr] = RSA.Preprocessing.shuffleData(X_3D, Y);
+[~, ~, pr] = Preprocessing.shuffleData(X_3D, Y);
 assert(isnan(pr))
 
-[~, ~, pr] = RSA.Preprocessing.shuffleData(X_3D, Y, []);
+[~, ~, pr] = Preprocessing.shuffleData(X_3D, Y, []);
 assert(isnan(pr))

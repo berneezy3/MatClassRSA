@@ -1,4 +1,4 @@
-function [reliabilities] = computeSampleSizeReliability(obj, X, Y, featureIdx, varargin)
+function [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, varargin)
 %---------------------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [reliabilities] = RSA.computeReliability.computeSampleSizeReliability(X, Y, featureIdx, ...

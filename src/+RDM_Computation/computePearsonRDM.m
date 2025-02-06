@@ -1,4 +1,4 @@
-function [dissimilarities] = computePearsonRDM(obj,X, Y, varargin)
+function [dissimilarities] = computePearsonRDM(X, Y, varargin)
 %----------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [dissimilarities] = ...

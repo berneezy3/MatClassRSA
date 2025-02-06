@@ -33,7 +33,7 @@ clc
 
 %% FAIL: Call the function with wrong-length labels vector
 clc
-[a, b] = RSA.Preprocessing.noiseNormalization(S01.X, S01_72class_slightlyUnbalanced.labels72);
+[a, b] = Preprocessing.noiseNormalization(S01.X, S01_72class_slightlyUnbalanced.labels72);
 
 % Error using noiseNormalization (line 35)
 % Length of labels vector does not match number of trials in the
@@ -45,11 +45,11 @@ clc
 %'Y' is not a vector
 
 %% SUCCESS 3D input single channel
-[a3d1, b3d1] = RSA.Preprocessing.noiseNormalization(S01.X(96,:,:), S01.labels72);
+[a3d1, b3d1] = Preprocessing.noiseNormalization(S01.X(96,:,:), S01.labels72);
 
 %% SUCCESS 2D input
 X2d = squeeze(S01.X(96,:,:))';
-[a2d1, b2d1] = RSA.Preprocessing.noiseNormalization(X2d, S01.labels72);
+[a2d1, b2d1] = Preprocessing.noiseNormalization(X2d, S01.labels72);
 assert(isequal(squeeze(a3d1), a2d1'))
 disp('success! 3d single-channel input equals 2d input')
 
@@ -59,79 +59,79 @@ unique(X2d ./ a2d1)
 
 %% SUCCESS: Using 3D Normalization outputs as X and Y inputs for subsequent processes (Shuffle)
 
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
-[Xshuff, Yshuff] = RSA.Preprocessing.shuffleData(Xnorm, Ynorm);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(S01.X, S01.labels72);
+[Xshuff, Yshuff] = Preprocessing.shuffleData(Xnorm, Ynorm);
 
 %'Y' is invalid. It must satisfy the function: isvector.
 
 %% SUCCESS: Using 3D Normalization outputs as X and Y inputs for subsequent processes (Classify)
 
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(S01.X, S01.labels72);
 
-C_LDA = RSA.Classification.crossValidateMulti(Xnorm, S01.labels72,... 
+C_LDA = Classification.crossValidateMulti(Xnorm, S01.labels72,... 
     'PCA', .99, 'classifier', 'LDA');
 
 %'Y' is invalid. It must satisfy the function: isvector.
 
 %% SUCCESS: Using 3D Normalization outputs as X and Y inputs for subsequent processes (Average)
 
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(S01.X, S01.labels72);
 
-[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(Xnorm, S01.labels72, 5, ... 
+[X_avg, Y_avg] = Preprocessing.averageTrials(Xnorm, S01.labels72, 5, ... 
     'rngType', 0);
 
 %'Y' is invalid. It must satisfy the function: isvector.
 
 %% SUCCESS: Using 2D Normalization outputs as X and Y inputs for subsequent processes (Shuffle)
 
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
-[Xshuff, Yshuff] = RSA.Preprocessing.shuffleData(Xnorm, SL100.Y);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(SL100.X, SL100.Y);
+[Xshuff, Yshuff] = Preprocessing.shuffleData(Xnorm, SL100.Y);
 
 % 'Length of input labels vector must equal length of trial dimension of
 % input data.'
 
 %% SUCCESS: Using 2D Normalization outputs as X and Y inputs for subsequent processes (Classify)
 
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(SL100.X, SL100.Y);
 
-C_LDA = RSA.Classification.crossValidateMulti(Xnorm, SL100.Y,... 
+C_LDA = Classification.crossValidateMulti(Xnorm, SL100.Y,... 
     'PCA', .99, 'classifier', 'LDA');
 
 % 'Index exceeds the number of array elements (1).'
 
 %% SUCCESS: Using 2D Normalization outputs as X and Y inputs for subsequent processes (Average)
 
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(SL100.X, SL100.Y);
 
-[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(Xnorm, SL100.Y, 5, ... 
+[X_avg, Y_avg] = Preprocessing.averageTrials(Xnorm, SL100.Y, 5, ... 
     'rngType', 0);
 
 %'number of trials in X does not equal number of labels in Y'
 
 %% SUCCESS: Using 2D Normalization outputs as X and Y inputs for subsequent processes (Normalization)
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(Xnorm, Ynorm);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(SL100.X, SL100.Y);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(Xnorm, Ynorm);
 
 % number of trials in X does not equal number of labels in Y
 
 %% SUCCESS: Using 3D Normalization outputs as X and Y inputs for subsequent processes (Normalization)
 
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(Xnorm, Ynorm);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(S01.X, S01.labels72);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(Xnorm, Ynorm);
 
 %`Y` is not a vector.
 
 %% FAIL: Normalized data being renormalized
 clc
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(S01.X, S01.labels72);
-[Xnorm2, Ynorm2] = RSA.Preprocessing.noiseNormalization(Xnorm, S01.labels72);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(S01.X, S01.labels72);
+[Xnorm2, Ynorm2] = Preprocessing.noiseNormalization(Xnorm, S01.labels72);
 
 assert(isequal(Xnorm, Xnorm2))
 disp('Success! renormalized data is the same')
 
 
 %% FAIL: 2D output the same as input
-[Xnorm, Ynorm] = RSA.Preprocessing.noiseNormalization(SL100.X, SL100.Y);
+[Xnorm, Ynorm] = Preprocessing.noiseNormalization(SL100.X, SL100.Y);
 
 assert(isequal(Xnorm, SL100.X.*Ynorm))
 disp('Success');

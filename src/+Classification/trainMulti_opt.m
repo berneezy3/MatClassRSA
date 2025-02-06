@@ -1,4 +1,4 @@
-function [M, permTestData] = trainMulti_opt(obj, X, Y, varargin)
+function [M, permTestData] = trainMulti_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % M = RSA.Classification.trainMulti_opt(trainData, testData); 

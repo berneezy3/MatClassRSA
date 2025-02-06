@@ -7,11 +7,10 @@
 %   - Clearing workspace
 %   - Setting random number generator seed and number of trials to average
 %   - Loading 3D dataset
-%   - Instantiating MatClassRSA object
 %   - Averaging trials
 %   - Visualizing 10 single trials and 10 averaged pseudotrials
 
-% Ray - April, 2022
+% Ray - April, 2022; Edited: Ray Feb., 2025;
 
 % Clear console, figures, and workspace
 clear all; close all; clc
@@ -21,15 +20,12 @@ rnd_seed = 0;
 n_trials_to_avg = 10;
 
 % Load three dimensional dataset (electrode X time X trial)
-load('S01.mat')
-
-% Make MatClassRSA object
-RSA = MatClassRSA;
+load('S01.mat');
 
 % Run shuffleData.m with 3D EEG data, 6-class labels vector, number of 
 % trials averaged into pseudotrial set to n_trial_to_avg, random seed set 
 % to rnd_seed.
-[X_avg, Y_avg] = RSA.Preprocessing.averageTrials(X, labels6, n_trials_to_avg, 'randomseed', rnd_seed);
+[X_avg, Y_avg] = Preprocessing.averageTrials(X, labels6, n_trials_to_avg, 'rngType', rnd_seed);
 
 % Get indices of trials and pseudotrials from category 1
 stIndx = find(labels6==1);

@@ -1,4 +1,4 @@
-function C = crossValidateMulti(obj, X, Y, varargin)
+function C = crossValidateMulti(X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % C = RSA.Classification.crossValidateMulti(X, Y, varargin)
@@ -192,7 +192,7 @@ function C = crossValidateMulti(obj, X, Y, varargin)
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip, X, Y, varargin{:});
+    ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
     
     %Required inputs
     [r c] = size(X);
@@ -207,12 +207,12 @@ function C = crossValidateMulti(obj, X, Y, varargin)
     parse(ip, X, Y, varargin{:});
     
     % If SVM is selected, then gamma and C parameters must be manually set
-    verifySVMParameters(ip);
+    Utils.verifySVMParameters(ip);
    
    % check if data is double, convert to double if it isn't
-   [X, Y] = convert2double(X,Y);
+   [X, Y] = Utils.convert2double(X,Y);
    
-   [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+   [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
                                                 ip.Results.featureUse);
@@ -233,7 +233,7 @@ function C = crossValidateMulti(obj, X, Y, varargin)
     % SET RANDOM SEED
     % for Random forest purposes
 
-    setUserSpecifiedRng(ip.Results.rngType);
+    Utils.setUserSpecifiedRng(ip.Results.rngType);
 
     % Split Data into fold (w/ or w/o PCA)
     if (ip.Results.PCA>0 && ip.Results.PCA>0)
@@ -252,8 +252,8 @@ function C = crossValidateMulti(obj, X, Y, varargin)
     end
     % partition data for cross validation 
     trainTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
-    partition = trainDevTestPart(X, ip.Results.nFolds, trainTestSplit); 
-    [cvDataObj,V,nPCs] = cvData(X,Y, partition, ip, ipCenter, ipScale);
+    partition = Utils.trainDevTestPart(X, ip.Results.nFolds, trainTestSplit); 
+    [cvDataObj,V,nPCs] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
 
     % CROSS VALIDATION
     disp('Cross Validating')
@@ -289,9 +289,9 @@ function C = crossValidateMulti(obj, X, Y, varargin)
         testX = cvDataObj.testXall{i};
         testY = cvDataObj.testYall{i};
 
-        [mdl, scale] = fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
+        [mdl, scale] = Utils.fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
 
-        [predictions decision_values] = modelPredict(testX, mdl, scale);
+        [predictions decision_values] = Utils.modelPredict(testX, mdl, scale);
 
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat predictions];
@@ -301,7 +301,7 @@ function C = crossValidateMulti(obj, X, Y, varargin)
     toc
 
     C.CM = confusionmat(labelsConcat, predictionsConcat); 
-    C.accuracy = computeAccuracy(labelsConcat, predictionsConcat);
+    C.accuracy = Utils.computeAccuracy(labelsConcat, predictionsConcat);
     % Initilize info struct for return
     classificationInfo = struct(...
                         'PCA', ip.Results.PCA, ...
@@ -338,7 +338,7 @@ function C = crossValidateMulti(obj, X, Y, varargin)
             permTestTestY = cvDataObj.testYall{1};
 
             % permute training labels
-            permTestTrainY = permTestTrainY(randperm(length(permTestTrainY)), :);
+            permTestTrainY = Utils.permTestTrainY(randperm(length(permTestTrainY)), :);
             
             % Train permutation model and predict test data
             evalc(['permTestM = obj.trainMulti(' ...
@@ -355,7 +355,7 @@ function C = crossValidateMulti(obj, X, Y, varargin)
                 'permTestTestX, ''actualLabels'', permTestTestY);' ]);
             accArr(i) = permTestOutput.accuracy;
         end
-        C.pVal = permTestPVal(C.accuracy, accArr);
+        C.pVal = Utils.permTestPVal(C.accuracy, accArr);
         C.permAccs = accArr;
     else
         C.pVal = NaN;

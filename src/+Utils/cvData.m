@@ -108,8 +108,8 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
         % outside of folds
         if (PCAinFold == 0)
 %             disp('Conducting PCA on once on entire dataset');
-            [X, colMeans, colScales] = centerAndScaleData(X, center, scale);
-            [X, V, nPC] = getPCs(X, PCA);
+            [X, colMeans, colScales] = Utils.centerAndScaleData(X, center, scale);
+            [X, V, nPC] = Utils.getPCs(X, PCA);
 
             for i = 1:trainDevTestSplit.NumTestSets
                 trainIndx = find(trainDevTestSplit.train{i});

@@ -1,4 +1,4 @@
-function fig = plotMDS(obj, RDM, varargin)
+function fig = plotMDS(RDM, varargin)
 %-------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  RSA.Visualization.plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')

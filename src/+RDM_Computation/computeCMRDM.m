@@ -1,4 +1,4 @@
-function [RDM, params] = computeCMRDM(obj, M, varargin)
+function [RDM, params] = computeCMRDM(M, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
 % [RDM, params] = RSA.RDM_Computation.computeClassificationRDM(M, varargin)

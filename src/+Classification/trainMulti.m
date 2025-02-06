@@ -1,4 +1,4 @@
-function [M, trainData] = trainMulti(obj, X, Y, varargin)
+function [M, trainData] = trainMulti(X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % M = RSA.Classification.trainMulti(trainData, testData); 

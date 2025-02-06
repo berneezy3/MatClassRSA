@@ -1,4 +1,4 @@
-function [RDM, params] = computeClassificationRDM(obj, M, varargin)
+function [RDM, params] = computeClassificationRDM(M, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
 % [RDM, params] = RSA.RDM_Computation.computeClassificationRDM(M, varargin)
@@ -256,10 +256,10 @@ elseif ip.Results.matrixtype == 'cm'
 end
 
 if isPairwise
-    RSA.RDM_Computation.shiftPairwiseAccuracy(M)
+    RDM_Computation.shiftPairwiseAccuracy(M)
     params.matrixtype = 'pairwise';
 else
-    RSA.RDM_Computation.computeCMRDM(M, ip.Results)
+    RDM_Computation.computeCMRDM(M, ip.Results)
     params.matrixtype = 'cm';
 end
 

@@ -1,4 +1,4 @@
- function [M, permTestData] = trainPairs(obj, X, Y, varargin)
+ function [M, permTestData] = trainPairs(X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % M = RSA.Classification.trainPairs(X, Y, varargin)

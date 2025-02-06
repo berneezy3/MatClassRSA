@@ -1,4 +1,4 @@
-function  fig = plotMST(obj, RDM, varargin)
+function  fig = plotMST(RDM, varargin)
 %-------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  RSA.visualize.plotMST(RDM, varargin)

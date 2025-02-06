@@ -1,4 +1,4 @@
-function  [img, fig] = plotMatrix(obj, RDM, varargin)
+function  [img, fig] = plotMatrix(RDM, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
 % RSA.visualize.plotMatrix(matrix, varargin)

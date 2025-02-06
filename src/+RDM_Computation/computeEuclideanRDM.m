@@ -1,4 +1,4 @@
-function [dissimilarities] = computeEuclideanRDM(obj, X, Y, varargin)
+function [dissimilarities] = computeEuclideanRDM(X, Y, varargin)
 %------------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [dissimilarities] = ...

@@ -1,4 +1,4 @@
-function [averagedX, averagedY, averagedP, whichObs] = averageTrials(obj, X, Y, groupSize, varargin)
+function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, groupSize, varargin)
 %-------------------------------------------------------------------
 % RSA = MatClassRSA;
 % [averagedX, averagedY, averagedP, whichObs] = ...

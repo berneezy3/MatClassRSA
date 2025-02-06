@@ -1,4 +1,4 @@
- function C = crossValidateMulti_opt(obj, X, Y, varargin)
+ function C = crossValidateMulti_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % C = RSA.Classification.crossValidateMulti_opt(X, Y, varargin)

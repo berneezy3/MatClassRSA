@@ -1,4 +1,4 @@
-function P = predict(obj, M, X, varargin)
+function P = predict(M, X, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA;
 % % any of the train functions could be used in the following line

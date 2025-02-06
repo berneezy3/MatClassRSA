@@ -99,7 +99,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
     % classification function
     switch functionName
        case 'crossValidateMulti'
-            addRequired(ip, 'X', @is2Dor3DMatrix);
+            addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'LDA', 'RF', 'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -108,7 +108,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case {'crossValidatePairs', 'crossValidatePairs_fast', 'crossValidatePairs_slow'}
-            addRequired(ip, 'X', @is2Dor3DMatrix);
+            addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'LDA', 'RF'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -117,7 +117,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'crossValidateMulti_opt'
-            addRequired(ip, 'X', @is2Dor3DMatrix);
+            addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'svm'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -131,7 +131,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
                 @(x) any(validatestring(x, expectedOptimization)));
                 %@(x) (floor(x == x) && x > 0));
         case 'crossValidatePairs_opt'
-            addRequired(ip, 'X', @is2Dor3DMatrix);
+            addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -143,7 +143,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addParameter(ip, 'optimization', defaultOptimization,...
                 @(x) any(validatestring(x, expectedOptimization)));
        case 'trainMulti'
-            addRequired(ip, 'X', @is2Dor3DMatrix);
+            addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'LDA', 'RF', 'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -151,7 +151,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'trainPairs'
-            addRequired(ip, 'X', @is2Dor3DMatrix);
+            addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'LDA', 'RF', 'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -159,7 +159,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addParameter(ip, 'gamma', 'default', @(x) any([strcmp(x, 'default') isnumeric(x)]));
             addParameter(ip, 'C', 1);
        case 'trainPairs_opt'
-            addRequired(ip, 'X', @is2Dor3DMatrix);
+            addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
@@ -168,7 +168,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addParameter(ip, 'cSpace', defaultCSpace);
             addParameter(ip, 'nestedCV', defaultNestedCV);
        case 'trainMulti_opt'
-            addRequired(ip, 'X', @is2Dor3DMatrix);
+            addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
             defaultClassifier = 'SVM';

@@ -1,4 +1,4 @@
-function [reliabilities] = computeSpaceTimeReliability(obj, X, Y, varargin)
+function [reliabilities] = computeSpaceTimeReliability(X, Y, varargin)
 %------------------------------------------------------------------------------------------
 %  RSA = MatClassRSA;
 %  [reliabilities] = ...

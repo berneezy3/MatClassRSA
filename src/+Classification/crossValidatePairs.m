@@ -1,4 +1,4 @@
- function C = crossValidatePairs(obj, X, Y, varargin)
+ function C = crossValidatePairs(X, Y, varargin)
 % -------------------------------------------------------------------------
 % RSA = MatClassRSA
 % C = RSA.Classification.crossValidatePairs(X, Y, varargin)
