@@ -4,7 +4,6 @@
 
 clear all; close all; clc
 
-RSA = MatClassRSA;
 
 %% Basic test: 3x3 identity matrix (for a simple, square matrix case)
 

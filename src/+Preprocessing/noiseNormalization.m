@@ -7,12 +7,12 @@ function [norm_data, sigma_inv] = noiseNormalization(X, Y)
 % It depends on an external function 'cov1para', which needs to be in the 
 % path.
 %
-% Input Args:
+% REQUIRED INPUTS:
 %   X - The data matrix. Can be a 3D matrix (space x time x trial)
 %       or a 2D matrix (trial x feature).
 %   Y - Labels vector. The length of this vector should correspond to
 %       the length, along the trial dimension, of the input data.
-% Output Args:
+% OUTPUTS:
 %   norm_data - Data matrix after noise normalization is applied. It
 %       will be the same size as the input data matrix.
 %   sigma_inv - Inverse of the square root of the covariance matrix.

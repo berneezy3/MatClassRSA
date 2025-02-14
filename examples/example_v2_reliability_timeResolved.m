@@ -7,7 +7,6 @@
 %  - Clearing figures, console, and workspace
 %  - Setting random number generator seed and number of permutations 
 %  - Loading 3D dataset
-%  - Instantiating MatClassRSA object
 %  - Computing reliability across space	
 %  - Averaging reliability over space
 %  - Visualizing reliability across time with permutation standard deviation
@@ -26,13 +25,9 @@ rnd_seed = 5;
 % Load three dimensional dataset (electrode x time X trial)
 load('S01.mat')
 
-% Make MatClassRSA object
-RSA = MatClassRSA;
-
 % Run computeSpaceTimeReliability.m with 3D EEG data, 72 class labels
 % vector, n_perm permutations and random seed set to rnd_seed
-reliability_time = RSA.Reliability.computeSpaceTimeReliability(X, labels72, 'numPermutations', n_perm, 'rngType', rnd_seed);
-
+reliability_time = Reliability.computeSpaceTimeReliability(X, labels72, 'numPermutations', n_perm, 'rngType', rnd_seed);
 
 % Average reliabilities over space
 avg_space_reliability_time = squeeze(mean(reliability_time, 1));

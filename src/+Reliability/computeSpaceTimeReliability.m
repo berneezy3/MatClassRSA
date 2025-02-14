@@ -84,7 +84,7 @@ reliabilities = zeros(num_timepoints, ip.Results.numPermutations, num_components
 for t=1:num_timepoints
     fprintf('Timepoint %d\n', t);
     curr_data = squeeze(X(:,:,t));
-    rels = computeReliability(curr_data, Y, ip.Results.numPermutations);
+    rels = Utils.computeReliability(curr_data, Y, ip.Results.numPermutations);
     assert(isequal(size(rels), [ip.Results.numPermutations, num_components]));
     reliabilities(t,:,:) = rels;
 end
