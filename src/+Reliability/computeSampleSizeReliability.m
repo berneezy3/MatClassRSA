@@ -1,24 +1,23 @@
 function [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, varargin)
 %---------------------------------------------------------------------------------------------
-%  RSA = MatClassRSA;
-%  [reliabilities] = RSA.computeReliability.computeSampleSizeReliability(X, Y, featureIdx, ...
+%  [reliabilities] = Reliability.computeSampleSizeReliability(X, Y, featureIdx, ...
 %                       numTrialsPerHalf, numPermutations, numTrialPermutations)
 %---------------------------------------------------------------------------------------------
 %
-% Computes split-half reliabilities of data over subsets of trials for each component for a
+% This function computes split-half reliabilities of data over subsets of trials for each component for a
 % specific time point. Typically, one would aggregate the trials across participants and provide
 % the aggregated data as input into this function. Since split-half reliability is computed,
 % Spearman-Brown correction is applied.
 %
-% Input Args (REQUIRED):
-%   X - data matrix. X is a 3D matrix, it is assumed to be of size
-%       nSpace x nTime x nTrial. If X is a 2D matrix, it is assumed to be of
-%       size nTrial x nFeature.
-%   Y - labels vector. The length of Y should be nTrial.
+% REQUIRED INPUTS :
+%   X - The data matrix. Can be a 3D matrix (space x time x trial)
+%       or a 2D matrix (trial x feature).
+%   Y - labels vector. Length should match the length of the trials
+%       dimension of X.
 %   featureIdx - Feature (e.g., time) sample index to use in computing 
 %       reliability for a subset of trials.
 %
-% Input Args (OPTIONAL NAME-VALUE PAIRS):
+% OPTIONAL NAME-VALUE INPUTS:
 %   numTrialsPerHalf - a vector of how many trials in a split half to
 %       use for reliability computation. (e.g. [1,2,3] would 
 %       correspond to using 2, 4 and 6 trials in the reliability 
@@ -52,15 +51,50 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, vararg
 %               sets the generator to the specified rng generator type.
 %           - rng struct as previously assigned by rngType = rng.
 %
-% Outputs:
+% OUTPUTS:
 %   reliabilities - If input matrix was 3D, dimensions are 
 %       numTrialPermutations x length(numTrialsPerHalf) x nSpace. If input 
 %       matrix was 2D, dimensions are numTrialPermutations x length(numTrialsPerHalf). 
 %       Note that the permutations used to split the trials in half for the 
 %       inner loop reliability computation is averaged out.
 %
-% MatClassRSA dependencies: setUserSpecifiedRng computeReliability
-% See also computeSpaceTimeReliability
+
+% This software is licensed under the 3-Clause BSD License (New BSD License),
+% as follows:
+% -------------------------------------------------------------------------
+% Copyright 2019 Bernard C. Wang, Nathan C. L. Kong, Anthony M. Norcia, 
+% and Blair Kaneshiro
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+% 1. Redistributions of source code must retain the above copyright notice,
+% this list of conditions and the following disclaimer.
+%
+% 2. Redistributions in binary form must reproduce the above copyright notice,
+% this list of conditions and the following disclaimer in the documentation
+% and/or other materials provided with the distribution.
+%
+% 3. Neither the name of the copyright holder nor the names of its
+% contributors may be used to endorse or promote products derived from this
+% software without specific prior written permission.
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: Utils.setUserSpecifiedRng(),
+% Utils.computeReliability()
+%
+% See also Reliability.computeSpaceTimeReliability()
 
 % parse inputs
 ip = inputParser;
@@ -92,8 +126,8 @@ end
 assert(size(X, 2) == length(Y), 'Length of labels vector does not match number of trials in the data.');
 
 % Set random number generator
-if any(strcmp(ip.UsingDefaults, 'rngType')), setUserSpecifiedRng();
-else, setUserSpecifiedRng(ip.Results.rngType);
+if any(strcmp(ip.UsingDefaults, 'rngType')), Utils.setUserSpecifiedRng();
+else, Utils.setUserSpecifiedRng(ip.Results.rngType);
 end
 
 num_components = size(X, 1);
@@ -124,7 +158,7 @@ for k=1:ip.Results.numTrialPermutations
         if sum(isnan(curr_data_labels)) == (num_trials_to_use * num_images)
             continue;
         end
-        rel = computeReliability(curr_data, curr_data_labels, ip.Results.numPermutations);
+        rel = Utils.computeReliability(curr_data, curr_data_labels, ip.Results.numPermutations);
         reliabilities(k,i,:) = mean(rel, 1);
     end % Trial subsets
 end % Random permutations of trials

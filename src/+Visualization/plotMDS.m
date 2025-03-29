@@ -1,18 +1,17 @@
 function fig = plotMDS(RDM, varargin)
 %-------------------------------------------------------------------
-%  RSA = MatClassRSA;
-%  RSA.Visualization.plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
+%  fig = Visualization.plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
-% This function creates a dendrogram plot with the distance matrix
+% This function creates a MDS plot with the distance matrix
 % passed in.
 %
-% Required inputs:
+% REQUIRED INPUTS:
 % - RDM: A distance matrix.  Diagonals must be 0, and must be
 %               symmetrical along the diagonal
 %
-% Optional name-value pairs:
+% OPTIONAL NAME-VALUE INPUTS:
 %   'nodeColors': a vector of colors, whose order corresponds to the order 
 %       of labels in the confusion matrix.  For example, if user inputs: 
 %        ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black'],  
@@ -33,9 +32,9 @@ function fig = plotMDS(RDM, varargin)
 %       Default is classical.  More info can be found here: 
 %       https://www.mathworks.com/help/stats/cmdscale.html
 %
-% Outputs:
-% - img: figure corresponding to output plot
-%
+% OUTPUTS:
+%    fig: figure corresponding to output plot
+
 % Notes:
 %   - linkage order
 %   - do more things regarding order
@@ -76,8 +75,12 @@ function fig = plotMDS(RDM, varargin)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: Utils.processRDM(), Utils.getImageFiles(), 
 
-    RDM = processRDM(RDM);
+
+    RDM = Utils.processRDM(RDM);
+    
     if length(find(RDM<0)) > 0
         warning('Distance less than 0 detected, converting negative distances to 0');
         RDM(RDM<0) = 0;
@@ -113,7 +116,7 @@ function fig = plotMDS(RDM, varargin)
     elseif ~isempty(ip.Results.iconPath)
         
 %         labels = dir(ip.Results.iconPath);
-        labels = getImageFiles(ip.Results.iconPath);
+        labels = Utils.getImageFiles(ip.Results.iconPath);
         
     elseif isempty(ip.Results.nodeLabels) && isempty(ip.Results.iconPath) ...
             && ~isempty(ip.Results.nodeColors)

@@ -1,7 +1,6 @@
 function [RDM, params] = computeCMRDM(M, varargin)
 %-------------------------------------------------------------------
-% RSA = MatClassRSA;
-% [RDM, params] = RSA.RDM_Computation.computeClassificationRDM(M, varargin)
+% [RDM, params] = RDM_Computation.computeCMRDM(M, varargin)
 % ------------------------------------------------------------------
 % Blair - January 31, 2017, revised September 2019
 %
@@ -149,6 +148,9 @@ function [RDM, params] = computeCMRDM(M, varargin)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: Utils.normalizeMatrix(),
+% Utils.symmetrizeMatrix(), Utils.convertSimtoDist(), Utils.rankDistances()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Begin input parser
@@ -227,15 +229,15 @@ params.rankdistances = ip.Results.rankdistances;
 %params.matrixtype = ip.Results.matrixtype;
 
 % NORMALIZE
-NM = normalizeMatrix(M, params.normalize);
+NM = Utils.normalizeMatrix(M, params.normalize);
 
 % SYMMETRIZE
-SM = symmetrizeMatrix(NM, params.symmetrize);
+SM = Utils.symmetrizeMatrix(NM, params.symmetrize);
 
 % DISTANCE
-DM = convertSimToDist(SM, params.distance, params.distpower);
+DM = Utils.convertSimToDist(SM, params.distance, params.distpower);
 
 % RANKDISTANCES
-RDM = rankDistances(DM, params.rankdistances);
+RDM = Utils.rankDistances(DM, params.rankdistances);
 
 

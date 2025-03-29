@@ -13,18 +13,20 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, varargin)
 % wish to distribute trials across the course of a recording session or 
 % across participants, prior to trial averaging or cross-validation.
 %
-% REQUIRED INPUTS
+% REQUIRED INPUTS:
 %   X: Data matrix. Data can be in 3D (space x time x trial) or 2D
 %       (trial x feature) form.
 %   Y: Labels vector (numeric). The length of Y must correspond to the 
 %       length of the trial dimension of X.
 %
-% OPTIONAL INPUTS
-%   P: Participant vector (optional). The length of P must correspond to
+% OPTIONAL INPUTS:
+%   P: Participant vector. The length of P must correspond to
 %       the length of Y and the length of the trial dimension of X. If P
 %       is not entered or is empty, the function will return NaN as 
 %       randomized P. P can be a numeric vector, string array, or cell 
 %       array.
+%
+% OPTIONAL NAME-VALUE INPUTS: 
 %   rngType - Random number generator specification. Here you can set the
 %       the rng seed and the rng generator, in the form {'rngSeed','rngGen'}.
 %       If rngType is not entered, or is empty, rng will be assigned as 
@@ -81,7 +83,7 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, varargin)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
 %
-% MatClassRSA dependencies: setUserSpecifiedRng
+% MatClassRSA dependencies: Utils.setUserSpecifiedRng()
 
 ip = inputParser;
 ip.FunctionName = 'shuffleData';

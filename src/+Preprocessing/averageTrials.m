@@ -20,7 +20,7 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 % labeling of data observations) prior to averaging, they should call the 
 % shuffleData function prior to calling this function.
 %
-% Required inputs:
+% REQUIRED INPUTS:
 %       X - data matrix. Can be either a 2D (trial x feature) or
 %           3D (space x time x trial) matrix.
 %       Y - labels vector. Length should match the length of the trials
@@ -28,7 +28,7 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 %       groupSize - number of single trials you wish to average in each
 %           group
 %
-% Optional inputs: 
+% OPTIONAL INPUTS: 
 %       P - optional participants vector. Must be the same length as Y.
 %           Can be numeric or a string array. If not entered or is empty, 
 %           a vector of zeros (same size as Y) will be returned. If
@@ -36,7 +36,7 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 %           basis, meaning that each averaged trial will contain trials 
 %           from a single participant.
 % 
-% Optional name-value inputs: 
+% OPTIONAL NAME-VALUE INPUTS: 
 %       'handleRemainder' - method to handle remainder trials.
 %           For example if you have 21 rows with label 1, and set averaging
 %           group size to 5, you would have 4 groups (20/5), and 1 remainder
@@ -82,7 +82,7 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 %               sets the generator to the specified rng generator type.
 %           - rng struct as previously assigned by rngType = rng.
 %
-% Output Args:
+% OUTPUTS:
 %       averagedX - the data matrix after trial averaging. Will match the
 %           shape (2D or 3D) of the input data matrix.
 %       averagedY - the label vector for the trials in averagedX.
@@ -125,6 +125,8 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 % POSSIBILITY OF SUCH DAMAGE.
+%
+%MatClassRSA Dependencies: Utils.setUserSpecifiedRng()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % parse inputs
@@ -184,7 +186,7 @@ if length(size(X)) > 3
 elseif length(size(X)) == 3
     xTransform = 1;
     [~,trialTime,~] = size(X);
-    X = cube2trRows(X);
+    X = Utils.cube2trRows(X);
 else
     xTransform = 0;
 end
@@ -381,7 +383,7 @@ if ip.Results.endShuffle
     disp('averageTrials: Shuffling order of averaged data.')
     %%%% Set the random number generator %%%%
     thisRng = ip.Results.rngType;
-    setUserSpecifiedRng(thisRng);
+    Utils.setUserSpecifiedRng(thisRng);
     %%%% End set random number generator %%%%
     
     % Do the randomization
@@ -394,7 +396,7 @@ end
 
 % If the input data was 3D to begin with, convert it back to 3D
 if xTransform
-    averagedX = trRows2cube(averagedX, trialTime);
+    averagedX = Utils.trRows2cube(averagedX, trialTime);
 end
 
 % If the vector inputs were rows to begin with, return them as rows.

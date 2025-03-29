@@ -1,11 +1,10 @@
 function [dissimilarities] = computePearsonRDM(X, Y, varargin)
 %----------------------------------------------------------------------------------
-%  RSA = MatClassRSA;
 %  [dissimilarities] = ...
-%  RSA.computeRDM.computePearsonRDM(X, Y, num_permutations, rngType)
+%  RDM_Computation.computePearsonRDM(X, Y, num_permutations, rngType)
 %----------------------------------------------------------------------------------
 %
-% Returns pairwise dissimilarities with respect to cross-validated Pearson
+% This function returns pairwise dissimilarities with respect to cross-validated Pearson
 % correlation.  A possible data input to this function would have dimensions:
 % nElectrodes x (nTrials*nImages).  With this input, the resulting RDM would be
 % computed using the electrode values at a specific time point as features.  On
@@ -13,12 +12,12 @@ function [dissimilarities] = computePearsonRDM(X, Y, varargin)
 % nTimepoints x (nTrials*nImages).  In this case, the resulting RDM would be
 % computed using the time point values for a particular electrode as features.
 %
-% Input Args (REQUIRED):
+% REQUIRED INPUTS:
 %   X - data matrix. The size of X should be nFeatures x
 %              (nTrials*nImages)
 %   Y - labels vector. The size of Y should be (nTrials*nImages)
 %
-% Input Args (OPTIONAL NAME-VALUE PAIRS):
+% OPTIONAL NAME-VALUE INPUTS:
 %   num_permutations (optional) - how many permutations to randomly select
 %       train and test data matrix. If not entered or empty, this defaults 
 %       to 10.
@@ -40,10 +39,42 @@ function [dissimilarities] = computePearsonRDM(X, Y, varargin)
 %               sets the generator to the specified rng generator type.
 %           - rng struct as previously assigned by rngType = rng.
 %
-% Output Args:
+% OUTPUTS:
 %   dissimilarities - the dissimilarity matrix, dimensions: num_images
 %                     x num_images x num_permutations
 
+% This software is licensed under the 3-Clause BSD License (New BSD License),
+% as follows:
+% -------------------------------------------------------------------------
+% Copyright 2017 Bernard C. Wang, Anthony M. Norcia, and Blair Kaneshiro
+%
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+% 1. Redistributions of source code must retain the above copyright notice,
+% this list of conditions and the following disclaimer.
+%
+% 2. Redistributions in binary form must reproduce the above copyright notice,
+% this list of conditions and the following disclaimer in the documentation
+% and/or other materials provided with the distribution.
+%
+% 3. Neither the name of the copyright holder nor the names of its
+% contributors may be used to endorse or promote products derived from this
+% software without specific prior written permission.
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: Utils.setUserSpecifiedRng()
 
 % parse inputs
 ip = inputParser;
@@ -60,8 +91,8 @@ assert(size(X,2) == length(Y), 'Mismatch in number of trials in data and length 
 
 
 % Set random number generator
-if any(strcmp(ip.UsingDefaults, 'rngType')), setUserSpecifiedRng();
-else, setUserSpecifiedRng(ip.Results.rngType);
+if any(strcmp(ip.UsingDefaults, 'rngType')), Utils.setUserSpecifiedRng();
+else, Utils.setUserSpecifiedRng(ip.Results.rngType);
 end
 
 unique_labels = unique(Y);

@@ -1,24 +1,23 @@
 function [reliabilities] = computeSpaceTimeReliability(X, Y, varargin)
 %------------------------------------------------------------------------------------------
-%  RSA = MatClassRSA;
-%  [reliabilities] = ...
-%  RSA.computeReliability.computeSpaceTimeReliability(X, Y, numPermutations, rngType)
+%  [reliabilities] = Reliability.computeSpaceTimeReliability(X, Y, ...
+%                    numPermutations, rngType)
 %------------------------------------------------------------------------------------------
 %
-% Returns split-half reliabilities computed for each component across time. With the 
+% This function returns split-half reliabilities computed for each component across time. With the 
 % resulting data matrix, one can take the mean along the third dimension (the components 
 % axis) and this will tell you the average reliability across components at each time point.
 % On the other hand, if one takes the mean across the first dimension (the time axis),
 % one will be able to see how reliable each component is across time (on average). Since
 % split-half reliability is computed, Spearman-Brown correction is applied.
 %
-% Input Args (REQUIRED):
-%   X - data matrix. 3D data matrices are assumed to be nSpace x nTime x
-%       nTrial.  If the data matrix is 2D, it is assumed to be nTrial x 
-%       nFeature.
-%   Y - labels vector. The length of labels should be equal to nTrials.
+% REQUIRED INPUTS:
+%   X - The data matrix. Can be a 3D matrix (space x time x trial)
+%       or a 2D matrix (trial x feature).
+%   Y - labels vector. Length should match the length of the trials
+%       dimension of X.
 %
-% Input Args (OPTIONAL NAME-VALUE PAIRS):
+% OPTIONAL NAME-VALUE INPUTS:
 %   numPermutations - how many permutations to split the trials 
 %       for split-half reliability. If numPermutations is not entered or is 
 %       empty, this defaults to 10.
@@ -39,15 +38,49 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, varargin)
 %               The first argument set the rng seed. The second argument
 %               sets the generator to the specified rng generator type.
 %           - rng struct as previously assigned by rngType = rng.
-% Output Args:
+% OUTPUTS:
 %   reliabilities - reliability for each electrode across time. The 
 %       dimensions of this matrix are nSpace x nTime x nPermutations if a 
 %       3D matrix was provided. If a 2D matrix was provided, the 
 %       dimensions of the results are nTime x nPermutations. You would 
 %       typically average across the permutations dimension.
+
+% This software is licensed under the 3-Clause BSD License (New BSD License),
+% as follows:
+% -------------------------------------------------------------------------
+% Copyright 2019 Bernard C. Wang, Nathan C. L. Kong, Anthony M. Norcia, 
+% and Blair Kaneshiro
 %
-% MatClassRSA dependencies: setUserSpecifiedRng computeReliability
-% See also computeSampleSizeReliability
+% Redistribution and use in source and binary forms, with or without
+% modification, are permitted provided that the following conditions are met:
+%
+% 1. Redistributions of source code must retain the above copyright notice,
+% this list of conditions and the following disclaimer.
+%
+% 2. Redistributions in binary form must reproduce the above copyright notice,
+% this list of conditions and the following disclaimer in the documentation
+% and/or other materials provided with the distribution.
+%
+% 3. Neither the name of the copyright holder nor the names of its
+% contributors may be used to endorse or promote products derived from this
+% software without specific prior written permission.
+%
+% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
+% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+% POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: Utils.setUserSpecifiedRng(),
+% Utils.computeReliability()
+%
+% See also Reliability.computeSampleSizeReliability()
 
 % parse inputs
 ip = inputParser;
@@ -73,8 +106,8 @@ end
 
 
 % Set random number generator
-if any(strcmp(ip.UsingDefaults, 'rngType')), setUserSpecifiedRng();
-else, setUserSpecifiedRng(ip.Results.rngType);
+if any(strcmp(ip.UsingDefaults, 'rngType')), Utils.setUserSpecifiedRng();
+else, Utils.setUserSpecifiedRng(ip.Results.rngType);
 end
 
 num_components = size(X, 1);

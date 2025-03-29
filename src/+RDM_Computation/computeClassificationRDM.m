@@ -1,7 +1,6 @@
 function [RDM, params] = computeClassificationRDM(M, varargin)
 %-------------------------------------------------------------------
-% RSA = MatClassRSA;
-% [RDM, params] = RSA.RDM_Computation.computeClassificationRDM(M, varargin)
+% [RDM, params] = RDM_Computation.computeClassificationRDM(M, varargin)
 % ------------------------------------------------------------------
 % Blair - January 31, 2017, revised September 2019; Ray - revised April
 % 2024

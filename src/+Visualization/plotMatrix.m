@@ -1,19 +1,18 @@
 function  [img, fig] = plotMatrix(RDM, varargin)
 %-------------------------------------------------------------------
-% RSA = MatClassRSA;
-% RSA.visualize.plotMatrix(matrix, varargin)
+% [img,fig] = Visualization.plotMatrix(matrix, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
 % This function plots a matrix.  The matrix can either be an 
-% representational dissimilarity matrix (RDM)computed by the functions in 
-% MatClassRSA.RDM_Computation, or a confusion matrix from the functions in
-% MatCLass.Classification.  
+% representational dissimilarity matrix (RDM) computed by the functions in 
+% +RDM_Computation, or a confusion matrix output from the functions in
+% +Classification.  
 %
-% INPUT ARGS:
+% REQUIRED INPUTS:
 % - Matrix: A matrix, e.g., a confusion matrix, RDM/distance matrix.
 %
-% Optional name-value pairs:
+% OPTIONAL NAME-VALUE INPUTS:
 %   'ranktype': specification for whether to convert matrix values to 
 %       percentile ranks (a common step when visualizing RDMs) or ranks
 %       prior to plotting. Note that conversion of values to ranks or 
@@ -55,7 +54,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %   'iconSize' - If 'iconPath' parameter is used, use this to set the size
 %       of image labels. Default 40.
 % 
-% OUTPUT ARGS:
+% OUTPUTS:
 %   'img': image corresponding to graph
 %   'fig': figure corresponding to output plot
 %
@@ -101,6 +100,9 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: Utils.getImageFiles(), Utils.TickCoord(),
+% Utils.rankDistances()
 
     % parse inputs
     ip = inputParser;
@@ -134,7 +136,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     end
     
     % Rank distances
-    RDM = rankDistances(RDM, ip.Results.ranktype);
+    RDM = Utils.rankDistances(RDM, ip.Results.ranktype);
     
     img = imagesc(RDM);
     fig = gcf;
@@ -184,7 +186,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
         labels = ip.Results.axisLabels;
     %picture labels
     elseif ~isempty(ip.Results.iconPath)
-        labels = getImageFiles(ip.Results.iconPath);
+        labels = Utils.getImageFiles(ip.Results.iconPath);
     elseif isempty(ip.Results.axisLabels) && isempty(ip.Results.iconPath) && ~isempty(ip.Results.axisColors)
          labels = ip.Results.axisColors;
     else %no labels specified
@@ -217,7 +219,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
         
         set(gca,'xTick', [1:length(RDM)]);
         set(gca,'yTick',  [1:length(RDM)]);
-        [xTickCoords yTickCoords] = getTickCoord;
+        [xTickCoords yTickCoords] = Utils.getTickCoord;
         
         set(gca,'xTickLabel', '');
         set(gca,'yTickLabel', '');
@@ -279,7 +281,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
         set(gca,'xTickLabel', '');
         set(gca,'yTickLabel', '');
         
-        [xTickCoords yTickCoords] = getTickCoord;
+        [xTickCoords yTickCoords] = Utils.getTickCoord;
 
         pos = get(gca,'position');
         leftMargin = pos(1);
@@ -352,7 +354,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
         set(gca,'xTickLabel', '');
         set(gca,'yTickLabel', '');
         
-        [xTickCoords yTickCoords] = getTickCoord;
+        [xTickCoords yTickCoords] = Utils.getTickCoord;
 
         pos = get(gca,'position');
         leftMargin = pos(1);

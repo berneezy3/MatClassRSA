@@ -1,18 +1,17 @@
 function  fig = plotMST(RDM, varargin)
 %-------------------------------------------------------------------
-%  RSA = MatClassRSA;
-%  RSA.visualize.plotMST(RDM, varargin)
+%  fig = Visualization.plotMST(RDM, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 28, 2017
 %
 % This function, given a distance matrix input, plots a minimum spanning
 % tree(MST).  Optional name-value pair arugments are described below.
 %
-% Required Inputs:
+% REQUIRED INPUTS:
 % - RDM: A distance matrix.  Diagonals must be 0, and must be symmetrical 
 %       along the diagonal.
 %
-% Optional name-value pairs:
+% OPTIONAL NAME-VALUE INPUTS:
 %   'nodeColors': a vector of colors, whose order corresponds to the order 
 %       of labels in the confusion matrix.  For example, if user inputs: 
 %        ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black'],  
@@ -36,8 +35,8 @@ function  fig = plotMST(RDM, varargin)
 %       expressed as an RGB triplet ([1 1 0]), short name ('y') or long 
 %       name ('yellow').
 %
-% Outputs:
-% - img: Figure corresponding to output plot
+% OUTPUTS:
+%  fig: Figure corresponding to output plot
 
 % Notes:
 %   TODO - find out how to plot images on the coordinates
@@ -73,6 +72,8 @@ function  fig = plotMST(RDM, varargin)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA Dependencies: Utils.processRDM, Utils.getImageFiles()
 
     % parse inputs
     ip = inputParser;
@@ -93,7 +94,7 @@ function  fig = plotMST(RDM, varargin)
     
 
     % set up the nodes and connections between
-    RDM = processRDM(RDM);
+    RDM = Utils.processRDM(RDM);
     [r c] = size(RDM);
     numEdges = ((r-1) + (r-1)^2)/2;
     numNodes = r;
@@ -159,7 +160,7 @@ function  fig = plotMST(RDM, varargin)
         
         disp('CASE: IMAGE');
         
-        labels = getImageFiles(ip.Results.iconPath);
+        labels = Utils.getImageFiles(ip.Results.iconPath);
         plt = MSTimagehelper(sourceNodes, destNodes, weights, ...
             labels, ip);
 

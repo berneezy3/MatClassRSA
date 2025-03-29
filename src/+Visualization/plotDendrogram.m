@@ -1,18 +1,17 @@
 function fig = plotDendrogram(RDM, varargin)
 %-------------------------------------------------------------------
-% RSA = MatClassRSA;
-% RSA.visualize.plotDendrogram(RDM, varargin)
+% fig = Visualization.plotDendrogram(RDM, varargin)
 % ------------------------------------------------
-% Bernard Wang - April 23, 2017
+% Bernard Wang - April 23, 2017, Ray - Edit 2025
 %
-% Given a distance matrix as input, this function plots a dendorgram.  
+% Given a distance matrix as input, this function plots a dendrogram.  
 % Optional name-value pair arugments are described below.
 %
-% INPUT ARGS (REQUIRED):
+% REQUIRED INPUTS:
 %   RDM: A distance matrix.  Diagonals must be 0, and the matrix must be
 %   	symmetrical along the diagonal.
 %
-% INPUT ARGS (OPTIONAL NAME-VALUE PAIRS)
+% OPTIONAL NAME-VALUE INPUTS:
 %   'nodeColors': a vector of colors, whose order corresponds to the order 
 %       of labels in the confusion matrix.  For example, if user inputs: 
 %        ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black'],  
@@ -55,10 +54,11 @@ function fig = plotDendrogram(RDM, varargin)
 %       abbreviations, full-length color names, or RGB color triplets.  
 %       Default 'black'.
 %   'iconSize' - If parameter 'iconPath' is passed in, this parameter will 
-%       determine the size of each image icon.  Default 40.
+%       determine the size of each image icon.  Default dyamically set as
+%       10% of figure height`.
 %
-% OUTPUT ARGS:
-%   'img' - Figure corresponding to output plot.
+% OUTPUTS:
+%   'fig': figure corresponding to output plot
 
 % Notes:
 %   - linkage order - inorder w/ crossing, best order w/o crossing, dist
@@ -98,6 +98,8 @@ function fig = plotDendrogram(RDM, varargin)
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
+%
+% MatClassRSA dependencies: Utils.getImageFiles(), Utils.TickCoord()
     
 
     expectedDistMethod = {'average', 'centroid', 'complete', 'median', 'single', ...
@@ -126,14 +128,15 @@ function fig = plotDendrogram(RDM, varargin)
     ip.addParameter('lineWidth', 2, @(x) assert(isnumeric(x), ...
         'textRotation must be a numeric value'));
     ip.addParameter('lineColor', 'black');
-    ip.addParameter('iconSize', 40);
+    ip.addParameter('iconSize', '');
     
     parse(ip, RDM,varargin{:});
     
     % extract RDM lower triangle
-    RDM = processRDM(RDM);
+    RDM = Utils.processRDM(RDM);
     tree = linkage(RDM, ip.Results.distMethod);
     [r c] = size(tree);
+    tree(:,3) = tree(:,3) / max(tree(:,3)); % Normalization step
     
     
     if (~isempty(ip.Results.reorder))
@@ -179,7 +182,7 @@ function fig = plotDendrogram(RDM, varargin)
         labels = ip.Results.nodeLabels;
     %picture labels
     elseif ~isempty(ip.Results.iconPath)
-        labels = getImageFiles(ip.Results.iconPath);
+        labels = Utils.getImageFiles(ip.Results.iconPath);
     %color labels
     elseif isempty(ip.Results.nodeLabels) && isempty(ip.Results.iconPath) && ~isempty(ip.Results.nodeColors)
          labels = ip.Results.nodeColors;
@@ -195,7 +198,7 @@ function fig = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
         disp('Plotting with user defined colored labels...')
-        xTickCoords = getTickCoord;
+        xTickCoords = Utils.getTickCoord;
         set(gca,'xTickLabel', '');
 
         for i = 1:length(labels)
@@ -207,10 +210,7 @@ function fig = plotDendrogram(RDM, varargin)
                 t.Color = ip.Results.nodeColors{P(i)};
                 t(1).FontSize = ip.Results.fontSize;
             else
-
-            end
-
-            
+            end   
         end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: NODE
@@ -233,21 +233,29 @@ function fig = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.nodeLabels) && ~isempty(ip.Results.iconPath)
         
-         disp('Plotting with user specified directory of image icons...')
-        xTickCoords = getTickCoord;
+        disp('Plotting with user specified directory of image icons...')
+        
         set(gca,'xTickLabel', '');
+        set(gcf, 'Renderer', 'painters'); % Ensures high-quality rendering
+        
         pos = get(gca,'position');
         x = pos(1);
         y = pos(2);
-        dlta = (pos(3)) / (length(xTickCoords) + 1);
-        figPos = get(gcf, 'position');
-        figWidth = figPos(3);
-        figHeight = figPos(4);
+        
+        if isempty(ip.Results.iconSize)
+                
+            % Get figure size info for dynamic resizing
+            figPos = get(gcf, 'position');
+            figWidth = figPos(3);
+            figHeight = figPos(4);
+
+            scaleFactor = 0.1; % Image size is 10% of figure height
+            iconSize = figHeight * scaleFactor;        
+        end
+
         
         for i = 1:length(labels)
             [thisIcon map] = imread([char(labels(i))]);
-            [height width] = size(thisIcon);
-            %convert thisIcon to scale 0~1
             
             if ~isempty(map)
                 disp('converting to RGB')
@@ -255,25 +263,37 @@ function fig = plotDendrogram(RDM, varargin)
                 thisIcon = ind2rgb(thisIcon, map);
             end
             
-            % Resize to 40*40 square
-%             if height > width
-%                 thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
-%             else
-%                 thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
-%             end
+            % Resize image dynamically based on figure height
+            if size(thisIcon, 1) > size(thisIcon, 2)
+                thisIcon = imresize(thisIcon, [iconSize NaN]);
+            else
+                thisIcon = imresize(thisIcon, [NaN iconSize]);
+            end
 
             % Add 3rd(color) dimension if there is none
             if length(size(thisIcon)) == 2
                 thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
             end
+            
+            % Position image dynamically
+            
+            % spacingFactor = 1; % Spread icons out more
+            
+            numIcons = length(labels); % Assuming one icon per x-tick
+            xTickCoords = 1:numIcons; % X-ticks from 1 to numIcons
+            
+            % Convert xtick position to figure position
+            newX = (xTickCoords(i) - 0) / (1 + numIcons); % Adjust for axis limits
 
+            % Center icon on the x-tick
             if i <= length(labels)
-                lblAx = axes('parent',gcf,'position',[pos(1)+dlta*i - ...
-                    ip.Results.iconSize/2/figWidth,y-ip.Results.iconSize/figHeight, ...
-                    ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
-                imagesc(thisIcon,'parent',lblAx);
-                axis(lblAx,'off');
-            else
+                lblAx = axes('parent', gcf, 'position', ...
+                    [x + newX * pos(3) - iconSize / (2 * figWidth), ...  % Centering in x-direction
+                     y - iconSize / figHeight, ...  % Adjust y-position
+                     iconSize / figWidth, iconSize / figHeight]);
+             
+                 imagesc(thisIcon, 'Parent', lblAx);
+                 axis(lblAx,'off');
             end
         end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
@@ -284,7 +304,7 @@ function fig = plotDendrogram(RDM, varargin)
         disp('Plotting with user defined colored blocks...')
         
         set(gca,'xTickLabel', '');
-        xTickCoords = getTickCoord;
+        xTickCoords = Utils.getTickCoord;
         set(gca,'xTickLabel', '');
         pos = get(gca,'position');
         x = pos(1);
@@ -311,24 +331,13 @@ function fig = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: NONE (Default number labels)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    else
-        
+    else  
         disp('Plotting with default number labels...')
-        % Do NOTHING
-
-        
-        
+        % Do NOTHING     
     end
     
     hold on;
      
-end
-
-%helper function to customDendrogram
-function y = colorSquare(original, xCorner, yCorner, width, height)
-    
-    
-
 end
 
 function y = isPosInt(x)

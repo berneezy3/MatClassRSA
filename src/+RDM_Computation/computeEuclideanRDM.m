@@ -1,11 +1,10 @@
 function [dissimilarities] = computeEuclideanRDM(X, Y, varargin)
 %------------------------------------------------------------------------------------
-%  RSA = MatClassRSA;
 %  [dissimilarities] = ...
-%  RSA.computeRDM.computeEuclideanRDM(X, Y, num_permutations, rngType)
+%  RDM_Computation.computeEuclideanRDM(X, Y, num_permutations, rngType)
 %------------------------------------------------------------------------------------
 %
-% Returns pairwise similarities with respect to cross-validated Euclidean
+% This function returns pairwise similarities with respect to cross-validated Euclidean
 % distance.  A possible data input to this function would have dimensions:
 % nElectrodes x (nTrials*nImages).  With this input, the resulting RDM would be
 % computed using the electrode values at a specific time point as features.  On
@@ -13,15 +12,15 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, varargin)
 % nTimepoints x (nTrials*nImages).  In this case, the resulting RDM would be
 % computed using the time point values for a particular electrode as features.
 %
-% Input Args (REQUIRED):
+% REQUIRED INPUTS:
 %   X - data matrix. The size of X should be nFeatures x nTrials. Users 
 %       working with 3D data matrices should already have subset the data 
 %       along a single sensor (along the space dimension) or time sample 
 %       (along the time dimension).
 %   Y - labels vector. The length of Y should be nTrials.
 %
-% Input Args (OPTIONAL NAME-VALUE PAIRS):
-%   num_permutations (optional) - how many permutations to randomly select
+% OPTIONAL NAME-VALUE INPUTS:
+%   num_permutations - how many permutations to randomly select
 %       train and test data matrix. If not entered or empty, this defaults 
 %       to 10.
 %   rngType - Random number generator specification, for reproducibility. 
@@ -42,9 +41,11 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, varargin)
 %               sets the generator to the specified rng generator type.
 %           - rng struct as previously assigned by rngType = rng.
 %
-% Output Args:
+% OUTPUTS:
 %   dissimilarities - the dissimilarity matrix, dimensions: num_labels
 %                     x num_labels x num_permutations
+
+
 
 
 % parse inputs
@@ -80,8 +81,8 @@ disp(['<a href="matlab: open(which(''computeEuclideanRDM.m''))">computeEuclidean
 disp(['<a href="matlab: open(which(''computeEuclideanRDM.m''))">computeEuclideanRDM</a> input labels vector is of length ' num2str(length(Y)) '.'])
 
 % Set random number generator
-if any(strcmp(ip.UsingDefaults, 'rngType')), setUserSpecifiedRng();
-else, setUserSpecifiedRng(ip.Results.rngType);
+if any(strcmp(ip.UsingDefaults, 'rngType')), Utils.setUserSpecifiedRng();
+else, Utils.setUserSpecifiedRng(ip.Results.rngType);
 end
 
 unique_labels = unique(Y);
