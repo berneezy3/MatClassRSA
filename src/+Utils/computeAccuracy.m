@@ -12,7 +12,7 @@ function acc = computeAccuracy(actualY, predictedY)
 %   - predictedY: the predicted labels from the model
 %
 % OUTPUTS:
-%   - acc: percent accuracy
+%   - acc: percent accuracy (value between 0 and 1)
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
