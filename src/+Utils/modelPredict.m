@@ -1,11 +1,10 @@
-function [predictions decision_values] = modelPredict(X, mdl, scale)
+function [predictions, decision_values] = modelPredict(X, mdl, scale)
+% [predictions, decision_values] = modelPredict(X, mdl, scale)
 %-------------------------------------------------------------------
 % (c) Bernard Wang and Blair Kaneshiro, 2017.
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% modelPredict(X, mdl)
-% --------------------------------
 % Bernard Wang, Sept 28, 2019
 %
 % This function takes a classification produced by fitModel(), and predicts
@@ -14,9 +13,10 @@ function [predictions decision_values] = modelPredict(X, mdl, scale)
 % INPUT ARGS:
 %   - X: 2D trial by feature test data matrix
 %   - mdl: output obejct from fitModel()
+%   - scale: shift and scale factors for libsvm
 %
 % OUTPUT ARGS:
-%   - predictions: predicted values of 
+%   - predictions: predicted labels
 %   - decision_values: decision values are returned if SVM is the
 %   classifier
 %
