@@ -8,14 +8,22 @@ function pairwiseCellMat = initPairwiseCellMat(numClasses)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
 %
-% Initializes an empty 2 x 2 x (numClasses choose 2) matrix for pairwise
-% classification
+% Given the number of classes numClasses, this function initializes a
+% {numClasses x numClasses} cell array, each element of which will store
+% the confusion matrix, class labels, and accuracy of each pairwise
+% classification. 
 % 
 % INPUT ARGS:
 %   - numClasses: number of classes in pairwise classification
 %
 % OUTPUT ARGS:
-%   - pairwiseCellMat: an empty 2 x 2 x (numClasses choose 2) matrix
+%   - pairwiseCellMat: A {numClasses x numClasses} cell array. Off-diagonal
+%   elements i, j of the cell array will store output for pairwise
+%   classifications of i, j in the following fields:
+%   - CM: 2 x 2 confusion matrix (initialized as all zeros)
+%   - classBoundary: Label of the pair, e.g., '1 vs. 2'
+%   - accuracy: Classification accuracy of the pair (initialized as NaN)
+%   
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
