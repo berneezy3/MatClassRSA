@@ -137,6 +137,7 @@ num_images = length(unique(Y));
 
 reliabilities = nan(ip.Results.numTrialPermutations, num_trial_subsets, num_components);
 time_data = squeeze(X(:,:,featureIdx));
+
 for k=1:ip.Results.numTrialPermutations
     
     % Shuffle data and labels
@@ -158,7 +159,11 @@ for k=1:ip.Results.numTrialPermutations
         if sum(isnan(curr_data_labels)) == (num_trials_to_use * num_images)
             continue;
         end
+        
+        disp(ip.Results.numPermutations);
+        
         rel = Utils.computeReliability(curr_data, curr_data_labels, ip.Results.numPermutations);
+        
         reliabilities(k,i,:) = mean(rel, 1);
     end % Trial subsets
 end % Random permutations of trials

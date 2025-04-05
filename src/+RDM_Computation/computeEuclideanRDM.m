@@ -1,7 +1,7 @@
-function [dissimilarities] = computeEuclideanRDM(X, Y, varargin)
+function D = computeEuclideanRDM(X, Y, varargin)
 %------------------------------------------------------------------------------------
-%  [dissimilarities] = ...
-%  RDM_Computation.computeEuclideanRDM(X, Y, num_permutations, rngType)
+%  D = ...
+%  RDM_Computation.computeEuclideanRDM(X, Y, numPermutations, rngType)
 %------------------------------------------------------------------------------------
 %
 % This function returns pairwise similarities with respect to cross-validated Euclidean
@@ -20,7 +20,7 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, varargin)
 %   Y - labels vector. The length of Y should be nTrials.
 %
 % OPTIONAL NAME-VALUE INPUTS:
-%   num_permutations - how many permutations to randomly select
+%   numPermutations - how many permutations to randomly select
 %       train and test data matrix. If not entered or empty, this defaults 
 %       to 10.
 %   rngType - Random number generator specification, for reproducibility. 
@@ -42,9 +42,13 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, varargin)
 %           - rng struct as previously assigned by rngType = rng.
 %
 % OUTPUTS:
-%   dissimilarities - the dissimilarity matrix, dimensions: num_labels
-%                     x num_labels x num_permutations
-
+%   D - output struct object containing computed Euclidean RDM 
+%        across all perumtations, and average RDM
+%   --subfields--
+%   RDM - The average Euclidean RDM across all user-specified
+%           permutations
+%   dissimilarities - All computed dissimilarities across all permutations
+%           with the size nLabels x nLabes x nPermutations
 
 
 
@@ -52,7 +56,7 @@ function [dissimilarities] = computeEuclideanRDM(X, Y, varargin)
 ip = inputParser;
 addRequired(ip, 'X');
 addRequired(ip, 'Y');
-addParameter(ip, 'num_permutations', 10);
+addParameter(ip, 'numPermutations', 10);
 addParameter(ip, 'rngType', 'default');
 parse(ip, X, Y, varargin{:})
 
@@ -88,8 +92,8 @@ end
 unique_labels = unique(Y);
 num_labels = length(unique_labels);
 num_features = size(X,1);
-dissimilarities = zeros(ip.Results.num_permutations, num_labels, num_labels);
-for p=1:ip.Results.num_permutations
+dissimilarities = zeros(ip.Results.numPermutations, num_labels, num_labels);
+for p=1:ip.Results.numPermutations
     
     for i=1:num_labels
         curr_label_i = unique_labels(i);
@@ -133,6 +137,10 @@ end % permutations
 
 %  Permute so that the dimensions are: nLabels x nLabels x nPerms
 dissimilarities = permute(dissimilarities, [2,3,1]);
+
+% Populate output struct
+D.dissimilarities = dissimilarities;
+D.RDM = mean(dissimilarities, 3);
 
 end % function
 

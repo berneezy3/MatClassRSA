@@ -62,7 +62,7 @@ function [mdl, scale] = fitModel(X, Y, ip, gamma, C)
             end
             
             % data scaling
-            [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(X, [-1,1]);
+            [xScaled, shift1, shift2, scaleFactor] = Utils.scaleDataInRange(X, [-1,1]);
             X = xScaled;
             scale = struct();
             scale.needScale = 1;

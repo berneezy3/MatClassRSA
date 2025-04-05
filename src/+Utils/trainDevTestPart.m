@@ -112,6 +112,8 @@ foldSize = floor(numTrials/nFolds);
 if remainder == 0
     for i = 1:nFolds
         
+        testIndices = zeros( numTrials,1 );
+        
         for j = 1:testSize
             testIndices(j+(i-1)*testSize) = 1;
         end

@@ -8,7 +8,6 @@ clear all; close all; clc
 % "lsosorelli_500sweep_epoched.mat","S01.mat"
 run('loadUnitTestData.m') 
 
-RSA = MatClassRSA;
 
 %% 3D input balanced 72 class-labels -- looks good
 r = RSA.Reliability.computeSampleSizeReliability(S01.X, S01.labels72, 19, 1:11);

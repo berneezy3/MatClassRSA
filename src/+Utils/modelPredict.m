@@ -58,14 +58,14 @@ function [predictions decision_values] = modelPredict(X, mdl, scale)
             [r c] = size(X);
             Y = round(rand(r,1)*6);
             if (isstruct(scale))
-                X = scaleDataShiftDivide(X, scale.shift1, scale.shift2, scale.scaleFactor);
+                X = Utils.scaleDataShiftDivide(X, scale.shift1, scale.shift2, scale.scaleFactor);
             end
             
             [predictions, ~, decision_values] = svmpredict(Y, X, mdl, ['-q']);
             
             % handle ties
             for i=1:r
-                [indOfWinner tallies tie] = SVMhandleties(decision_values(i, :), mdl.Label');
+                [indOfWinner tallies tie] = Utils.SVMhandleties(decision_values(i, :), mdl.Label');
                 if (tie ~= 0)
 %                     disp(['libsvm''s winner: ' num2str(predictions(i)) ', bernard''s tie broken winner: ' num2str(mdl.Label(indOfWinner))]);
 %                     disp(['label order: ' num2str(mdl.Label')]);

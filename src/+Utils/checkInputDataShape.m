@@ -1,24 +1,19 @@
 function checkInputDataShape(X, Y)
 %-------------------------------------------------------------------
-% (c) Bernard Wang and Blair Kaneshiro, 2017.
-% Published under a GNU General Public License (GPL)
-% Contact: bernardcwang@gmail.com
-%-------------------------------------------------------------------
 % checkInputDataShape(X, Y)
-% --------------------------------
+% ------------------------------------------------------------------
 % Bernard Wang, Sept 28, 2019
 % 
 % This function checks if the format of input data (X,Y) is correct.  It
 % checks to make sure dimensions between X and Y and consistent.
 %
-% INPUT ARGS:
+% INPUTS:
 %   - X: Training Data (2D or 3D)
 %   - Y: Labels
 %
-% OUTPUT ARGS:
+% OUTPUTS:
 %   - N/A
 
-%
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------

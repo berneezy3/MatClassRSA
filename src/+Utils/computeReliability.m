@@ -1,11 +1,7 @@
 function [rels] = computeReliability(data, labels, num_permutations)
 %-------------------------------------------------------------------
-% (c) Bernard Wang, Nathan Kong, Blair Kaneshiro, 2017.
-% Published under a GNU General Public License (GPL)
-% Contact: bernardcwang@gmail.com
-%--------------------------------------------------------------------------------------------
 %  [rels] = computeReliability(data, labels, num_permutations)
-%--------------------------------------------------------------------------------------------
+%-------------------------------------------------------------------
 %
 % This function computes the component-wise reliability of a data matrix, which has
 % information about a specific time point.  The functions in this file are used
@@ -13,12 +9,12 @@ function [rels] = computeReliability(data, labels, num_permutations)
 %   - computeSampleSizeReliability.m
 %   - computeSpaceTimeReliability.m
 %
-% Input Args:
+% REQUIRED INPUTS:
 %   data - 3D data matrix. The dimensions of the data matrix are: nSpace x nTrial
 %   labels - labels vector. The length of labels should be equal to nTrials.
 %   num_permutations - how many permutations to split the trials for split half reliability.
 %
-% Output Args:
+% OUTPUTS:
 %   rels - reliability for each electrode at a particular time. The dimensions of
 %          the results matrix is: num_permutations x num_components
 

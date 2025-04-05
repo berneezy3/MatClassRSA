@@ -1,11 +1,7 @@
 function y = classTuple2Nchoose2Ind(classTuple, n)
 %-------------------------------------------------------------------
-% (c) Bernard Wang and Blair Kaneshiro, 2017.
-% Published under a GNU General Public License (GPL)
-% Contact: bernardcwang@gmail.com
-%-------------------------------------------------------------------
 % classTuple2Nchoose2Ind(classTuple, n)
-% --------------------------------
+% --------------------------------------------------------------------
 % Bernard Wang, Sept 28, 2019
 %
 % Say we are given N choose 2 pairs of classes, and these N choose 2
@@ -16,11 +12,11 @@ function y = classTuple2Nchoose2Ind(classTuple, n)
 % classes.  If we were to run the function call classTuple2Nchoose2Ind((2, 4), 5), 
 % the function would return index 6.  
 % 
-% INPUT ARGS:
+% INPUTS:
 %   - classTuple: a pair of classes in array form
 %   - n: number of classes
 %
-% OUTPUT ARGS:
+% OUTPUTS:
 %   - y: index of the class pair
 %
 

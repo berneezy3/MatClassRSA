@@ -1,4 +1,21 @@
 function [X, Y] = convert2double(X, Y)
+%-------------------------------------------------------------------
+%  [X, Y] = convert2double(X, Y)
+%-------------------------------------------------------------------
+%
+% This function converts user data into double format
+%
+% REQUIRED INPUTS:
+%       X - data matrix. Can be either a 2D (trial x feature) or
+%           3D (space x time x trial) matrix.
+%       Y - labels vector. Length should match the length of the trials
+%           dimension of X.
+%
+% OUTPUTS:
+%       X - Converted data matrix (double format). Can be either a 2D (trial x feature) or
+%           3D (space x time x trial) matrix.
+%       Y - Converted labels vector (double format). Length should match the length of the trials
+%           dimension of X.
 % Bernard - June. 27, 2020, Ray - Edit Sept, 2023
 
    if ~isa(X, 'double')

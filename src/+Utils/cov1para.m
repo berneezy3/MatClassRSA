@@ -1,15 +1,19 @@
 function [sigma,shrinkage]=cov1para(x,shrink)
-
-% function sigma=cov1para(x)
-% x (t*n): t iid observations on n random variables
-% sigma (n*n): invertible covariance matrix estimator
+% Disclaimer: This piece of code was obtained from Guggenmos et al. 2018.
+%-------------------------------------------------------------------
+%  [sigma,shrinkage] = cov1para(x,shrink)
+%-------------------------------------------------------------------
 %
-% Shrinks towards one-parameter matrix:
-%    all variances are the same
-%    all covariances are zero
-% if shrink is specified, then this value is used for shrinkage
-
-% This version: 04/2014
+% This function shrinks input data towards one-parameter matrix:
+% all covariances are the same, all covariances are zero.
+%
+% REQUIRED INPUTS:
+%   x - 3D data matrix. The dimensions of the data matrix are: nSpace x nTrial
+%   shrink - value is used for shrinkage
+%
+% OUTPUTS:
+%   sigma (n*n)- invertible covariance matrix estimator
+%   shrinkage - the user-specified shrink parameter, used for shrinkage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This file is released under the BSD 2-clause license.

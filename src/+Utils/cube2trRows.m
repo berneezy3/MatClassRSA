@@ -1,10 +1,7 @@
 function xOut = cube2trRows(xIn)
 %-------------------------------------------------------------------
-% (c) Bernard Wang and Blair Kaneshiro, 2017.
-% Published under a GNU General Public License (GPL)
-% Contact: bernardcwang@gmail.com
-%-------------------------------------------------------------------
 % xOut = cube2trRows(xIn)
+%-------------------------------------------------------------------
 % Blair - July 4, 2016
 %
 % This function takes in a 3D electrodes x time x trials matrix and
@@ -13,10 +10,10 @@ function xOut = cube2trRows(xIn)
 %
 % See also cube2chRows ch2trRows tr2chRows chRows2cube trRows2cube
 
-% Inputs:
+% REQUIRED INPUTS:
 %   - xIn:  a 3D electrodes x time x trials matrix
 %
-% Outputs:
+% OUTPUTS:
 %   - xOut: a 2D trials by concatenated-electrodes matrix
 
 

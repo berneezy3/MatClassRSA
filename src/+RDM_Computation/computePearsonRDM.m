@@ -1,7 +1,7 @@
-function [dissimilarities] = computePearsonRDM(X, Y, varargin)
+function D = computePearsonRDM(X, Y, varargin)
 %----------------------------------------------------------------------------------
-%  [dissimilarities] = ...
-%  RDM_Computation.computePearsonRDM(X, Y, num_permutations, rngType)
+%  D = ...
+%  RDM_Computation.computePearsonRDM(X, Y, numPermutations, rngType)
 %----------------------------------------------------------------------------------
 %
 % This function returns pairwise dissimilarities with respect to cross-validated Pearson
@@ -18,7 +18,7 @@ function [dissimilarities] = computePearsonRDM(X, Y, varargin)
 %   Y - labels vector. The size of Y should be (nTrials*nImages)
 %
 % OPTIONAL NAME-VALUE INPUTS:
-%   num_permutations (optional) - how many permutations to randomly select
+%   numPermutations - how many permutations to randomly select
 %       train and test data matrix. If not entered or empty, this defaults 
 %       to 10.
 %   rngType - Random number generator specification. Here you can set the
@@ -40,8 +40,14 @@ function [dissimilarities] = computePearsonRDM(X, Y, varargin)
 %           - rng struct as previously assigned by rngType = rng.
 %
 % OUTPUTS:
-%   dissimilarities - the dissimilarity matrix, dimensions: num_images
-%                     x num_images x num_permutations
+%   D - output struct object containing computed Pearson RDM 
+%        across all perumtations, and average RDM
+%   --subfields--
+%   RDM - The average Pearson RDM across all user-specified
+%           permutations
+%   dissimilarities - All computed dissimilarities across all permutations
+%           with the size nLabels x nLabes x nPermutations
+
 
 % This software is licensed under the 3-Clause BSD License (New BSD License),
 % as follows:
@@ -80,7 +86,7 @@ function [dissimilarities] = computePearsonRDM(X, Y, varargin)
 ip = inputParser;
 addRequired(ip, 'X');
 addRequired(ip, 'Y');
-addParameter(ip, 'num_permutations', 10);
+addParameter(ip, 'numPermutations', 10);
 addParameter(ip, 'rngType', 'default');
 parse(ip, X, Y, varargin{:})
 
@@ -95,11 +101,16 @@ if any(strcmp(ip.UsingDefaults, 'rngType')), Utils.setUserSpecifiedRng();
 else, Utils.setUserSpecifiedRng(ip.Results.rngType);
 end
 
+% Input data are usable: Print size of input variables.
+disp(['<a href="matlab: open(which(''computeEuclideanRDM.m''))">computePearsonRDM</a> input feature-by-trial data matrix is of size ' mat2str(size(X)) '.'])
+disp(['<a href="matlab: open(which(''computeEuclideanRDM.m''))">computePearsonRDM</a> input labels vector is of length ' num2str(length(Y)) '.'])
+
+
 unique_labels = unique(Y);
 num_images = length(unique_labels);
 num_features = size(X,1);
-dissimilarities = zeros(ip.Results.num_permutations, num_images, num_images);
-for p=1:ip.Results.num_permutations
+dissimilarities = zeros(ip.Results.numPermutations, num_images, num_images);
+for p=1:ip.Results.numPermutations
     
     for i=1:num_images
         curr_label_i = unique_labels(i);
@@ -141,6 +152,10 @@ end % permutations
 
 %  Permute so that the dimensions are: nLabels x nLabels x nPerms
 dissimilarities = permute(dissimilarities, [2,3,1]);
+
+% Populate output struct
+D.dissimilarities = dissimilarities;
+D.RDM = mean(dissimilarities, 3);
 
 end % function
 

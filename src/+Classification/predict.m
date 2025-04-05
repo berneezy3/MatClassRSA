@@ -117,7 +117,7 @@ function P = predict(M, X, varargin)
     testDataSize = size(X);
     
     % Subset data 
-    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+    [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                 tempInfo.spaceUse, ...
                                                 tempInfo.timeUse, ...
                                                 tempInfo.featureUse);
@@ -131,7 +131,7 @@ function P = predict(M, X, varargin)
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
     % rng(classifierInfo.rngType);
-    setUserSpecifiedRng(classifierInfo.rngType);
+    Utils.setUserSpecifiedRng(classifierInfo.rngType);
     
 
     % Predict Labels for Test Data
@@ -150,18 +150,18 @@ function P = predict(M, X, varargin)
         
         % PCA
         if (classifierInfo.PCA > 0) 
-            [X, ~, ~] = centerAndScaleData(X, classifierInfo.colMeans, classifierInfo.colScales);
+            [X, ~, ~] = Utils.centerAndScaleData(X, classifierInfo.colMeans, classifierInfo.colScales);
             testData = getPCs(X, M.classifierInfo.PCA_nPC);
         else
             testData = X;
         end
         
-        [P.predY decision_values] = modelPredict(testData, M.mdl, M.scale);
+        [P.predY decision_values] = Utils.modelPredict(testData, M.mdl, M.scale);
     
         % Get Accuracy and confusion matrix
         if ( ~isnan(ip.Results.actualLabels) )
             Y = ip.Results.actualLabels;
-            P.accuracy = computeAccuracy(P.predY, Y); 
+            P.accuracy = Utils.computeAccuracy(P.predY, Y); 
             P.CM = confusionmat(Y, P.predY);
         else
             P.accuracy = NaN; 
@@ -199,12 +199,12 @@ function P = predict(M, X, varargin)
                 for i = 1:ip.Results.permutations
                     disp(['Permutation ' num2str(i) ' of ' num2str(ip.Results.permutations)]);
                     pTrainLabels = trainLabels(randperm(numTrials));
-                    [pMdl, ~] = fitModel(trainData, pTrainLabels, M.ip, M.ip.Results.gamma, M.ip.Results.C); 
-                    predictedY = modelPredict(testData, pMdl, M.classifierInfo.ip);
+                    [pMdl, ~] = Utils.fitModel(trainData, pTrainLabels, M.ip, M.ip.Results.gamma, M.ip.Results.C); 
+                    predictedY = Utils.modelPredict(testData, pMdl, M.classifierInfo.ip);
                     %store accuracy
-                    accDist(i) = computeAccuracy(testLabels , predictedY);
+                    accDist(i) = Utils.computeAccuracy(testLabels , predictedY);
                 end
-                P.pVal = permTestPVal(P.accuracy, accDist);
+                P.pVal = Utils.permTestPVal(P.accuracy, accDist);
             elseif (strcmp(M.functionName, 'trainMulti_opt'))
                 numTrials = length(trainLabels);
                 for i = 1:ip.Results.permutations
@@ -217,21 +217,21 @@ function P = predict(M, X, varargin)
                         [pTrainData, pDevData, pTrainLabels, pDevLabels] ...
                             = permuteTrainDevData(trainData, devData, ...
                                                     pTrainLabels, devLabels);
-                        [pGamma_opt, pC_opt] = trainDevGridSearch(pTrainData, pTrainLabels, ...
+                        [pGamma_opt, pC_opt] = Utils.trainDevGridSearch(pTrainData, pTrainLabels, ...
                             pDevData, pDevLabels, M.ip);
                         [pMdl, ~] = fitModel(X, Y, M.ip, pGamma_opt, pC_opt);
-                        predictedY = modelPredict(testData, pMdl, M.classifierInfo.ip);
-                        accDist(i) = computeAccuracy(testLabels , predictedY);
+                        predictedY = Utils.modelPredict(testData, pMdl, M.classifierInfo.ip);
+                        accDist(i) = Utils.computeAccuracy(testLabels , predictedY);
                     else
                     % nested CV optimization
                         pTrainLabels = trainLabels(randperm(numTrials), :);
-                        [pGamma_opt, pC_opt] = nestedCvGridSearch(trainData, pTrainLabels, M.ip);
-                        [pMdl, ~] = fitModel(trainData, pTrainLabels, M.ip, M.gamma_opt, M.C_opt);
-                        predictedY = modelPredict(testData, pMdl, M.classifierInfo.ip);
-                        accDist(i) = computeAccuracy(testLabels , predictedY);
+                        [pGamma_opt, pC_opt] = Utils.nestedCvGridSearch(trainData, pTrainLabels, M.ip);
+                        [pMdl, ~] = Utils.fitModel(trainData, pTrainLabels, M.ip, M.gamma_opt, M.C_opt);
+                        predictedY = Utils.modelPredict(testData, pMdl, M.classifierInfo.ip);
+                        accDist(i) = Utils.computeAccuracy(testLabels , predictedY);
                     end
                 end
-                P.pVal = permTestPVal(P.accuracy, accDist);
+                P.pVal = Utils.permTestPVal(P.accuracy, accDist);
             end
 
         end
@@ -254,7 +254,7 @@ function P = predict(M, X, varargin)
 
         P.classificationInfo = struct();
         P.pairwiseInfo = struct();
-        pairwiseCell = initPairwiseCellMat(numClasses);
+        pairwiseCell = Utils.initPairwiseCellMat(numClasses);
         decMatchups = nchoosek(1:numClasses, 2);
         
         classifierInfo = struct(...
@@ -274,7 +274,7 @@ function P = predict(M, X, varargin)
             
             % PCA
             if (M.ip.Results.PCA > 0) 
-                [tempX_PCA, ~, ~] = centerAndScaleData(tempX, M.classifierInfo{i}.colMeans, M.classifierInfo{i}.colScales);
+                [tempX_PCA, ~, ~] = Utils.centerAndScaleData(tempX, M.classifierInfo{i}.colMeans, M.classifierInfo{i}.colScales);
                
                 testData = tempX_PCA*M.classifierInfo{i}.PCA_V;
                 testData = testData(:,1:M.classifierInfo{i}.PCA_nPC);
@@ -284,7 +284,7 @@ function P = predict(M, X, varargin)
 
             tempInfo = M.classifierInfo{i};
 
-            predY{i} = modelPredict(testData, M.mdl{i}, M.scale{i});
+            predY{i} = Utils.modelPredict(testData, M.mdl{i}, M.scale{i});
             P.classificationInfo.classBoundary{i} = [num2str(class1) ' vs. ' num2str(class2)];
             
             tempStruct = struct();
@@ -330,7 +330,7 @@ function P = predict(M, X, varargin)
 
                      % conduct grid search here
                      if (strcmp(M.ip.Results.optimization, 'nestedCV'))
-                        [gamma_opt, C_opt] = nestedCvGridSearch(trainX, pTrainY, cvDataObj, ip);
+                        [gamma_opt, C_opt] = Utils.nestedCvGridSearch(trainX, pTrainY, cvDataObj, ip);
                      elseif (strcmp(M.ip.Results.optimization, 'singleFold'))
                         devX = cvDataObj.devXall{1};
                         devY = cvDataObj.devYall{1};
@@ -339,13 +339,13 @@ function P = predict(M, X, varargin)
                         pTrainY = pTrainDevY(1:length(trainY));
                         pDevY = pTrainDevY(length(trainY)+1:end);
 
-                        [gamma_opt, C_opt] = trainDevGridSearch(trainX, pTrainY, ...
+                        [gamma_opt, C_opt] = Utils.trainDevGridSearch(trainX, pTrainY, ...
                             devX, pDevY, ip);
                     end
 
-                    [mdl, scale] = fitModel(trainX, trainY, ip, gamma_opt, C_opt);
+                    [mdl, scale] = Utils.fitModel(trainX, trainY, ip, gamma_opt, C_opt);
 
-                    [predictions, decision_values] = modelPredict(testX, mdl, scale);
+                    [predictions, decision_values] = Utils.modelPredict(testX, mdl, scale);
 
                     labelsConcat = [labelsConcat testY];
                     predictionsConcat = [predictionsConcat predictions];
@@ -353,7 +353,7 @@ function P = predict(M, X, varargin)
 
                     if strcmp(upper(ip.Results.classifier), 'SVM')
                         [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
-                            decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
+                            Utils.decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
                     end
                 end
         
@@ -378,7 +378,7 @@ function P = predict(M, X, varargin)
             
                         tempX = X(currUse, :);
                         tempY = Y(currUse);
-                        evalc(['pM = obj.trainMulti(trainX, pY,'  ...
+                        evalc(['pM = Classification.trainMulti(trainX, pY,'  ...
                             ' ''classifier'', M.classifier,' ...
                             ' ''PCA'', 0,''numTrees'', M.ip.Results.numTrees,' ...
                             ' ''minLeafSize'', M.ip.Results.minLeafSize, ' ...
@@ -390,7 +390,7 @@ function P = predict(M, X, varargin)
 
                     end
 
-                    pValMat(class1, class2) = permTestPVal(P.AM(class1, class2), ...
+                    pValMat(class1, class2) = Utils.permTestPVal(P.AM(class1, class2), ...
                         squeeze(accMatDist(class1, class2, :)));
                     pValMat(class2, class1) = pValMat(class1, class2);
                 end
@@ -407,12 +407,12 @@ function P = predict(M, X, varargin)
         
         numClasses = M.classifierInfo.numClasses;
         numDecBounds = nchoosek(numClasses, 2);
-        pairwiseCell = initPairwiseCellMat(numClasses);
+        pairwiseCell = Utils.initPairwiseCellMat(numClasses);
         pairwiseMat3D = zeros(2,2, numDecBounds);
         decMatchups = nchoosek(1:numClasses, 2);
         AM = NaN(numClasses, numClasses);
         
-        [predictions decision_values] = modelPredict(X, M.mdl, M.scale);           
+        [predictions decision_values] = Utils.modelPredict(X, M.mdl, M.scale);           
         
         [r c] = size(decision_values);
         allPredictions = zeros(size(decision_values));
@@ -445,7 +445,7 @@ function P = predict(M, X, varargin)
         
         if (sum(contains( fieldnames( ip.Results) , 'actualLabels' )))
             [P.AM, ~, P.pairwiseInfo] = ...
-            decValues2PairwiseAcc(pairwiseMat3D, ip.Results.actualLabels, M.mdl.Label, decision_values, pairwiseCell);
+            Utils.decValues2PairwiseAcc(pairwiseMat3D, ip.Results.actualLabels, M.mdl.Label, decision_values, pairwiseCell);
         end
         
         P.mdl = M.mdl;
@@ -471,7 +471,7 @@ function P = predict(M, X, varargin)
                 pTrainY = trainY(randperm(l), :);
                  % conduct grid search here
                  if (strcmp(ip.Results.optimization, 'nestedCV'))
-                    [gamma_opt, C_opt] = nestedCvGridSearch(trainX, pTrainY, cvDataObj, ip);
+                    [gamma_opt, C_opt] = Utils.nestedCvGridSearch(trainX, pTrainY, cvDataObj, ip);
                  elseif (strcmp(ip.Results.optimization, 'singleFold'))
                     devX = cvDataObj.devXall{1};
                     devY = cvDataObj.devYall{1};
@@ -479,14 +479,14 @@ function P = predict(M, X, varargin)
                     pTrainDevY = trainDevY(randperm(length(trainDevY)), :);
                     pTrainY = pTrainDevY(1:length(trainY));
                     pDevY = pTrainDevY(length(trainY)+1:end);
-                    [gamma_opt, C_opt] = trainDevGridSearch(trainX, pTrainY, ...
+                    [gamma_opt, C_opt] = Utils.trainDevGridSearch(trainX, pTrainY, ...
                         devX, pDevY, ip);
                  end
                 [pMdl, scale] = fitModel(trainX, pTrainY, ip, gamma_opt, C_opt);
 
                 if strcmp(upper(M.ip.Results.classifier), 'SVM')
                     [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
-                    decValues2PairwiseAcc(pairwiseMat3D, ip.Results.actualLabels, ...
+                    Utils.decValues2PairwiseAcc(pairwiseMat3D, ip.Results.actualLabels, ...
                         pP.model.Label, decision_values, pairwiseCell);
                 end
                 accMatDist(:,:,i) = pairwiseAccuracies;
@@ -497,7 +497,7 @@ function P = predict(M, X, varargin)
                 % class1 class2
                 class1 = classPairs(k, 1);
                 class2 = classPairs(k, 2);
-                pValMat(class1, class2) = permTestPVal(P.AM(class1, class2), ...
+                pValMat(class1, class2) = Utils.permTestPVal(P.AM(class1, class2), ...
                         accMatDist(class1, class2, :));
                 pValMat(class2, class1)  = pValMat(class1, class2);
             end

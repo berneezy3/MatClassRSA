@@ -95,7 +95,6 @@ defaultP = zeros(size(Y));
 addOptional(ip, 'P', defaultP);
 
 % parse optional inputs
-defaultEndShuffle = 1;
 defaultRandomSeed = {'shuffle', 'twister'}; 
 if verLessThan('matlab', '8.2')
     addParamValue(ip, 'rngType', defaultRandomSeed);
@@ -105,10 +104,7 @@ end
 
 parse(ip, X, Y, varargin{:});
 
-% Set random number generator
-if nargin < 5 || isempty(ip.Results.rngType), Utils.setUserSpecifiedRng();
-else, Utils.setUserSpecifiedRng(ip.Results.rngType);
-end
+Utils.setUserSpecifiedRng(ip.Results.rngType);
 
 % Make sure data matrix X is a 2D or 3D matrix
 assert(ndims(X) == 2 | ndims(X) == 3,...

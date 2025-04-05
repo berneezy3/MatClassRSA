@@ -177,7 +177,7 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
     % DONT DO PCA
     else
         if (~isnan(center) && ~isnan(scale))
-            [X, ~, ~] = centerAndScaleData(X, center, scale);
+            [X, ~, ~] = Utils.centerAndScaleData(X, center, scale);
         end
         for i = 1:nFolds
             trainIndx = find(trainDevTestSplit.train{i});

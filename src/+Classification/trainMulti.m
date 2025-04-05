@@ -176,7 +176,7 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     %display(ip.Results.rngType);
     st = dbstack;
     namestr = st.name;
-    ip = initInputParser(namestr, ip, X, Y, varargin{:});
+    ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
     
     % Parse Inputs
     parse(ip, X, Y, varargin{:});
@@ -185,13 +185,14 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     
     %display(ip.Results.rngType);
     % check input data 
-    checkInputDataShape(X, Y);
+    Utils.checkInputDataShape(X, Y);
     
-    % If SVM is selected, then gamma and C parameters must be manually set
-    verifySVMParameters(ip);
+    % If SVM is selected, and rbf kernel is chosen, then gamma and C parameters must be manually set
+    % If SVM is selected, and linear kernel is chosen, then C parameter must be manually set
+    Utils.verifySVMParameters(ip);
     
     % this function contains input checking functions
-    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+    [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                     ip.Results.spaceUse, ...
                                                     ip.Results.timeUse, ...
                                                     ip.Results.featureUse);
@@ -206,7 +207,7 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     % for data shuffling and permutation testing purposes
     %rng(ip.Results.randomSeed);
     %display(ip.Results.rngType);
-    setUserSpecifiedRng(ip.Results.rngType);
+    Utils.setUserSpecifiedRng(ip.Results.rngType);
 
     % Moving centering and scaling parameters out of ip, in case we need to
     % override the user's centering specification
@@ -220,22 +221,22 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     
     trainData = X;
     
-    tdtSplit = processTrainDevTestSplit([1 0 0], X);
-    partition = trainDevTestPart(X, 1, tdtSplit);
+    tdtSplit = Utils.processTrainDevTestSplit([1 0 0], X);
+    partition = Utils.trainDevTestPart(X, 1, tdtSplit);
     
     % Check that all lables in train set are also in test set.
     
     % PCA
     if (ip.Results.PCA > 0)
         disp('Conducting Principal Component Analysis...')
-        [cvDataObj, V, nPC, colMeans, colScales] = cvData(X,Y, partition, ip, ipCenter, ipScale);
+        [cvDataObj, V, nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
     else 
         disp('Principal Component Analysis turned off')
 %         V = NaN;
 %         nPC = NaN;
 %         colMeans = NaN;
 %         colScales = NaN;
-        [cvDataObj, V, nPC, colMeans, colScales] = cvData(X,Y, partition, ip, ipCenter, ipScale, 1);
+        [cvDataObj, V, nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale, 1);
     end
     trainData = cvDataObj.trainXall{1};
     
@@ -269,7 +270,7 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     
     disp(['classifying with ' ip.Results.classifier] )
 
-    [mdl, scale] = fitModel(trainData, Y(:), ip, ip.Results.gamma, ip.Results.C);
+    [mdl, scale] = Utils.fitModel(trainData, Y(:), ip, ip.Results.gamma, ip.Results.C);
     
         
     % set return struct fields

@@ -88,9 +88,10 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 %       averagedY - the label vector for the trials in averagedX.
 %       averagedP - the participants vector corresponding to trials in
 %           averagedY.
-%       whichObs - a matrix that contains information on which trials in
-%           the input matrix X were used to create trial in averagedX.  
-%           The size of whichObs should be length(averagedY) x groupSize.
+%       whichObs - a cell array that contains information on which trials in
+%           the input matrix X were used to create each trial in averagedX.  
+%           The size of whichObs should be length(averagedY), with each cell
+%           containing the trial numbers of length(groupSize).
 %
 % See also shuffleData setUserSpecifiedRng
 
@@ -216,8 +217,13 @@ uP = sort(unique(PALL));
 nP = length(uP);
 
 for pp = 1:nP % Iterate through the participants
+    
     % Print message of which participant we are processing
     thisParticip = uP(pp);
+    
+    disp(thisParticip);
+    
+    % Checks if P vector has any participants and notifies user
     if any(PALL~=0)
         disp(['Computing ' num2str(groupSize) '-trial averages for participant ' ...
             num2str(thisParticip) ' (' num2str(pp) ' of ' num2str(nP) ').'])
@@ -225,10 +231,13 @@ for pp = 1:nP % Iterate through the participants
     
     % Subset data from that participant
     thisIdx = find(PALL == thisParticip);
+    
+    %disp(thisIdx);
+    
     X = (XALL(thisIdx,:));
     Y = YALL(thisIdx);
     
-    % the original data set with data from other participants set as zero,
+    % the original dataset with data from other participants set as zero,
     % to preserve original data indexing
     notThisInd = find(PALL ~= thisParticip);
     Xalt = XALL;
@@ -259,7 +268,6 @@ for pp = 1:nP % Iterate through the participants
     % create dictionary to store labels and their corresponding number of
     % remainders
     labelNumRemains = containers.Map(k, rem(val, groupSize));
-    
     
     % store the indecies of current label
     tempInd = [];
@@ -313,6 +321,15 @@ for pp = 1:nP % Iterate through the participants
             remTempRow = zeros(1,c);
             remY = uniqueLabels(i);
             
+            %disp(['Total trials before grouping for label ', num2str(uniqueLabels(i)), ': ', num2str(length(Y))]);
+%disp(['Remainders before handling for label ', num2str(uniqueLabels(i)), ': ', num2str(rem(length(Y), groupSize))]);
+           
+          %  disp(['Label ', num2str(uniqueLabels(i)), ...
+     % ' - Total Trials: ', num2str(val(i)), ...
+     % ' - Remainder (expected nonzero if not multiple of 7): ', num2str(rem(val(i), groupSize))]);
+       %     disp(['Total trials before grouping: ', num2str(nnz(Y == uniqueLabels(i)))]);
+       %     disp(['Remainders before handling for label ' num2str(uniqueLabels(i)) ': ' num2str(labelNumRemains(num2str(uniqueLabels(i))))]);
+            
             for j=1:labelNumRemains(num2str(uniqueLabels(i)))
                 % CASE: DISCARD REMAINDERS (DO NOTHING)
                 if (strcmp(ip.Results.handleRemainder, 'discard'))
@@ -363,7 +380,7 @@ for pp = 1:nP % Iterate through the participants
                     for k = 1:length(remInd)
                         remTempRow = Xalt(remInd(k), :) + averagedX(averagedInd(k),:) * groupSize;
                         Xalt(averagedInd(k), :) = remTempRow/(groupSize+1);
-                        whichObs{averagedInd(k)} = [whichObs{end} remInd(k)]
+                        whichObs{averagedInd(k)} = [whichObs{end} remInd(k)];
                     end
                 end
             end

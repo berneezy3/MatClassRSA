@@ -6,15 +6,15 @@ function xOut = convertSimToDist(xIn, distType, distPower)
 %
 % This function converts a proximity matrix to distances.
 % Inputs:
-% - xIn: The square confusion matrix, possibly normlized
-% - distType:
-%   - Linear ('linear', 'lin)
-%   - Power ('power', 'p')
-%   - Logarithmic ('logarithmic', 'log')
-%   - Pairwise ('pairwise', 'pw')
-%   - None ('none', 'n')
-% - distPower:
-%   - Distance power (used in power and logarithmic computations)
+%   - xIn: The square confusion matrix, possibly normlized
+%   - distType:
+%       - Linear ('linear', 'lin)
+%       - Power ('power', 'p')
+%       - Logarithmic ('logarithmic', 'log')
+%       - Pairwise ('pairwise', 'pw')
+%       - None ('none', 'n')
+%   - distPower:
+%       - Distance power (used in power and logarithmic computations)
 %
 % Outputs
 %   xOut: distance matrix

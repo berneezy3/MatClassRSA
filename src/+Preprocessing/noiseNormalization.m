@@ -1,6 +1,6 @@
-function [norm_data, sigma_inv] = noiseNormalization(X, Y)
+function [normData, sigmaInv] = noiseNormalization(X, Y)
 %---------------------------------------------------------------------------
-%  [norm_data, sigma_inv] = Preprocessing.noiseNormalization(X, Y)
+%  [normData, sigmaInv] = Preprocessing.noiseNormalization(X, Y)
 %---------------------------------------------------------------------------
 %
 % Function to perform multivariate noise normalization on time varying data.
@@ -13,9 +13,9 @@ function [norm_data, sigma_inv] = noiseNormalization(X, Y)
 %   Y - Labels vector. The length of this vector should correspond to
 %       the length, along the trial dimension, of the input data.
 % OUTPUTS:
-%   norm_data - Data matrix after noise normalization is applied. It
+%   normData - Data matrix after noise normalization is applied. It
 %       will be the same size as the input data matrix.
-%   sigma_inv - Inverse of the square root of the covariance matrix.
+%   sigmaInv - Inverse of the square root of the covariance matrix.
 
 % This software is licensed under the 3-Clause BSD License (New BSD License),
 % as follows:
@@ -76,7 +76,7 @@ function [norm_data, sigma_inv] = noiseNormalization(X, Y)
     num_images = length(unique_labels);
 
     % This is probably not the best in terms of memory
-    norm_data = nan(num_components, num_timepoints, total_trials);
+    normData = nan(num_components, num_timepoints, total_trials);
 
     all_image_covs = nan(num_images, num_components, num_components);
     for i=1:num_images
@@ -97,16 +97,16 @@ function [norm_data, sigma_inv] = noiseNormalization(X, Y)
 
     % Average covariances across images
     sigma = squeeze(mean(all_image_covs, 1));
-    sigma_inv = sigma^(-0.5);
+    sigmaInv = sigma^(-0.5);
 
     for t=1:num_timepoints
-        weighted_data = sigma_inv * squeeze(X(:,t,:));
-        norm_data(:,t,:) = weighted_data;
+        weighted_data = sigmaInv * squeeze(X(:,t,:));
+        normData(:,t,:) = weighted_data;
     end
 
     % If the 2D data were provided, permute back to original dimensions
     if num_dim == 2
-        norm_data = permute(norm_data, [3,2,1]);
+        normData = permute(normData, [3,2,1]);
     end
 
 end

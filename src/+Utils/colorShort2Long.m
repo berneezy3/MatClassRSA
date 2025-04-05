@@ -1,12 +1,13 @@
 function y = colorShort2Long(shortName)
 %-------------------------------------------------------------------
-% colorlongNametor = colorShort2Long(['b' 'k' 'y' 'm' 'c' 'r' 'g' 'w'])
-%
+% y = colorShort2Long(['b' 'k' 'y' 'm' 'c' 'r' 'g' 'w'])
+%----------------------------------------------------------------------
 % This function converts color abbreviaton to long name
-% INPUT ARGS:
+%
+% INPUTS:
 %   - shortname:  first letter of color
 %
-% OUTPUT ARGS:
+% OUTPUTS:
 %   - y: color string
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
