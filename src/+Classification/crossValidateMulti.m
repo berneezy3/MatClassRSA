@@ -67,11 +67,11 @@ function C = crossValidateMulti(X, Y, varargin)
 %       - integer greater than or equal to 1: Use N most important
 %       - 0: Do not perform PCA.
 %   'PCAinFold' - This controls whether or not PCA is conducted in each
-%   fold duration cross validation, or if PCA is conducted once on the 
-%   entire dataset prior to partitioning data for cross validation.
+%       fold duration cross validation, or if PCA is conducted once on the 
+%       entire dataset prior to partitioning data for cross validation.
 %       --options--
-%       true (default): Conduct PCA within each fold.
-%       false : One PCA for entire training data matrix X.
+%       true : Conduct PCA within each fold.
+%       false (default): One PCA for entire training data matrix X.
 %   'nFolds' - Number of folds in cross validation.  Must be integer
 %       greater than 1 and less than or equal to the number of trials. 
 %       Default is 10.

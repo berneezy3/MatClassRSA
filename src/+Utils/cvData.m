@@ -146,20 +146,20 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
                 
                 % center and scale training data
                 [trainX, colMeans, colScales] = ...
-                    centerAndScaleData(trainX, center, scale);
+                    Utils.centerAndScaleData(trainX, center, scale);
                 trainY = Y(trainIndx);
 
                 devX = X(devIndx, :);
                 testX = X(testIndx, :);
                 % accordingly center and scale test data
-                    [testX, ~, ~] = centerAndScaleData(testX, colMeans, colScales);
-                    [devX, ~, ~] = centerAndScaleData(devX, colMeans, colScales);
+                    [testX, ~, ~] = Utils.centerAndScaleData(testX, colMeans, colScales);
+                    [devX, ~, ~] = Utils.centerAndScaleData(devX, colMeans, colScales);
                 devY = Y(devIndx);    
                 testY = Y(testIndx);
 
                 % PCA after data center/scaling
                 if (PCAinFold == 1)
-                    [trainX, V, nPC] = getPCs(trainX, PCA);
+                    [trainX, V, nPC] = Utils.getPCs(trainX, PCA);
                     testX = testX*V;
                     testX = testX(:,1:nPC);
                     devX = devX*V;

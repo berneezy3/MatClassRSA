@@ -15,7 +15,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
     defaultSpaceUse = [];
     defaultFeatureUse = [];
     defaultRandomSeed = 'shuffle';
-    defaultKernel = 'linear';
+    defaultKernel = 'rbf';
 %   defaultDiscrimType = 'linear';
     defaultNumTrees = 64;
     defaultMinLeafSize = 1;
@@ -88,7 +88,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             @(x) (assert(isvector(x))));
         addParameter(ip, 'featureUse', defaultFeatureUse, ...
             @(x) (assert(isvector(x))));
-        addParameter(ip, 'kernel', 'rbf', @(x) any(validatestring(x, expectedKernels)));
+        addParameter(ip, 'kernel', defaultKernel, @(x) any(validatestring(x, expectedKernels)));
         addParameter(ip, 'numTrees', 128);
         addParameter(ip, 'minLeafSize', 1);
         addParameter(ip, 'permutations', 0);
@@ -110,7 +110,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
        case {'crossValidatePairs', 'crossValidatePairs_fast', 'crossValidatePairs_slow'}
             addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
-            expectedClassifier = {'LDA', 'RF'};
+            expectedClassifier = {'LDA', 'RF', 'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'nFolds', defaultNFolds, validateNFolds);

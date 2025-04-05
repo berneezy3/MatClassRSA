@@ -57,6 +57,67 @@ M = Classification.crossValidateMulti(X , labels6, ...
 
 M.classificationInfo
 
+%% Number of Permutations
+
+M = Classification.crossValidateMulti(X , labels6, ...
+    'classifier', 'RF', ...
+    'PCA', 0.99, ...
+    'permutations', 5 ...
+);
+
+M.classificationInfo
+
+%% PCA within Cross-Validation Folds
+% PCAinFold default is 0 (false)
+
+M = Classification.crossValidateMulti(X, labels6, 'PCA', .99, ...
+    'classifier', 'LDA', 'PCAinFold', 1);
+
+M.classificationInfo
+
+%% Time Use
+
+% Innspect time vector
+t(17:22)
+
+% We pass in the array 17:23 into the 'timeUse' argument to 
+% subset data representing 144-224 milliseconds.   
+M = Classification.crossValidateMulti(X, labels6, 'PCA', .99, ...
+    'classifier', 'LDA', 'timeUse', 17:22);
+
+M.classificationInfo
+M.accuracy
+
+%% Space Use
+
+% We pass in the array 94:100 into the 'spaceUse' argument to 
+% subset data representing electrodes 94 to 100.   
+M = Classification.crossValidateMulti(X, labels6, 'PCA', .99, ...
+    'classifier', 'LDA', 'spaceUse', 94:100);
+
+M.classificationInfo
+M.accuracy
+
+%% Turning Centering Off
+
+% Default centering - true
+
+M = Classification.crossValidateMulti(X, labels6, 'PCA', .99, ...
+    'classifier', 'LDA', 'center', false);
+
+M.classificationInfo
+M.accuracy
+
+%% Scaling on
+
+% Default scaling - false
+
+M = Classification.crossValidateMulti(X, labels6, 'PCA', .99, ...
+    'classifier', 'LDA', 'scale', true);
+
+M.classificationInfo
+M.accuracy
+
 %% Random Forest Classification, Default Hyperparameters
 % default numTrees = 128
 % default minLeafSize = 1
@@ -119,17 +180,17 @@ M = Classification.crossValidateMulti(X , labels6, ...
 );
 
 M.classificationInfo
-%% Number of Permutations
 
-M = Classification.crossValidateMulti(X , labels6, ...
-    'classifier', 'RF', ...
-    'PCA', 0.99, ...
-    'permutations', 5 ...
-);
+%% Feature Use
+
+load('losorelli_100sweep_epoched.mat')
+
+% We pass in the array of chosen features into the 
+% 'featureUse' argument to subset data representing features of interest.   
+M = Classification.crossValidateMulti(X, Y, 'PCA', .99, ...
+    'classifier', 'LDA', 'featureUse', 100:1500);
 
 M.classificationInfo
-%% Feature Use
-%% Time Use
-%% Space Use
-%% PCA within Cross-Validation Folds
+M.accuracy
+
 

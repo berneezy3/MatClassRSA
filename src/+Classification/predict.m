@@ -91,7 +91,7 @@ function P = predict(M, X, varargin)
     ip.CaseSensitive = false;
     
     addRequired(ip, 'M');
-    addRequired(ip, 'X', @is2Dor3DMatrix);
+    addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
     defaultY = NaN;
     addParameter(ip, 'actualLabels', defaultY, @isvector);
     addParameter(ip, 'permTestData', defaultY, @isvector);
@@ -205,9 +205,12 @@ function P = predict(M, X, varargin)
                     accDist(i) = Utils.computeAccuracy(testLabels , predictedY);
                 end
                 P.pVal = Utils.permTestPVal(P.accuracy, accDist);
+            
             elseif (strcmp(M.functionName, 'trainMulti_opt'))
                 numTrials = length(trainLabels);
+                
                 for i = 1:ip.Results.permutations
+                    
                     % Train model
                     disp(['Permutation ' num2str(i) ' of ' num2str(ip.Results.permutations)]);
                     if (strcmp(M.ip.Results.optimization, 'singleFold'))
@@ -222,7 +225,8 @@ function P = predict(M, X, varargin)
                         [pMdl, ~] = fitModel(X, Y, M.ip, pGamma_opt, pC_opt);
                         predictedY = Utils.modelPredict(testData, pMdl, M.classifierInfo.ip);
                         accDist(i) = Utils.computeAccuracy(testLabels , predictedY);
-                    else
+                        
+                    else   
                     % nested CV optimization
                         pTrainLabels = trainLabels(randperm(numTrials), :);
                         [pGamma_opt, pC_opt] = Utils.nestedCvGridSearch(trainData, pTrainLabels, M.ip);
