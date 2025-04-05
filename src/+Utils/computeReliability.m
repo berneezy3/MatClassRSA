@@ -3,14 +3,14 @@ function [rels] = computeReliability(data, labels, num_permutations)
 %  [rels] = computeReliability(data, labels, num_permutations)
 %-------------------------------------------------------------------
 %
-% This function computes the component-wise reliability of a data matrix, which has
-% information about a specific time point.  The functions in this file are used
-% in conjunction with:
+% This function computes the component-wise reliability of an input data 
+% matrix containing information about a specific time point.  The functions 
+% in this file are used in conjunction with:
 %   - computeSampleSizeReliability.m
 %   - computeSpaceTimeReliability.m
 %
 % REQUIRED INPUTS:
-%   data - 3D data matrix. The dimensions of the data matrix are: nSpace x nTrial
+%   data - Data matrix. The dimensions of the data matrix are: nSpace x nTrial
 %   labels - labels vector. The length of labels should be equal to nTrials.
 %   num_permutations - how many permutations to split the trials for split half reliability.
 %
