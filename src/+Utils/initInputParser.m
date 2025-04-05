@@ -2,7 +2,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
 % y = initInputParser(functionName, ip, X, Y, varargin)
 % ------------------------------------------------------------
 % This function initializes the input parser for various functions. It
-% fills in generalized parameters such as rng, PCA speficiations, center
+% fills in generalized parameters such as rng, PCA specifications, center
 % and scale parameters, data subsetting, and classification parameters. It
 % also fills in additional parameters depending on which function it is
 % being called from.
