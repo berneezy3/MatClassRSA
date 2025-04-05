@@ -7,9 +7,10 @@ function [sigma,shrinkage]=cov1para(x,shrink)
 % This function shrinks input data towards one-parameter matrix:
 % all covariances are the same, all covariances are zero.
 %
-% REQUIRED INPUTS:
-%   x - 3D data matrix. The dimensions of the data matrix are: nSpace x nTrial
-%   shrink - value is used for shrinkage
+% INPUTS:
+%   x - Data matrix of size nSpace x nTrial
+%   shrink (optional) - value is used for shrinkage. If not entered or
+%   entered as -1, the function will compute the shrinkage estimator.
 %
 % OUTPUTS:
 %   sigma (n*n)- invertible covariance matrix estimator
