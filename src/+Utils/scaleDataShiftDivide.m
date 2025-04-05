@@ -1,25 +1,20 @@
 function scaledData = scaleDataShiftDivide(data, shift1, shift2, scaleFactor)
-% scaledData = scaleDataShiftDivide(data, shift, divide)
+% scaledData = scaleDataShiftDivide(data, shift1, shift2, scaleFactor)
 % -------------------------------------------------------------------------
 % Bernard - February 25, 2020
 %
-% This function takes in the data matrix data and a shift and divide factor
-% calculated from the function scaleDataInRange().  The function applies
-% the shift and divide factor on the data matrix to center the data around
-% 0, within a range set in scaleDataInRange()
+% This function takes in the data matrix data along with shift and divide
+% factors calculated from the function scaleDataInRange(). The function 
+% applies the shift and divide factor on the data matrix to bring the data
+% to the range specified in scaleDataInRange(). Thus, the function can be
+% used to apply precomputed shift and scaled factors to a dataset. 
 % 
 % INPUTS
-%   data: Input numeric data matrix.
-%   shift: Shift factor to zero center the data matrix.  This value should
-%   be an output from scaleDataInRange().
-%   divide: Scaling factor to ensure that all values in the data matrix
-%   fall with a certain range.  The range is specified in
-%   scaleDataInRange(), and the divide factor should be be an output from 
-%   scaleDataInRange().
+% The function takes in the four variables in this equation:
+%   (data - shift1).*scaleFactor + shift2
 %
 % OUTPUTS
-%   scaledData:  the data matrix that is zero-centered and scaled
-%   according to the input parameters
+%   scaledData:  Data matrix that has undergone the above equation.
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
