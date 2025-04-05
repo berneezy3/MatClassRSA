@@ -5,11 +5,15 @@ function [W, nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, spaceUse, t
 % Bernard - September 28, 2019
 %
 % This function subsets the input Matrix X according to parameters
-% spaceUse, timeUse and featureUse, defined by the user during function
-% call.
+% spaceUse, timeUse and featureUse, defined by the user during the function
+% call. spaceUse and timeUse operate on 3D [space x time x trial] input
+% matrices, subsetting along the 1st and/or 2nd dimensions, respectively.
+% featureUse operates on 2D [trial x feature] input matrices, subsetting
+% along the 2nd dimension. The function returns a 2D trial-by-feature
+% matrix whether a 2D or 3D matrix was input. 
 %
 % INPUT ARGS:
-%   X - The image which will be overlayed by the new image
+%   X - The input data matrix. Can be 2D or 3D. 
 %   spaceUse - If X is a 3D, space-by-time-by-trials matrix, then this
 %       option will subset X along the space dimension.  The input
 %       argument should be passed in as a vector of indices that indicate the 
@@ -28,7 +32,15 @@ function [W, nSpace, nFeature, nTrials] = subsetTrainTestMatrices(X, spaceUse, t
 %       space-by-time-by-trials matrix.
 %
 % OUTPUT ARGS:
-% - N/A
+% - W: The subset matrix. This will always be a 2D trial-by-feature matrix,
+%   even if a 3D matrix was input. 
+% - nSpace: The size of the space dimension of the output matrix (i.e., the
+%   length of spaceUse). Will be NaN if input matrix was 2D. 
+% - nFeature: The size of the feature dimension of the output matrix (i.e.,
+%   the length of featureUse). This will report the size of the time
+%   dimension (i.e., length of timeUse) if a 3D matrix was input.
+% - nTrials: The number of trials of the output matrix.
+
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
