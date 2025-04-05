@@ -20,8 +20,8 @@ function obj = cvpart(numTrials, nFolds)
 % step we choose to assign partitions sequentially.  
 % 
 % INPUT ARGS:
-%   - n: number of training samples
-%   - k: number of folds
+%   - numTrials: number of training samples
+%   - nFolds: number of folds
 %
 % OUTPUT ARGS:
 %   - obj:  an object of the cvpart class
