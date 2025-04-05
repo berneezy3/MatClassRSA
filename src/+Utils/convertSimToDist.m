@@ -1,6 +1,6 @@
 function xOut = convertSimToDist(xIn, distType, distPower)
 %-------------------------------------------------------------------
-% xOut = computeDistances(xIn, distType)
+% xOut = computeDistances(xIn, distType, distPower)
 % --------------------------------------------------------
 % Blair - February 22, 2017
 %
