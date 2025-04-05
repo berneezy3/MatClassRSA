@@ -1,5 +1,5 @@
 function y = processTrainDevTestSplit(trainDevTestSplit, X)
-%  processTrainDevTestSplit(trainDevTestSplit, X)
+%  y = processTrainDevTestSplit(trainDevTestSplit, X)
 % --------------------------------
 % Bernard Wang, September 17, 2020
 % 
