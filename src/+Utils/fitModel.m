@@ -4,24 +4,30 @@ function [mdl, scale] = fitModel(X, Y, ip, gamma, C)
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% mdl = fitModel(X, Y, ip)
+% [mdl, scale] = fitModel(X, Y, ip, gamma, C)
 % --------------------------------
 % Bernard Wang, Sept 28, 2019
 %
-% Given the classifier and training data specified in classifyCrossValidate(), 
-% fitModel() of returns a classifcation model.  The output object mdl is to
-% be passed into modelPredict.  The purpose of this class is to provide a
-% unified interface towards training a model, because the function calls to 
-% the different classifiers (SVM, RF, and LDA etc) are all different.
+% Given the classifier and training data specified in another 
+% function, this function returns a classifcation model.  The output object 
+% mdl is to be passed into the predict stage.  The purpose of this class is 
+% to provide a unified interface towards training a model, because the 
+% function calls to the different classifiers (SVM, RF, and LDA etc) are 
+% all different.
 % 
 % INPUT ARGS:
 %   - X: 2D trial by feature training data matrix
 %   - Y: label vector
-%   - ip: input parser parameters from classifyCrossValidate()
+%   - ip: input parser parameters from classification function
+%   - gamma: Hyperparameter for SVM classifications
+%   - C: Hyperparameter for SVM classifications
 %
 % OUTPUT ARGS:
 %   - mdl: an object that contains the classification model
-%
+%   - scale: If classifier is SVM, this output is a struct specifying that 
+%       scaling was performed and also stores the shift and scale 
+%       parameters. For LDA and RF classifiers, scale is NaN. 
+%   
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
 % -------------------------------------------------------------------------
