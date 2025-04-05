@@ -1,4 +1,20 @@
 function y = initInputParser(functionName, ip, X, Y, varargin)
+% y = initInputParser(functionName, ip, X, Y, varargin)
+% ------------------------------------------------------------
+% This function initializes the input parser for various functions. It
+% fills in generalized parameters such as rng, PCA speficiations, center
+% and scale parameters, data subsetting, and classification parameters. It
+% also fills in additional parameters depending on which function it is
+% being called from.
+%
+% INPUTS: 
+% - functionName: Name of the function calling this function
+% - ip: Already-initialized input parser
+% - X: Data matrix
+% - Y: Labels vector
+%
+% OUTPUT:
+% - y: Updated input parser
 
     % Initialize the input parser
     ip = inputParser;
