@@ -9,9 +9,16 @@ function verifySVMParameters(ip)
 % Bernard Wang, Sept 28, 2019
 %
 % This function is used for the non-optimization classification functions
-% (crossValidateMulti, crossValidatePairs, trainPairs, trainMulti) to
-% ensure that gamma and C parameters are manually set by the user when
-% using the SVM classifier
+% to ensure that gamma and C parameters are manually set by the user when
+% using the SVM classifier.
+%
+% INPUT
+% - ip: The input parser of the current classification 
+%
+% OUTPUT
+% - There are no outputs. If the gamma and C parameters are not
+% appropriately set, the function will return an error with instructions to
+% use one of the optimization functions to compute suitables values. 
 %
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
