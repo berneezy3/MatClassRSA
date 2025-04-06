@@ -5,10 +5,9 @@ function xOut = cube2trRows(xIn)
 % Blair - July 4, 2016
 %
 % This function takes in a 3D electrodes x time x trials matrix and
-% reshapes it to a 2D trials by concatenated-electrodes matrix. Needs only
-% 1 input, so fun!
-%
-% See also cube2chRows ch2trRows tr2chRows chRows2cube trRows2cube
+% reshapes it to a 2D trials by concatenated-electrodes matrix. Only 1
+% input is needed since all possible dimensions of the data can be inferred
+% from the 3D input matrix. 
 
 % REQUIRED INPUTS:
 %   - xIn:  a 3D electrodes x time x trials matrix
