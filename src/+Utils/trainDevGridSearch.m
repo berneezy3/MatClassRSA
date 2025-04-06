@@ -4,20 +4,23 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% mdl = trainDevGridSearch(X, Y, gammaRange, cRange)
+% [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
 % --------------------------------
 % Bernard Wang, April 5, 2020
 %
-% Given training data matrix X, label vector Y, and a vector of gamma's 
-% and C's to search over, this function runs cross validation over a grid 
-% of all possible combinations of gammas and C's.
+% Given training and development partitions of data and labels, as well as
+% vectors of gamma and C values to search over, this function runs cross
+% validations over a grid of all possible combinations of gammas and Cs and
+% returns the optimal value for each. 
 % 
 % INPUT ARGS:
-%   - trainX: 2D trial by feature training data matrix
-%   - trainY: label vector
-%   - devX: 2D trial by feature training data matrix
-%   - devY:label vector
-%   - ip: input parser passed from parent script, which calls this function
+%   - trainX: 2D trial-by-feature training data matrix
+%   - trainY: labels vector for training data
+%   - devX: 2D trial-by-feature development data matrix
+%   - devY: labels vector for development data 
+%   - ip: input parser passed from parent script, which calls this
+%   function. Includes gammaSpace and cSpace parameters, which specify the
+%   grid over which to search.
 %
 % OUTPUT ARGS:
 %   - gamma_opt: gamma value that produces the highest cross validation
