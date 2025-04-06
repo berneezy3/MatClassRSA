@@ -1,8 +1,7 @@
 function [M, trainData] = trainMulti(X, Y, varargin)
 % -------------------------------------------------------------------------
-% RSA = MatClassRSA;
-% M = RSA.Classification.trainMulti(trainData, testData); 
-% P = RSA.Classification.predict(M, X, Y)
+% [M, trainData] = Classification.trainMulti(trainData, testData); 
+% P = Classification.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -117,7 +116,7 @@ function [M, trainData] = trainMulti(X, Y, varargin)
 % OUTPUT ARGS 
 %   M - Classification output to be passed into predict().  
 %       --subfields--
-%       M.classifierInfo - additional parameters/info for classification
+%       M.classificationInfo - additional parameters/info for classification
 %       M.mdl - classification model which is used in predict to predict
 %           the labels of new data
 %       M.classifier - classifier selected for training
@@ -162,9 +161,6 @@ function [M, trainData] = trainMulti(X, Y, varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     train_time = tic;
-
-    
-
 
     %initialize output struct C
     M = struct;
@@ -262,6 +258,9 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     switch classifierInfo.classifier
         case 'SVM'
             classifierInfo.kernel = ip.Results.kernel;
+           
+            classifierInfo.gamma = ip.Results.gamma;
+            classifierInfo.C = ip.Results.C;
         case 'LDA'
         case 'RF'
             classifierInfo.numTrees = ip.Results.numTrees;
@@ -274,7 +273,7 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     
         
     % set return struct fields
-    M.classifierInfo = classifierInfo;
+    M.classificationInfo = classifierInfo;
     M.mdl = mdl;
     M.scale = scale;
     M.pairwise = 0;

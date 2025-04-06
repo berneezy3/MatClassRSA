@@ -1,7 +1,6 @@
  function C = crossValidateMulti_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
-% RSA = MatClassRSA;
-% C = RSA.Classification.crossValidateMulti_opt(X, Y, varargin)
+% C = Classification.crossValidateMulti_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -213,14 +212,20 @@
         end
     end
 
-    % check that X and Y have same number of trials
-    assert(size(X,1) == length(Y), "X and Y vectors must have same number of trials");
+    if(~Utils.is2Dor3DMatrix(X))
+        % check that X and Y have same number of trials
+        assert(size(X,1) == length(Y), "X and Y vectors must have same number of trials");
+    elseif(Utils.is2Dor3DMatrix(X))
+        % check that X and Y have same number of trials
+        assert(size(X,3) == length(Y), "X and Y vectors must have same number of trials");
+    end
     
     % Initialize the input parser
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip, X, Y, varargin{:});
+    ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
+    disp(ip.Results.gammaSpace);
 %     checkInputData(namestr, ip, X, Y);
     
     % Hardcode SVM for now
@@ -259,7 +264,7 @@
        warning('Y label vector not in double format.  Converting Y labels to double.')
        Y = double(Y);
    end
-   [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+   [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
                                                 ip.Results.featureUse);
@@ -281,7 +286,7 @@
     % SET RANDOM SEED
     % for Random forest purposes
 
-    setUserSpecifiedRng(ip.Results.rngType);
+    Utils.setUserSpecifiedRng(ip.Results.rngType);
 
     % PCA 
     % Split Data into fold (w/ or w/o PCA)
@@ -305,8 +310,8 @@
         trainDevTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
     end
     
-    partition = trainDevTestPart(X, ip.Results.nFolds, trainDevTestSplit);
-    [cvDataObj,V,nPCs] = cvData(X,Y, partition, ip, ipCenter, ipScale);
+    partition = Utils.trainDevTestPart(X, ip.Results.nFolds, trainDevTestSplit);
+    [cvDataObj,V,nPCs] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
     
     % restore rng to original
     rng(ip.Results.rngType);
@@ -361,23 +366,23 @@
                 ip.Results.nFolds == 2 )
                 devX = cvDataObj.devXall{i};
                 devY= cvDataObj.devYall{i};
-                [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, ...
+                [gamma_opt, C_opt] = Utils.trainDevGridSearch(trainX, trainY, ...
                     devX, devY, ip);
             elseif ( strcmp(ip.Results.optimization, 'nestedCV'))
-                [gamma_opt, C_opt] = nestedCvGridSearch(trainX, trainY, ip, cvDataObj);
+                [gamma_opt, C_opt] = Utils.nestedCvGridSearch(trainX, trainY, ip, cvDataObj);
             end
             
             C.gamma_opt(i) = gamma_opt;
             C.C_opt(i) = C_opt;
             
-            M = obj.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+            M = Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
                 'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
         else
-            M = obj.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+            M = Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
                 'PCA', 0);
         end
         
-        P = obj.predict(M, testX, 'actualLabels',testY);
+        P = Classification.predict(M, testX, 'actualLabels',testY);
 
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat P.predY];
@@ -427,14 +432,14 @@
                 permTestDevY = permTestTrainDevY(length(trainY)+1:end);
                 
                 % conduct grid search here
-                [gamma_opt_perm, C_opt_perm] = trainDevGridSearch(permTestTrainX, permTestTrainY, ...
+                [gamma_opt_perm, C_opt_perm] = Utils.trainDevGridSearch(permTestTrainX, permTestTrainY, ...
                     permTestDevX, permTestDevY, ip);
                 
                 gammaDist(i) = gamma_opt_perm;
                 cDist(i) = C_opt_perm;
                 
                 % Train permutation model and predict test data
-                evalc(['permTestM = obj.trainMulti(' ...
+                evalc(['permTestM = Classification.trainMulti(' ...
                     ' permTestTrainX, permTestTrainY, '...
                     ' ''classifier'', ip.Results.classifier, ' ...
                     ' ''PCA'', 0, ''scale'', false, ' ...
@@ -443,7 +448,7 @@
                     ' ''kernel'', ip.Results.kernel, ' ...
                     ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
 
-                evalc(['permTestOutput = obj.predict(permTestM, '...
+                evalc(['permTestOutput = Classification.predict(permTestM, '...
                     'permTestTestX, ''actualLabels'', permTestTestY);' ]);
                 accArr(i) = permTestOutput.accuracy;
             end
@@ -463,14 +468,14 @@
                 permCvDataObj.trainYall{1} = permTestTrainY;
                 
                 % conduct grid search here
-                [gamma_opt_perm, C_opt_perm] = nestedCvGridSearch(...
+                [gamma_opt_perm, C_opt_perm] = Utils.nestedCvGridSearch(...
                      X, Y, ip, cvDataObj);
 
                 gammaDist(i) = gamma_opt_perm;
                 cDist(i) = C_opt_perm;
                  
                 % Train permutation model and predict test data
-                evalc(['permTestM = obj.trainMulti(' ...
+                evalc(['permTestM = Classification.trainMulti(' ...
                     ' permTestTrainX, permTestTrainY, '...
                     ' ''classifier'', ip.Results.classifier, ' ...
                     ' ''PCA'', 0, ''scale'', false, ' ...
@@ -479,7 +484,7 @@
                     ' ''kernel'', ip.Results.kernel, ' ...
                     ' ''minLeafSize'', ip.Results.minLeafSize )' ]);
 
-                evalc(['permTestOutput = obj.predict(permTestM, '...
+                evalc(['permTestOutput = Classification.predict(permTestM, '...
                     '  permTestTestX, ''actualLabels'', permTestTestY);' ]);
                 accArr(i) = permTestOutput.accuracy;
             end
@@ -492,7 +497,7 @@
         C.permAccs = NaN;
     end
     
-    C.accuracy = computeAccuracy(labelsConcat, predictionsConcat); 
+    C.accuracy = Utils.computeAccuracy(labelsConcat, predictionsConcat); 
     C.modelsConcat = modelsConcat;
     C.predY = predictionsConcat;
     C.classificationInfo = classificationInfo;

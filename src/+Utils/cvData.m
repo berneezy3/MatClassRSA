@@ -61,8 +61,6 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
     % check that there are no classes with only 1 observation
     assert(min(counts) > 1, 'The number of observations for each class must be larger than 1');
     
-   
-
     PCA = ip.Results.PCA;
     PCAinFold = ip.Results.PCAinFold;
 

@@ -9,7 +9,7 @@ function [mdl, scale] = fitModel(X, Y, ip, gamma, C)
 % Bernard Wang, Sept 28, 2019
 %
 % Given the classifier and training data specified in classifyCrossValidate(), 
-% fitModel() of returns a classifcation model.  The output object mdl is to
+% fitModel() returns a classifcation model.  The output object mdl is to
 % be passed into modelPredict.  The purpose of this class is to provide a
 % unified interface towards training a model, because the function calls to 
 % the different classifiers (SVM, RF, and LDA etc) are all different.

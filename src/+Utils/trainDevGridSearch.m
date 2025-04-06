@@ -65,7 +65,7 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
     gammaSpace = ip.Results.gammaSpace;
     rngType = ip.Results.rngType;
     display(rngType);
-    RSA = MatClassRSA;
+    
     
     
     % parallelized grid search
@@ -90,15 +90,15 @@ end
 
 
 function M = trainMultiEvalc(trainData, trainLabels, PCA, classifier, C, gamma, rngType)
-    RSA = MatClassRSA;
-    [~, M] = evalc(['RSA.Classification.trainMulti(' ... 
+    
+    [~, M] = evalc(['Classification.trainMulti(' ... 
         'trainData, trainLabels, ''PCA'', PCA, ''classifier'', classifier, ' ...
         ' ''C'', C, ''rngType'', rngType,' ...
         ' ''gamma'', gamma);']);
 end
 
 function C = predictEvalc(M, testData, testLabels)
-    RSA = MatClassRSA;
-    [~, C] = evalc(['RSA.Classification.predict(M, testData,' ...
+    
+    [~, C] = evalc(['Classification.predict(M, testData,' ...
         ' ''actualLabels'', testLabels);']);
 end

@@ -81,7 +81,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
              @(x) validateattributes(x,{'logical'}, {'nonempty'}));
         addParameter(ip, 'scale', defaultScale, ...
              @(x) validateattributes(x,{'logical'}, {'nonempty'}));
-%         addParameter(ip, 'nFolds', defaultNFolds);
+        addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'timeUse', defaultTimeUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'spaceUse', defaultSpaceUse, ...
@@ -120,7 +120,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM', 'svm'};
-            addParameter(ip, 'classifier', defaultClassifier, ...
+            addParameter(ip, 'classifier', 'SVM', ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'nFolds', defaultNFolds, validateNFolds);
             addParameter(ip, 'gammaSpace', defaultGammaSpace);

@@ -106,8 +106,8 @@ function C = crossValidateMulti(X, Y, varargin)
 %       than 0, then classification will be performed over n permutation 
 %       iterations. Default value is 0 (off). 
 %   'center' - This variable controls data centering, also known as 
-%       mean centering.  Setting this to any non-zero value will set the
-%       mean along the feature dimension to be 0.  Setting to 0 turns it 
+%       mean centering.  Setting this to 'true' will set the
+%       mean along the feature dimension to be 0.  Setting to 'false' turns it 
 %       off. If PCA is performed, data centering is required; if the user
 %       selects a PCA calculation but 'center' is off, the function
 %       will issue a warning and turn centering on.
@@ -115,9 +115,9 @@ function C = crossValidateMulti(X, Y, varargin)
 %        false - centering turned off
 %        true (default) - centering turned on 
 %   'scale' - This variable controls data scaling, also known as data
-%       normalization.  Setting this to a non-zero value to scales each 
+%       normalization.  Setting this to a true scales each 
 %       feature to have unit variance prior to PCA.  Setting 
-%       it to 0 turns off data scaling.  
+%       it to 'false' turns off data scaling.  
 %        --options--
 %        false (default) - scaling turned off
 %        true - scaling turned on 

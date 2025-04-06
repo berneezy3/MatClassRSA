@@ -1,8 +1,7 @@
 function [M, permTestData] = trainMulti_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
-% RSA = MatClassRSA;
-% M = RSA.Classification.trainMulti_opt(trainData, testData); 
-% P = RSA.Classification.predict(M, X, Y)
+% [M, permTestData] = Classification.trainMulti_opt(trainData, testData); 
+% P = Classification.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -192,7 +191,7 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     ip.CaseSensitive = false;
     st = dbstack;
     namestr = st.name;
-    ip = initInputParser(namestr, ip, X, Y, varargin{:});
+    ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
 
     % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
@@ -209,7 +208,7 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     end
     
     % check input data 
-    checkInputDataShape(X, Y);
+    Utils.checkInputDataShape(X, Y);
     dataSize = size(X);
     if(ip.Results.spaceUse)
         dataSize(1) = length(ip.Results.spaceUse);
@@ -222,7 +221,7 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     end
     
     % this function contains input checking functions
-    [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+    [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                     ip.Results.spaceUse, ...
                                                     ip.Results.timeUse, ...
                                                     ip.Results.featureUse);
@@ -235,7 +234,7 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     % SET RANDOM SEED
     % for data shuffling and permutation testing purposes
     %rng(ip.Results.randomSeed);
-    setUserSpecifiedRng(ip.Results.rngType);
+    Utils.setUserSpecifiedRng(ip.Results.rngType);
 
     % Moving centering and scaling parameters out of ip, in case we need to
     % override the user's centering specification
@@ -254,15 +253,15 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     colMeans = NaN;
     colScales = NaN;
     if ( strcmp(ip.Results.optimization, 'singleFold'))
-        tdtSplit = processTrainDevTestSplit([ip.Results.trainDevSplit 0], X);
-        partition = trainDevTestPart(X, 1, tdtSplit); 
-        [cvDataObj, V, nPC, colMeans, colScales] = cvData(X, Y, partition, ip, ipCenter, ipScale);
+        tdtSplit = Utils.processTrainDevTestSplit([ip.Results.trainDevSplit 0], X);
+        partition = Utils.trainDevTestPart(X, 1, tdtSplit); 
+        [cvDataObj, V, nPC, colMeans, colScales] = Utils.cvData(X, Y, partition, ip, ipCenter, ipScale);
         trainData = cvDataObj.trainXall{1};
         trainLabels = cvDataObj.trainYall{1};
         devData = cvDataObj.devXall{1};
         devLabels = cvDataObj.devYall{1};
     elseif ( strcmp(ip.Results.optimization, 'nestedCV') )
-        [X, colMeans, colScales] = centerAndScaleData(X, ip.Results.center, ip.Results.scale);
+        [X, colMeans, colScales] = Utils.centerAndScaleData(X, ip.Results.center, ip.Results.scale);
         [X, V, nPC] = getPCs(X, ip.Results.PCA);
         trainData = X;
         trainLabels = Y;
@@ -306,31 +305,32 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     % conduct grid search here
     % train/dev/test optimization
     if (strcmp(ip.Results.optimization, 'singleFold'))
-        [gamma_opt, C_opt] = trainDevGridSearch(trainData,trainLabels, ...
+        [gamma_opt, C_opt] = Utils.trainDevGridSearch(trainData,trainLabels, ...
             devData, devLabels, ip);
         [mdl, scale] = fitModel(trainData, trainLabels, ip, gamma_opt, C_opt);
     % nested CV optimization
     elseif (strcmp(ip.Results.optimization, 'nestedCV'))
-        [gamma_opt, C_opt] = nestedCvGridSearch(trainData, trainLabels, ip);
+        [gamma_opt, C_opt] = Utils.nestedCvGridSearch(trainData, trainLabels, ip);
         [mdl, scale] = fitModel(X, T, ip, gamma_opt, C_opt);
     end
     
     % if permutation testing is turned on
     numTrials = length(trainLabels);
     permutationMdls = cell(1, ip.Results.permutations);
+    
     for i = 1:ip.Results.permutations
         % Train model
         if (strcmp(ip.Results.optimization, 'singleFold'))
             [pTrainData, pDevData, pTrainLabels, pDevLabels] ...
                 = permuteTrainDevData(trainData, devData, trainLabels, devLabels);
-            [pGamma_opt, pC_opt] = trainDevGridSearch(pTrainData, pTrainLabels, ...
+            [pGamma_opt, pC_opt] = Utils.trainDevGridSearch(pTrainData, pTrainLabels, ...
                 pDevData, pDevLabels, ip);
-            [pMdl, ~] = fitModel(X, Y, ip, pGamma_opt, pC_opt);
+            [pMdl, ~] = Utils.fitModel(X, Y, ip, pGamma_opt, pC_opt);
         else
         % nested CV optimization
             pTrainLabels = trainLabels(randperm(numTrials), :);
-            [pGamma_opt, pC_opt] = nestedCvGridSearch(trainData, pTrainLabels, ip);
-            [pMdl, ~] = fitModel(trainData, pTrainLabels, ip, gamma_opt, C_opt);
+            [pGamma_opt, pC_opt] = Utils.nestedCvGridSearch(trainData, pTrainLabels, ip);
+            [pMdl, ~] = Utils.fitModel(trainData, pTrainLabels, ip, gamma_opt, C_opt);
         end
         permutationMdls{i} = pMdl;
         
