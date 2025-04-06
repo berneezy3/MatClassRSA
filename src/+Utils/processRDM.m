@@ -1,4 +1,18 @@
 function y = processRDM(RDM)
+% y = processRDM(RDM)
+% ----------------------------
+% For a given input RDM, this function (1) ensures the RDM is square; (2)
+% ensures the RDM is symmetric (if not, will print a warning and use the
+% lower triangle); and (3) ensures the diagonal is zero (if not, will print
+% a warning and set diagonal to zero). 
+%
+% INPUT
+% - RDM: Input RDM
+%
+% OUTPUT
+% - RDM with the three conditions enforced. If input RDM was already
+% square, symmetric, and zero-diagonal, the output will be the same as the
+% input. 
 
     % make sure RDM is square
     [r c] = size(RDM);

@@ -8,11 +8,11 @@ function y = endswith(a, b)
 % --------------------------------
 % Bernard Wang
 %
-% Checks if string a ends with string b
+% Checks if char vector a ends with char vector b
 % 
 % INPUT ARGS:
-%   - a: string, must be as long as b
-%   - b: string, must be at most as long as a
+%   - a: char vector, must be as long as b
+%   - b: char vector, must be at most as long as a
 %
 % OUTPUT ARGS:
 %   - y:  1 or 0

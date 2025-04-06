@@ -4,24 +4,24 @@ function obj = cvpart(numTrials, nFolds)
 % Published under a GNU General Public License (GPL)
 % Contact: bernardcwang@gmail.com
 %-------------------------------------------------------------------
-% partitionObj = cvpart(n,k)
+% obj = cvpart(numTrials, nFolds)
 % --------------------------------
 % Bernard Wang, June 27, 2017
 % 
 % This class stores a cross-validation partition for data.  This constructor
-% of this class takes in the number of training samples n and number of
-% training k folds, then creates k partitions in the data.  This object is
-% to be passed into the constructor cvData() later.
+% of this class takes in the number of training samples numTrials and 
+% number of training folds nFolds, then creates nFolds partitions in the 
+% data.  This object is to be passed into the constructor cvData() later.
 %
 % This class is an alternative to the matlab cvpartition class.  The reason
-% this class is used instead of the matlab cvpartition class is because the
-% matlab class uses randomization to assign partitions.  In MatClassRSA, 
-% data shuffling is handled in the preprocessing step, we choose to assign
-% partitions sequentially.  
+% this class is used instead of the Matlab cvpartition class is because the
+% Matlab class uses randomization to assign partitions. But in MatClassRSA, 
+% data shuffling is handled in the preprocessing step and in the present 
+% step we choose to assign partitions sequentially.  
 % 
 % INPUT ARGS:
-%   - n: number of training samples
-%   - k: number of folds
+%   - numTrials: number of training samples
+%   - nFolds: number of folds
 %
 % OUTPUT ARGS:
 %   - obj:  an object of the cvpart class

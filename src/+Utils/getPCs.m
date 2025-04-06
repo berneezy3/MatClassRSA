@@ -13,14 +13,15 @@ function [y, V, nPC] = getPCs(X, PCs)
 %
 % INPUT ARGS:
 %   X - training data matrix
-%   PCs - if value is a positive integer, either number of PCs to 
-%     extract based on significance , or variance explained by PCs 
-%     if value between 0 and 1
+%   PCs - if value is a positive integer, this specifies the number of PCs 
+%     to extract based on significance. If a value between 0 and 1, this 
+%     specifies the desired proportion of variance explained and the number
+%     of PCs will be computed accordingly.
 %
 % OUTPUT ARGS:
 %   y - training data matrix with only principal compenents
-%   V - 
-%   PCs - number of PCs extracted
+%   V - SVD parameter
+%   nPC - number of PCs extracted
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

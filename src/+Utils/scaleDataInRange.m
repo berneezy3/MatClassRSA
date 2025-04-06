@@ -1,5 +1,5 @@
 function [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(xIn, desiredMinMax)
-% [xScaled, scaledRange] = scaleDataInRange(xIn, desiredMinMax)
+% [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(xIn, desiredMinMax)
 % -------------------------------------------------------------------------
 % Blair/Bernard - February 25th, 2020
 %
@@ -19,10 +19,13 @@ function [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(xIn, desiredM
 % OUTPUTS
 %   xScaled: The scaled data. This variable will be a data matrix the same 
 %       size as the input variable xIn.
-%   scaledRange: Two-element vector specifying the min and max values by 
-%       which the input data were scaled. The vector will be equal to
-%       scaleByMinMax if that was specified as an input; otherwise, it will
-%       contain the min and max values of the input data xIn.
+%   shift1: Shift factor applied to the input data to make the smallest 
+%       value in the input data equal to 0.
+%   shift2: Shift factor applied to the data after shift1 and scaleFactor,
+%       to ensure that the smallest value of the output data equals the 
+%       specified desired minimum value.
+% scaleFactor: The value by which the data were scaled, in between applying
+%       shift1 and shift2.
 
 % LICENSE GOES HERE
 
@@ -44,7 +47,7 @@ end
 desiredMin = desiredMinMax(1);
 desiredMax = desiredMinMax(2);
 
-% Shift data by subtracting mean
+% Shift data by subtracting smallest value
 xVec = xIn(:);
 shift1 = min(xVec);
 xVec = xVec - shift1;

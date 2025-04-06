@@ -1,5 +1,5 @@
-function y = processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
-%  processTrainDevTestSplit(trainDevTestSplit, X)
+function y = processTrainDevTestSplit(trainDevTestSplit, X)
+%  y = processTrainDevTestSplit(trainDevTestSplit, X)
 % --------------------------------
 % Bernard Wang, September 17, 2020
 % 
@@ -21,6 +21,9 @@ function y = processTrainDevTestSplit(trainDevTestSplit, X, nfolds)
 %   fraction of N each partition contains, thus the vector should sum up to
 %   1.  
 %   - X: full training data matrix
+%
+% OUTPUT
+% - y: updated version of trainDevTestSplit input (integer representation)
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:

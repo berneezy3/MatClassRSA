@@ -7,9 +7,10 @@ function [firstInds, secondInds] = getNChoose2Ind(n)
 % [firstInds, secondInds] = getNChoose2Ind(n)
 % --------------------------------
 %
-% Given a length n, this function returns two arrrays representing the
-% classes in a pairwise classification of n classes.  This is an utility
-% function intended to be used by decValues2PairwiseAcc().
+% Given an input length \texttt{n}, this function returns two arrays 
+% representing the first and second classes for e.g., pairwise 
+% classifications of n classes. This is a utility function intended to be 
+% used by decValues2PairwiseAcc().
 %
 % INPUT ARGS:
 %   - n:  number of classes
