@@ -1,4 +1,4 @@
-% trainMulti_opt_opt.m
+% trainMulti_opt.m
 % ---------------------
 % Ray - March, 2025
 %
@@ -34,7 +34,7 @@ M.classificationInfo
 
 %% Number of Folds of Cross-Validation
 
-M = Classification.trainMulti_opt(X, labels6, 'rngType', {rngSeed,'twister'}, 'nFolds', 4);
+M = Classification.trainMulti_opt(X, labels6, 'rngType', {rngSeed,'twister'}, 'nFolds', 2);
 M.classificationInfo
 
 

@@ -182,96 +182,200 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
 
     train_time = tic;
 
-    %initialize output struct C
-    M = struct;
-    permTestData = struct;
+     % initialize parallel worker pool
+    try
+        matlabpool;
+        closePool=1;
+    catch
+        try 
+            parpool;
+            closePool=0;
+        catch
+            % do nothing if no parpool functions exist
+        end
+    end
+
+    if(~Utils.is2Dor3DMatrix(X))
+        % check that X and Y have same number of trials
+        assert(size(X,1) == length(Y), "X and Y vectors must have same number of trials");
+    elseif(Utils.is2Dor3DMatrix(X))
+        % check that X and Y have same number of trials
+        assert(size(X,3) == length(Y), "X and Y vectors must have same number of trials");
+    end
     
     % Initialize the input parser
-    ip = inputParser;
-    ip.CaseSensitive = false;
     st = dbstack;
     namestr = st.name;
+    ip = inputParser;
     ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
-
-    % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
+    disp(ip.Results.gammaSpace);
     
+    %Required inputs
     [r c] = size(X);
-
+    
     %Optional name-value pairs
     %NOTE: Should use addParameter for R2013b and later.
+    if (find(isnan(X(:))))
+        error('MatClassRSA classifiers cannot handle missing values (NaNs) in the data at this time.')
+    end
+
 
     % Parse
-    try 
-        parse(ip, X, Y, varargin{:});
-    catch ME
-        disp(getReport(ME,'extended'));
-    end
+    parse(ip, X, Y, varargin{:});
     
-    % check input data 
-    Utils.checkInputDataShape(X, Y);
-    dataSize = size(X);
-    if(ip.Results.spaceUse)
-        dataSize(1) = length(ip.Results.spaceUse);
-    end
-    if(ip.Results.timeUse)
-        dataSize(2) = length(ip.Results.timeUse);
-    end
-    if(ip.Results.featureUse)
-        dataSize(2) = length(ip.Results.featureUse);
-    end
-    
-    % this function contains input checking functions
-    [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
-                                                    ip.Results.spaceUse, ...
-                                                    ip.Results.timeUse, ...
-                                                    ip.Results.featureUse);
-    
-    defaultShuffleData = 1;
-    defaultRandomSeed = 'shuffle';
-    defaultAverageTrials = -1;
-    defaultAverageTrialsHandleRemainder = 'discard';
+   % check if data is double, convert to double if it isn't
+   if ~isa(X, 'double')
+       warning('X data matrix not in double format.  Converting X values to double.')
+       disp('Converting X matrix to double')
+       X = double(X); 
+   end
+   if ~isa(Y, 'double')
+       warning('Y label vector not in double format.  Converting Y labels to double.')
+       Y = double(Y);
+   end
+   
+   % subset based on spaceUse, timeUse, featureUse
+   [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
+                                                ip.Results.spaceUse, ...
+                                                ip.Results.timeUse, ...
+                                                ip.Results.featureUse);
 
+    % let r and c store size of 2D matrix
+    [r c] = size(X);
+    [r1 c1] = size(Y);
+    
+    if (r1 < c1)
+        Y = Y';
+    end
+    
+    
+    %%%%% Whatever we started with, we now have a 2D trials-by-feature matrix
+    % moving forward.
+    
+    
     % SET RANDOM SEED
-    % for data shuffling and permutation testing purposes
-    %rng(ip.Results.randomSeed);
+    % for Random forest purposes
+
     Utils.setUserSpecifiedRng(ip.Results.rngType);
 
+    % PCA 
+    % Split Data into fold (w/ or w/o PCA)
+    if (ip.Results.PCA>0)
+        disp('Conducting Principal Component Analysis');
+    else
+        disp('Skipping Principal Component Analysis');
+    end
     % Moving centering and scaling parameters out of ip, in case we need to
     % override the user's centering specification
     ipCenter = ip.Results.center; 
     ipScale = ip.Results.scale;
+    
     if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
         warning(['Data centering must be on if performing PCA. Overriding '...
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    
-
-    % initialize PCA and data centering/scaling related variables
-    V = NaN;
-    nPC = NaN;
-    colMeans = NaN;
-    colScales = NaN;
-    if ( strcmp(ip.Results.optimization, 'singleFold'))
-        tdtSplit = Utils.processTrainDevTestSplit([ip.Results.trainDevSplit 0], X);
-        partition = Utils.trainDevTestPart(X, 1, tdtSplit); 
-        [cvDataObj, V, nPC, colMeans, colScales] = Utils.cvData(X, Y, partition, ip, ipCenter, ipScale);
-        trainData = cvDataObj.trainXall{1};
-        trainLabels = cvDataObj.trainYall{1};
-        devData = cvDataObj.devXall{1};
-        devLabels = cvDataObj.devYall{1};
-    elseif ( strcmp(ip.Results.optimization, 'nestedCV') )
-        [X, colMeans, colScales] = Utils.centerAndScaleData(X, ip.Results.center, ip.Results.scale);
-        [X, V, nPC] = getPCs(X, ip.Results.PCA);
-        trainData = X;
-        trainLabels = Y;
+    if ( strcmp(ip.Results.optimization, 'nestedCV'))
+        trainDevTestSplit = [1-1/ip.Results.nFolds_opt 0 1/ip.Results.nFolds_opt];
+    elseif (strcmp(ip.Results.optimization, 'singleFold'))
+        trainDevTestSplit = [1-1/ip.Results.nFolds_opt 0 1/ip.Results.nFolds_opt];
     end
     
+    partition = Utils.trainDevTestPart(X, ip.Results.nFolds_opt, trainDevTestSplit);
+    [cvDataObj,V,nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
     
-    % Train Model
-    disp('Training Model...')
+    % restore rng to original
+    Utils.setUserSpecifiedRng(ip.Results.rngType);
     
-    % create classifier info struct
+    % CROSS VALIDATION
+    disp('Cross Validating')
+    
+    % Just partition, as shuffling (or not) was handled in previous step
+    if ip.Results.nFolds_opt == 1
+        % Special case of fitting model with no test set (argh)
+        error('nFolds must be a integer value greater than 1');
+    end
+    
+
+    % if nFolds < 0 | ceil(nFolds) ~= floor(nFolds) | nFolds > nTrials
+    %   error, nFolds must be an integer between 2 and nTrials to perform CV
+    assert(ip.Results.nFolds_opt > 0 & ...
+        ceil(ip.Results.nFolds_opt) == floor(ip.Results.nFolds_opt) & ...
+        ip.Results.nFolds_opt <= nTrials, ...
+        'nFolds must be an integer between 1 and nTrials to perform CV' );
+        
+        predictionsConcat = [];
+        labelsConcat = [];
+        modelsConcat = {1, ip.Results.nFolds_opt};
+       
+    numClasses = length(unique(Y));
+    numDecBounds = nchoosek(numClasses ,2);
+  
+    
+    % Single optimization fold vs. full optimization folds
+    % Train/Dev/Test Split
+    
+    disp('Conducting CV w/ train/dev/test split');
+    numClasses = length(unique(Y));
+    CM_tmp = zeros(numClasses, numClasses, ip.Results.nFolds_opt);
+    C.gamma_opt = zeros(1, ip.Results.nFolds_opt);
+    C.C_opt = zeros(1, ip.Results.nFolds_opt);
+    
+    for i = 1:ip.Results.nFolds_opt
+
+        disp(['Processing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds_opt) '...'])
+
+        trainX = cvDataObj.trainXall{i};
+        trainY = cvDataObj.trainYall{i};
+        testX = cvDataObj.testXall{i};
+        testY = cvDataObj.testYall{i};
+
+        % conduct grid search here
+        if ( ~strcmp(ip.Results.classifier, 'LDA'))
+            if ( strcmp(ip.Results.optimization, 'singleFold') || ...
+                ip.Results.nFolds_opt == 2 )
+                devX = cvDataObj.devXall{i};
+                devY= cvDataObj.devYall{i};
+                [gamma_opt, C_opt] = Utils.trainDevGridSearch(trainX, trainY, ...
+                    devX, devY, ip);
+            elseif ( strcmp(ip.Results.optimization, 'nestedCV'))
+                [gamma_opt, C_opt] = Utils.nestedCvGridSearch(trainX, trainY, ip, cvDataObj);
+            end
+            
+            C.gamma_opt(i) = gamma_opt;
+            C.C_opt(i) = C_opt;
+            
+            mdl = Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+                'kernel', ip.Results.kernel, 'gamma', gamma_opt, 'C', C_opt, 'PCA', 0);
+        else
+            mdl = Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
+                'PCA', 0);
+        end 
+    end
+    
+    % if permutation testing is turned on
+    numTrials = length(trainY);
+    permutationMdls = cell(1, ip.Results.permutations);
+    
+    for i = 1:ip.Results.permutations
+        % Train model
+        if (strcmp(ip.Results.optimization, 'singleFold'))
+            [ptrainX, pDevData, pTrainLabels, pDevLabels] ...
+                = permuteTrainDevData(trainX, devX, trainY, devY);
+            [pGamma_opt, pC_opt] = Utils.trainDevGridSearch(ptrainX, pTrainLabels, ...
+                pDevData, pDevLabels, ip);
+            [pMdl, ~] = Utils.fitModel(X, Y, ip, pGamma_opt, pC_opt);
+        else
+        % nested CV optimization
+            pTrainLabels = trainY(randperm(numTrials), :);
+            [pGamma_opt, pC_opt] = Utils.nestedCvGridSearch(trainX, pTrainLabels, ip);
+            [pMdl, ~] = Utils.fitModel(trainX, pTrainLabels, ip, gamma_opt, C_opt);
+        end
+        permutationMdls{i} = pMdl;
+        
+    end
+    
+     % create classifier info struct
     classifierInfo = struct();
     classifierInfo.PCA = ip.Results.PCA;
     classifierInfo.classifier = ip.Results.classifier;
@@ -281,66 +385,28 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     classifierInfo.rngType = ip.Results.rngType;
     classifierInfo.PCA_V = V;
     classifierInfo.PCA_nPC = nPC;
-    classifierInfo.trainingDataSize = dataSize;
     classifierInfo.numClasses = length(unique(Y));
-    classifierInfo.scale = ip.Results.scale;
-    classifierInfo.center = ip.Results.center;
     classifierInfo.colMeans = colMeans;
     classifierInfo.colScales = colScales;
     classifierInfo.ip = ip;
-
+    
     switch classifierInfo.classifier
         case 'SVM'
             classifierInfo.kernel = ip.Results.kernel;
+           
+            classifierInfo.gamma = ip.Results.gammaSpace;
+            classifierInfo.C = ip.Results.cSpace;
         case 'LDA'
         case 'RF'
             classifierInfo.numTrees = ip.Results.numTrees;
             classifierInfo.minLeafSize =  ip.Results.minLeafSize;
     end
     
-    
-    disp(['classifying with ' ip.Results.classifier] )
-    
-        
-    % conduct grid search here
-    % train/dev/test optimization
-    if (strcmp(ip.Results.optimization, 'singleFold'))
-        [gamma_opt, C_opt] = Utils.trainDevGridSearch(trainData,trainLabels, ...
-            devData, devLabels, ip);
-        [mdl, scale] = fitModel(trainData, trainLabels, ip, gamma_opt, C_opt);
-    % nested CV optimization
-    elseif (strcmp(ip.Results.optimization, 'nestedCV'))
-        [gamma_opt, C_opt] = Utils.nestedCvGridSearch(trainData, trainLabels, ip);
-        [mdl, scale] = fitModel(X, T, ip, gamma_opt, C_opt);
-    end
-    
-    % if permutation testing is turned on
-    numTrials = length(trainLabels);
-    permutationMdls = cell(1, ip.Results.permutations);
-    
-    for i = 1:ip.Results.permutations
-        % Train model
-        if (strcmp(ip.Results.optimization, 'singleFold'))
-            [pTrainData, pDevData, pTrainLabels, pDevLabels] ...
-                = permuteTrainDevData(trainData, devData, trainLabels, devLabels);
-            [pGamma_opt, pC_opt] = Utils.trainDevGridSearch(pTrainData, pTrainLabels, ...
-                pDevData, pDevLabels, ip);
-            [pMdl, ~] = Utils.fitModel(X, Y, ip, pGamma_opt, pC_opt);
-        else
-        % nested CV optimization
-            pTrainLabels = trainLabels(randperm(numTrials), :);
-            [pGamma_opt, pC_opt] = Utils.nestedCvGridSearch(trainData, pTrainLabels, ip);
-            [pMdl, ~] = Utils.fitModel(trainData, pTrainLabels, ip, gamma_opt, C_opt);
-        end
-        permutationMdls{i} = pMdl;
-        
-    end
-    
-    M.classifierInfo = classifierInfo;
+    M.classificationInfo = classifierInfo;
     M.mdl = mdl;
     M.classifier = ip.Results.classifier;
-    M.trainData = trainData;
-    M.trainLabels = trainLabels;
+    M.trainData = trainX;
+    M.trainLabels = trainY;
     M.functionName = namestr;
     if (exist('cvDataObj'))
         M.cvDataObj = cvDataObj;
@@ -355,12 +421,12 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     
 
     permTestData = struct();
-    permTestData.X = trainData;
-    permTestData.Y = trainLabels;
+    permTestData.X = trainX;
+    permTestData.Y = trainY;
     
     if (~strcmp(ip.Results.optimization, 'nestedCV'))
-        permTestData.devData = devData;
-        permTestData.devLabels= devLabels;
+        permTestData.devData = devX;
+        permTestData.devLabels= devY;
     end
 
     M.elapsedTime = toc(train_time);

@@ -99,10 +99,10 @@ function P = predict(M, X, varargin)
 
     parse(ip, M, X, varargin{:});
 
-    if length(M.classifierInfo) >= 1 && iscell(M.classifierInfo)
-        tempInfo = M.classifierInfo{1};
+    if length(M.classificationInfo) >= 1 && iscell(M.classificationInfo)
+        tempInfo = M.classificationInfo{1};
     else
-        tempInfo = M.classifierInfo;
+        tempInfo = M.classificationInfo;
     end
     
     % check for permTestData and initialize data variables
@@ -122,10 +122,10 @@ function P = predict(M, X, varargin)
                                                 tempInfo.timeUse, ...
                                                 tempInfo.featureUse);
 
-    if (iscell(M.classifierInfo))
-        classifierInfo = M.classifierInfo{1};
+    if (iscell(M.classificationInfo))
+        classifierInfo = M.classificationInfo{1};
     else
-        classifierInfo = M.classifierInfo;
+        classifierInfo = M.classificationInfo;
     end
     
     % SET RANDOM SEED
@@ -151,7 +151,7 @@ function P = predict(M, X, varargin)
         % PCA
         if (classifierInfo.PCA > 0) 
             [X, ~, ~] = Utils.centerAndScaleData(X, classifierInfo.colMeans, classifierInfo.colScales);
-            testData = getPCs(X, M.classifierInfo.PCA_nPC);
+            testData = getPCs(X, M.classificationInfo.PCA_nPC);
         else
             testData = X;
         end
@@ -170,16 +170,16 @@ function P = predict(M, X, varargin)
 
         predictionInfo = struct(...
                         'PCA', 1, ...
-                        'PCA_V', M.classifierInfo.PCA_V, ...
-                        'PCA_nPC', M.classifierInfo.PCA_nPC, ...
-                        'spaceUse', M.classifierInfo.spaceUse, ...
-                        'timeUse', M.classifierInfo.timeUse, ...
-                        'featureUse', M.classifierInfo.featureUse, ...
-                        'rngType', M.classifierInfo.rngType ,...
+                        'PCA_V', M.classificationInfo.PCA_V, ...
+                        'PCA_nPC', M.classificationInfo.PCA_nPC, ...
+                        'spaceUse', M.classificationInfo.spaceUse, ...
+                        'timeUse', M.classificationInfo.timeUse, ...
+                        'featureUse', M.classificationInfo.featureUse, ...
+                        'rngType', M.classificationInfo.rngType ,...
                         'decisionValues', decision_values);
 
         P.predictionInfo = predictionInfo;
-        P.classificationInfo = M.classifierInfo;
+        P.classificationInfo = M.classificationInfo;
         P.model = M.mdl;
         disp('Prediction Finished')        
             
@@ -200,7 +200,7 @@ function P = predict(M, X, varargin)
                     disp(['Permutation ' num2str(i) ' of ' num2str(ip.Results.permutations)]);
                     pTrainLabels = trainLabels(randperm(numTrials));
                     [pMdl, ~] = Utils.fitModel(trainData, pTrainLabels, M.ip, M.ip.Results.gamma, M.ip.Results.C); 
-                    predictedY = Utils.modelPredict(testData, pMdl, M.classifierInfo.ip);
+                    predictedY = Utils.modelPredict(testData, pMdl, M.classificationInfo.ip);
                     %store accuracy
                     accDist(i) = Utils.computeAccuracy(testLabels , predictedY);
                 end
@@ -223,7 +223,7 @@ function P = predict(M, X, varargin)
                         [pGamma_opt, pC_opt] = Utils.trainDevGridSearch(pTrainData, pTrainLabels, ...
                             pDevData, pDevLabels, M.ip);
                         [pMdl, ~] = fitModel(X, Y, M.ip, pGamma_opt, pC_opt);
-                        predictedY = Utils.modelPredict(testData, pMdl, M.classifierInfo.ip);
+                        predictedY = Utils.modelPredict(testData, pMdl, M.classificationInfo.ip);
                         accDist(i) = Utils.computeAccuracy(testLabels , predictedY);
                         
                     else   
@@ -231,7 +231,7 @@ function P = predict(M, X, varargin)
                         pTrainLabels = trainLabels(randperm(numTrials), :);
                         [pGamma_opt, pC_opt] = Utils.nestedCvGridSearch(trainData, pTrainLabels, M.ip);
                         [pMdl, ~] = Utils.fitModel(trainData, pTrainLabels, M.ip, M.gamma_opt, M.C_opt);
-                        predictedY = Utils.modelPredict(testData, pMdl, M.classifierInfo.ip);
+                        predictedY = Utils.modelPredict(testData, pMdl, M.classificationInfo.ip);
                         accDist(i) = Utils.computeAccuracy(testLabels , predictedY);
                     end
                 end
@@ -262,8 +262,8 @@ function P = predict(M, X, varargin)
         decMatchups = nchoosek(1:numClasses, 2);
         
         classifierInfo = struct(...
-            'PCA', M.classifierInfo{1}.PCA, ...
-            'classifier', M.classifierInfo{1}.classifier);
+            'PCA', M.classificationInfo{1}.PCA, ...
+            'classifier', M.classificationInfo{1}.classifier);
         P.classificationInfo = classifierInfo;
         
         % Initilize info struct
@@ -278,15 +278,15 @@ function P = predict(M, X, varargin)
             
             % PCA
             if (M.ip.Results.PCA > 0) 
-                [tempX_PCA, ~, ~] = Utils.centerAndScaleData(tempX, M.classifierInfo{i}.colMeans, M.classifierInfo{i}.colScales);
+                [tempX_PCA, ~, ~] = Utils.centerAndScaleData(tempX, M.classificationInfo{i}.colMeans, M.classificationInfo{i}.colScales);
                
-                testData = tempX_PCA*M.classifierInfo{i}.PCA_V;
-                testData = testData(:,1:M.classifierInfo{i}.PCA_nPC);
+                testData = tempX_PCA*M.classificationInfo{i}.PCA_V;
+                testData = testData(:,1:M.classificationInfo{i}.PCA_nPC);
             else
                 testData = tempX;
             end
 
-            tempInfo = M.classifierInfo{i};
+            tempInfo = M.classificationInfo{i};
 
             predY{i} = Utils.modelPredict(testData, M.mdl{i}, M.scale{i});
             P.classificationInfo.classBoundary{i} = [num2str(class1) ' vs. ' num2str(class2)];
@@ -409,7 +409,7 @@ function P = predict(M, X, varargin)
 
     elseif ((strcmp(M.functionName, 'trainPairs_opt') && (M.ip.results.PCA <= 0)))
         
-        numClasses = M.classifierInfo.numClasses;
+        numClasses = M.classificationInfo.numClasses;
         numDecBounds = nchoosek(numClasses, 2);
         pairwiseCell = Utils.initPairwiseCellMat(numClasses);
         pairwiseMat3D = zeros(2,2, numDecBounds);
@@ -438,11 +438,11 @@ function P = predict(M, X, varargin)
         
         predictionInfo = struct(...
                 'PCA', 1, ...
-                'PCA_V', M.classifierInfo.PCA_V, ...
-                'PCA_nPC', M.classifierInfo.PCA_nPC, ...
-                'spaceUse', M.classifierInfo.spaceUse, ...
-                'timeUse', M.classifierInfo.timeUse, ...
-                'featureUse', M.classifierInfo.featureUse, ...
+                'PCA_V', M.classificationInfo.PCA_V, ...
+                'PCA_nPC', M.classificationInfo.PCA_nPC, ...
+                'spaceUse', M.classificationInfo.spaceUse, ...
+                'timeUse', M.classificationInfo.timeUse, ...
+                'featureUse', M.classificationInfo.featureUse, ...
                 'rngType', M.ip.Results.rngType);
         
         pairwiseMat3D = zeros(2,2, numDecBounds);
@@ -454,8 +454,8 @@ function P = predict(M, X, varargin)
         
         P.mdl = M.mdl;
         P.classificationInfo = struct(...
-            'PCA', M.classifierInfo.PCA, ...
-            'classifier', M.classifierInfo.classifier);
+            'PCA', M.classificationInfo.PCA, ...
+            'classifier', M.classificationInfo.classifier);
         
         %Permutation Testing
         if ip.Results.permutations > 0

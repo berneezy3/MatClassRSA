@@ -226,12 +226,6 @@
     ip = inputParser;
     ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
     disp(ip.Results.gammaSpace);
-%     checkInputData(namestr, ip, X, Y);
-    
-    % Hardcode SVM for now
-    %classifier = 'SVM';
-    
-    % ADD SPACEUSE TIMEUSE AND FEATUREUSE, DEAFULT SHOULD B EMPTY MATRIX
     
     %Required inputs
     [r c] = size(X);
@@ -264,12 +258,13 @@
        warning('Y label vector not in double format.  Converting Y labels to double.')
        Y = double(Y);
    end
+   
+   % subset based on spaceUse, timeUse, featureUse
    [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
                                                 ip.Results.featureUse);
 
-    
     % let r and c store size of 2D matrix
     [r c] = size(X);
     [r1 c1] = size(Y);
@@ -299,6 +294,7 @@
     % override the user's centering specification
     ipCenter = ip.Results.center; 
     ipScale = ip.Results.scale;
+    
     if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
         warning(['Data centering must be on if performing PCA. Overriding '...
         'user input and removing the mean from each data feature.']);
@@ -387,10 +383,6 @@
         labelsConcat = [labelsConcat testY'];
         predictionsConcat = [predictionsConcat P.predY];
         modelsConcat{i} = M.mdl;
-        
-        %CM_tmp(:,:,i) = confusionmat(labelsConcat, predictionsConcat);
-        %TEMP = confusionmat(labelsConcat, predictionsConcat);
-        %CM_tmp(1:length(TEMP),1:length(TEMP),i) = TEMP; 
         
 
     end

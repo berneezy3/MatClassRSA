@@ -52,8 +52,6 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
     
     nbins = length(unique(Y));
     counts = histcounts(Y, nbins);
-    display(length(Y));
-    display(counts);
 
     % check that length of counts is the same as nClasses
     assert(length(counts) == length(unique(Y)), 'length of counts is not the same as the number of unique classes');
@@ -173,11 +171,17 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
 
         end
     % DONT DO PCA
+    
     else
         if (~isnan(center) && ~isnan(scale))
             [X, ~, ~] = Utils.centerAndScaleData(X, center, scale);
         end
+                    
         for i = 1:nFolds
+            
+            %debugging
+            disp(i)
+            
             trainIndx = find(trainDevTestSplit.train{i});
             devIndx = find(trainDevTestSplit.dev{i});
             testIndx = find(trainDevTestSplit.test{i});

@@ -67,21 +67,48 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
     cSpace = ip.Results.cSpace;
     gammaSpace = ip.Results.gammaSpace;
     rngType = ip.Results.rngType;
-    display(rngType);
+    
+    
+    kernel = ip.Results.kernel;
     
     
     
     % parallelized grid search
-    parfor i = 1:cLen*gammaLen
-        cInd = mod(i-1, gammaLen)+1;
-        gammaInd = ceil(i/gammaLen);
-        tempM = trainMultiEvalc(trainX, trainY, 0, 'SVM', ...
-            cSpace(cInd), gammaSpace(gammaInd), rngType);
-        tempC = predictEvalc(tempM, devX, devY);
-        accVec(i) = tempC.accuracy;
-        cVec{i} = tempC;
-    end
     
+    if (strcmpi(kernel, 'rbf'))
+        disp('RBF Kernel Grid Search Starting');
+        parfor i = 1:cLen*gammaLen
+            cInd = mod(i-1, gammaLen)+1;
+            gammaInd = ceil(i/gammaLen);
+            
+            
+            tempM = trainMultiEvalc(trainX, trainY, 0, 'SVM',  ...
+                cSpace(cInd), gammaSpace(gammaInd), rngType);
+
+            tempC = predictEvalc(tempM, devX, devY);
+
+            accVec(i) = tempC.accuracy;
+            cVec{i} = tempC;
+        end
+        
+    elseif (strcmpi(kernel, 'linear'))
+         disp('Linear Kernel Grid Search Starting');
+        parfor i = 1:cLen
+            cInd = i;
+           
+         
+            tempM = Classification.trainMulti(trainX, trainY, 'PCA', 0, 'classifier', 'SVM', 'kernel', kernel, ...
+                'C', cSpace(cInd), 'rngType', rngType);
+
+            tempC = predictEvalc(tempM, devX, devY);
+
+            accVec(i) = tempC.accuracy;
+            cVec{i} = tempC;
+        end
+    
+    else
+        disp('The kernel is not correctly specified');
+    end
     
     [maxVal, maxIdx] = max(accVec(:));
     [xInd yInd] = ind2sub([cLen gammaLen], maxIdx);
@@ -95,9 +122,10 @@ end
 function M = trainMultiEvalc(trainData, trainLabels, PCA, classifier, C, gamma, rngType)
     
     [~, M] = evalc(['Classification.trainMulti(' ... 
-        'trainData, trainLabels, ''PCA'', PCA, ''classifier'', classifier, ' ...
-        ' ''C'', C, ''rngType'', rngType,' ...
-        ' ''gamma'', gamma);']);
+        'trainData, trainLabels, ''PCA'', PCA, ''classifier'', classifier,'  ...
+         '''C'', C, ''rngType'', rngType,' ...
+         '''gamma'', gamma);']);
+      
 end
 
 function C = predictEvalc(M, testData, testLabels)

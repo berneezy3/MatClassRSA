@@ -223,6 +223,7 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     % Check that all lables in train set are also in test set.
     
     % PCA
+    disp('Inside trainMulti: about to call cvData'); 
     if (ip.Results.PCA > 0)
         disp('Conducting Principal Component Analysis...')
         [cvDataObj, V, nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
@@ -232,8 +233,10 @@ function [M, trainData] = trainMulti(X, Y, varargin)
 %         nPC = NaN;
 %         colMeans = NaN;
 %         colScales = NaN;
+        
         [cvDataObj, V, nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale, 1);
     end
+    
     trainData = cvDataObj.trainXall{1};
     
     % Train Model

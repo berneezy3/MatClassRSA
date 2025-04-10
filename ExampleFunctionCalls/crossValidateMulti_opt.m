@@ -1,8 +1,8 @@
-% crossValidateMulti_opt_opt.m
+% crossValidateMulti_opt.m
 % ---------------------
 % Ray - March, 2025
 %
-% Example function calls for crossValidateMulti_opt_opt() function within
+% Example function calls for crossValidateMulti_opt() function within
 % the +Classification module
 
 clear all; close all; clc;

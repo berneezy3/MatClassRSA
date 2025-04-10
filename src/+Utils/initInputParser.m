@@ -97,7 +97,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
              @(x) validateattributes(x,{'logical'}, {'nonempty'}));
         addParameter(ip, 'scale', defaultScale, ...
              @(x) validateattributes(x,{'logical'}, {'nonempty'}));
-        addParameter(ip, 'nFolds', defaultNFolds);
+        %addParameter(ip, 'nFolds', defaultNFolds);
         addParameter(ip, 'timeUse', defaultTimeUse, ...
             @(x) (assert(isvector(x))));
         addParameter(ip, 'spaceUse', defaultSpaceUse, ...
@@ -152,7 +152,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             expectedClassifier = {'SVM'};
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
-            addParameter(ip, 'nFolds', defaultNFolds, validateNFolds);
+            addParameter(ip, 'nFolds_opt', defaultNFolds, validateNFolds);
             addParameter(ip, 'gammaSpace', defaultGammaSpace);
             addParameter(ip, 'cSpace', defaultCSpace);
             addParameter(ip, 'trainDevSplit', defaultTrainDevSplit);
