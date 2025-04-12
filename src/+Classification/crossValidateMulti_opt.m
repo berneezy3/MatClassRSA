@@ -211,21 +211,15 @@
             % do nothing if no parpool functions exist
         end
     end
-
-    if(~Utils.is2Dor3DMatrix(X))
-        % check that X and Y have same number of trials
-        assert(size(X,1) == length(Y), "X and Y vectors must have same number of trials");
-    elseif(Utils.is2Dor3DMatrix(X))
-        % check that X and Y have same number of trials
-        assert(size(X,3) == length(Y), "X and Y vectors must have same number of trials");
-    end
     
     % Initialize the input parser
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
     ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
-    disp(ip.Results.gammaSpace);
+    
+    disp(ip.Results.trainDevSplit);
+   
     
     %Required inputs
     [r c] = size(X);
@@ -300,13 +294,10 @@
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    if ( strcmp(ip.Results.optimization, 'nestedCV'))
-        trainDevTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
-    elseif (strcmp(ip.Results.optimization, 'singleFold'))
-        trainDevTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
-    end
+
     
-    partition = Utils.trainDevTestPart(X, ip.Results.nFolds, trainDevTestSplit);
+    
+    partition = Utils.trainDevTestPart(X, ip.Results.nFolds, ip.Results.trainDevSplit);
     [cvDataObj,V,nPCs] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
     
     % restore rng to original
@@ -362,6 +353,11 @@
                 ip.Results.nFolds == 2 )
                 devX = cvDataObj.devXall{i};
                 devY= cvDataObj.devYall{i};
+                
+                % check that there is a dev partition
+                assert(~isempty(devX), 'devX must not be empty.');
+                assert(~isempty(devY), 'devY must not be empty.');
+                
                 [gamma_opt, C_opt] = Utils.trainDevGridSearch(trainX, trainY, ...
                     devX, devY, ip);
             elseif ( strcmp(ip.Results.optimization, 'nestedCV'))

@@ -1,7 +1,6 @@
 function C = crossValidatePairs_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
-% RSA = MatClassRSA
-% C = RSA.Classification.crossValidatePairs_opt(X, Y, varargin)
+% C = Classification.crossValidatePairs_opt(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Bernard - Jun. 23, 2020
 %
@@ -75,7 +74,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
 %       --options--
 %       true (default): Conduct PCA within each CV fold.
 %       false: One PCA for entire training data matrix X.
-%   'nFolds' - Number of folds in cross validation.  Must be integer
+%   'nFolds_opt' - Number of folds in cross validation.  Must be integer
 %       greater than 1 and less than or equal to the number of trials. 
 %       Default is 10.
 %   'classifier' - Choose classifier for cross validation.  Currently, only
@@ -135,32 +134,41 @@ function C = crossValidatePairs_opt(X, Y, varargin)
 %       https://www.mathworks.com/help/stats/treebagger.html
 %
 % OUTPUT ARGS 
-%   C - output object containing all cross validation related
-%   information, including confucion matrix, accuracy, prediction results
-%   etc.  The structure of C will differ depending on the value of the 
-%   input value 'pairwise', which is set to 0 by default.  if 'pairwise' 
-%   is set to 1, then C will be a cell matrix of structs, symmetrical along 
-%   the diagonal.  If pairwise is 0, then C is a struct containing values:
-%   
-%   CM - Confusion matrix that summarizes the performance of the
-%       classification, in which rows represent actual labels and columns
-%       represent predicted labels.  Element i,j represents the number of 
-%       observations belonging to class i that the classifier labeled as
-%       belonging to class j.
-%   accuracy - Classification accuracy
-%   predY - predicted label vector
-%   modelsConcat - Struct containing the N models used during cross
-%   validation.
-%   permAccMat - Permutation testing accuracies.  This field will be NaN if 
-%       permuatation testing is not specfied.  The first two dimensions
-%       represent pairwise classes, while the third dimension represent 
-%       permutation.
-%   classificationInfo - This struct contains the specifications used
-%       during classification, including 'PCA', 'PCAinFold', 'nFolds', 
-%       'classifier' and 'dataPartitionObj'
-%   dataPartitionObj - This struct contains the train/test data partitions 
-%       for cross validation (and a dev data partition if hyperparameter 
-%       optimization is specified).
+%   C -  A struct with the following subfields:
+%       pairwiseInfo - a cell matrix of structs, symmetrical along the
+%                      diagonal. Each struct contains the following
+%                      subfields, for each class boundary:
+%              CM - Confusion matrix that summarizes the performance of the
+%                   classification, in which rows represent actual labels and columns
+%                   represent predicted labels.  Element i,j represents the number of 
+%                   observations belonging to clC_tt_multiass i that the classifier labeled as
+%                   belonging to class j.
+%              classBoundary - (i.e.) class 1 vs class 4
+%              accuracy - classification accuracy for the given class
+%                         boundary
+%              actualLabels - actual class labels
+%              predictions - prediced class labels by the trained model
+%       AM - Accuracy matrix. Where each off-diagonal element shows the accuracy 
+%           for distinguishing one class from another,
+%           with a NaN diagonal, comparing a class with itself
+%       pValMat - If permutation testing is specified, a matrix containing
+%               the computed percentile value of the found value among the
+%               permutation test values.
+%       elapsedTime - Time to finish function call.
+%       modelsConcat - Struct containing the N models used during cross
+%                      validation.
+%       permAccMat - Permutation testing accuracies.  This field will be NaN if 
+%               permuatation testing is not specfied.  The first two dimensions
+%               represent pairwise classes, while the third dimension represent 
+%               permutation. 
+%       classificationInfo - This struct contains the specifications used
+%               during classification, including 'PCA', 'PCAinFold', 'nFolds', 
+%               'classifier' and 'dataPartitionObj'
+%       dataPartitionObj - This struct contains the train/test data partitions 
+%               for cross validation (and a dev data partition if hyperparameter 
+%               optimization is specified).
+%       avgAccuracy - Average classifcation accuracy across all class
+%               boundaries
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -203,7 +211,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip, X, Y);
+    ip = Utils.initInputParser(namestr, ip, X, Y);
     
     %Required inputs
     [r c] = size(X);
@@ -225,7 +233,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
     classifierInfo = struct(...
                         'PCA', ip.Results.PCA, ...
                         'PCAinFold', ip.Results.PCAinFold, ...
-                        'nFolds', ip.Results.nFolds, ...
+                        'nFolds_opt', ip.Results.nFolds_opt, ...
                         'classifier', ip.Results.classifier);
     
    % check if data is double, convert to double if it isn't
@@ -240,7 +248,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
    end
    
    %%%%% SUBSET DATA MATRICES %%%%%
-   [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+   [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
                                                 ip.Results.featureUse);
@@ -251,7 +259,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
     [r1 c1] = size(Y);
     
     if (r1 < c1)
-        Y = Y'
+        Y = Y';
     end
     
     
@@ -262,7 +270,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
     %%%%% SET RANDOM SEED %%%%%
     % for Random forest purposes
     %rng(ip.Results.rngType);
-    setUserSpecifiedRng(ip.Results.rngType);
+    Utils.setUserSpecifiedRng(ip.Results.rngType);
 
     
     %%%%% PCA, CENTERING, SCALING and CV DATA PARTITIONING %%%%% 
@@ -282,44 +290,44 @@ function C = crossValidatePairs_opt(X, Y, varargin)
         ipCenter = true;
     end
     
-    if (ip.Results.PCA > 0 || strcmp(ip.Results.optimization, 'nestedCV'))
+    if (strcmp(ip.Results.optimization, 'nestedCV'))
         disp('No development set needed, setting trainDevSplit to [1 0]');
     	trainDevSplit = [1 0];
     else
         trainDevSplit = ip.Results.trainDevSplit;
     end
     
-    partition = trainDevTestPart(X, ip.Results.nFolds, trainDevSplit);
-    cvDataObj = cvData(X,Y, partition, ip, ipCenter, ipScale);
+    partition = Utils.trainDevTestPart(X, ip.Results.nFolds_opt, trainDevSplit);
+    cvDataObj = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
     
     
     %%%%% CROSS VALIDATION %%%%%
     disp('Cross Validating')
     
     % Just partition, as shuffling (or not) was handled in previous step
-    if ip.Results.nFolds == 1
+    if ip.Results.nFolds_opt == 1
         % Special case of fitting model with no test set (argh)
         error('nFolds must be a integer value greater than 1');
     end
 
     % if nFolds < 0 | ceil(nFolds) ~= floor(nFolds) | nFolds > nTrials
     %   error, nFolds must be an integer between 2 and nTrials to perform CV
-    assert(ip.Results.nFolds > 0 & ...
-        ceil(ip.Results.nFolds) == floor(ip.Results.nFolds) & ...
-        ip.Results.nFolds <= nTrials, ...
+    assert(ip.Results.nFolds_opt > 0 & ...
+        ceil(ip.Results.nFolds_opt) == floor(ip.Results.nFolds_opt) & ...
+        ip.Results.nFolds_opt <= nTrials, ...
         'nFolds must be an integer between 1 and nTrials to perform CV' );
         
     predictionsConcat = [];
     labelsConcat = [];
-    modelsConcat = {1, ip.Results.nFolds};
+    modelsConcat = {1, ip.Results.nFolds_opt};
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses ,2);
     pairwiseMat3D = zeros(2,2, numDecBounds);
     % initialize the diagonal cell matrix of structs containing pairwise
     % classification information
-    pairwiseCell = initPairwiseCellMat(numClasses);
+    pairwiseCell = Utils.initPairwiseCellMat(numClasses);
     C = struct();
-    modelsConcat = cell(ip.Results.nFolds, numDecBounds);
+    modelsConcat = cell(ip.Results.nFolds_opt, numDecBounds);
     
     CM = NaN;
    
@@ -339,13 +347,13 @@ function C = crossValidatePairs_opt(X, Y, varargin)
                 tempY = Y(useTrials);
                 tempStruct = struct();
                 % Store the accuracy in the accMatrix
-                [~, tempC] = evalc([' obj.crossValidateMulti_opt(' ...
+                [~, tempC] = evalc([' Classification.crossValidateMulti_opt(' ...
                         '   tempX, tempY, ' ...
                         ' ''classifier'', ip.Results.classifier, ' ...
                         ' ''rngType'', ''default'', ' ...
                         ' ''PCAinFold'', ip.Results.PCAinFold, '...
                         ' ''optimization'', ip.Results.optimization, ' ...
-                        ' ''nFolds'', ip.Results.nFolds, ' ...
+                        ' ''nFolds'', ip.Results.nFolds_opt, ' ...
                         ' ''center'', ip.Results.center, ' ...
                         ' ''scale'', ip.Results.scale, ' ...
                         ' ''cSpace'', ip.Results.cSpace, ' ...
@@ -362,12 +370,13 @@ function C = crossValidatePairs_opt(X, Y, varargin)
                 %tempStruct.decision
                 AM(class1, class2) = tempStruct.accuracy;
                 AM(class2, class1) = tempStruct.accuracy;
-                modelsConcat(:, classTuple2Nchoose2Ind([class1, class2], 6)) = ...
+                modelsConcat(:, Utils.classTuple2Nchoose2Ind([class1, class2], 6)) = ...
                     tempC.modelsConcat';
                 pairwiseCell{class1, class2} = tempStruct;
                 pairwiseCell{class2, class1} = tempStruct;
                 
-                decInd = classTuple2Nchoose2Ind([class1 class2], numClasses);
+                
+                decInd = Utils.classTuple2Nchoose2Ind([class1 class2], numClasses);
                 
             end
         end
@@ -398,13 +407,13 @@ function C = crossValidatePairs_opt(X, Y, varargin)
                     tempX = X(useTrials, :);
                     tempY = Y(useTrials);
                     pTempY = Y(randperm(length(Y)), :); % permuate Y labels
-                    [~, tempC] = evalc([' obj.crossValidateMulti_opt(' ...
+                    [~, tempC] = evalc([' Classification.crossValidateMulti_opt(' ...
                         ' tempX, pTempY, ' ...
                         ' ''classifier'', ip.Results.classifier, ' ...
                         ' ''rngType'', ''default'', ' ...
                         ' ''PCAinFold'', ip.Results.PCAinFold, '...
                         ' ''optimization'', ip.Results.optimization, ' ...
-                        ' ''nFolds'', ip.Results.nFolds, ' ...
+                        ' ''nFolds'', ip.Results.nFolds_opt, ' ...
                         ' ''center'', ip.Results.center, ' ...
                         ' ''scale'', ip.Results.scale, ' ...
                         ' ''cSpace'', ip.Results.cSpace, ' ...
@@ -425,9 +434,9 @@ function C = crossValidatePairs_opt(X, Y, varargin)
     % START PAIRWISE SVM w/o PCA
     elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
         
-        for i = 1:ip.Results.nFolds
+        for i = 1:ip.Results.nFolds_opt
 
-            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds) '...'])
+            disp(['Computing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds_opt) '...'])
 
             trainX = cvDataObj.trainXall{i};
             trainY = cvDataObj.trainYall{i};
@@ -457,13 +466,13 @@ function C = crossValidatePairs_opt(X, Y, varargin)
 %                     decValues2PairwiseAcc(pairwiseMat3D, testY, mdl.Label, decision_values, pairwiseCell);
 %             end
 %             
-            [~, tempC] = evalc([' obj.crossValidateMulti_opt(' ...
+            [~, tempC] = evalc([' Classification.crossValidateMulti_opt(' ...
                         ' trainX, pTempY, ' ...
                         ' ''classifier'', ip.Results.classifier, ' ...
                         ' ''rngType'', ''default'', ' ...
                         ' ''PCAinFold'', ip.Results.PCAinFold, '...
                         ' ''optimization'', ip.Results.optimization, ' ...
-                        ' ''nFolds'', ip.Results.nFolds, ' ...
+                        ' ''nFolds'', ip.Results.nFolds_opt, ' ...
                         ' ''center'', ip.Results.center, ' ...
                         ' ''scale'', ip.Results.scale, ' ...
                         ' ''cSpace'', ip.Results.cSpace, ' ...
@@ -494,7 +503,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
                 pTrainY = trainY(randperm(l), :);
                  % conduct grid search here
                  if (strcmp(ip.Results.optimization, 'nestedCV'))
-                    [gamma_opt, C_opt] = nestedCvGridSearch(trainX, pTrainY, cvDataObj, ip);
+                    [gamma_opt, C_opt] = Utils.nestedCvGridSearch(trainX, pTrainY, cvDataObj, ip);
                  elseif (strcmp(ip.Results.optimization, 'singleFold'))
                     devX = cvDataObj.devXall{1};
                     devY = cvDataObj.devYall{1};
@@ -503,12 +512,12 @@ function C = crossValidatePairs_opt(X, Y, varargin)
                     pTrainY = pTrainDevY(1:length(trainY));
                     pDevY = pTrainDevY(length(trainY)+1:end);
 
-                    [gamma_opt, C_opt] = trainDevGridSearch(trainX, pTrainY, ...
+                    [gamma_opt, C_opt] = Utils.trainDevGridSearch(trainX, pTrainY, ...
                         devX, pDevY, ip);
                  end
-                [pMdl, scale] = fitModel(trainX, pTrainY, ip, gamma_opt, C_opt);
+                [pMdl, scale] = Utils.fitModel(trainX, pTrainY, ip, gamma_opt, C_opt);
 
-                [predictions decision_values] = modelPredict(testX, pMdl, scale);
+                [predictions decision_values] = Utils.modelPredict(testX, pMdl, scale);
 
                 if strcmp(upper(ip.Results.classifier), 'SVM')
                     [pairwiseAccuracies, pairwiseMat3D, pairwiseCell] = ...
@@ -523,7 +532,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
                 % class1 class2
                 class1 = classPairs(k, 1);
                 class2 = classPairs(k, 2);
-                pValMat(class1, class2) = permTestPVal(C.AM(class1, class2), ...
+                pValMat(class1, class2) = Utils.permTestPVal(C.AM(class1, class2), ...
                         permAccMat(class1, class2, :));
                 pValMat(class2, class1)  = pValMat(class1, class2);
                 

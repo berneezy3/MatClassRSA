@@ -195,14 +195,6 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
         end
     end
 
-    if(~Utils.is2Dor3DMatrix(X))
-        % check that X and Y have same number of trials
-        assert(size(X,1) == length(Y), "X and Y vectors must have same number of trials");
-    elseif(Utils.is2Dor3DMatrix(X))
-        % check that X and Y have same number of trials
-        assert(size(X,3) == length(Y), "X and Y vectors must have same number of trials");
-    end
-    
     % Initialize the input parser
     st = dbstack;
     namestr = st.name;
@@ -275,13 +267,8 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
         'user input and removing the mean from each data feature.']);
         ipCenter = true;
     end
-    if ( strcmp(ip.Results.optimization, 'nestedCV'))
-        trainDevTestSplit = [1-1/ip.Results.nFolds_opt 0 1/ip.Results.nFolds_opt];
-    elseif (strcmp(ip.Results.optimization, 'singleFold'))
-        trainDevTestSplit = [1-1/ip.Results.nFolds_opt 0 1/ip.Results.nFolds_opt];
-    end
     
-    partition = Utils.trainDevTestPart(X, ip.Results.nFolds_opt, trainDevTestSplit);
+    partition = Utils.trainDevTestPart(X, ip.Results.nFolds_opt, ip.Results.trainDevSplit);
     [cvDataObj,V,nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
     
     % restore rng to original
@@ -316,6 +303,7 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     % Train/Dev/Test Split
     
     disp('Conducting CV w/ train/dev/test split');
+    
     numClasses = length(unique(Y));
     CM_tmp = zeros(numClasses, numClasses, ip.Results.nFolds_opt);
     C.gamma_opt = zeros(1, ip.Results.nFolds_opt);

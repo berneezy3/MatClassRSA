@@ -1,7 +1,6 @@
  function C = crossValidatePairs(X, Y, varargin)
 % -------------------------------------------------------------------------
-% RSA = MatClassRSA
-% C = RSA.Classification.crossValidatePairs(X, Y, varargin)
+% C = Classification.crossValidatePairs(X, Y, varargin)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Jun. 21, 2020
 %
@@ -124,32 +123,41 @@
 %        true - scaling turned on 
 %
 % OUTPUT ARGS 
-%   C - output object containing all cross validation related
-%   information, including confucion matrix, accuracy, prediction results
-%   etc.  The structure of C will differ depending on the value of the 
-%   input value 'pairwise', which is set to 0 by default.  if 'pairwise' 
-%   is set to 1, then C will be a cell matrix of structs, symmetrical along 
-%   the diagonal.  If pairwise is 0, then C is a struct containing values:
-%   
-%   CM - Confusion matrix that summarizes the performance of the
-%       classification, in which rows represent actual labels and columns
-%       represent predicted labels.  Element i,j represents the number of 
-%       observations belonging to class i that the classifier labeled as
-%       belonging to class j.
-%   accuracy - Classification accuracy
-%   predY - predicted label vector
-%   modelsConcat - Struct containing the N models used during cross
-%   validation.
-%   permAccMat - Permutation testing accuracies.  This field will be NaN if 
-%       permuatation testing is not specfied.  The first two dimensions
-%       represent pairwise classes, while the third dimension represent 
-%       permutation. 
-%   classificationInfo - This struct contains the specifications used
-%       during classification, including 'PCA', 'PCAinFold', 'nFolds', 
-%       'classifier' and 'dataPartitionObj'
-%   dataPartitionObj - This struct contains the train/test data partitions 
-%       for cross validation (and a dev data partition if hyperparameter 
-%       optimization is specified).
+%   C -  A struct with the following subfields:
+%       pairwiseInfo - a cell matrix of structs, symmetrical along the
+%                      diagonal. Each struct contains the following
+%                      subfields, for each class boundary:
+%              CM - Confusion matrix that summarizes the performance of the
+%                   classification, in which rows represent actual labels and columns
+%                   represent predicted labels.  Element i,j represents the number of 
+%                   observations belonging to clC_tt_multiass i that the classifier labeled as
+%                   belonging to class j.
+%              classBoundary - (i.e.) class 1 vs class 4
+%              accuracy - classification accuracy for the given class
+%                         boundary
+%              actualLabels - actual class labels
+%              predictions - prediced class labels by the trained model
+%       AM - Accuracy matrix. Where each off-diagonal element shows the accuracy 
+%           for distinguishing one class from another,
+%           with a NaN diagonal, comparing a class with itself
+%       pValMat - If permutation testing is specified, a matrix containing
+%               the computed percentile value of the found value among the
+%               permutation test values.
+%       elapsedTime - Time to finish function call.
+%       modelsConcat - Struct containing the N models used during cross
+%                      validation.
+%       permAccMat - Permutation testing accuracies.  This field will be NaN if 
+%               permuatation testing is not specfied.  The first two dimensions
+%               represent pairwise classes, while the third dimension represent 
+%               permutation. 
+%       classificationInfo - This struct contains the specifications used
+%               during classification, including 'PCA', 'PCAinFold', 'nFolds', 
+%               'classifier' and 'dataPartitionObj'
+%       dataPartitionObj - This struct contains the train/test data partitions 
+%               for cross validation (and a dev data partition if hyperparameter 
+%               optimization is specified).
+%       avgAccuracy - Average classifcation accuracy across all class
+%               boundaries
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
@@ -192,7 +200,7 @@
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip, X, Y, varargin{:});
+    ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
     
     %Required inputs
     [r c] = size(X);
@@ -221,7 +229,7 @@
        warning('Y label vector not in double format.  Converting Y labels to double.')
        Y = double(Y);
    end
-   [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+   [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
                                                 ip.Results.featureUse);
@@ -232,7 +240,7 @@
     [r1 c1] = size(Y);
     
     if (r1 < c1)
-        Y = Y'
+        Y = Y';
     end
     
     
@@ -243,7 +251,7 @@
     % SET RANDOM SEED
     % for Random forest purposes
     %rng(ip.Results.rngType);
-    setUserSpecifiedRng(ip.Results.rngType);
+    Utils.setUserSpecifiedRng(ip.Results.rngType);
 
     % CROSS VALIDATION
     disp('Cross Validating')
@@ -257,7 +265,7 @@
     pairwiseMat3D = zeros(2,2, numDecBounds);
     % initialize the diagonal cell matrix of structs containing pairwise
     % classification infomration
-    pairwiseCell = initPairwiseCellMat(numClasses);
+    pairwiseCell = Utils.initPairwiseCellMat(numClasses);
     C = struct();
     modelsConcat = cell(ip.Results.nFolds, numDecBounds);
     
@@ -311,10 +319,10 @@
 
             % partition data for cross validation 
             trainTestSplit = [1-1/ip.Results.nFolds 0 1/ip.Results.nFolds];
-            partition = trainDevTestPart(currX, ip.Results.nFolds, trainTestSplit);
+            partition = Utils.trainDevTestPart(currX, ip.Results.nFolds, trainTestSplit);
             
             % This line handles PCA either in or out of folds
-            cvDataObj{k} = cvData(currX, currY, partition, ip, ipCenter, ipScale);
+            cvDataObj{k} = Utils.cvData(currX, currY, partition, ip, ipCenter, ipScale);
 
             disp(['Conducting cross validation on classes ' num2str(class1) ' and ' num2str(class2)]);
 
@@ -326,9 +334,9 @@
                 testX = cvDataObj{k}.testXall{i};
                 testY = cvDataObj{k}.testYall{i};
 
-                [mdl, scale] = fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
+                [mdl, scale] = Utils.fitModel(trainX, trainY, ip, ip.Results.gamma, ip.Results.C);
 
-                [predictions decision_values] = modelPredict(testX, mdl, scale);
+                [predictions decision_values] = Utils.modelPredict(testX, mdl, scale);
 
                 actualLabelsCell{class1, class2} = [actualLabelsCell{class1, class2} testY'];
                 predictionsCell{class1, class2} = [predictionsCell{class1, class2} predictions];
@@ -339,23 +347,38 @@
 
         end
         
+        numUnique = nchoosek(numClasses, 2);
+        Acc = zeros(numUnique, 1);
+        index = 1;
+        
         for class1 = 1:numClasses-1
             for class2 = (class1+1):numClasses
                 actualLabels = actualLabelsCell{class1, class2};
                 predictions = predictionsCell{class1, class2};
-                AM(class1, class2) = computeAccuracy(actualLabels, predictions);
-                AM(class2, class1) = computeAccuracy(actualLabels, predictions);
+                Accuracy = Utils.computeAccuracy(actualLabels, predictions);
+                
+                Acc(index) = Accuracy;
+                index = index + 1;
+                
+                AM(class1, class2) = Accuracy;
+                AM(class2, class1) = Accuracy;
                 pairwiseCell{class1, class2}.CM = confusionmat(actualLabels, predictions);
                 pairwiseCell{class2, class1}.CM = pairwiseCell{class1, class2}.CM;
                 pairwiseCell{class1, class2}.actualLabels = actualLabels;
                 pairwiseCell{class1, class2}.predictions = predictions;
                 pairwiseCell{class2, class1}.actualLabels = actualLabels;
                 pairwiseCell{class2, class1}.predictions = predictions;
+                pairwiseCell{class2, class1}.accuracy = Accuracy;
+                pairwiseCell{class1, class2}.accuracy = Accuracy;
             end
         end
 
         C.pairwiseInfo = pairwiseCell;
         C.AM = AM;
+        
+ 
+        avgAccuracy = mean(Acc);
+        C.avgAccuracy = avgAccuracy;
         
         % Permutation testing
         numClasses = length(unique(Y));
@@ -378,22 +401,22 @@
                 
                     l = length(trainY);
                     pY = trainY(randperm(l), :);
-                    evalc(['pM = obj.trainMulti(trainX, pY,'  ...
+                    evalc(['pM = Classification.trainMulti(trainX, pY,'  ...
                         ' ''classifier'', ip.Results.classifier,' ...
                         ' ''PCA'', 0,' ...
                         ' ''C'', ip.Results.C, ''gamma'', ip.Results.gamma,' ...
                         ' ''kernel'', ip.Results.kernel, ''numTrees'', ip.Results.numTrees,' ...
                         ' ''minLeafSize'', ip.Results.minLeafSize);']);
 
-                    evalc(['pC = obj.predict(pM, testX, ''actualLabels'',testY)']);
+                    evalc(['pC = Classification.predict(pM, testX, ''actualLabels'',testY)']);
                     permAccMat(class1, class2, i) = pC.accuracy;
                     permAccMat(class2, class1, i) = pC.accuracy;
 
                 end
                 
-                pValMat(class1, class2) = permTestPVal(AM(class1, class2), ...
+                pValMat(class1, class2) = Utils.permTestPVal(AM(class1, class2), ...
                     squeeze(permAccMat(class1, class2, :)));
-                pValMat(class2, class1) = pValMat(class1, class2);
+                pValMat(class2, class1) = Utils.pValMat(class1, class2);
                 
             end
         end

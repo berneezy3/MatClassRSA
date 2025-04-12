@@ -59,7 +59,7 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
 % POSSIBILITY OF SUCH DAMAGE.
 
 %     accGrid = zeros(length(ip.Results.cSpace), length(ip.Results.gammaSpace));
-    accVec = zeros(1, length(ip.Results.cSpace)*length(ip.Results.gammaSpace));
+    
     cGrid = cell(length(ip.Results.cSpace), length(ip.Results.gammaSpace));
     cLen = length(ip.Results.cSpace);
     gammaLen = length(ip.Results.gammaSpace);
@@ -71,61 +71,107 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
     
     kernel = ip.Results.kernel;
     
+    % Create a parallel data queue
+    D = parallel.pool.DataQueue;
+               
+    % update function
+        function updateWaitbar(~)
+            progressCount = progressCount + 1;
+            waitbar(progressCount/numIterations, hWait);
+        end
+
     
+    % callback function to update the waitbar.
+        afterEach(D, @(x) updateWaitbar());
     
     % parallelized grid search
     
     if (strcmpi(kernel, 'rbf'))
-        disp('RBF Kernel Grid Search Starting');
+        accVec = zeros(1, length(ip.Results.cSpace)*length(ip.Results.gammaSpace));
+        
+         % Create a waitbar on the client
+        hWait = waitbar(0, 'Processing RBF Kernel Grid Search...');      
+
+        % Create a persistent variable to track progress.
+        progressCount = 0;
+        
+        numIterations = cLen*gammaLen;
+         
         parfor i = 1:cLen*gammaLen
             cInd = mod(i-1, gammaLen)+1;
             gammaInd = ceil(i/gammaLen);
             
             
-            tempM = trainMultiEvalc(trainX, trainY, 0, 'SVM',  ...
+            tempM = trainMultiEvalc(trainX, trainY, 0,  'SVM',  kernel, ...
                 cSpace(cInd), gammaSpace(gammaInd), rngType);
 
             tempC = predictEvalc(tempM, devX, devY);
 
             accVec(i) = tempC.accuracy;
             cVec{i} = tempC;
+            
+            % Send an update to the DataQueue to update the waitbar
+            send(D, 1);
         end
         
+        [maxVal, maxIdx] = max(accVec(:));
+        [xInd yInd] = ind2sub([cLen gammaLen], maxIdx);
+
+        gamma_opt = gammaSpace(yInd);
+        C_opt = cSpace(xInd);  
+        
+        % Close the waitbar when done
+        close(hWait);
+
+        
     elseif (strcmpi(kernel, 'linear'))
-         disp('Linear Kernel Grid Search Starting');
+        
+        accVec = zeros(1, cLen);
+        
+        % Create a waitbar on the client
+        hWait = waitbar(0, 'Processing Linear Kernel Grid Search...');      
+
+        % Create a persistent variable to track progress.
+        progressCount = 0;
+        
+        numIterations = cLen;
+        
         parfor i = 1:cLen
-            cInd = i;
            
-         
-            tempM = Classification.trainMulti(trainX, trainY, 'PCA', 0, 'classifier', 'SVM', 'kernel', kernel, ...
-                'C', cSpace(cInd), 'rngType', rngType);
+            tempM = trainMultiEvalc(trainX, trainY, 0, 'SVM', kernel, ...
+                 cSpace(i), gammaSpace(i), rngType);
 
             tempC = predictEvalc(tempM, devX, devY);
 
             accVec(i) = tempC.accuracy;
             cVec{i} = tempC;
+            
+            % Send an update to the DataQueue to update the waitbar
+            send(D, 1);
         end
-    
+        
+       [maxVal, maxIdx] = max(accVec(:));
+        C_opt = cSpace(maxIdx);
+        gamma_opt = 0;
+        
+        % Close the waitbar when done
+        close(hWait);
+        
     else
         disp('The kernel is not correctly specified');
     end
     
-    [maxVal, maxIdx] = max(accVec(:));
-    [xInd yInd] = ind2sub([cLen gammaLen], maxIdx);
-
-    gamma_opt = gammaSpace(yInd);
-    C_opt = cSpace(xInd);  
-
+    
 end
 
 
-function M = trainMultiEvalc(trainData, trainLabels, PCA, classifier, C, gamma, rngType)
+function M = trainMultiEvalc(trainData, trainLabels, PCA, classifier, kernel, C, gamma, rngType)
     
     [~, M] = evalc(['Classification.trainMulti(' ... 
-        'trainData, trainLabels, ''PCA'', PCA, ''classifier'', classifier,'  ...
-         '''C'', C, ''rngType'', rngType,' ...
-         '''gamma'', gamma);']);
-      
+        'trainData, trainLabels, ''PCA'', PCA, ''classifier'', classifier , ''kernel'', kernel,' ...
+         ' ''C'', C, ''gamma'', gamma, ''rngType'', rngType);']);
+     
+     
 end
 
 function C = predictEvalc(M, testData, testLabels)

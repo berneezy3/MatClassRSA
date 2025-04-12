@@ -150,7 +150,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
-            addParameter(ip, 'classifier', defaultClassifier, ...
+            addParameter(ip, 'classifier', 'SVM', ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'nFolds_opt', defaultNFolds, validateNFolds);
             addParameter(ip, 'gammaSpace', defaultGammaSpace);

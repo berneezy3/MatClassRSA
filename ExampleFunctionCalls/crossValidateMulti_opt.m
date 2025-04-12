@@ -132,8 +132,7 @@ load('losorelli_100sweep_epoched.mat')
 
 % We pass in the array of chosen features into the 
 % 'featureUse' argument to subset data representing features of interest.   
-M = Classification.crossValidateMulti_opt(X, Y, 'PCA', .99, ...
-    'featureUse', 100:1500);
+M = Classification.crossValidateMulti_opt(X, Y, 'PCA', .99);
 
 M.classificationInfo
 
