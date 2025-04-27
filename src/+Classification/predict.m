@@ -1,9 +1,8 @@
 function P = predict(M, X, varargin)
 % -------------------------------------------------------------------------
-% RSA = MatClassRSA;
 % % any of the train functions could be used in the following line
-% M = RSA.Classification.trainMulti(trainData, testData); 
-% P = RSA.Classification.predict(M, X, Y)
+% M = Classification.trainMulti(X, Y); 
+% P = Classification.predict(M, X)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -151,12 +150,12 @@ function P = predict(M, X, varargin)
         % PCA
         if (classifierInfo.PCA > 0) 
             [X, ~, ~] = Utils.centerAndScaleData(X, classifierInfo.colMeans, classifierInfo.colScales);
-            testData = getPCs(X, M.classificationInfo.PCA_nPC);
+            testData = Utils.getPCs(X, M.classificationInfo.PCA_nPC);
         else
             testData = X;
         end
         
-        [P.predY decision_values] = Utils.modelPredict(testData, M.mdl, M.scale);
+        [P.predY, decision_values] = Utils.modelPredict(testData, M.mdl, M.scale);
     
         % Get Accuracy and confusion matrix
         if ( ~isnan(ip.Results.actualLabels) )

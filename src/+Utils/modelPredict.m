@@ -65,7 +65,7 @@ function [predictions, decision_values] = modelPredict(X, mdl, scale)
             
             % handle ties
             for i=1:r
-                [indOfWinner tallies tie] = Utils.SVMhandleties(decision_values(i, :), mdl.Label');
+                [indOfWinner, tallies, tie] = Utils.SVMhandleties(decision_values(i, :), mdl.Label');
                 if (tie ~= 0)
 %                     disp(['libsvm''s winner: ' num2str(predictions(i)) ', bernard''s tie broken winner: ' num2str(mdl.Label(indOfWinner))]);
 %                     disp(['label order: ' num2str(mdl.Label')]);
