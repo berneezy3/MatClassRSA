@@ -8,28 +8,54 @@
 clear all; close all; clc;
 
 load('exampleModel.mat');
-load('S01.mat');
-rngSeed = 3;
+trainParticipant = load('S01.mat');
+testParticipant = load('TestData2016Paper');
+rngSeed = 6;
 
-%%
-% Preprocessing Steps
-[xShuf, yShuf] = Preprocessing.shuffleData(X, labels6);  % Shuffle Data
+%% Partitioning Data of Single Participant
+
+% Preprocessing steps for train participant
+[xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 20, 'handleRemainder', 'append');  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-M = Classification.crossValidateMulti(xAvg, yAvg);
+partition = Utils.trainDevTestPart(xAvg, 1, [0.9, 0, 0.1]);
 
-%% Basic Function Call with SVM Model
-% Trained using trainMulti_opt() on SO1 dataset (124 electrode x 40 time x 5184 trials)
-% using 6 class labels
+ip.Results.PCA = 0;
+ip.Results.PCAinFold = 0;
 
+[cvDataObj,V,nPCs] = Utils.cvData(xAvg, yAvg, partition, ip, 0, 0);
 
-P = Classification.predict(M.modelsConcat{1}, X, 'actualLabels', labels6);
+% LDA classificaiton
+M = Classification.trainMulti(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'rngType', rngSeed);
+
+P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
+disp(P.accuracy);
+disp(P.CM);
+
+%% Train model on one participant and predict class labels for another
+
+% Preprocessing steps for train participant
+[xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 30, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
+
+% LDA classificaiton
+M = Classification.trainMulti(xAvg, yAvg, 'rngType', rngSeed);
+
+% Preprocessing steps for test participant
+[xShuf, yShuf] = Preprocessing.shuffleData(testParticipant.X, testParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 30, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
+
+P = Classification.predict(M, xAvg, 'actualLabels', yAvg);
 
 % P.predY contains all predicted class labels for X
-%%
 
-confMat = confusionmat(labels6, P.predY);
+confMat = confusionmat(yAvg, P.predY);
 confusionchart(confMat);
+P.accuracy;
 
 %%
+
+

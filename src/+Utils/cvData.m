@@ -1,5 +1,5 @@
 function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds)
-% cvDataObj = cvData_opt(X,Y, partition, PCA, PCAinFold);
+% cvDataObj = cvData(X, Y, trainDevTestSplit, ip, center, scale, nFolds);
 % --------------------------------
 % Bernard Wang, August 17, 2017
 % 
@@ -13,8 +13,10 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
 %   - X: training data (2D)
 %   - Y: labels
 %   - partition: object of class trainDevTestSplit
-%   - PCA: ip.Results.PCA parameter specified in classifyCrossValidate() 
-%   - kPCAinFold: ip.Results.PCAinFold specified in classifyCrossValidate() 
+%   - ip: User input parsed as ip, with ip.Results.PCA parameter and
+%         ip.Results.PCAinFold paramter
+%   - scale: boolean (True/False) for data scaling
+%   - center: boolean (True/False) for data centering
 %
 % OUTPUT ARGS:
 %   - obj:  an object of the trainDevTestSplit class

@@ -92,7 +92,7 @@ switch ndims(xIn)
         reshapeToCube = 0;
     case 3
         [nSpace, nTime, nTrial] = size(xIn);
-        xIn = cube2trRows(xIn);
+        xIn = Utils.cube2trRows(xIn);
         reshapeToCube = 1;
     otherwise
         error('Input data should be a 2D or 3D matrix.')
