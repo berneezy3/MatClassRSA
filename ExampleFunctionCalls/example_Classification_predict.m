@@ -53,7 +53,7 @@ ip.Results.PCAinFold = 0;
 
 % SVM classificaiton hyperparameters
 gamma_opt = .0032;
-C_opt = 100000;
+C_opt = 316;
 
 M = Classification.trainMulti(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'PCA', .99, ...
    'classifier', 'SVM', 'gamma', gamma_opt, 'C', C_opt, 'rngType', rngSeed);
@@ -84,7 +84,7 @@ M = Classification.trainMulti_opt(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}
 
 P = Classification.predict(M.mdl, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
 disp(P.accuracy);
-confusionchart(P.CM)
+disp(P.CM);
 
 %% trainMulti() LDA Model on Participant + Predict Class Labels for Another
 
