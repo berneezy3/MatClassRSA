@@ -372,7 +372,7 @@ for pp = 1:nP % Iterate through the participants
                     
                     for k = 1:length(remInd)
                         remTempRow = Xalt(remInd(k), :) + averagedX(averagedInd(k),:) * groupSize;
-                        Xalt(averagedInd(k), :) = remTempRow/(groupSize+1);
+                        averagedX(averagedInd(k), :) = remTempRow/(groupSize+1);
                         whichObs{averagedInd(k)} = [whichObs{averagedInd(k)} remInd(k)];
                     end
                 end
