@@ -1,8 +1,7 @@
  function [M, permTestData] = trainPairs(X, Y, varargin)
 % -------------------------------------------------------------------------
-% RSA = MatClassRSA;
-% M = RSA.Classification.trainPairs(X, Y, varargin)
-% P = RSA.Classification.predict(M, X, Y)
+% M = Classification.trainPairs(X, Y, varargin)
+% P = Classification.predict(M, X, Y)
 % -------------------------------------------------------------------------
 % Blair/Bernard - Feb. 22, 2017
 %
@@ -155,7 +154,7 @@
     namestr = st.name;
     ip = inputParser;
     %Required inputs
-    ip = initInputParser(namestr, ip, X, Y, varargin{:});
+    ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
     parse(ip, X, Y, varargin{:});
             
     % Initilize info struct
@@ -171,13 +170,13 @@
 
     
    % check if data is double, convert to double if it isn't
-   [X, Y] = convert2double(X, Y);
+   [X, Y] = Utils.convert2double(X, Y);
    
    % If SVM is selected, then gamma and C parameters must be manually set
-   verifySVMParameters(ip);
+   Utils.verifySVMParameters(ip);
 
    
-   [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+   [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
                                                 ip.Results.featureUse);
@@ -198,7 +197,7 @@
     pairwiseMat3D = zeros(2,2, numDecBounds);
     % initialize the diagonal cell matrix of structs containing pairwise
     % classification infomration
-    pairwiseCell = initPairwiseCellMat(numClasses);
+    pairwiseCell = Utils.initPairwiseCellMat(numClasses);
     
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses, 2);
@@ -217,6 +216,7 @@
         % return format to be cell array to hold multiple structs
         M.mdl = {};
         M.classifierInfo = {};
+        M.classificationInfo = {};
         M.scale = {};
         M.trainData = X;
         M.trainLabels = Y;
@@ -243,7 +243,7 @@
            
 
             % Store the accuracy in the accMatrix
-            [~, tempM] = evalc([' obj.trainMulti(tempX, tempY, ' ...
+            [~, tempM] = evalc([' Classification.trainMulti(tempX, tempY, ' ...
                 ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
                 ' ''kernel'', ip.Results.kernel,'...
                 ' ''gamma'', ip.Results.gamma, ' ...
@@ -256,6 +256,7 @@
             tempM.classifierInfo.numClasses = numClasses;
             M.cvDataObj = cvDataObj;
             M.classifierInfo{k} =  tempM.classifierInfo;
+            M.classificationInfo{k} = tempM.classificationInfo;
             M.mdl{k} = tempM.mdl;
             M.scale{k} = tempM.scale;
             permTestData{k} = tempM.cvDataObj;

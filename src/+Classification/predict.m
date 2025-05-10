@@ -255,7 +255,7 @@ function P = predict(M, X, varargin)
     elseif ( strcmp(M.functionName, 'trainPairs') || ...
             (strcmp(M.functionName, 'trainPairs_opt') && (M.ip.results.PCA > 0)) ) 
       
-        numClasses = tempInfo.numClasses;
+        numClasses = M.classifierInfo{1}.numClasses;
         numDecBounds = length(M.mdl);
         predY = cell(1, numDecBounds);
         P.AM = NaN(numClasses, numClasses);
@@ -280,6 +280,7 @@ function P = predict(M, X, varargin)
             
             class1 = classPairs(i, 1);
             class2 = classPairs(i, 2);
+            
             currUse = ismember(Y, [class1 class2]);
             
             tempX = X(currUse, :);
