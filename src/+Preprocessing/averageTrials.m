@@ -221,7 +221,7 @@ for pp = 1:nP % Iterate through the participants
     % Print message of which participant we are processing
     thisParticip = uP(pp);
     
-    disp(thisParticip);
+    disp(['Participant #: ' num2str(pp)]);
     
     % Checks if P vector has any participants and notifies user
     if any(PALL~=0)
@@ -302,16 +302,11 @@ for pp = 1:nP % Iterate through the participants
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         if (labelNumRemains(num2str(uniqueLabels(i))) > 0)
             
-            
-            % what is this???
-            %
+            % locate indices of the remainder trials 
             remInd = find(Yalt==uniqueLabels(i), ...
                 labelNumRemains(num2str(uniqueLabels(i))),...
                 'last');
             
-            labelNumRemains(num2str(uniqueLabels(i))) = 0;
-
-%             disp(Y(remInd));
             
             % Initialize return parameters remX, remY
             remX = [];
@@ -330,11 +325,9 @@ for pp = 1:nP % Iterate through the participants
        %     disp(['Total trials before grouping: ', num2str(nnz(Y == uniqueLabels(i)))]);
        %     disp(['Remainders before handling for label ' num2str(uniqueLabels(i)) ': ' num2str(labelNumRemains(num2str(uniqueLabels(i))))]);
             
-            for j=1:labelNumRemains(num2str(uniqueLabels(i)))
+            if (labelNumRemains(num2str(uniqueLabels(i))) > 0)
                 % CASE: DISCARD REMAINDERS (DO NOTHING)
-                if (strcmp(ip.Results.handleRemainder, 'discard'))
-                    ;
-                    
+                if (strcmp(ip.Results.handleRemainder, 'discard'))                    
                     % CASE: CREATE NEW GROUP W/ REMAINDER
                 elseif (strcmp(ip.Results.handleRemainder, 'newGroup'))
                     % sum remainder rows with the same label
@@ -380,7 +373,7 @@ for pp = 1:nP % Iterate through the participants
                     for k = 1:length(remInd)
                         remTempRow = Xalt(remInd(k), :) + averagedX(averagedInd(k),:) * groupSize;
                         Xalt(averagedInd(k), :) = remTempRow/(groupSize+1);
-                        whichObs{averagedInd(k)} = [whichObs{end} remInd(k)];
+                        whichObs{averagedInd(k)} = [whichObs{averagedInd(k)} remInd(k)];
                     end
                 end
             end
