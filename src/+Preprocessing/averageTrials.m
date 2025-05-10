@@ -167,8 +167,8 @@ parse(ip, X, Y, groupSize, varargin{:});
 % end parse inputs
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Assign P based on input parser or convert to zeros if empty input
-if isempty(ip.Results.P), P = zeros(size(Y));
+% Assign P based on input parser or return empty array if empty input
+if isempty(ip.Results.P), P = [];
 else, P = ip.Results.P;
 end
 
