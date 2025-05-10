@@ -174,6 +174,7 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     namestr = st.name;
     ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
     
+    
     % Parse Inputs
     parse(ip, X, Y, varargin{:});
     
@@ -224,6 +225,7 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     
     % PCA
     disp('Inside trainMulti: about to call cvData'); 
+    
     if (ip.Results.PCA > 0)
         disp('Conducting Principal Component Analysis...')
         [cvDataObj, V, nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);

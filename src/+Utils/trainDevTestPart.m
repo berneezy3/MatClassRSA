@@ -60,6 +60,11 @@ function obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
+
+% add reshape data to 2D
+
+
+
 [numTrials c] = size(X);
 
     
@@ -84,6 +89,7 @@ if length(trainDevTestSplit) == 2
         trainDevTestSplit = [trainSplit devSplit 0];
     end
 end
+
 
 trainDevTestSplit = Utils.processTrainDevTestSplit(trainDevTestSplit, X);
 

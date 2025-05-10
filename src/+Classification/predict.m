@@ -138,6 +138,12 @@ function P = predict(M, X, varargin)
         
     %%%%% multiclass classification %%%%%
     
+    % model info is stored one field deeper for optimization functions
+    if(strcmp(M.functionName, 'trainMulti_opt') || ...
+            strcmp(M.functionName, 'trainPairs_opt'))
+       M.mdl= M.mdl.mdl;
+    end
+    
     %initialize variables
     testLabels = ip.Results.actualLabels;        
     PCA = classifierInfo.PCA;
