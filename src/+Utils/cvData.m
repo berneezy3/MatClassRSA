@@ -51,6 +51,15 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
 % CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
+
+is3D = 0;
+
+if ndims(X) == 3
+    is3D = 1;
+    X3D = X;
+    % add reshape data to 2D
+    X = Utils.cube2trRows(X);
+end
     
     nbins = length(unique(Y));
     counts = histcounts(Y, nbins);
@@ -208,11 +217,49 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
         nPC = c;
 
     end
-    obj.trainXall = trainXall;
-    obj.devXall = devXall;
-    obj.testXall = testXall;
-    obj.trainYall = trainYall;
-    obj.devYall = devYall;
-    obj.testYall = testYall;
+    if is3D
+        % Get sizes to initialize the output
+        nCh = size(X3D, 1); % Number of electrodes
+        N = size(X3D, 2); % Number of time samples per trial
+        
+        if (PCA >0)
+            N = nPC;
+        end
+        
+        for i = 1:nFolds
+        
+            nTrialsTrain = size(trainXall{i}, 1); % Number of trials train
+            nTrialsTest = size(testXall{i}, 1); % Number of trials test
+            nTrialsDev = size(devXall{i}, 1); % Number of trials dev
+            
+            if (PCA >0)
+                % Reshape into [numTrials x numSamples x numElectrodes]
+                data3DTrain = reshape(trainXall{i}', [N, nTrialsTrain]);
+                data3DTest = reshape(testXall{i}', [N, nTrialsTest]);
+                data3DDev = reshape(devXall{i}', [N, nTrialsDev]);
+            else
+                % Reshape into [numTrials x numSamples x numElectrodes]
+                data3DTrain = reshape(trainXall{i}', [nCh, N, nTrialsTrain]);
+                data3DTest = reshape(testXall{i}', [nCh, N, nTrialsTest]);
+                data3DDev = reshape(devXall{i}', [nCh, N, nTrialsDev]);
+            end
+
+            
+            obj.trainXall{i} = data3DTrain;
+            obj.devXall{i} = data3DDev;
+            obj.testXall{i} = data3DTest;
+        end
+        
+        obj.trainYall = trainYall;
+        obj.devYall = devYall;
+        obj.testYall = testYall;
+    else
+        obj.trainXall = trainXall;
+        obj.devXall = devXall;
+        obj.testXall = testXall;
+        obj.trainYall = trainYall;
+        obj.devYall = devYall;
+        obj.testYall = testYall;
+    end
 end
       
