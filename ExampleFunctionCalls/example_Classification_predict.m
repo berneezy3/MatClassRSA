@@ -12,7 +12,7 @@ trainParticipant = load('S01.mat');
 testParticipant = load('TestData2016Paper');
 rngSeed = 6;
 
-%% Partitioning Data of Single Participant, tainMulti() LDA Model, no PCA -- looks good acc: 70%
+%% Partitioning Data of Single Participant, tainMulti(), LDA Model, no PCA
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
@@ -34,7 +34,7 @@ M = Classification.trainMulti(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'r
 P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
 disp(P.accuracy);
 disp(P.CM);
-%% Partitioning Data of Single Participant, tainMulti() LDA Model, PCA on all data -- looks ok, but not great acc: 32%
+%% Partitioning Data of Single Participant, tainMulti(), LDA Model, PCA on all data
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
@@ -56,7 +56,7 @@ M = Classification.trainMulti(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'r
 P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
 disp(P.accuracy);
 disp(P.CM);
-%% Partitioning Data of Single Participant, tainMulti() LDA Model, PCA on partitioned data -- good acc: 60%
+%% Partitioning Data of Single Participant, tainMulti(), LDA Model, PCA on partitioned data
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
@@ -78,7 +78,7 @@ P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.t
 disp(P.accuracy);
 disp(P.CM);
 
-%% Partitioning Data of Single Participant, trainMulti() SVM Model, no PCA, pre-identified hyperparameters -- looks good
+%% Partitioning Data of Single Participant, trainMulti(), SVM Model, no PCA, pre-identified hyperparameters
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant.X, testParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
@@ -106,7 +106,7 @@ disp(P.accuracy);
 disp(P.CM);
 
 
-%% Partitioning Data of Single Participant, trainMulti_opt() SVM Model -- PCA on all data -- looks good
+%% Partitioning Data of Single Participant, trainMulti_opt(), SVM Model -- PCA on all data
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant.X, testParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
@@ -131,7 +131,7 @@ P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.t
 
 disp(P.accuracy);
 disp(P.CM);
-%% Partitioning Data of Single Participant, trainMulti_opt() SVM Model, PCA on partitioned data -- looks great acc: 72%
+%% Partitioning Data of Single Participant, trainMulti_opt(), SVM Model, PCA on partitioned data
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant.X, testParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
@@ -159,7 +159,7 @@ disp(P.accuracy);
 disp(P.CM);
 
 
-%% Partitioning Data of Single Participant, trainMulti_opt() SVM Model -- PCA on partitioned train data -- its ok acc: 43%
+%% Partitioning Data of Single Participant, trainMulti_opt(), SVM Model -- PCA on partitioned train data
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant.X, testParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
@@ -184,14 +184,14 @@ P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.t
 disp(P.accuracy);
 disp(P.CM);
 
-%% trainMulti()_opt, SVM model on one Participant transfer model to Predict Class Labels for Another, Acc: 30%
+%% Transfer Learning: SVM model from Participant to Predict Classes of Another
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 [xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 5, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% LDA classificaiton
+% SVM classificaiton
 M = Classification.trainMulti_opt(xAvg, yAvg, 'PCA', 0.90, ...
    'classifier', 'SVM', 'rngType', rngSeed);
 
@@ -210,6 +210,25 @@ disp(P.accuracy);
 disp(P.CM);
 
 
+%% Partitioning Data of Single Participant, tainMulti(), LDA Model, PCA on all data
 
+% Preprocessing steps for train participant
+[xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
+% (90% Train, 0 Development, 10% Test) data partitioning
+partition = Utils.trainDevTestPart(xAvg, 1, [0.8, 0, 0.2]);
 
+% needed for cvData() function call
+ip.Results.PCA = 0.99;
+ip.Results.PCAinFold = 0;
+
+[cvDataObj,V,nPCs] = Utils.cvData(xAvg, yAvg, partition, ip, 1, 0);
+
+% LDA classificaiton
+M = Classification.trainPairs(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'rngType', rngSeed, 'PCA' , 0);
+
+P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
+
+disp(P.AM);
