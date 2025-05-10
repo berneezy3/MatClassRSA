@@ -60,9 +60,10 @@ function obj = trainDevTestPart(X, nFolds, trainDevTestSplit)
 % ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
 % POSSIBILITY OF SUCH DAMAGE.
 
-
-% add reshape data to 2D
-
+if ndims(X) == 3
+    % add reshape data to 2D
+    X = Utils.cube2trRows(X);
+end
 
 
 [numTrials c] = size(X);

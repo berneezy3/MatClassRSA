@@ -40,10 +40,10 @@ disp(P.CM);
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant.X, testParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 5, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% (80% Train, 0 Development, 20% Test) data partitioning
-partition = Utils.trainDevTestPart(xAvg, 1, [0.8, 0, 0.2]);
+% (90% Train, 0 Development, 20% Test) data partitioning
+partition = Utils.trainDevTestPart(xAvg, 1, [0.9, 0, 0.1]);
 
 % needed for cvData() function call
 ip.Results.PCA = 0;
@@ -60,7 +60,7 @@ M = Classification.trainMulti(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'P
 
 P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
 disp(P.accuracy);
-confusionchart(P.CM);
+disp(P.CM);
 
 
 %% Partitioning Data of Single Participant, trainMulti_opt() SVM Model
@@ -68,18 +68,18 @@ confusionchart(P.CM);
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant.X, testParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 5, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% (80% Train, 0 Development, 20% Test) data partitioning
-partition = Utils.trainDevTestPart(xAvg, 1, [0.8, 0, 0.2]);
+% (90% Train, 0 Development, 10% Test) data partitioning
+partition = Utils.trainDevTestPart(xAvg, 1, [0.9, 0, 0.1]);
 
 % needed for cvData() function call
-ip.Results.PCA = 0.99;
+ip.Results.PCA = 0;
 ip.Results.PCAinFold = 0;
 
 [cvDataObj,V,nPCs] = Utils.cvData(xAvg, yAvg, partition, ip, 1, 0);
 
-M = Classification.trainMulti_opt(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'PCA', ip.Results.PCA, ...
+M = Classification.trainMulti_opt(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'PCA', 0.99, ...
    'classifier', 'SVM', 'rngType', rngSeed);
 
 P = Classification.predict(M.mdl, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
