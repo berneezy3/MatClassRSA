@@ -121,6 +121,8 @@ function P = predict(M, X, varargin)
                                                 tempInfo.timeUse, ...
                                                 tempInfo.featureUse);
 
+    % everything is 2D moving forward, regardless of staring dimensions
+    
     if (iscell(M.classificationInfo))
         classifierInfo = M.classificationInfo{1};
     else
@@ -154,9 +156,11 @@ function P = predict(M, X, varargin)
             strcmp(M.functionName, 'trainMulti_opt'))
         
         % PCA
-        if (classifierInfo.PCA > 0) 
+        if (PCA > 0) 
             [X, ~, ~] = Utils.centerAndScaleData(X, classifierInfo.colMeans, classifierInfo.colScales);
-            testData = Utils.getPCs(X, M.classificationInfo.PCA_nPC);
+            testData = X*M.classificationInfo.PCA_V;
+            testData = testData(:,1:M.classificationInfo.PCA_nPC);
+            
         else
             testData = X;
         end

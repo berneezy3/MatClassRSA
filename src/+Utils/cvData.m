@@ -53,6 +53,7 @@ function [obj, V, nPC, colMeans, colScales] = cvData(X, Y, trainDevTestSplit, ip
 % POSSIBILITY OF SUCH DAMAGE.
 
 is3D = 0;
+isPCA = 0;
 
 if ndims(X) == 3
     is3D = 1;
@@ -72,9 +73,14 @@ end
     
     PCA = ip.Results.PCA;
     PCAinFold = ip.Results.PCAinFold;
+    
 
     if (isfield(ip.Results,'nFolds'))
         nFolds = ip.Results.nFolds;
+         % check that nObservationsPerClass > nFolds
+        assert(min(counts) >= nFolds, 'the number of observations for each class must be larger than nFolds');
+    elseif (isfield(ip.Results,'nFolds_opt'))
+        nFolds = ip.Results.nFolds_opt;
          % check that nObservationsPerClass > nFolds
         assert(min(counts) >= nFolds, 'the number of observations for each class must be larger than nFolds');
     else 
@@ -112,6 +118,7 @@ end
     %parpool;
     % DO PCA
     if (PCA >0)
+        isPCA = 1;
         % outside of folds
         if (PCAinFold == 0)
 %             disp('Conducting PCA on once on entire dataset');
@@ -130,8 +137,7 @@ end
                 testX = X(testIndx, :);
                 testY = Y(testIndx);
                 
-                
-                
+            
                 trainXall = [trainXall {trainX}];
                 devXall = [devXall {devX}];
                 testXall = [testXall {testX}];
@@ -237,6 +243,11 @@ end
                 data3DTrain = reshape(trainXall{i}', [N, nTrialsTrain]);
                 data3DTest = reshape(testXall{i}', [N, nTrialsTest]);
                 data3DDev = reshape(devXall{i}', [N, nTrialsDev]);
+                
+                data3DTrain = data3DTrain';
+                data3DTest = data3DTest';
+                data3DDev = data3DDev';
+                
             else
                 % Reshape into [numTrials x numSamples x numElectrodes]
                 data3DTrain = reshape(trainXall{i}', [nCh, N, nTrialsTrain]);
@@ -253,6 +264,7 @@ end
         obj.trainYall = trainYall;
         obj.devYall = devYall;
         obj.testYall = testYall;
+      
     else
         obj.trainXall = trainXall;
         obj.devXall = devXall;
@@ -260,6 +272,7 @@ end
         obj.trainYall = trainYall;
         obj.devYall = devYall;
         obj.testYall = testYall;
+
     end
 end
       

@@ -261,6 +261,7 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     % override the user's centering specification
     ipCenter = ip.Results.center; 
     ipScale = ip.Results.scale;
+    ipFolds = ip.Results.nFolds_opt;
     
     if ((~ip.Results.center) && (ip.Results.PCA>0) ) 
         warning(['Data centering must be on if performing PCA. Overriding '...
@@ -269,7 +270,7 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     end
     
     partition = Utils.trainDevTestPart(X, ip.Results.nFolds_opt, ip.Results.trainDevSplit);
-    [cvDataObj,V,nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
+    [cvDataObj, V, nPC, colMeans, colScales] = Utils.cvData(X,Y, partition, ip, ipCenter, ipScale);
     
     % restore rng to original
     Utils.setUserSpecifiedRng(ip.Results.rngType);
