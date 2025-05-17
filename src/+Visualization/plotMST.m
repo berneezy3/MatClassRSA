@@ -22,11 +22,6 @@ function  fig = plotMST(RDM, varargin)
 %           https://www.mathworks.com/help/matlab/ref/colorspec.html
 %   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
 %       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
-%   'iconPath': a directory containing images used to label, where the
-%       image files must be ordered in the same order as the labels of the 
-%       confusion matrix
-%   'iconSize': If the user sets the 'iconPath' argument, then this 
-%       argument deterines the size of icon.  Default is 40.
 %   'edgeLabelSize': Set the size of the MST edge labels.  Default is 15.
 %   'nodeLabelSize': Set the size of node labels.  Default is 15.
 %   'nodeLabelRotation': Set the angle of the node label.
@@ -82,8 +77,6 @@ function  fig = plotMST(RDM, varargin)
     options = [1, 0];
     ip.addParameter('nodeColors', [], @(x) isvector(x)); 
     ip.addParameter('nodeLabels', [], @(x) isvector(x));
-    ip.addParameter('iconPath', '');
-    ip.addParameter('iconSize', 40);
     ip.addParameter('edgeLabelSize', 15, @(x) isnumeric(x));
     ip.addParameter('nodeLabelSize', 15, @(x) isnumeric(x));
     ip.addParameter('nodeLabelRotation', 0, @(x) isnumeric(x));
@@ -125,8 +118,7 @@ function  fig = plotMST(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels) ...
-            && isempty(ip.Results.iconPath)
+    if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
     
         disp('CASE: COLOR AND NODE')
         plt = MSTplothelper(sourceNodes, destNodes, weights, ...
@@ -137,38 +129,16 @@ function  fig = plotMST(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels) ...
-            && isempty(ip.Results.iconPath)
+    elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
         
         disp('CASE: NODE')
         MSTplothelper(sourceNodes, destNodes, weights, ip.Results.nodeLabels, ip);
         
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: COLOR AND IMAGE
+    % CASE: COLOR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%     elseif ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.iconPath) ...
-% %             && isempty(ip.Results.nodeLabels)
-        
-       
-        
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: IMAGE
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.iconPath) ...
-            && isempty(ip.Results.nodeLabels)
-        
-        disp('CASE: IMAGE');
-        
-        labels = Utils.getImageFiles(ip.Results.iconPath);
-        plt = MSTimagehelper(sourceNodes, destNodes, weights, ...
-            labels, ip);
-
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-%     % CASE: COLOR
-%     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.iconPath) ...
-            && isempty(ip.Results.nodeLabels)
+    elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.nodeLabels)
         
         disp('CASE: COLOR AND NODE')
         
@@ -279,42 +249,6 @@ function plt = MSTimagehelper(sourceNodes, destNodes, weights, nodeLabels, ip)
         plotHeight = (pos(3))/12;
         plotLength = (pos(4))/12;
         
-        
-        for i = 1:length(nodeLabels)
-
-            [thisIcon map] = imread([ip.Results.iconPath ...
-                char(nodeLabels(i))]);
-            [height width] = size(thisIcon);
-            %convert thisIcon to scale 0~1
-            
-            if ~isempty(map)
-                %'converting to RGB
-                thisIcon = ind2rgb(thisIcon, map);
-            end
-            
-            % Resize to 40*40 square
-            if height > width
-                thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
-            else
-                thisIcon = imresize(thisIcon, [NaN ip.Results.iconSize]);
-            end
-
-            % Add 3rd(color) dimension if there is none
-            if length(size(thisIcon)) == 2
-                thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
-            end
-
-            %calculate X and Y coords
-            % scale from axis units to MATLAB pixel units
-            xC = pos(1) + (xd(i)-xl(1))/(xl(2)-xl(1))*pos(3);
-            yC = pos(2) + (yd(i)-yl(1))/(yl(2)-yl(1))*pos(4);
-
-            lblAx = axes('parent',gcf,'position', [xC-plotLength/2, yC-plotHeight/2, ...
-                    plotLength, plotHeight]);
-            imagesc(thisIcon);
-            axis(lblAx,'off');
-
-        end
 end
 
 

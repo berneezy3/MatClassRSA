@@ -22,15 +22,6 @@ function fig = plotDendrogram(RDM, varargin)
 %           https://www.mathworks.com/help/matlab/ref/colorspec.html
 %   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
 %       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
-%   'iconPath': A directory containing images files to use as labels. The
-%       alphabetical ordering of the image filenames must correspond to 
-%       the order of the labels as they are presented in the  
-%       confusion matrix.  For example, the first file in the iconPath
-%       directory will correspond to the confusion matrices' first label, 
-%       the second file will correspond to the second CM label etc.
-%       Supported image file formats can be found at the MATLAB imread()
-%       documentation page: 
-%           https://www.mathworks.com/help/matlab/ref/imread.html
 %   'fontSize': A number to specify the font size of labels.
 %   'orientation' - This parameter lets the user specify which direction 
 %       to plot the dendrogram leaves.
@@ -53,9 +44,8 @@ function fig = plotDendrogram(RDM, varargin)
 %       dendrogram.  Similar to 'nodeColors', we can either pass in color 
 %       abbreviations, full-length color names, or RGB color triplets.  
 %       Default 'black'.
-%   'iconSize' - If parameter 'iconPath' is passed in, this parameter will 
-%       determine the size of each image icon.  Default dyamically set as
-%       10% of figure height`.
+%   'colorBlockSize' - This parameter determines the size of each color block icon.  
+%       Default dyamically set as 5.
 %
 % OUTPUTS:
 %   'fig': figure corresponding to output plot
@@ -115,7 +105,6 @@ function fig = plotDendrogram(RDM, varargin)
     ip.addParameter('nodeColors', [], @(x) isvector(x)); 
     ip.addParameter('nodeLabels', [], @(x) isvector(x));
     ip.addParameter('fontSize', 25, @(x) isnumeric(x));
-    ip.addParameter('iconPath', '');
     ip.addParameter('orientation', 'down', @(x) any(validatestring(x, ...
         expectedOrientation)));
     ip.addParameter('reorder', [], @(x) assert(length(x) == length(RDM)));
@@ -128,7 +117,8 @@ function fig = plotDendrogram(RDM, varargin)
     ip.addParameter('lineWidth', 2, @(x) assert(isnumeric(x), ...
         'textRotation must be a numeric value'));
     ip.addParameter('lineColor', 'black');
-    ip.addParameter('iconSize', '');
+    ip.addParameter('colorBlockSize', 5, @(x) assert(isnumeric(x), ...
+        'colorBlockSize must be a numeric value'));
     
     parse(ip, RDM,varargin{:});
     
@@ -167,24 +157,13 @@ function fig = plotDendrogram(RDM, varargin)
     
     %%%%%%%%%%%%%%%%%%%%
     % CONVERT TO MATRIX
-    %%%%%%%%%%%%%%%%%%%%
-%     F = getframe(gcf);
-%     dendrogramImg = im2double(F.cdata);
-    
-    %imagesc(dendrogramImg);
-    addpath(ip.Results.iconPath);
-    
-    %check that either labels or iconPath has the same amount as nodeColors
-    
+    %%%%%%%%%%%%%%%%%%%%    
     % check which set of labels to use
     % alphanumeric labels
     if ~isempty(ip.Results.nodeLabels)
         labels = ip.Results.nodeLabels;
-    %picture labels
-    elseif ~isempty(ip.Results.iconPath)
-        labels = Utils.getImageFiles(ip.Results.iconPath);
     %color labels
-    elseif isempty(ip.Results.nodeLabels) && isempty(ip.Results.iconPath) && ~isempty(ip.Results.nodeColors)
+    elseif isempty(ip.Results.nodeLabels) && ~isempty(ip.Results.nodeColors)
          labels = ip.Results.nodeColors;
     else %no labels specified
 %         set(gca,'xtick',[]);
@@ -229,78 +208,9 @@ function fig = plotDendrogram(RDM, varargin)
         set(gca,'xTickLabel', ip.Results.nodeLabels);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: IMAGE
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif isempty(ip.Results.nodeLabels) && ~isempty(ip.Results.iconPath)
-        
-        disp('Plotting with user specified directory of image icons...')
-        
-        set(gca,'xTickLabel', '');
-        set(gcf, 'Renderer', 'painters'); % Ensures high-quality rendering
-        
-        pos = get(gca,'position');
-        x = pos(1);
-        y = pos(2);
-        
-        if isempty(ip.Results.iconSize)
-                
-            % Get figure size info for dynamic resizing
-            figPos = get(gcf, 'position');
-            figWidth = figPos(3);
-            figHeight = figPos(4);
-
-            scaleFactor = 0.1; % Image size is 10% of figure height
-            iconSize = figHeight * scaleFactor;        
-        end
-
-        
-        for i = 1:length(labels)
-            [thisIcon map] = imread([char(labels(i))]);
-            
-            if ~isempty(map)
-                disp('converting to RGB')
-                %disp(map);
-                thisIcon = ind2rgb(thisIcon, map);
-            end
-            
-            % Resize image dynamically based on figure height
-            if size(thisIcon, 1) > size(thisIcon, 2)
-                thisIcon = imresize(thisIcon, [iconSize NaN]);
-            else
-                thisIcon = imresize(thisIcon, [NaN iconSize]);
-            end
-
-            % Add 3rd(color) dimension if there is none
-            if length(size(thisIcon)) == 2
-                thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
-            end
-            
-            % Position image dynamically
-            
-            % spacingFactor = 1; % Spread icons out more
-            
-            numIcons = length(labels); % Assuming one icon per x-tick
-            xTickCoords = 1:numIcons; % X-ticks from 1 to numIcons
-            
-            % Convert xtick position to figure position
-            newX = (xTickCoords(i) - 0) / (1 + numIcons); % Adjust for axis limits
-
-            % Center icon on the x-tick
-            if i <= length(labels)
-                lblAx = axes('parent', gcf, 'position', ...
-                    [x + newX * pos(3) - iconSize / (2 * figWidth), ...  % Centering in x-direction
-                     y - iconSize / figHeight, ...  % Adjust y-position
-                     iconSize / figWidth, iconSize / figHeight]);
-             
-                 imagesc(thisIcon, 'Parent', lblAx);
-                 axis(lblAx,'off');
-            end
-        end
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.iconPath) ...
-            && isempty(ip.Results.nodeLabels)
+    elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.nodeLabels)
         disp('Plotting with user defined colored blocks...')
         
         set(gca,'xTickLabel', '');
@@ -319,8 +229,8 @@ function fig = plotDendrogram(RDM, varargin)
 
             if i <= length(labels)
                 lblAx = axes('parent',gcf,'position',[pos(1)+dlta*i - ...
-                    ip.Results.iconSize/2/figWidth,y-ip.Results.iconSize/figHeight, ...
-                    ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
+                    ip.Results.colorBlockSize/2/figWidth,y-ip.Results.colorBlockSize/figHeight, ...
+                    ip.Results.colorBlockSize/figWidth, ip.Results.colorBlockSize/figHeight]);
                 rectangle('FaceColor', labels{i});
                 axis(lblAx,'off');
             else

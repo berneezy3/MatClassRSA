@@ -1,6 +1,6 @@
 function fig = plotMDS(RDM, varargin)
 %-------------------------------------------------------------------
-%  fig = Visualization.plotMDS(RDM, 'nodeColors', 'nodeLabels', 'iconPath')
+%  fig = Visualization.plotMDS(RDM, 'nodeColors', 'nodeLabels')
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
@@ -22,9 +22,6 @@ function fig = plotMDS(RDM, varargin)
 %           https://www.mathworks.com/help/matlab/ref/colorspec.html
 %   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
 %       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
-%   'iconPath': path to a directory containing images used to label, where the
-%       image files must be ordered in the same order as the labels of the 
-%       confusion matrix
 %   'dimensions': Choose which MDS dimensions to display (default [1 2]).
 %   'xLim': Set range of the X-axis with array of length 2, [xMin xMax].
 %   'yLim': Set range of the Y-axis with an array of length 2, [yMin yMax].
@@ -42,7 +39,6 @@ function fig = plotMDS(RDM, varargin)
 %TODO
 % - specify which dimensions to plot
 % - use xlim and ylim to determine boundary correctly
-% - let user specify icon height and width
 % - if # iamges > # classes, print instead of error
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
@@ -92,7 +88,6 @@ function fig = plotMDS(RDM, varargin)
     options = [1, 0];
     ip.addParameter('nodeColors', [], @(x) assert(isvector(x))); 
     ip.addParameter('nodeLabels', [], @(x) assert(isvector(x)));
-    ip.addParameter('iconPath', '');
     ip.addParameter('classical', 1, @(x) assert(isnumeric(x)));
 
     % which dimensions of MDS to plot
@@ -112,14 +107,7 @@ function fig = plotMDS(RDM, varargin)
         
         labels = ip.Results.nodeLabels;
         
-    %picture labels
-    elseif ~isempty(ip.Results.iconPath)
-        
-%         labels = dir(ip.Results.iconPath);
-        labels = Utils.getImageFiles(ip.Results.iconPath);
-        
-    elseif isempty(ip.Results.nodeLabels) && isempty(ip.Results.iconPath) ...
-            && ~isempty(ip.Results.nodeColors)
+    elseif isempty(ip.Results.nodeLabels) &&& ~isempty(ip.Results.nodeColors)
         
         labels = ip.Results.nodeColors;
         
@@ -181,8 +169,7 @@ function fig = plotMDS(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: DEFAULT LABELS
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if isempty(ip.Results.nodeColors) && isempty(ip.Results.nodeLabels) ...
-            && isempty(ip.Results.iconPath)
+    if isempty(ip.Results.nodeColors) && isempty(ip.Results.nodeLabels)
         disp('CASE: DEFAULT LABELS')
         labels = [1:length(RDM)];
         for i = 1:length(RDM)
@@ -195,8 +182,7 @@ function fig = plotMDS(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: COLOR AND NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    else if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels) ...
-            && isempty(ip.Results.iconPath)
+    else if ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
     
         disp('CASE: COLOR AND NODE')
         for i = 1:r
@@ -215,99 +201,18 @@ function fig = plotMDS(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: NODE
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels) ...
-            && isempty(ip.Results.iconPath)
+    elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.nodeLabels)
         disp('CASE: NODE')
         for i = 1:length(RDM)
             text(Y(i,xDim), Y(i,yDim), ip.Results.nodeLabels(i), ...
                 'FontSize', 30);
         end
-        
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: COLOR AND IMAGE
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif ~isempty(ip.Results.nodeColors) && ~isempty(ip.Results.iconPath) ...
-            && isempty(ip.Results.nodeLabels)
-        
-        for i = 1:length(labels)
-            hold on;
-            [thisIcon map] = imread(fullfile(ip.Results.iconPath, labels{i}));
-            [height width] = size(thisIcon);
-            %convert thisIcon to scale 0~1
-            if ~isempty(map)
-                thisIcon = ind2rgb(thisIcon, map);
-            else
-                thisIcon = double(thisIcon)/255;
-            end
-            
-            if length(size(thisIcon)) == 2
-                thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
-            end
-            
-            % Resize to 40*40 square
-%             if height > width
-%                 thisIcon = imresize(thisIcon, [30 NaN]);
-%             else
-%                 thisIcon = imresize(thisIcon, [NaN 30]);
-%             end
-            
-            plotLength = (max(Y(:,xDim)) - min(Y(:,xDim)))/12;
-            plotHeight = (max(Y(:,yDim)) - min(Y(:,yDim)))/12;
 
-
-            rectangle('Position', [Y(i,xDim)-plotLength-.1*plotLength, ...
-                Y(i,yDim)-plotHeight-.1*plotLength, plotLength+.2*plotLength, ...
-                plotHeight+.2*plotLength], 'faceColor', ...
-                ip.Results.nodeColors{i}, 'EdgeColor', ip.Results.nodeColors{i});
-            
-            imagesc([Y(i,xDim), Y(i,xDim) - plotLength], ...
-                [Y(i,yDim), Y(i,yDim) - plotHeight], thisIcon);
-        end
-        
-       
-        
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: IMAGE
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif isempty(ip.Results.nodeColors) && ~isempty(ip.Results.iconPath) ...
-            && isempty(ip.Results.nodeLabels)
-
-        for i = 1:length(labels)
-            hold on;
-            [thisIcon map] = imread(fullfile(ip.Results.iconPath, labels{i}));
-            [height width] = size(thisIcon);
-            %convert thisIcon to scale 0~1
-            if ~isempty(map)
-                thisIcon = ind2rgb(thisIcon, map);
-            else
-                thisIcon = double(thisIcon)/255;
-            end
-            
-            if length(size(thisIcon)) == 2
-                disp('KSJDKAJSNDKA')
-                thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
-            end
-            
-            % Resize to 40*40 square
-            if height > width
-                thisIcon = imresize(thisIcon, [50 NaN]);
-            else
-                thisIcon = imresize(thisIcon, [NaN 50]);
-            end
-            
-            plotLength = (max(Y(:,xDim)) - min(Y(:,xDim)))/12;
-            plotHeight = (max(Y(:,yDim)) - min(Y(:,yDim)))/12;
-            disp(i)
-
-            imagesc([Y(i,xDim), Y(i,xDim) + plotLength], ...
-                [Y(i,yDim), Y(i,yDim) - plotHeight], thisIcon);
-        end
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.iconPath) ...
-            && isempty(ip.Results.nodeLabels)
+    elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.nodeLabels)
         
         for i = 1:r
             plot( Y(i,xDim) ,Y(i,yDim) , 'o', 'MarkerSize', 15, 'LineWidth', 4, ...

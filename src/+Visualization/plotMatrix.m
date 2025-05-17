@@ -34,10 +34,6 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %       specification documentation for more info: 
 %           https://www.mathworks.com/help/matlab/ref/colorspec.html
 %   'axisLabels': a matrix of alphanumeric labels, ordered by same order of
-%       items in the confusion matrix e.g., ['cat' 'dog' 'fish']
-%   'iconPath': a directory containing images used to label, where the
-%       image files must be ordered in the same order as the labels of the 
-%       confusion matrix
 %   'colorMap' - This parameter can be used to call a default Matlab colormap, 
 %       or one specified by the user, to change the overall look of the plot. 
 %       For example, plotMatrix(RDM, 'colorMap', 'hsv')
@@ -51,8 +47,8 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %   'FontSize' - Set font size of matrix and axis labels. Default 15
 %   'ticks' - Set number of ticks on the colorbar, Default 5
 %   'textRotation' - Set rotation of text.  Default 0
-%   'iconSize' - If 'iconPath' parameter is used, use this to set the size
-%       of image labels. Default 40.
+%   'colorBlockSize' - This parameter determines the size of each color block icon.  
+%       Default dyamically set as 5.
 % 
 % OUTPUTS:
 %   'img': image corresponding to graph
@@ -67,7 +63,6 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %       color image labels
 %       None
 %  
-% TODO: test, calcuate optimal size for icons
 % See also rankDistances
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
@@ -116,7 +111,6 @@ function  [img, fig] = plotMatrix(RDM, varargin)
         @(x) any(validatestring(x, expectedRanktype)));
     ip.addParameter('axisColors', [], @(x) isvector(x)); 
     ip.addParameter('axisLabels', [], @(x) isvector(x));
-    ip.addParameter('iconPath', '');
     ip.addParameter('colormap', '');
     ip.addParameter('colorbar', '');
     ip.addParameter('matrixLabels', 0);
@@ -125,7 +119,8 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     ip.addParameter('ticks', 5, @(x) (isnumeric(x) && x>0));
     ip.addParameter('textRotation', 0, @(x) assert(isnumeric(x), ...
         'textRotation must be a numeric value'));
-    ip.addParameter('iconSize', 40);
+    ip.addParameter('colorBlockSize', 5, @(x) assert(isnumeric(x), ...
+        'colorBlockSize must be a numeric value'));
     parse(ip, RDM, varargin{:});
     
     
@@ -184,10 +179,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     % alphanumeric labels
     if ~isempty(ip.Results.axisLabels)
         labels = ip.Results.axisLabels;
-    %picture labels
-    elseif ~isempty(ip.Results.iconPath)
-        labels = Utils.getImageFiles(ip.Results.iconPath);
-    elseif isempty(ip.Results.axisLabels) && isempty(ip.Results.iconPath) && ~isempty(ip.Results.axisColors)
+    elseif isempty(ip.Results.axisLabels) && ~isempty(ip.Results.axisColors)
          labels = ip.Results.axisColors;
     else %no labels specified
 %         set(gca,'xtick',[]);
@@ -202,8 +194,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE:  DEFAULT LABELS
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    if isempty(ip.Results.axisColors) && isempty(ip.Results.axisLabels) ...
-            && isempty(ip.Results.iconPath)
+    if isempty(ip.Results.axisColors) && isempty(ip.Results.axisLabels)
         disp('Plotting with default number labels...')
         set(gca,'xTickLabelRotation', ip.Results.textRotation);
         set(gca,'yTickLabelRotation', ip.Results.textRotation);
@@ -212,8 +203,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE:  AXIS COLOR LABEL
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif ~isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
-            && isempty(ip.Results.iconPath)
+    elseif ~isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels)
         
         disp('Plotting with user defined colored labels...')
         
@@ -251,8 +241,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % CASE: AXIS LABEL
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels) ...
-            && isempty(ip.Results.iconPath)
+    elseif isempty(ip.Results.axisColors) && ~isempty(ip.Results.axisLabels)
         disp('Plotting with user defined labels...')
         
         set(gca,'xTick', [1:length(RDM)]);
@@ -268,82 +257,10 @@ function  [img, fig] = plotMatrix(RDM, varargin)
         set(gca,'xTickLabelRotation', ip.Results.textRotation);
         set(gca,'yTickLabelRotation', ip.Results.textRotation);
 
-        
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-    % CASE: IMAGE
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif  ~isempty(ip.Results.iconPath) ...
-            && isempty(ip.Results.axisLabels)
-         disp('Plotting with user specified directory of image icons...')
-          
-        set(gca,'xTick', [1:length(RDM)]);
-        set(gca,'yTick',  [1:length(RDM)]);
-        set(gca,'xTickLabel', '');
-        set(gca,'yTickLabel', '');
-        
-        [xTickCoords yTickCoords] = Utils.getTickCoord;
-
-        pos = get(gca,'position');
-        leftMargin = pos(1);
-        bottomMargin = pos(2);
-        topMargin = pos(2) + pos(4);
-        xdlta = (pos(3)) / (length(xTickCoords));
-        ydlta = (pos(4)) / (length(yTickCoords));
-        xinit = xdlta/2;
-        yinit = ydlta/2;
-        figPos = get(gcf, 'position');
-        figWidth = figPos(3);
-        figHeight = figPos(4);
-        
-        for i = 1:length(labels)
-            [thisIcon map] = imread([char(labels(i))]);
-            [height width] = size(thisIcon);
-            %convert thisIcon to scale 0~1
-            
-            if ~isempty(map)
-%               converting to RGB
-                %disp(map);
-                thisIcon = ind2rgb(thisIcon, map);
-
-            end
-            
-%             % Resize to 40*40 square
-%             if height > width
-%                 thisIcon = imresize(thisIcon, [ip.Results.iconSize NaN]);
-%             else
-%                 thisIcon = imresize(thisIcon, 1);
-%             end
-
-            % Add 3rd(color) dimension if there is none
-            if length(size(thisIcon)) == 2
-                thisIcon = cat(3, thisIcon, thisIcon, thisIcon);
-            end
-
-            if i <= length(labels)
-                % plot x axis labels
-                lblAx = axes('parent',gcf,'position', ...
-                    [leftMargin + xinit + xdlta * (i-1) - ip.Results.iconSize/2/figWidth ...
-                    ,bottomMargin-ip.Results.iconSize/figHeight, ...
-                    ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
-                imagesc(thisIcon,'parent',lblAx);
-                axis(lblAx,'off');
-                % plot y axis labels
-                lblAx = axes('parent',gcf,'position', ...
-                    [leftMargin - ip.Results.iconSize/figWidth ...
-                    ,topMargin - yinit - ydlta * (i-1) - ip.Results.iconSize/2/figHeight, ...
-                    ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
-                imagesc(thisIcon,'parent',lblAx);
-                axis(lblAx,'off');
-            else
-            end
-        end
-        
-       
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif ~isempty(ip.Results.axisColors) && isempty(ip.Results.iconPath) ...
-            && isempty(ip.Results.axisLabels)
+    elseif ~isempty(ip.Results.axisColors) && isempty(ip.Results.axisLabels)
         
                 
         disp('Plotting with user defined colored blocks...')
@@ -372,16 +289,16 @@ function  [img, fig] = plotMatrix(RDM, varargin)
             
             % plot x axis labels
             lblAx = axes('parent',gcf,'position', ...
-                [leftMargin + xinit + xdlta * (i-1) - ip.Results.iconSize/2/figWidth ...
-                ,bottomMargin-ip.Results.iconSize/figHeight, ...
-                ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
+                [leftMargin + xinit + xdlta * (i-1) - ip.Results.colorBlockSize/2/figWidth ...
+                ,bottomMargin-ip.Results.colorBlockSize/figHeight, ...
+                ip.Results.colorBlockSize/figWidth, ip.Results.colorBlockSize/figHeight]);
             rectangle('FaceColor', labels{i});
             axis(lblAx,'off');
             % plot y axis labels
             lblAx = axes('parent',gcf,'position', ...
-                [leftMargin - ip.Results.iconSize/figWidth ...
-                ,topMargin - yinit - ydlta * (i-1) - ip.Results.iconSize/2/figHeight, ...
-                ip.Results.iconSize/figWidth, ip.Results.iconSize/figHeight]);
+                [leftMargin - ip.Results.colorBlockSize/figWidth ...
+                ,topMargin - yinit - ydlta * (i-1) - ip.Results.colorBlockSize/2/figHeight, ...
+                ip.Results.colorBlockSize/figWidth, ip.Results.colorBlockSize/figHeight]);
             rectangle('FaceColor', labels{i});
             axis(lblAx,'off');
 
