@@ -9,15 +9,21 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
 % Bernard Wang, April 5, 2020
 %
 % Given training data matrix X, label vector Y, and a vector of gamma's 
-% and C's to search over, this function runs cross validation over a grid 
-% of all possible combinations of gammas and C's.
+% and C's to search over, this function runs over a grid 
+% of all possible combinations of gammas and C's to find the values that 
+% produce the highest cross validation accuracy.  
+%
+% Gamma is a hyperparameter of the rbf kernel for SVM classification, and 
+% 'C' is a hyperparameter of both the rbf and linear kernel for SVM 
+% classification. 
 % 
 % INPUT ARGS:
 %   - X: 2D trial by feature training data matrix
 %   - Y: label vector
 %   - ip: inputParser pass from parent script which called this function
-%   - cvDataObj: ?e
-%   - excludeIndx: ?
+%   - cvDataObj: Cross validation object containing the train/test data
+%   splits for X,Y.  Created by the function Utils.cvData(). 
+%   - excludeIndx: Indicies of trials to skip during cross validation
 %   - kernel:  SVM classification kernel
 %   - optFolds: number of folds used for optimization
 %
@@ -96,7 +102,7 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
         YFolds = cvDataObj.testYall;
         YFolds(excludeIndx) = [];
 
-        for i = 1:length(Cs)
+        for i = 1:length(cSpace)
             for j = 1:length(gammaSpace)
 
                 labelsConcat = [];
