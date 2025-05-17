@@ -56,7 +56,7 @@ function [xShift] = shiftPairwiseAccuracyRDM(xIn, varargin)
 % POSSIBILITY OF SUCH DAMAGE.
 %
 
-ip = inputparser;
+ip = inputParser;
 
 addRequired(ip, 'xIn', @isnumeric)
 addParameter(ip, 'pairScale', 1, @(x) assert(isnumeric(x), ...
@@ -64,7 +64,7 @@ addParameter(ip, 'pairScale', 1, @(x) assert(isnumeric(x), ...
 
 parse(ip, xIn, varargin{:})
 
-if any(xIn > 1) || pairScale == 100
+if any(xIn(:) > 1) || ip.Results.pairScale == 100
     xIn = xIn/100;
 end
 
