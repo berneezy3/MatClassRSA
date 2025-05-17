@@ -74,8 +74,8 @@
 %   'kernel' - Specification for SVM's decision function.  This input will 
 %       not do anything if a classifier other than SVM is selected.
 %        --options--
-%       'linear' (default)
-%       'rbf' 
+%       'linear'
+%       'rbf' (default)
 %   'gamma' - Hyperparamter of the rbf kernel for SVM classification.  If
 %       SVM is selected as the classifier, and rbf is selected as the
 %       kernel, then gamma must be manually set by the user.

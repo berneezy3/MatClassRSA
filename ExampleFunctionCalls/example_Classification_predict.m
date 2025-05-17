@@ -210,7 +210,7 @@ disp(P.accuracy);
 disp(P.CM);
 
 
-%% Partitioning Data of Single Participant, tainMulti(), LDA Model, PCA on all data
+%% Partitioning Data of Single Participant, trainPairs(), LDA Model, PCA on all data
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
@@ -232,3 +232,27 @@ M = Classification.trainPairs(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'r
 P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
 
 disp(P.AM);
+
+%% Partitioning Data of Single Participant, trainPairs()_opt, SVM Model, PCA on all data
+
+% Preprocessing steps for train participant
+[xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rngSeed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
+
+% (90% Train, 0 Development, 10% Test) data partitioning
+partition = Utils.trainDevTestPart(xAvg, 1, [0.8, 0, 0.2]);
+
+% needed for cvData() function call
+ip.Results.PCA = 0.99;
+ip.Results.PCAinFold = 0;
+
+[cvDataObj,V,nPCs] = Utils.cvData(xAvg, yAvg, partition, ip, 1, 0);
+
+% LDA classificaiton
+M = Classification.trainPairs_opt(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, 'rngType', rngSeed, 'PCA' , 0);
+
+P = Classification.predict(M, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
+
+disp(P.accuracy)
+disp(P.CM);

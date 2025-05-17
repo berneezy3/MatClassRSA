@@ -178,6 +178,7 @@ function y = initInputParser(functionName, ip, X, Y, varargin)
             addRequired(ip, 'X', @Utils.is2Dor3DMatrix);
             addRequired(ip, 'Y', @isvector);
             expectedClassifier = {'SVM'};
+            defaultClassifier = 'SVM';
             addParameter(ip, 'classifier', defaultClassifier, ...
                 @(x) any(validatestring(x, expectedClassifier)));
             addParameter(ip, 'gammaSpace', defaultGammaSpace);

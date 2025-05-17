@@ -164,7 +164,7 @@
     st = dbstack;
     namestr = st.name;
     ip = inputParser;
-    ip = initInputParser(namestr, ip, X, Y, varargin{:});
+    ip = Utils.initInputParser(namestr, ip, X, Y, varargin{:});
     [r c] = size(X);
     parse(ip, X, Y, varargin{:});
 
@@ -176,10 +176,10 @@
                         'classifier', ip.Results.classifier);
     
    % check if data is double, convert to double if it isn't
-   [X,Y] = convert2double(X,Y);
+   [X,Y] = Utils.convert2double(X,Y);
     
    %%%%% SUBSET DATA MATRICES %%%%%
-   [X, nSpace, nTime, nTrials] = subsetTrainTestMatrices(X, ...
+   [X, nSpace, nTime, nTrials] = Utils.subsetTrainTestMatrices(X, ...
                                                 ip.Results.spaceUse, ...
                                                 ip.Results.timeUse, ...
                                                 ip.Results.featureUse);
@@ -202,7 +202,7 @@
     pairwiseMat3D = zeros(2,2, numDecBounds);
     % initialize the diagonal cell matrix of structs containing pairwise
     % classification infomration
-    pairwiseCell = initPairwiseCellMat(numClasses);
+    pairwiseCell = Utils.initPairwiseCellMat(numClasses);
     
     numClasses = length(unique(Y));
     numDecBounds = nchoosek(numClasses, 2);
@@ -231,7 +231,7 @@
                 tempY = Y(currUse);
                 tempStruct = struct();
                 % Store the accuracy in the accMatrix
-                [~, tempM] = evalc([' obj.trainMulti_opt(tempX, tempY, ' ...
+                [~, tempM] = evalc([' Classification.trainMulti_opt(tempX, tempY, ' ...
                     ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
                     ' ''kernel'', ip.Results.kernel,'...
                     ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
@@ -254,7 +254,7 @@
         
 %         [mdl, scale] = fitModel(X, Y, ip, ip.Results.gamma, ip.Results.C);
 
-        [~, tempM] = evalc([' obj.trainMulti_opt(X, Y, ' ...
+        [~, tempM] = evalc([' Classification.trainMulti_opt(X, Y, ' ...
             ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
             ' ''kernel'', ip.Results.kernel,'...
             ' ''gammaSpace'', ip.Results.gammaSpace, ' ...
@@ -265,15 +265,14 @@
             ' ''scale'', ip.Results.scale, ' ...
             ' ''rngType'', ''default'' ) ' ]);
         
-        tempM.classifierInfo.pairwise = 1;
-        M = tempM;
         
-        M.pairwise = 1;
-        M.classifier = ip.Results.classifier;
+        M = tempM;
+        %M.pairwise = 1;
+        %M.classifier = ip.Results.classifier;
         
     end
     
-    permTestData = cvDataObj;
+    %permTestData = cvDataObj;
     
     disp('trainPairs_opt() Finished!')
     
