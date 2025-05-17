@@ -147,7 +147,7 @@ ip.Results.PCAinFold = 0;
 
 [cvDataObj,V,nPCs] = Utils.cvData(xAvg, yAvg, partition, ip, 0, 0);
 
-% SVM classifiction hyperparameters
+% SVM classification hyperparameters
 gamma_opt = 1.0000e-5;
 C_opt = 100000;
 

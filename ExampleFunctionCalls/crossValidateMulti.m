@@ -16,7 +16,7 @@ rngSeed = 3;
 % default PCAinFold should be 0
 % default nFolds 10
 
-M = Classification.crossValidateMulti(X, labels6);
+M = Classification.crossValidateMulti(X, labels6+2);
 M.classificationInfo
 
 %% Reproducible RNG, Single-Argument

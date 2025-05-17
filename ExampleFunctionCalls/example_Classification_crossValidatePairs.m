@@ -16,9 +16,8 @@ rngSeed = 3;
 % default PCAinFold should be 0
 % default nFolds 10
 
-M = Classification.crossValidatePairs(X, labels6);
+M = Classification.crossValidatePairs(X, labels6+2);
 M.classificationInfo
-
 %% Reproducible RNG, Single-Argument
 
 M = Classification.crossValidatePairs(X, labels6, 'rngType', 3);
@@ -33,7 +32,6 @@ M.classificationInfo
 
 M = Classification.crossValidatePairs(X, labels6, 'rngType', {rngSeed,'twister'}, 'nFolds', 4);
 M.classificationInfo
-
 
 %% No Principle Component Analysis
 M = Classification.crossValidatePairs(X, labels6, ...

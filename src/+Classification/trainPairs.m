@@ -191,10 +191,14 @@
     end
     
     % Split data into pairs representing each combination of labels  
-    numClasses = length(unique(Y));
+    allClasses = unique(Y);
+    numClasses = length(allClasses);
     numDecBounds = nchoosek(numClasses ,2);
     classPairs = nchoosek(1:numClasses, 2);
     pairwiseMat3D = zeros(2,2, numDecBounds);
+    
+    classPairs = allClasses(classPairs(:,:));
+    
     % initialize the diagonal cell matrix of structs containing pairwise
     % classification infomration
     pairwiseCell = Utils.initPairwiseCellMat(numClasses);
