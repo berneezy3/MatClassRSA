@@ -15,6 +15,13 @@ function [sigma,shrinkage]=cov1para(x,shrink)
 % OUTPUTS:
 %   sigma (n*n)- invertible covariance matrix estimator
 %   shrinkage - the user-specified shrink parameter, used for shrinkage
+%
+% This code was taken directly from a code tutorial provided by Guggenmos 
+% et al. (2018):
+% - https://github.com/m-guggenmos/megmvpa/tree/master
+% - Related publication: Guggenmos, M., Sterzer, P., & Cichy, R. M. (2018). 
+%   Multivariate pattern analysis for MEG: A comparison of dissimilarity 
+%   measures. Neuroimage, 173, 434-447. DOI: 10.1016/j.neuroimage.2018.02.044
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This file is released under the BSD 2-clause license.
@@ -45,8 +52,6 @@ function [sigma,shrinkage]=cov1para(x,shrink)
 % NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 % SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%% Disclaimer: This piece of code was obtained from Guggenmos et al. 2018.
 
 % de-mean returns
 [t,n]=size(x);

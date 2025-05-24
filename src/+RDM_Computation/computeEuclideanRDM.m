@@ -49,7 +49,13 @@ function D = computeEuclideanRDM(X, Y, varargin)
 %           permutations
 %   dissimilarities - All computed dissimilarities across all permutations
 %           with the size nLabels x nLabes x nPermutations
-
+%
+% This code was adapted from a code tutorial provided by Guggenmos et al.
+% (2018):
+% - https://github.com/m-guggenmos/megmvpa/blob/master/tutorial_matlab/matlab_distance.ipynb
+% - Related publication: Guggenmos, M., Sterzer, P., & Cichy, R. M. (2018). 
+%   Multivariate pattern analysis for MEG: A comparison of dissimilarity 
+%   measures. Neuroimage, 173, 434-447. DOI: 10.1016/j.neuroimage.2018.02.044
 
 
 % parse inputs
