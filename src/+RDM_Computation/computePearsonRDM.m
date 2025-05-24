@@ -6,16 +6,16 @@ function D = computePearsonRDM(X, Y, varargin)
 %
 % This function returns pairwise dissimilarities with respect to cross-validated Pearson
 % correlation.  A possible data input to this function would have dimensions:
-% nElectrodes x (nTrials*nImages).  With this input, the resulting RDM would be
+% nElectrodes x (nTrials*nClasses).  With this input, the resulting RDM would be
 % computed using the electrode values at a specific time point as features.  On
 % the other hand, one could also provide, as input, data of dimensions:
-% nTimepoints x (nTrials*nImages).  In this case, the resulting RDM would be
+% nTimepoints x (nTrials*nClasses).  In this case, the resulting RDM would be
 % computed using the time point values for a particular electrode as features.
 %
 % REQUIRED INPUTS:
 %   X - data matrix. The size of X should be nFeatures x
-%              (nTrials*nImages)
-%   Y - labels vector. The size of Y should be (nTrials*nImages)
+%              (nTrials*nClasses)
+%   Y - labels vector. The size of Y should be (nTrials*nClasses)
 %
 % OPTIONAL NAME-VALUE INPUTS:
 %   numPermutations - how many permutations to randomly select

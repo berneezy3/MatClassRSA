@@ -4,13 +4,14 @@ function D = computeEuclideanRDM(X, Y, varargin)
 %  RDM_Computation.computeEuclideanRDM(X, Y, numPermutations, rngType)
 %------------------------------------------------------------------------------------
 %
-% This function returns pairwise similarities with respect to cross-validated Euclidean
-% distance.  A possible data input to this function would have dimensions:
-% nElectrodes x (nTrials*nImages).  With this input, the resulting RDM would be
-% computed using the electrode values at a specific time point as features.  On
-% the other hand, one could also provide, as input, data of dimensions:
-% nTimepoints x (nTrials*nImages).  In this case, the resulting RDM would be
-% computed using the time point values for a particular electrode as features.
+% This function returns pairwise similarities with respect to cross-
+% validated Euclidean distance.  A possible data input to this function 
+% would have dimensions: nElectrodes x (nTrials*nClasses).  With this 
+% input, the resulting RDM would be computed using the electrode values at 
+% a specific time point as features.  On the other hand, one could also 
+% provide, as input, data of dimensions: nTimepoints x (nTrials*nClasses).  
+% In this case, the resulting RDM would be computed using the time point 
+% values for a particular electrode as features.
 %
 % REQUIRED INPUTS:
 %   X - data matrix. The size of X should be nFeatures x nTrials. Users 
