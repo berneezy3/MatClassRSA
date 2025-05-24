@@ -16,8 +16,8 @@ function [sigma,shrinkage]=cov1para(x,shrink)
 %   sigma (n*n)- invertible covariance matrix estimator
 %   shrinkage - the user-specified shrink parameter, used for shrinkage
 %
-% This code was taken directly from a code tutorial provided by Guggenmos 
-% et al. (2018):
+% This function was created by Olivier Ledoit and Michael Wolf and was 
+% obtained from a code tutorial provided by Guggenmos et al. (2018):
 % - https://github.com/m-guggenmos/megmvpa/tree/master
 % - Related publication: Guggenmos, M., Sterzer, P., & Cichy, R. M. (2018). 
 %   Multivariate pattern analysis for MEG: A comparison of dissimilarity 
