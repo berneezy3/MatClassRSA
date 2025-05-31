@@ -47,9 +47,9 @@ function D = computeEuclideanRDM(X, Y, varargin)
 %        across all perumtations, and average RDM
 %   --subfields--
 %   RDM - The average Euclidean RDM across all user-specified
-%           permutations
+%           permutations. Size is nClasses x nClasses.
 %   dissimilarities - All computed dissimilarities across all permutations
-%           with the size nLabels x nLabes x nPermutations
+%           with the size nClasses x nClasses x nPermutations.
 %
 % This code was adapted from a code tutorial provided by Guggenmos et al.
 % (2018):
