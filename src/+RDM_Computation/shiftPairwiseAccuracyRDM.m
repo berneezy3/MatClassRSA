@@ -14,9 +14,9 @@ function [xShift] = shiftPairwiseAccuracyRDM(xIn, varargin)
 %       accommodate inputs whose values range from 0 to 100
 %
 % OPTIONAL INPUTS:
-%   pairScale -- '1' (default), '100'
+%   pairScale -- 1 (default), 100
 %       Specification of whether the input matrix is on a 0-to-1 scale, or a
-%       0-to-100 scale. If input is missing or empty, will be set to '1'.
+%       0-to-100 scale. If input is missing or empty, will be set to 1.
 %       However, if any value of the input matrix xIn is found to be
 %       greater than 1, pairScale will then be set to 100. 
 %
