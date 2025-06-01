@@ -3,11 +3,10 @@ function [xShift] = shiftPairwiseAccuracyRDM(xIn, varargin)
 % [xShift] = RDM_Computation.shiftPairwiseAccuracyRDM(xIn, pairScale)
 % -----------------------------------------------------------------------------
 %
-% This function subtracts 0.5 (or some other amount) from  the accuracies 
-%   stored in a matrix of pairwise classification accuracies so that
-%   the pairwise classification accuracies are easier to interpret as
-%   distances (i.e., a classification accuracy at chance level of 0.5
-%   implies a distance of zero).
+% This function subtracts 0.5 from the accuracies stored in a matrix of 
+%   pairwise classification accuracies so that the pairwise classification 
+%   accuracies are easier to interpret as distances (i.e., a classification 
+%   accuracy at chance level of 0.5 implies a distance of zero).
 %
 % REQUIRED INPUTS:
 %   xIn -- A matrix of pairwise classification accuracies (typically square).
@@ -23,8 +22,8 @@ function [xShift] = shiftPairwiseAccuracyRDM(xIn, varargin)
 %
 % OUTPUTS:
 %   xShift -- A matrix the same size as xIn, with shift amount 0.5 subtracted
-%       out. Values along the diagonal will be output as NaNs if any diagonal
-%       values in the input were NaN; and otherwise will be output as
+%       out. Any NaNs along the diagonal of the input matrix will be output 
+%       as NaN; otherwise, values on the diagnoal of the output will be
 %       zeros. Regardless of the pairScale of the input, the output matrix
 %       will range from -0.5 to 0.5 (i.e., pairScale 100 matrices will have
 %       been divided by 100 prior to subtracting 0.5 from all values). 
@@ -74,3 +73,4 @@ if any(xIn(:) > 1) || ip.Results.pairScale == 100
 end
 
 xShift = xIn - 0.5;
+xShift = xShift - diag(diag(xShift));
