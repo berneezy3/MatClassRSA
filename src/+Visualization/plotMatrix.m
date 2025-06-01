@@ -4,16 +4,16 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 % ------------------------------------------------
 % Bernard Wang - April 23, 2017
 %
-% This function plots a matrix.  The matrix can either be an 
+% This function plots a matrix.  The matrix can either be a
 % representational dissimilarity matrix (RDM) computed by the functions in 
-% +RDM_Computation, or a confusion matrix output from the functions in
-% +Classification.  
+% +RDM_Computation, or a confusion matrix or pairwise accuracy matrix 
+% output from the functions in +Classification.  
 %
 % REQUIRED INPUTS:
-% - Matrix: A matrix, e.g., a confusion matrix, RDM/distance matrix.
+%   - RDM: A matrix, e.g., a confusion matrix, RDM/distance matrix.
 %
 % OPTIONAL NAME-VALUE INPUTS:
-%   'ranktype': specification for whether to convert matrix values to 
+%   - 'ranktype': specification for whether to convert matrix values to 
 %       percentile ranks (a common step when visualizing RDMs) or ranks
 %       prior to plotting. Note that conversion of values to ranks or 
 %       percentile ranks assumes a symmetric input matrix and operates only 
@@ -22,48 +22,37 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %       and conversion proceeds using only lower-triangle values, returning 
 %       a symmetric matrix.
 %       --options--
-%       'none', 'n' - perform no conversion of matrix values (default)
-%       'rank', 'r' - convert matrix values to ranks
-%       'percentrank', 'p' - convert matrix values to percentile ranks
-%   'axisColors': a vector of colors, ordered by the order of labels in the 
+%       'none' - perform no conversion of matrix values (default)
+%       'rank' - convert matrix values to ranks
+%       'percentrank' - convert matrix values to percentile ranks
+%   - 'axisColors': a vector of colors, ordered by the order of labels in the 
 %       confusion matrix.  If this argument is passed in, then square color
 %       blocks will be used as the row/column labels.  Colors can be 
 %       expressed as an RGB triplet, short name or long name, e.g. 
 %       {'y' 'm' 'c' 'r'} or {'yellow' 'magenta' 'cyan' 'red'} or 
-%       {'[1 1 0]' '[1 0 1]' '[0 1 1]' '[1 0 0]'}. See Matlab color 
+%       {[1 1 0] [1 0 1] [0 1 1] [1 0 0]}. See Matlab color 
 %       specification documentation for more info: 
 %           https://www.mathworks.com/help/matlab/ref/colorspec.html
-%   'axisLabels': a matrix of alphanumeric labels, ordered by same order of
-%   'colorMap' - This parameter can be used to call a default Matlab colormap, 
-%       or one specified by the user, to change the overall look of the plot. 
-%       For example, plotMatrix(RDM, 'colorMap', 'hsv')
-%   'colorBar' - Choose whether to display colorbar or not (default 0)
+%   - 'axisLabels': a matrix of alphanumeric labels, ordered by same order 
+%       of 'colorMap' - This parameter can be used to call a default Matlab 
+%       colormap, or one specified by the user, to change the overall look 
+%       of the plot. For example, plotMatrix(RDM, 'colorMap', 'hsv')
+%   - 'colorBar' - Choose whether to display colorbar or not (default 0)
 %       --options--
 %       0 - hide (default)
 %       1 - show
-%   'matrixLabels' -  Use this parameter to choose whether or not to display 
+%   - 'matrixLabels' -  Use this parameter to choose whether or not to display 
 %       values for each square in the matrix.  Ignore parameter to turn off, 
 %       enter any value to turn on.
-%   'FontSize' - Set font size of matrix and axis labels. Default 15
-%   'ticks' - Set number of ticks on the colorbar, Default 5
-%   'textRotation' - Set rotation of text.  Default 0
-%   'colorBlockSize' - This parameter determines the size of each color block icon.  
+%   - 'FontSize' - Set font size of matrix and axis labels. Default 15
+%   - 'ticks' - Set number of ticks on the colorbar, Default 5
+%   - 'textRotation' - Set rotation of text.  Default 0
+%   - 'colorBlockSize' - This parameter determines the size of each color block icon.  
 %       Default dyamically set as 5.
 % 
 % OUTPUTS:
-%   'img': image corresponding to graph
-%   'fig': figure corresponding to output plot
-%
-% Notes:
-%   6 types of labels for the visualiations:
-%       Color labels
-%       Character labels
-%       Image labels
-%       Color character labels
-%       color image labels
-%       None
-%  
-% See also rankDistances
+%   - 'img': Handle of the plot (image) axis
+%   - 'fig': Handle of the output figure
 
 % This software is licensed under the 3-Clause BSD License (New BSD License), 
 % as follows:
