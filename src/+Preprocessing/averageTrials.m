@@ -86,8 +86,10 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 %       averagedX - the data matrix after trial averaging. Will match the
 %           shape (2D or 3D) of the input data matrix.
 %       averagedY - the label vector for the trials in averagedX.
-%       averagedP - the participants vector corresponding to trials in
-%           averagedY.
+%       averagedP - vector of participant identifiers corresponding to 
+%           trials in averagedY. Will always be returned; if P was not
+%           input or was an empty input, averagedP will be a vector of
+%           zeros. 
 %       whichObs - a cell array that contains information on which trials in
 %           the input matrix X were used to create each trial in averagedX.  
 %           The size of whichObs should be length(averagedY), with each cell
