@@ -70,7 +70,7 @@ function [RDM, params] = computeCMRDM(M, varargin)
 %   'power' - computes distance D = 1 - S.^distpower (see below for 
 %       specification of distpower).
 %   'logarithmic' - computes distance 
-%       D = log2(distPower*M + 1) ./ log2(distPower + 1) (see below for
+%       D = log2(distpower*M + 1) ./ log2(distpower + 1) (see below for
 %       specification of distpower).
 %   'pairwise' - computed distace D = 0.5(chance) - S.
 %   
