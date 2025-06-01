@@ -18,11 +18,16 @@ function [xShift] = shiftPairwiseAccuracyRDM(xIn, varargin)
 %   pairScale -- '1' (default), '100'
 %       Specification of whether the input matrix is on a 0-to-1 scale, or a
 %       0-to-100 scale. If input is missing or empty, will be set to '1'.
+%       However, if any value of the input matrix xIn is found to be
+%       greater than 1, pairScale will then be set to 100. 
 %
 % OUTPUTS:
-%   xShift -- A matrix the same size as xIn, with the shift amount subtracted
+%   xShift -- A matrix the same size as xIn, with shift amount 0.5 subtracted
 %       out. Values along the diagonal will be output as NaNs if any diagonal
-%       values in the input were NaN; and otherwise will be output as zeros.
+%       values in the input were NaN; and otherwise will be output as
+%       zeros. Regardless of the pairScale of the input, the output matrix
+%       will range from -0.5 to 0.5 (i.e., pairScale 100 matrices will have
+%       been divided by 100 prior to subtracting 0.5 from all values). 
 
 % This software is licensed under the 3-Clause BSD License (New BSD License),
 % as follows:
