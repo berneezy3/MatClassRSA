@@ -69,46 +69,49 @@ MPW = Classification.crossValidatePairs(xAvg, yAvg, ...
 % Pairwise RDM from accuracy matrix
 RDMpm = RDM_Computation.shiftPairwiseAccuracyRDM(MPW.AM);
 
+
 % -------------------------- Visualization ------------------------------
 figure;
 set(gcf, 'Position', [150,300,1200,1200]);
-subplot(3,2,1)
+subplot(3,2,1);
 Visualization.plotMatrix(RDMmc, 'colorbar', 1, 'matrixLabels', 1, ...
-                            'axisLabels', catLabels, 'axisColors', rgb6);
+                            'axisLabels', catLabels, 'axisColors', rgb6, ...
+                            'colorMap', 'summer', 'rankType', 'p');
  
 title(sprintf('Multi-class Classification RDM'));
-set(gca, 'fontsize', 16)
+set(gca, 'fontsize', 16);
 
-subplot(3,2,2)
+subplot(3,2,2);
 Visualization.plotMatrix(RDMpm, 'colorbar', 1, 'matrixLabels', 1, ...
-                            'axisLabels', catLabels, 'axisColors', rgb6);
+                            'axisLabels', catLabels, 'axisColors', rgb6, ...
+                            'colorMap', 'summer', 'rankType', 'p');
                         
 title(sprintf('Pairwise Classification RDM'));
-set(gca, 'fontsize', 16)
+set(gca, 'fontsize', 16);
 
-subplot(3,2,3)
+subplot(3,2,3);
 Visualization.plotMDS(RDMmc, 'nodeLabels', catLabels, 'nodeColors', rgb6);
                         
 title(sprintf('Multi-class Classification MDS'));
-set(gca, 'fontsize', 16)
+set(gca, 'fontsize', 16);
 
-subplot(3,2,4)
+subplot(3,2,4);
 Visualization.plotMDS(RDMpm, 'nodeLabels', catLabels, 'nodeColors', rgb6);
                         
 title(sprintf('Pairwise Classification MDS'));
-set(gca, 'fontsize', 16)
+set(gca, 'fontsize', 16);
 
-subplot(3,2,5)
-Visualization.plotDendrogram(RDMmc, 'nodeLabels', catLabels, 'nodeColors', rgb6, 'iconSize', 30);
+subplot(3,2,5);
+Visualization.plotDendrogram(RDMmc, 'nodeLabels', catLabels, 'nodeColors', rgb6);
                         
 title(sprintf('Multi-class Classification Dendrogram'));
-set(gca, 'fontsize', 14)
+set(gca, 'fontsize', 16);
 
-subplot(3,2,6)
-Visualization.plotDendrogram(RDMpm, 'nodeLabels', catLabels, 'nodeColors', rgb6, 'iconSize', 30);
+subplot(3,2,6);
+Visualization.plotDendrogram(RDMpm, 'nodeLabels', catLabels, 'nodeColors', rgb6);
                         
 title(sprintf('Pairwise Classification Dendrogram'));
-set(gca, 'fontsize', 14)
+set(gca, 'fontsize', 16);
 
 
 sgtitle('Multi-class vs Pairwise Classification on Same Dataset', ...
@@ -122,6 +125,7 @@ annotation ('textbox', [0.45, 0.32, 0.1, 0.1], ...
     'BackgroundColor', [173/255, 216/255, 230/255], ...
     'HorizontalAlignment', 'center', ...
     'VerticalAlignment', 'middle');
+
 %% Compare Pearson and Euclidean RDMs At Electrode
 singleElectrodeX = squeeze(X(96,:,:));
 
@@ -131,19 +135,19 @@ PearsonRDM = RDM_Computation.computePearsonRDM(singleElectrodeX, labels6, ...
 EuclidRDM = RDM_Computation.computeEuclideanRDM(singleElectrodeX, labels6, ...
     'rngType', rnd_seed);
 
-% ------------------------------ Plot -------------------------------
+% -------------------------------- Plot ---------------------------------
 figure;
 set(gcf, 'Position', [150,300,1200,1200]);
 subplot(2,2,1)
 Visualization.plotMatrix(PearsonRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels, 'axisColors', rgb6);
+    'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
  
 title(sprintf('Pearson RDM'));
 set(gca, 'fontsize', 16)
 
 subplot(2,2,2)
 Visualization.plotMatrix(EuclidRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels, 'axisColors', rgb6);
+    'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
                         
 title(sprintf('Euclidean RDM'));
 set(gca, 'fontsize', 16)
@@ -223,14 +227,14 @@ figure;
 set(gcf, 'Position', [150,300,1100,1100]);
 subplot(3,2,1)
 Visualization.plotMatrix(PearsonRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels, 'axisColors', rgb6);
+    'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
  
 title(sprintf('Pearson RDM'));
 set(gca, 'fontsize', 16)
 
 subplot(3,2,2)
 Visualization.plotMatrix(EuclidRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels, 'axisColors', rgb6);
+    'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
                         
 title(sprintf('Euclidean RDM'));
 set(gca, 'fontsize', 16)
@@ -249,14 +253,16 @@ set(gca, 'fontsize', 16)
 
 subplot(3,2,5)
 Visualization.plotMST(PearsonRDM.RDM, ...
-    'nodeLabels', catLabels, 'nodeColors', rgb6);
+    'nodeLabels', catLabels, 'nodeColors', rgb6, 'nodeLabelSize', 28, ...
+    'lineColor', rgb6{1}, 'lineWidth', 3);
  
 title(sprintf('Pearson MST'));
 set(gca, 'fontsize', 16)
 
 subplot(3,2,6)
 Visualization.plotMST(EuclidRDM.RDM, ...
-    'nodeLabels', catLabels, 'nodeColors', rgb6);
+    'nodeLabels', catLabels, 'nodeColors', rgb6, 'nodeLabelSize', 28, ...
+    'lineColor', rgb6{1}, 'lineWidth', 3);
 
 title(sprintf('Euclidean MST'));
 set(gca, 'fontsize', 16)

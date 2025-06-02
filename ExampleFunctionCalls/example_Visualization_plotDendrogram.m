@@ -74,3 +74,4 @@ Visualization.plotDendrogram(RDM, 'nodeLabels', catLabels, 'nodeColors', rgb6, '
 
 figure;
 Visualization.plotDendrogram(RDM, 'nodeLabels', catLabels, 'nodeColors', rgb6, 'fontSize', 25, 'textRotation', 20, 'yLim', [0.8 1], 'lineWidth', 2.5, 'lineColor', rgb6{1});
+

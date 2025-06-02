@@ -25,8 +25,8 @@ function fig = plotMDS(RDM, varargin)
 %   'dimensions': Choose which MDS dimensions to display (default [1 2]).
 %   'xLim': Set range of the X-axis with array of length 2, [xMin xMax].
 %   'yLim': Set range of the Y-axis with an array of length 2, [yMin yMax].
-%   'classical':  choose between classical and non-classical mdscaling.
-%       Default is classical.  More info can be found here: 
+%   'classical':  choose between classical (1) and non-classical (0) mdscaling.
+%       Default is classical (1). More info can be found here: 
 %       https://www.mathworks.com/help/stats/cmdscale.html
 %
 % OUTPUTS:
@@ -107,7 +107,7 @@ function fig = plotMDS(RDM, varargin)
         
         labels = ip.Results.nodeLabels;
         
-    elseif isempty(ip.Results.nodeLabels) &&& ~isempty(ip.Results.nodeColors)
+    elseif isempty(ip.Results.nodeLabels) && ~isempty(ip.Results.nodeColors)
         
         labels = ip.Results.nodeColors;
         

@@ -96,7 +96,8 @@ set(gca, 'fontsize', 14)
 % ---------------------- Preprocessing Steps -------------------------
 [xShuf, yShuf] = Preprocessing.shuffleData(X, labels6, 'rngType', rnd_seed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', ...
+    'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 % ----------- Partition the data for training and testing --------------
 
@@ -200,7 +201,6 @@ title(sprintf('Improved SVM Accuracy: %.2f%% Accuracy', MSVM.accuracy*100'));
 set(gca, 'fontsize', 14)
 
 
-
 %% SVM vs LDA: After Hyperparameter Tuning
 
 % Classify using newly fine tuned hyperparameters Gamma and C
@@ -210,8 +210,7 @@ MSVM = Classification.trainMulti(cvDataObj.trainXall{1}, cvDataObj.trainYall{1},
 % Predict using newly trained model
 PSVM = Classification.predict(MSVM, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
 
-
-% --------------------------- plot -------------------------------
+% ----------------------------- plot ---------------------------------
 figure;
 set(gcf, 'Position', [150,300,1200,500]);
 subplot(1,2,1)

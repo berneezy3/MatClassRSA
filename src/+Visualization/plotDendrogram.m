@@ -23,13 +23,6 @@ function fig = plotDendrogram(RDM, varargin)
 %   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
 %       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
 %   'fontSize': A number to specify the font size of labels.
-%   'orientation' - This parameter lets the user specify which direction 
-%       to plot the dendrogram leaves.
-%       --options--
-%       'down' (default) 
-%       'up' 
-%       'left'
-%       'right'
 %   'reorder' - Specify order of classes in the dendrogram.  Must be passed
 %       in as a length N vector, N being the number of classes in RDM.  
 %       Also, vector should contain values 1:N. Note that custom orderings
@@ -44,8 +37,6 @@ function fig = plotDendrogram(RDM, varargin)
 %       dendrogram.  Similar to 'nodeColors', we can either pass in color 
 %       abbreviations, full-length color names, or RGB color triplets.  
 %       Default 'black'.
-%   'colorBlockSize' - This parameter determines the size of each color block icon.  
-%       Default dyamically set as 5.
 %
 % OUTPUTS:
 %   'fig': figure corresponding to output plot
@@ -196,46 +187,85 @@ function fig = plotDendrogram(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif isempty(ip.Results.nodeColors) &&  ~isempty(ip.Results.nodeLabels)
 
-        disp('Plotting with user defined labels...')
+        disp('Plotting with user defined labels...');
+        
+        xTickCoords = Utils.getTickCoord;
         set(gca,'xTickLabel', '');
 
-
-%         labels = NaN{1,length(RDM)};
-%         for i = 1:length(RDM)
-%             labels(i) = ip.Results.nodeLabels{P(i)};
-%         end
-        
+        for i = 1:length(labels)
+            if i <= length(ip.Results.nodeColors)
+                label = labels(P(i));
+                t = text(xTickCoords(i, 1), xTickCoords(i, 2), label, ...
+                    'HorizontalAlignment', 'center');
+                t.Rotation = ip.Results.textRotation;
+                t.Color = 'k';
+                t(1).FontSize = ip.Results.fontSize;
+            else
+            end   
+        end
         set(gca,'xTickLabel', ip.Results.nodeLabels);
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.nodeLabels)
+        
         disp('Plotting with user defined colored blocks...')
         
-        set(gca,'xTickLabel', '');
+        ax = gca;
         xTickCoords = Utils.getTickCoord;
         set(gca,'xTickLabel', '');
-        pos = get(gca,'position');
-        x = pos(1);
-        y = pos(2);
-        dlta = (pos(3)) / (length(xTickCoords) + 1);
+        xlimData    = get(ax, 'XLim');                 
+        posAxes     = get(ax, 'Position'); 
         
-        figPos = get(gcf, 'position');
-        figWidth = figPos(3);
-        figHeight = figPos(4);
+        % Convert each tick from data‐space to normalized‐units:
+        xNorm = posAxes(1) + ((xTickCoords - xlimData(1)) ./ diff(xlimData)) * posAxes(3);
+    
+        % 2) Grab figure size so that we can translate a color‐block size (in pixels)
+        %    into normalized units:
+        figPos = get(gcf, 'Position');  % [left bottom width height] in pixels
+        figW = figPos(3);
+        figH = figPos(4);
         
-        for i = 1:length(labels)
+        % Desired block “height” (in pixels) below the axis:
+        blockSize = ip.Results.colorBlockSize;  % assume this is in pixels
 
-            if i <= length(labels)
-                lblAx = axes('parent',gcf,'position',[pos(1)+dlta*i - ...
-                    ip.Results.colorBlockSize/2/figWidth,y-ip.Results.colorBlockSize/figHeight, ...
-                    ip.Results.colorBlockSize/figWidth, ip.Results.colorBlockSize/figHeight]);
-                rectangle('FaceColor', labels{i});
-                axis(lblAx,'off');
-            else
-            end
+        % Convert that to normalized (vertical) units:
+        blockHeightNorm = blockSize / figH;
+        blockWidthNorm  = blockSize / figW;
+
+        
+       % 3) Clear any existing x‐tick labels (we are drawing colored bars instead)
+         set(ax, 'XTickLabel', '');
+    
+        % 6) Draw one small colored axes + rectangle per tick
+        nColors = numel(ip.Results.nodeColors);
+        for i = 1:nColors
+            xCenter = xNorm(i);
+            yBottom = posAxes(2) - blockHeightNorm;  % just below the main axes
+
+            % Create a tiny axes for the color block
+            axColor = axes( ...
+                'Parent', gcf, ...
+                'Units', 'normalized', ...
+                'Position', [ ...
+                    xCenter - blockWidthNorm/2, ...  % left
+                    yBottom,                       ...  % bottom
+                    blockWidthNorm,                ...  % width
+                    blockHeightNorm                  % height
+                ] ...
+            );
+
+            % Fill it with the i‐th color
+            rectangle( ...
+                'Parent',   axColor, ...
+                'Position', [0 0 1 1], ...
+                'FaceColor', ip.Results.nodeColors{i}, ...
+                'EdgeColor', 'none' ...
+            );
+            axis(axColor, 'off');
         end
+   
         
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    

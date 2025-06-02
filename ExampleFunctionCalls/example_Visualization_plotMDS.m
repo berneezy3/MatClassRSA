@@ -55,3 +55,7 @@ Visualization.plotMDS(RDM, 'nodeLabels', catLabels, 'nodeColors', rgb6, 'dimensi
 
 figure;
 Visualization.plotMDS(RDM, 'nodeLabels', catLabels, 'nodeColors', rgb6, 'dimensions', [2 3], 'xLim', [-0.2 1], 'yLim', [-0.5 0.8]);
+%% Non-classical MDS Scaling
+
+figure;
+Visualization.plotMDS(RDM, 'nodeLabels', catLabels, 'nodeColors', rgb6, 'dimensions', [2 3], 'xLim', [-0.2 1], 'yLim', [-0.5 0.8], 'classical',0);
