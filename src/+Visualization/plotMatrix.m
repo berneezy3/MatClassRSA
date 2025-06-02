@@ -49,6 +49,10 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %   - 'textRotation' - Set rotation of text.  Default 0
 %   - 'colorBlockSize' - This parameter determines the size of each color block icon.  
 %       Default dyamically set as 5.
+%   - 'colorMap' - Specify colormap. This parameter can be used to call a
+%       default Matlab colomap, or one specified by the user, to change the
+%       overall look of the plot. For example, plotMatrix(RDM, 'colorMap',
+%       'hsv')
 % 
 % OUTPUTS:
 %   - 'img': Handle of the plot (image) axis
