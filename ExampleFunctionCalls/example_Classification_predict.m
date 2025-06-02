@@ -41,7 +41,7 @@ disp(P.CM);
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 [xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% (90% Train, 0 Development, 10% Test) data partitioning
+% (70% Train, 0 Development, 30% Test) data partitioning
 partition = Utils.trainDevTestPart(xAvg, 1, [0.7, 0, 0.3]);
 
 % needed for cvData() function call
@@ -62,7 +62,7 @@ disp(P.CM);
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 [xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 5, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% (90% Train, 0 Development, 10% Test) data partitioning
+% (70% Train, 0 Development, 30% Test) data partitioning
 partition = Utils.trainDevTestPart(xAvg, 1, [0.7, 0, 0.3]);
 
 % needed for cvData() function call
@@ -85,7 +85,7 @@ disp(P.CM);
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 [xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 5, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% (90% Train, 0 Development, 20% Test) data partitioning
+% (90% Train, 0 Development, 10% Test) data partitioning
 partition = Utils.trainDevTestPart(xAvg, 1, [0.9, 0, 0.1]);
 
 % needed for cvData() function call
@@ -138,7 +138,7 @@ disp(P.CM);
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 [xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 5, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% (90% Train, 0 Development, 20% Test) data partitioning
+% (90% Train, 0 Development, 10% Test) data partitioning
 partition = Utils.trainDevTestPart(xAvg, 1, [0.9, 0, 0.1]);
 
 % needed for cvData() function call
@@ -217,7 +217,7 @@ disp(P.CM);
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 [xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% (90% Train, 0 Development, 10% Test) data partitioning
+% (80% Train, 0 Development, 20% Test) data partitioning
 partition = Utils.trainDevTestPart(xAvg, 1, [0.8, 0, 0.2]);
 
 % needed for cvData() function call
@@ -240,7 +240,7 @@ disp(P.AM);
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 [xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'append', 'rngType', rngSeed);  % Apply group averaging
 
-% (90% Train, 0 Development, 10% Test) data partitioning
+% (80% Train, 0 Development, 20% Test) data partitioning
 partition = Utils.trainDevTestPart(xAvg, 1, [0.8, 0, 0.2]);
 
 % needed for cvData() function call

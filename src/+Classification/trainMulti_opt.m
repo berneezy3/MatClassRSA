@@ -310,6 +310,11 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     C.gamma_opt = zeros(1, ip.Results.nFolds_opt);
     C.C_opt = zeros(1, ip.Results.nFolds_opt);
     
+    mdlPredictions = {1:ip.Results.nFolds_opt};
+    mdlAccuracies = zeros(1,ip.Results.nFolds_opt);
+    mdls = {1:ip.Results.nFolds_opt};
+    
+    
     for i = 1:ip.Results.nFolds_opt
 
         disp(['Processing fold ' num2str(i) ' of ' num2str(ip.Results.nFolds_opt) '...'])
@@ -318,6 +323,7 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
         trainY = cvDataObj.trainYall{i};
         testX = cvDataObj.testXall{i};
         testY = cvDataObj.testYall{i};
+       
 
         % conduct grid search here
         if ( ~strcmp(ip.Results.classifier, 'LDA'))
@@ -339,7 +345,10 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
         else
             mdl = Classification.trainMulti(trainX, trainY, 'classifier', ip.Results.classifier, ...
                 'PCA', 0);
-        end 
+        end
+        mdls{i} = mdl;
+        mdlPredictions{i} = Classification.predict(mdl, testX, 'actualLabels', testY);
+        mdlAccuracies(i) = mdlPredictions{i}.accuracy;
     end
     
     % if permutation testing is turned on
@@ -385,14 +394,18 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
            
             classifierInfo.gamma = ip.Results.gammaSpace;
             classifierInfo.C = ip.Results.cSpace;
+            
         case 'LDA'
         case 'RF'
             classifierInfo.numTrees = ip.Results.numTrees;
             classifierInfo.minLeafSize =  ip.Results.minLeafSize;
     end
     
+    [maxVal idx] = max(mdlAccuracies);
+    
+    M.maxAccuracy = maxVal;
     M.classificationInfo = classifierInfo;
-    M.mdl = mdl;
+    M.mdl = mdls{idx};
     M.classifier = ip.Results.classifier;
     M.trainData = trainX;
     M.trainLabels = trainY;
@@ -400,8 +413,8 @@ function [M, permTestData] = trainMulti_opt(X, Y, varargin)
     if (exist('cvDataObj'))
         M.cvDataObj = cvDataObj;
     end
-    M.gamma_opt = gamma_opt;
-    M.C_opt = C_opt;
+    M.gamma_opt = C.gamma_opt(idx);
+    M.C_opt = C.C_opt(idx);
     M.pairwise = 0;
     M.scale = ip.Results.scale;
     M.permutations = ip.Results.permutations;

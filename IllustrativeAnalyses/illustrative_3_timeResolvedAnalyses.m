@@ -27,14 +27,6 @@ rnd_seed = 3;
 % Load three dimensional dataset (electrode x time X trial)
 load('S01.mat')
 
-% Run computeSpaceTimeReliability.m with 3D EEG data,
-% n_perm permutations and random seed set to rnd_seed.
-
-% 6-class labels vector
-reliability_time_6Class = Reliability.computeSpaceTimeReliability(X, labels6, 'numPermutations', n_perm, 'rngType', rnd_seed);
-
-% 72-class labels vector
-reliability_time_72Class = Reliability.computeSpaceTimeReliability(X, labels72, 'numPermutations', n_perm, 'rngType', rnd_seed);
 
 % a) create cell array to store colors for visualization
 rgb6 = {[0.1216    0.4667    0.7059],  ...  % Blue
@@ -71,6 +63,15 @@ stimImagePaths = ["stimulus01.png'", "stimulus13.png", "stimulus25.png",...
     "stimulus37.png", "stimulus49.png", "stimulus62.png"];
 
 %% Find Reliable Timepoints for 6 and 72 class 3D EEG data
+
+% Run computeSpaceTimeReliability.m with 3D EEG data,
+% n_perm permutations and random seed set to rnd_seed.
+
+% 6-class labels vector
+reliability_time_6Class = Reliability.computeSpaceTimeReliability(X, labels6, 'numPermutations', n_perm, 'rngType', rnd_seed);
+
+% 72-class labels vector
+reliability_time_72Class = Reliability.computeSpaceTimeReliability(X, labels72, 'numPermutations', n_perm, 'rngType', rnd_seed);
 
 % Average reliabilities over space
 
@@ -350,7 +351,7 @@ legend(catLabels);
 % reliability averaged over electrodes, served as a decent proxy for
 % identifying a time window for best classificaiton. In this case the time
 % window of both the highest reliability and the highest classificaiton
-% accuracy is ~130 ms - 200 ms. This seems to indicate that for this
+% accuracy is ~130 ms - 200 ms. This seems to indicate that for the
 % present experiment, the classification is driven by the first negative
 % peak of the ERP across the 6 classes.
 

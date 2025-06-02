@@ -98,8 +98,9 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
         numIterations = cLen*gammaLen;
          
         parfor i = 1:cLen*gammaLen
-            cInd = mod(i-1, gammaLen)+1;
-            gammaInd = ceil(i/gammaLen);
+            
+            cInd = ceil(i / gammaLen); 
+            gammaInd = mod(i-1, gammaLen) + 1;
             
             
             tempM = trainMultiEvalc(trainX, trainY, 0,  'SVM',  kernel, ...
@@ -114,12 +115,19 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
             send(D, 1);
         end
         
-        [maxVal, maxIdx] = max(accVec(:));
-        [xInd yInd] = ind2sub([cLen gammaLen], maxIdx);
-
-        gamma_opt = gammaSpace(yInd);
-        C_opt = cSpace(xInd);  
+        for debugIdx = 1:numIterations
+            ic  = ceil(debugIdx/gammaLen);
+            ig  = mod(debugIdx-1, gammaLen)+1;
+            fprintf("idx=%d → C=%.3g, gamma=%.3g, acc=%.2f%%\n", ...
+                    debugIdx, cSpace(ic), gammaSpace(ig), 100*accVec(debugIdx));
+        end
         
+        [maxVal, maxIdx] = max(accVec);
+        [colIndex, rowIndex] = ind2sub([gammaLen, cLen], maxIdx);
+        
+        C_opt     = cSpace(rowIndex);
+        gamma_opt = gammaSpace(colIndex);
+
         % Close the waitbar when done
         close(hWait);
 
@@ -160,6 +168,17 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
     else
         disp('The kernel is not correctly specified');
     end
+        
+
+    
+fprintf("→ Best RBF parameters: C=%.5g, gamma=%.5g (accuracy=%.2f%%)\n", ...
+        C_opt, gamma_opt, 100*maxVal);
+    
+% Then run the same combination in a simple single‐loop call:
+tempM_test = trainMultiEvalc(trainX, trainY, 0, 'SVM', kernel, C_opt, gamma_opt, rngType);
+tempC_test = predictEvalc(tempM_test, devX, devY);
+fprintf("Verification: accuracy with (C=%.5g, γ=%.5g) = %.2f%%\n", ...
+        C_opt, gamma_opt, 100*tempC_test.accuracy);
     
     
 end

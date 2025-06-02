@@ -146,6 +146,11 @@ function P = predict(M, X, varargin)
        M.mdl= M.mdl.mdl;
     end
     
+    % model info is stored one field deeper for crossValidateMulti_opt
+    if(strcmp(M.functionName, 'crossValidateMulti_opt'))
+       M.mdl= M.modelsConcat{1};
+    end
+    
     %initialize variables
     testLabels = ip.Results.actualLabels;        
     PCA = classifierInfo.PCA;
