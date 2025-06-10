@@ -14,3 +14,4 @@ UnitTests/losorelli*.mat
 *losorelli_100sweep_epoched.mat
 *losorelli_500sweep_epoched.mat
 *S06.mat
+*.mexmac*
