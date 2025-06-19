@@ -47,6 +47,8 @@ function [randX, randY, randP, randIdx] = shuffleData(X, Y, varargin)
 %   randY: Labels vector with its trials reordered (same size as Y).
 %   randP: Participants vector with its trials reordered (same size as P).
 %   randIdx: Randomized ordering applied to all inputs.
+%
+% MatClassRSA dependencies: Utils.setUserSpecifiedRng()
 
 % Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 % Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.

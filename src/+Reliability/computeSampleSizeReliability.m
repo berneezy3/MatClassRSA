@@ -59,6 +59,8 @@ function [reliabilities] = computeSampleSizeReliability(X, Y, featureIdx, vararg
 %       Note that the permutations used to split the trials in half for the 
 %       inner loop reliability computation is averaged out.
 %
+% MatClassRSA dependencies: Utils.computeReliability(),
+%   Utils.setUserSpecifiedRng()
 
 % Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 % Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.

@@ -92,6 +92,9 @@ function [averagedX, averagedY, averagedP, whichObs] = averageTrials(X, Y, group
 %           the input matrix X were used to create each trial in averagedX.  
 %           The size of whichObs should be length(averagedY), with each cell
 %           containing the trial numbers of length(groupSize).
+%
+% MatClassRSA dependencies: Utils.cube2trRows(),
+%   Utils.setUserSpecifiedRng(), Utils.trRows2cube()
 
 % Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 % Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.

@@ -23,6 +23,8 @@ function [normData, sigmaInv] = noiseNormalization(X, Y)
 % - Related publication: Guggenmos, M., Sterzer, P., & Cichy, R. M. (2018). 
 %   Multivariate pattern analysis for MEG: A comparison of dissimilarity 
 %   measures. Neuroimage, 173, 434-447. DOI: 10.1016/j.neuroimage.2018.02.044
+%
+% MatClassRSA dependencies: Utils.cov1para()
 
 % Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 % Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.

@@ -45,6 +45,9 @@ function [reliabilities] = computeSpaceTimeReliability(X, Y, varargin)
 %       3D matrix was provided. If a 2D matrix was provided, the 
 %       dimensions of the results are nTime x nPermutations. You would 
 %       typically average across the permutations dimension.
+%
+% MatClassRSA dependencies: Utils.computeReliability(),
+%   Utils.setUserSpecifiedRng()
 
 % Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 % Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
