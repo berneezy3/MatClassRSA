@@ -1,4 +1,4 @@
-% Illustrative_4_trainTestOptimizeSVm.m
+% illustrative_4_trainTestOptimizeSVm.m
 % -----------------------------------------
 % Illustrative example code for grid search based hyperparamter tuning for
 % support vector machine (SVM) classification. This helps to identify the 

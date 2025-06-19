@@ -1,4 +1,4 @@
-% Illustrative_5_compareRDMs.m
+% illustrative_5_compareRDMs.m
 % -----------------------------------------
 % Illustrative example code visualizing various RMD constructs within the toolkit
 % This scripts call functions from +Preprocessing, +Classification,

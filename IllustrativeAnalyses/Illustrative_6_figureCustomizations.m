@@ -1,4 +1,4 @@
-% Illustrative_6_figureCustomizations.m
+% illustrative_6_figureCustomizations.m
 % -----------------------------------------
 % Illustrative example code visualizing 
 % This scripts call functions from +Preprocessing, +Classification,
