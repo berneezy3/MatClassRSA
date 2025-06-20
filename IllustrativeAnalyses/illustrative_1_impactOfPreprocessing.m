@@ -15,6 +15,8 @@
 %  - Noise Normalization on Transfer Learning Accuracy
 %  - Data Shuffling on Data Shape
 
+% This software is released under the MIT License, as follows:
+%
 % Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 % Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
 % 

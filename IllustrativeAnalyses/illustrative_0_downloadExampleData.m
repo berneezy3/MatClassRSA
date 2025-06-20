@@ -54,6 +54,8 @@
 % - More information about the data, and links to related literature, can 
 %   be found in the MatClassRSA user manual in the GitHub repo. 
 
+% This software is released under the MIT License, as follows:
+%
 % Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 % Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
 % 

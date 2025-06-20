@@ -26,6 +26,8 @@ function [normData, sigmaInv] = noiseNormalization(X, Y)
 %
 % MatClassRSA dependencies: Utils.cov1para()
 
+% This software is released under the MIT License, as follows:
+%
 % Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 % Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
 % 
