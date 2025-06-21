@@ -10,7 +10,14 @@ UnitTests/AllData.mat
 *.m~
 UnitTests/losorelli*.mat
 *.asv
-*S01.mat
 *losorelli_100sweep_epoched.mat
 *losorelli_500sweep_epoched.mat
+*.mexmac*
+*S01.mat
+*S04.mat
+*S05.mat
 *S06.mat
+*S08.mat
+*stimulus*.png
+*MatClassRSA_v2_ExampleData_README.pdf
+*OCEDStimuli.zip

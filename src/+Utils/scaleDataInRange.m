@@ -1,7 +1,6 @@
 function [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(xIn, desiredMinMax)
 % [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(xIn, desiredMinMax)
 % -------------------------------------------------------------------------
-% Blair/Bernard - February 25th, 2020
 %
 % This function takes in the data matrix xIn plus an optional vector of
 % min and max values, and scales its values so that its values fall 
@@ -27,7 +26,29 @@ function [xScaled, shift1, shift2, scaleFactor] = scaleDataInRange(xIn, desiredM
 % scaleFactor: The value by which the data were scaled, in between applying
 %       shift1 and shift2.
 
-% LICENSE GOES HERE
+% This software is released under the MIT License, as follows:
+%
+% Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
+% Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
+% 
+% Permission is hereby granted, free of charge, to any person obtaining 
+% a copy of this software and associated documentation files (the 
+% "Software"), to deal in the Software without restriction, including 
+% without limitation the rights to use, copy, modify, merge, publish, 
+% distribute, sublicense, and/or sell copies of the Software, and to 
+% permit persons to whom the Software is furnished to do so, subject to 
+% the following conditions:
+% 
+% The above copyright notice and this permission notice shall be included 
+% in all copies or substantial portions of the Software.
+% 
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+% IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+% CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+% TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+% SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 % If desiredMinMax was specified AND is not empty, 
 if exist('desiredMinMax', 'var') && ~isempty(desiredMinMax)

@@ -1,5 +1,4 @@
 function [sigma,shrinkage]=cov1para(x,shrink)
-% Disclaimer: This piece of code was obtained from Guggenmos et al. 2018.
 %-------------------------------------------------------------------
 %  [sigma,shrinkage] = cov1para(x,shrink)
 %-------------------------------------------------------------------

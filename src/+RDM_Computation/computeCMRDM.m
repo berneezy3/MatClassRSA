@@ -2,7 +2,6 @@ function [RDM, params] = computeCMRDM(M, varargin)
 %-------------------------------------------------------------------
 % [RDM, params] = RDM_Computation.computeCMRDM(M, varargin)
 % ------------------------------------------------------------------
-% Blair - January 31, 2017, revised September 2019
 %
 % This function transforms and scales a generalized square proximity 
 %   matrix. The default specifications assume a square multicategory 
@@ -105,6 +104,9 @@ function [RDM, params] = computeCMRDM(M, varargin)
 % params -- RDM computation parameters. It is a struct whose fields contain
 %   the normalization, symmetrization, distance measure, distance power, 
 %   and ranking specifications.
+%
+% MatClassRSA dependencies: Utils.normalizeMatrix(),
+% Utils.symmetrizeMatrix(), Utils.convertSimtoDist(), Utils.rankDistances()
 
 % Notes
 % - Computing ranks (with ties): tiedrank
@@ -118,39 +120,29 @@ function [RDM, params] = computeCMRDM(M, varargin)
 %   model relating generalization to distance in psychological space. 
 %   Journal of Experimental Psychology 55(6):509?523. doi: 10.1037/h0042354
 
-% This software is licensed under the 3-Clause BSD License (New BSD License),
-% as follows:
-% -------------------------------------------------------------------------
-% Copyright 2017 Bernard C. Wang, Anthony M. Norcia, and Blair Kaneshiro
+% This software is released under the MIT License, as follows:
 %
-% Redistribution and use in source and binary forms, with or without
-% modification, are permitted provided that the following conditions are met:
-%
-% 1. Redistributions of source code must retain the above copyright notice,
-% this list of conditions and the following disclaimer.
-%
-% 2. Redistributions in binary form must reproduce the above copyright notice,
-% this list of conditions and the following disclaimer in the documentation
-% and/or other materials provided with the distribution.
-%
-% 3. Neither the name of the copyright holder nor the names of its
-% contributors may be used to endorse or promote products derived from this
-% software without specific prior written permission.
-%
-% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ?AS IS?
-% AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-% IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-% ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-% LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-% CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-% SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-% INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-% CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-% ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-% POSSIBILITY OF SUCH DAMAGE.
-%
-% MatClassRSA dependencies: Utils.normalizeMatrix(),
-% Utils.symmetrizeMatrix(), Utils.convertSimtoDist(), Utils.rankDistances()
+% Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
+% Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
+% 
+% Permission is hereby granted, free of charge, to any person obtaining 
+% a copy of this software and associated documentation files (the 
+% "Software"), to deal in the Software without restriction, including 
+% without limitation the rights to use, copy, modify, merge, publish, 
+% distribute, sublicense, and/or sell copies of the Software, and to 
+% permit persons to whom the Software is furnished to do so, subject to 
+% the following conditions:
+% 
+% The above copyright notice and this permission notice shall be included 
+% in all copies or substantial portions of the Software.
+% 
+% THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+% OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+% MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+% IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+% CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+% TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+% SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Begin input parser
