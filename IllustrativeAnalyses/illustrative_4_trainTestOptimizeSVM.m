@@ -85,8 +85,8 @@ title(sprintf('SVM: %.2f%% Accuracy', MSVM.accuracy*100'));
 set(gca, 'fontsize', 14)
 
 % Accuracy: ~67%
-% Gamma: ~316
-% C: ~0.0032
+% Gamma: ~0.0032
+% C: ~316
 
 %% SVM vs LDA: Train and Test on Partitioned Data
 
@@ -172,8 +172,9 @@ annotation ('textbox', [0.40, 0.45, 0.2, 0.15], ...
 % and C values for RBF Kernel SVM classification
 
 % ---- Current Best -----
-% Gamma: ~316 - 
-% C: ~0.0032
+% Accuracy: ~67%
+% Gamma: ~0.0032
+% C: ~316
 
 % Number of values to iterate over for both C and Gamma during grid search
 nC     = 20;   % try 20 points for C

@@ -69,7 +69,7 @@ stimImagePaths = ["stimulus01.png'", "stimulus13.png", "stimulus25.png",...
 close
 
 % Average reliabilities across time
-avg_space_reliability_space = squeeze(mean(reliability_time(:,reliableTimePoints,:), 2));
+avg_space_reliability_space = squeeze(mean(reliability_time, 2));
 
 % Plot the reliability across space, with standard deviation across random
 % permutations

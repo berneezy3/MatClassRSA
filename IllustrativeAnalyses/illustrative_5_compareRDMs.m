@@ -126,49 +126,145 @@ annotation ('textbox', [0.45, 0.32, 0.1, 0.1], ...
     'HorizontalAlignment', 'center', ...
     'VerticalAlignment', 'middle');
 
-%% Compare Pearson and Euclidean RDMs At Electrode
+saveas(gcf, 'Figs/fig24_pairwise_vs_multiclass_rdms.jpg');
+
+%% Multi-class vs Pairwise Classification
+
+% ---------------------- Preprocessing Steps ---------------------------
+[xShuf, yShuf] = Preprocessing.shuffleData(X, labels6, 'rngType', rnd_seed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 20, 'handleRemainder', ...
+    'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+% ---------------------------- Training -------------------------------
+
+% Multi-class LDA Classification
+MMC = Classification.crossValidateMulti(xAvg, yAvg, ...
+    'classifier', 'LDA', 'PCA', 0.99);
+
+% Pairwise LDA Classification
+MPW = Classification.crossValidatePairs(xAvg, yAvg, ...
+    'classifier', 'LDA', 'PCA', 0.99);
+
+
+% ------------------------- RDM Computation ------------------------------
+
+% Multi-class RDM from confusion matrix
+[RDMmc, params] = RDM_Computation.computeCMRDM(MMC.CM);
+
+% Pairwise RDM from accuracy matrix
+RDMpm = RDM_Computation.shiftPairwiseAccuracyRDM(MPW.AM);
+
+
+% -------------------------- Visualization ------------------------------
+figure;
+set(gcf, 'Position', [150,300,1200,1200]);
+subplot(3,2,1);
+Visualization.plotMatrix(RDMmc, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6, ...
+                            'colorMap', 'summer', 'rankType', 'p');
+ 
+title(sprintf('Multi-class Classification RDM'));
+set(gca, 'fontsize', 16);
+
+subplot(3,2,2);
+Visualization.plotMatrix(RDMpm, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6, ...
+                            'colorMap', 'summer', 'rankType', 'p');
+                        
+title(sprintf('Pairwise Classification RDM'));
+set(gca, 'fontsize', 16);
+
+subplot(3,2,3);
+Visualization.plotMDS(RDMmc, 'nodeLabels', catLabels, 'nodeColors', rgb6);
+                        
+title(sprintf('Multi-class Classification MDS'));
+set(gca, 'fontsize', 16);
+
+subplot(3,2,4);
+Visualization.plotMDS(RDMpm, 'nodeLabels', catLabels, 'nodeColors', rgb6);
+                        
+title(sprintf('Pairwise Classification MDS'));
+set(gca, 'fontsize', 16);
+
+subplot(3,2,5);
+Visualization.plotDendrogram(RDMmc, 'nodeLabels', catLabels, 'nodeColors', rgb6);
+                        
+title(sprintf('Multi-class Classification Dendrogram'));
+set(gca, 'fontsize', 16);
+
+subplot(3,2,6);
+Visualization.plotDendrogram(RDMpm, 'nodeLabels', catLabels, 'nodeColors', rgb6);
+                        
+title(sprintf('Pairwise Classification Dendrogram'));
+set(gca, 'fontsize', 16);
+
+
+sgtitle('Multi-class vs Pairwise Classification on Same Dataset', ...
+    'FontSize', 20, ...
+    'FontWeight', 'bold');
+
+annotation ('textbox', [0.45, 0.32, 0.1, 0.1], ...
+    'String', sprintf('Pairwise classification may be more sensitive to class similarities, which drive confusion in classifcation'),...
+    'FontSize', 18, ...
+    'EdgeColor','none', ...
+    'BackgroundColor', [173/255, 216/255, 230/255], ...
+    'HorizontalAlignment', 'center', ...
+    'VerticalAlignment', 'middle');
+
+saveas(gcf, 'Figs/fig24_pairwise_vs_multiclass_rdms.jpg');
+%% Compare Pearson and Classification RMD, 72-Class
 singleElectrodeX = squeeze(X(96,:,:));
 
-PearsonRDM = RDM_Computation.computePearsonRDM(singleElectrodeX, labels6, ...
+PearsonRDM = RDM_Computation.computePearsonRDM(singleElectrodeX, labels72, ...
     'rngType', rnd_seed);
 
-EuclidRDM = RDM_Computation.computeEuclideanRDM(singleElectrodeX, labels6, ...
-    'rngType', rnd_seed);
+% ---------------------- Preprocessing Steps ---------------------------
+[xShuf, yShuf] = Preprocessing.shuffleData(X, labels72, 'rngType', rnd_seed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 5, 'handleRemainder', ...
+    'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+
+
+M = Classification.crossValidateMulti(xAvg, yAvg, 'PCA', 0.99);
+
+ClassRDM = RDM_Computation.computeCMRDM(M.CM);
 
 % -------------------------------- Plot ---------------------------------
 figure;
 set(gcf, 'Position', [150,300,1200,1200]);
 subplot(2,2,1)
-Visualization.plotMatrix(PearsonRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
+Visualization.plotMatrix(PearsonRDM.RDM, 'colorbar', 1, 'matrixLabels', 0, ...
+    'colorMap', 'summer', 'rankType', 'p');
  
 title(sprintf('Pearson RDM'));
 set(gca, 'fontsize', 16)
 
 subplot(2,2,2)
-Visualization.plotMatrix(EuclidRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
-    'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
+Visualization.plotMatrix(ClassRDM, 'colorbar', 1, 'matrixLabels', 0, ...
+    'colorMap', 'summer', 'rankType', 'p');
                         
-title(sprintf('Euclidean RDM'));
+title(sprintf('Classification RDM'));
 set(gca, 'fontsize', 16)
 
 subplot(2,2,3)
-Visualization.plotMST(PearsonRDM.RDM, ...
-    'nodeLabels', catLabels, 'nodeColors', rgb6);
+Visualization.plotMST(PearsonRDM.RDM);
  
 title(sprintf('Pearson MST'));
 set(gca, 'fontsize', 16)
 
 subplot(2,2,4)
-Visualization.plotMST(EuclidRDM.RDM, ...
-    'nodeLabels', catLabels, 'nodeColors', rgb6);
+Visualization.plotMST(ClassRDM);
 
-title(sprintf('Euclidean MST'));
+title(sprintf('Classification MST'));
 set(gca, 'fontsize', 16)
 
-sgtitle('Single Electrode 96, Computed Pearson and Euclidean RDM', ...
+sgtitle('Computed Pearson and 72-Class Classification RDM', ...
     'FontSize', 20, ...
     'FontWeight', 'bold');
+
+saveas(gcf, 'Figs/fig27_pearson_vs_classification_rdms_72Class.jpg');
 %% Compare Pearson and Euclidean RDMs At Timepoint
 
 % Visualize selected timepoint of interest
@@ -270,3 +366,5 @@ set(gca, 'fontsize', 16)
 sgtitle('Single Timepoint (144 ms), Visualized Pearson and Euclidean RDM', ...
     'FontSize', 20, ...
     'FontWeight', 'bold');
+
+saveas(gcf, 'Figs/fig26_pearson_vs_euclidean_timepoint.jpg');

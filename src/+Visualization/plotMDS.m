@@ -187,14 +187,14 @@ function fig = plotMDS(RDM, varargin)
         disp('CASE: COLOR AND NODE')
         for i = 1:r
 
-            % artificial method of setting siz
+          % artificial method of setting siz
 %             plot( Y(i,1) ,Y(i,2) , 's', 'MarkerSize', 15, 'LineWidth', 2, ....
 %                 'MarkerEdgeColor', 'k');
             text( Y(i,xDim), Y(i,yDim), char(ip.Results.nodeLabels(i)), ...
                 'Color', ip.Results.nodeColors{i}, ...
                 'FontWeight', 'bold', 'FontSize', 30 ...
             );
-            hold on
+            hold on  
         end
         
         
