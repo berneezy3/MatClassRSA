@@ -129,14 +129,14 @@
 %              CM - Confusion matrix that summarizes the performance of the
 %                   classification, in which rows represent actual labels and columns
 %                   represent predicted labels.  Element i,j represents the number of 
-%                   observations belonging to clC_tt_multiass i that the classifier labeled as
+%                   observations belonging to class i that the classifier labeled as
 %                   belonging to class j.
 %              classBoundary - (i.e.) class 1 vs class 4
 %              accuracy - classification accuracy for the given class
 %                         boundary
 %              actualLabels - actual class labels
 %              predictions - prediced class labels by the trained model
-%       AM - Accuracy matrix. Where each off-diagonal element shows the accuracy 
+%       AM - Accuracy matrix where each off-diagonal element shows the accuracy 
 %           for distinguishing one class from another,
 %           with a NaN diagonal, comparing a class with itself
 %       pValMat - If permutation testing is specified, a matrix containing
@@ -254,9 +254,12 @@
     labelsConcat = [];
        
     allClasses = unique(Y);
+    allClassesIndx = 1:length(allClasses);
     numClasses = length(allClasses);
     numDecBounds = nchoosek(numClasses ,2);
     classPairs = nchoosek(1:numClasses, 2);
+    classPairsIndx = allClassesIndx(classPairs(:,:));
+
     
     classPairs = allClasses(classPairs(:,:));
     
@@ -308,6 +311,8 @@
             % class1 class2
             class1 = classPairs(k, 1);
             class2 = classPairs(k, 2);
+            class1Indx = classPairsIndx(k, 1);
+            class2Indx = classPairsIndx(k, 2);
             
             % store indices of the trials of the current class pair of
             % interest
@@ -336,8 +341,8 @@
 
                 [predictions decision_values] = Utils.modelPredict(testX, mdl, scale);
 
-                actualLabelsCell{class1, class2} = [actualLabelsCell{class1, class2} testY'];
-                predictionsCell{class1, class2} = [predictionsCell{class1, class2} predictions];
+                actualLabelsCell{class1Indx, class2Indx} = [actualLabelsCell{class1Indx, class2Indx} testY'];
+                predictionsCell{class1Indx, class2Indx} = [predictionsCell{class1Indx, class2Indx} predictions];
                 
                 modelsConcat{i} = mdl; 
                 
@@ -394,6 +399,8 @@
                 % class1 class2
                 class1 = classPairs(k, 1);
                 class2 = classPairs(k, 2);
+                class1Indx = classPairsIndx(k, 1);
+                class2Indx = classPairsIndx(k, 2);
 
                 for i = 1:ip.Results.permutations
                 
@@ -407,14 +414,14 @@
                         ' ''minLeafSize'', ip.Results.minLeafSize);']);
 
                     evalc(['pC = Classification.predict(pM, testX, ''actualLabels'',testY)']);
-                    permAccMat(class1, class2, i) = pC.accuracy;
-                    permAccMat(class2, class1, i) = pC.accuracy;
+                    permAccMat(class1Indx, class2Indx, i) = pC.accuracy;
+                    permAccMat(class2Indx, class1Indx, i) = pC.accuracy;
 
                 end
                 
-                pValMat(class1, class2) = Utils.permTestPVal(AM(class1, class2), ...
-                    squeeze(permAccMat(class1, class2, :)));
-                pValMat(class2, class1) = Utils.pValMat(class1, class2);
+                pValMat(class1Indx, class2Indx) = Utils.permTestPVal(AM(class1Indx, class2Indx), ...
+                    squeeze(permAccMat(class1Indx, class2Indx, :)));
+                pValMat(class2Indx, class1Indx) = Utils.pValMat(class1Indx, class2Indx);
                 
             end
         end
