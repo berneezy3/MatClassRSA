@@ -33,6 +33,7 @@ function P = predict(M, X, varargin)
 %       - P.predictionInfo contians prediction related information
 %       - P.classificationInfo contains classification related info
 %       - P.model contains classification model(s)
+%       - P.pVal contains the permutation testing p-vaue
 %   Note that unless optional input 'actualLabels' is set, P.accuracy and 
 %   P.confusionMatrix will be NaN.
 %   If M was created using trainPairs() or trainPairs_opt(), then the
@@ -42,6 +43,8 @@ function P = predict(M, X, varargin)
 %       model(s)
 %       - P.predictionInfo contians prediction related information
 %       - P.classificationInfo contains classification related info
+%       - P.pValMat contains a matrix of p-values, in which each off-diagonal
+%         element corresponds to every pair of labels. 
 %   permAccs - Permutation testing accuracies.  This field will be NaN if 
 %       permuatation testing is not specfied.  
 %   classificationInfo - This struct contains the specifications used
@@ -307,13 +310,16 @@ function P = predict(M, X, varargin)
             tempStruct = struct();
            % Get Accuracy and confusion matrix
             if ( ~isnan(ip.Results.actualLabels) )
-
                 thisCM = confusionmat(tempY, predY{i});
                 P.AM(class1, class2) = sum(diag(thisCM))/sum(sum(thisCM));
                 P.AM(class2, class1) = P.AM(class1, class2); 
             else
 %                 P.accuracy{i} = NaN; 
 %                 P.CM{i} = NaN;
+                warning('NaNs detected in actualLabels parameter - output accuracy/confusion matrix may contain NaNs');
+                thisCM = confusionmat(tempY, predY{i});
+                P.AM(class1, class2) = sum(diag(thisCM))/sum(sum(thisCM));
+                P.AM(class2, class1) = P.AM(class1, class2); 
             end
                 
             tempStruct.classBoundary = [num2str(class1) ' vs. ' num2str(class2)];
