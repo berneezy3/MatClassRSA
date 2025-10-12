@@ -127,7 +127,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     if (ip.Results.matrixLabels==1)
         % Label the dendrogram with values
         % 
-        textStrings = num2str(RDM(:),'%0.2f');  %# Create strings from the matrix values
+        textStrings = num2str(RDM(:),'%d');  %# Create strings from the matrix values
         textStrings = strtrim(cellstr(textStrings));  %# Remove any space padding
         [x,y] = meshgrid(1:length(RDM));   %# Create x and y coordinates for the strings
         text(x(:),y(:),textStrings(:),...      %# Plot the strings

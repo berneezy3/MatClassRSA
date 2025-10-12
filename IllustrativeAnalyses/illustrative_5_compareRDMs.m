@@ -254,6 +254,13 @@ M = Classification.crossValidateMulti(xAvg, yAvg, 'PCA', 0.99);
 ClassRDM = RDM_Computation.computeCMRDM(M.CM);
 
 % -------------------------------- Plot ---------------------------------
+
+nodeColors = zeros(72,3);
+for i = 1:6
+    idx = (1:12) + (i-1)*12;   % 1:12, 13:24, ..., 61:72
+    nodeColors(idx, :) = repmat(rgb6{i}, 12, 1);
+end
+
 figure;
 set(gcf, 'Position', [150,300,1200,1200]);
 subplot(2,2,1)
@@ -277,7 +284,7 @@ title(sprintf('Pearson MST'));
 set(gca, 'fontsize', 16)
 
 subplot(2,2,4)
-Visualization.plotMST(ClassRDM);
+Visualization.plotMST(ClassRDM, 'nodeColors', nodeColors);
 
 title(sprintf('Classification MST'));
 set(gca, 'fontsize', 16)

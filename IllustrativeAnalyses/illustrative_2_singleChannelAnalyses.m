@@ -234,3 +234,47 @@ ylim([0, 1]); % Accuracy between 0 and 1
 xlim([0,numElectrodes+1]);
 grid on;
 
+%% Plot single-electrode classification accuracy against electrode reliability
+
+meanReliability = mean(avg_space_reliability_space, 2);
+
+% Compute correlation
+[r, p] = corr(meanReliability, accuraciesTime, 'type', 'Pearson');
+
+% Create scatter plot
+figure;
+scatter(meanReliability, accuraciesTime, 60, 'b', 'filled'); 
+hold on; grid on;
+
+% Fit and plot regression line
+coeffs = polyfit(meanReliability, accuraciesTime, 1);
+xFit = linspace(min(meanReliability), max(meanReliability), 100);
+yFit = polyval(coeffs, xFit);
+plot(xFit, yFit, 'r--', 'LineWidth', 2);
+
+% Highlight and label electrode 96
+elecIdx = 96;
+plot(meanReliability(elecIdx), accuraciesTime(elecIdx), 'ro', 'MarkerSize', 8, 'LineWidth', 2);
+
+% Label closer to the point (slightly offset for readability)
+text(meanReliability(elecIdx) + 0.005, accuraciesTime(elecIdx) + 0.005, ...
+    sprintf('Electrode %d', elecIdx), ...
+    'FontWeight', 'bold', 'Color', 'r', ...
+    'FontSize', 12, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
+
+% Label axes and title
+xlabel('Electrode Reliability', 'FontSize', 14);
+ylabel('Classification Accuracy', 'FontSize', 14);
+title('Single-Electrode Classification Accuracy vs Reliability', 'FontSize', 14);
+
+% Add correlation coefficient text to plot
+textPosX = min(meanReliability) + 0.05 * range(meanReliability);
+textPosY = max(accuraciesTime) - 0.1 * range(accuraciesTime);
+text(textPosX, textPosY, sprintf('r = %.2f (p = %.3g)', r, p), ...
+    'FontSize', 12, 'FontWeight', 'bold', 'Color', 'k');
+
+xlim([min(meanReliability) max(meanReliability)]);
+ylim([0.15 0.35]);
+grid on;
+
+saveas(gcf, 'Figs/fig12_accuracy_vs_reliability.jpg');

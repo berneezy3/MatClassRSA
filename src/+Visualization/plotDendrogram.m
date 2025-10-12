@@ -108,7 +108,9 @@ function fig = plotDendrogram(RDM, varargin)
     RDM = Utils.processRDM(RDM);
     tree = linkage(RDM, ip.Results.distMethod);
     [r c] = size(tree);
-    tree(:,3) = tree(:,3) / max(tree(:,3)); % Normalization step
+    
+    % Normalization step
+    tree(:,3) = tree(:,3) / max(tree(:,3)); 
     
     
     if (~isempty(ip.Results.reorder))
