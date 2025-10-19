@@ -33,3 +33,8 @@ src/libsvm-3.24/svm-train
 src/libsvm-3.24/svm-predict
 src/libsvm-3.24/svm-scale
 
+# ignore all data files kept in example data
+src/ExampleData/*
+
+# do not ignore these files
+!src/ExampleData/.gitkeep
