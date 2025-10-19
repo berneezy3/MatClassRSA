@@ -21,3 +21,15 @@ UnitTests/losorelli*.mat
 *stimulus*.png
 *MatClassRSA_v2_ExampleData_README.pdf
 *OCEDStimuli.zip
+
+# ignore compiled files for libsvm
+src/libsvm-3.24/matlab/*.mexmaci64
+src/libsvm-3.24/matlab/*.mex
+src/libsvm-3.24/matlab/libsvmread.m*
+src/libsvm-3.24/matlab/libsvmwrite.m*
+src/libsvm-3.24/matlab/svmpredict.m*
+src/libsvm-3.24/matlab/svmtrain.m*
+src/libsvm-3.24/svm-train
+src/libsvm-3.24/svm-predict
+src/libsvm-3.24/svm-scale
+
