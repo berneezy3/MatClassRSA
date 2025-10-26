@@ -143,6 +143,8 @@ end
 
 disp(['\ * \ * Run complete. ' num2str(nFilesDownloaded) ' file(s) downloaded. * / * /'])
 
+clear
+
 %% Helper function
 
 function INFO = createInfoStruct()
