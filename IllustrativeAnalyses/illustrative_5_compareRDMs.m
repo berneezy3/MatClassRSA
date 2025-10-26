@@ -98,17 +98,19 @@ set(gcf, 'Position', [150,300,1200,1200]);
 subplot(3,2,1);
 Visualization.plotMatrix(RDMmc, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6, ...
-                            'colorMap', 'summer', 'rankType', 'p');
+                            'colorMap', 'summer', 'rankType', 'p', ...
+                            'axisFontSize', 20);
  
-title(sprintf('Multi-class Classification RDM'));
+title(sprintf('Multi-class Classification RDM (Percent Rank)'));
 set(gca, 'fontsize', 16);
 
 subplot(3,2,2);
 Visualization.plotMatrix(RDMpm, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6, ...
-                            'colorMap', 'summer', 'rankType', 'p');
+                            'colorMap', 'summer', 'rankType', 'p',  ...
+                            'axisFontSize', 20);
                         
-title(sprintf('Pairwise Classification RDM'));
+title(sprintf('Pairwise Classification RDM (Percent Rank)'));
 set(gca, 'fontsize', 16);
 
 subplot(3,2,3);
@@ -124,13 +126,13 @@ title(sprintf('Pairwise Classification MDS'));
 set(gca, 'fontsize', 16);
 
 subplot(3,2,5);
-Visualization.plotDendrogram(RDMmc, 'nodeLabels', catLabels, 'nodeColors', rgb6);
+Visualization.plotDendrogram(RDMmc, 'nodeLabels', catLabels, 'nodeColors', rgb6, 'ylim', [0,1.5]);
                         
 title(sprintf('Multi-class Classification Dendrogram'));
 set(gca, 'fontsize', 16);
 
 subplot(3,2,6);
-Visualization.plotDendrogram(RDMpm, 'nodeLabels', catLabels, 'nodeColors', rgb6);
+Visualization.plotDendrogram(RDMpm, 'nodeLabels', catLabels, 'nodeColors', rgb6, 'ylim', [0,1.5]);
                         
 title(sprintf('Pairwise Classification Dendrogram'));
 set(gca, 'fontsize', 16);

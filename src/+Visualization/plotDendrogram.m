@@ -36,19 +36,14 @@ function fig = plotDendrogram(RDM, varargin)
 %       dendrogram.  Similar to 'nodeColors', we can either pass in color 
 %       abbreviations, full-length color names, or RGB color triplets.  
 %       Default 'black'.
+%   'normalization' - Use this parameter to scale the branch heights
+%       (dissimilarities), to fall between 0 and 1.
 %
 % OUTPUTS:
 %   'fig': figure corresponding to output plot
 %
 % MatClassRSA dependencies: Utils.getTickCoord(), Utils.processRDM()
 
-% Notes:
-%   - linkage order - inorder w/ crossing, best order w/o crossing, dist
-%   order
-%   - flip horizontal
-%   - make sure the side thin
-%   - make sure the dendrogram is in the correct order, not the order of
-%   the dist matrix
 
 % This software is released under the MIT License, as follows:
 %
@@ -84,7 +79,8 @@ function fig = plotDendrogram(RDM, varargin)
     options = [1, 0];
     ip.addParameter('distMethod', 'average', @(x) any(validatestring(x,  ...
         expectedDistMethod)));
-    ip.addParameter('nodeColors', [], @(x) isvector(x)); 
+    ip.addParameter('nodeColors', [], @(x) isvector(x));
+    ip.addParameter('normalization', false, @(x) islogical(x) || ismember(x, [0 1]));
     ip.addParameter('nodeLabels', [], @(x) isvector(x));
     ip.addParameter('fontSize', 25, @(x) isnumeric(x));
     ip.addParameter('orientation', 'down', @(x) any(validatestring(x, ...
@@ -110,8 +106,9 @@ function fig = plotDendrogram(RDM, varargin)
     [r c] = size(tree);
     
     % Normalization step
-    tree(:,3) = tree(:,3) / max(tree(:,3)); 
-    
+    if (ip.Results.normalization)
+        tree(:,3) = tree(:,3) / max(tree(:,3));
+    end
     
     if (~isempty(ip.Results.reorder))
         [d T P] = dendrogram(tree, 0, 'reorder', ip.Results.reorder);
@@ -137,6 +134,9 @@ function fig = plotDendrogram(RDM, varargin)
     % Set dendrogram Y axis height
     if ~isempty(ip.Results.yLim)
         ylim(ip.Results.yLim);
+    else
+        maxValue = max(tree(:,3));
+        ylim([0, maxValue]);
     end
     
     %%%%%%%%%%%%%%%%%%%%

@@ -36,6 +36,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %       of 'colorMap' - This parameter can be used to call a default Matlab 
 %       colormap, or one specified by the user, to change the overall look 
 %       of the plot. For example, plotMatrix(RDM, 'colorMap', 'hsv')
+%   - 'axisFontSize': Specify the font size of the axis labels.
 %   - 'colorBar' - Choose whether to display colorbar or not (default 0)
 %       --options--
 %       0 - hide (default)
@@ -49,7 +50,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %   - 'colorBlockSize' - This parameter determines the size of each color block icon.  
 %       Default dyamically set as 5.
 %   - 'colorMap' - Specify colormap. This parameter can be used to call a
-%       default Matlab colomap, or one specified by the user, to change the
+%       default Matlab colormap, or one specified by the user, to change the
 %       overall look of the plot. For example, plotMatrix(RDM, 'colorMap',
 %       'hsv')
 % 
@@ -95,6 +96,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
         @(x) any(validatestring(x, expectedRanktype)));
     ip.addParameter('axisColors', [], @(x) isvector(x)); 
     ip.addParameter('axisLabels', [], @(x) isvector(x));
+    ip.addParameter('axisFontSize', 25, @(x) isnumeric(x));
     ip.addParameter('colormap', '');
     ip.addParameter('colorbar', '');
     ip.addParameter('matrixLabels', 0);
@@ -123,17 +125,25 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     if ~isempty(ip.Results.colormap)
         colormap(ip.Results.colormap);
     end
-    
-    if (ip.Results.matrixLabels==1)
-        % Label the dendrogram with values
-        % 
-        textStrings = num2str(RDM(:),'%d');  %# Create strings from the matrix values
-        textStrings = strtrim(cellstr(textStrings));  %# Remove any space padding
-        [x,y] = meshgrid(1:length(RDM));   %# Create x and y coordinates for the strings
-        text(x(:),y(:),textStrings(:),...      %# Plot the strings
-                    'HorizontalAlignment','center', ...
-                    'FontSize', ip.Results.FontSize, ...
-                    'Color', ip.Results.matrixLabelColor);
+
+    if (ip.Results.matrixLabels == 1)
+        % Round values to nearest whole number for display
+        roundedVals = round(RDM);
+        
+        % Create strings (integer-style)
+        textStrings = arrayfun(@(x) sprintf('%d', x), roundedVals, 'UniformOutput', false);
+        
+        % Remove NaN labels (optional)
+        textStrings(isnan(RDM)) = {''};
+        
+        % Create x and y coordinates for each element
+        [x, y] = meshgrid(1:size(RDM, 2), 1:size(RDM, 1));
+        
+        % Plot the text labels
+        text(x(:), y(:), textStrings(:), ...
+            'HorizontalAlignment', 'center', ...
+            'FontSize', ip.Results.FontSize, ...
+            'Color', ip.Results.matrixLabelColor);
     end
     
     if ip.Results.colorbar > 0
@@ -144,14 +154,14 @@ function  [img, fig] = plotMatrix(RDM, varargin)
         %truncMax = fix(matMax * 10^2)/10^2;
         inc = (matMax - matMin)/(ip.Results.ticks-1);
         %c.Ticks = str2num(sprintf('%.2f2 ', [[0:ip.Results.ticks-2] * inc + matMin  matMax]));
-        switch ip.Results.ranktype
-            case 'none'
+        switch lower(ip.Results.ranktype)
+            case {'none', 'n'}
                 c.Ticks = round(linspace(matMin, matMax, 3), 2);
-            case 'rank'
+            case {'rank', 'r'}
                 t = sum(sum(tril(ones(size(RDM)), -1)));
                 c.Limits = [0 t];
                 c.Ticks = round(linspace(0, t, 3), 2);
-            case 'percentrank'
+            case {'percentrank', 'p'}
                 c.Limits = [0 100];
                 c.Ticks = 0:50:100; 
         c.FontWeight = 'bold';
@@ -208,7 +218,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
                     'VerticalAlignment', 'top');
                 t.Rotation = ip.Results.textRotation;
                 t.Color = ip.Results.axisColors{i};
-                t(1).FontSize = 25;
+                t(1).FontSize = ip.Results.axisFontSize;
         end
         
         for i = 1:length(labels)
@@ -217,7 +227,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
                     'HorizontalAlignment', 'center');
                 t.Rotation = ip.Results.textRotation;
                 t.Color = ip.Results.axisColors{i};
-                t(1).FontSize = 25;
+                t(1).FontSize = ip.Results.axisFontSize;
 
         end
         

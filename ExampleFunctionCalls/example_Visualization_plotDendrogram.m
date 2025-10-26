@@ -43,6 +43,11 @@ catLabels = {'HB', 'HF', 'AB', 'AF', 'FV', 'IO'};
 
 figure;
 Visualization.plotDendrogram(RDM)
+
+%% Adding Normalziation
+
+figure;
+Visualization.plotDendrogram(RDM, 'normalization', true)
 %% Adding Nodes
 
 figure;
