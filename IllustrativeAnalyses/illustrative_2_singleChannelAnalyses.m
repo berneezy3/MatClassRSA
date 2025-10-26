@@ -123,7 +123,14 @@ hold on;
 subplot(1,2,2);
 cBarMin = min(mean(avg_space_reliability_space, 2));
 cBarMax = max(mean(avg_space_reliability_space, 2));
-plotOnEgi([mean(avg_space_reliability_space, 2); nan(4,1)], [cBarMin cBarMax], true);
+
+montage = load('+Utils/locsEGI124.mat');
+Utils.topoplotStandalone([mean(avg_space_reliability_space, 2); nan(4,1)], ...
+    montage.locs, 'electrodes', 'labels',  ...
+    'style','both', 'maplimits', [cBarMin cBarMax]);
+colormap(jet);       % Or parula, hot, cool, autumn, winter, etc.
+colorbar;  
+
 title('Average Reliability Over Time Topographical Map');
 ylabel(colorbar, "Reliability");
 
@@ -215,6 +222,7 @@ for elec = 1:nElectrodes
     M = Classification.crossValidateMulti(xNorm, labels6);
     accuraciesTime(elec) = M.accuracy;
 end
+
 %% Plot classification accuracy per electrode
 
 figure;
@@ -277,4 +285,44 @@ xlim([min(meanReliability) max(meanReliability)]);
 ylim([0.15 0.35]);
 grid on;
 
-saveas(gcf, 'Figs/fig12_accuracy_vs_reliability.jpg');
+%% Plot single-electrode classification and single-electrode reliability
+
+
+% Plot average reliability across time, on scalp topographical map
+subplot(1,2,1);
+cBarMin = min(mean(avg_space_reliability_space, 2));
+cBarMax = max(mean(avg_space_reliability_space, 2));
+
+montage = load('+Utils/locsEGI124.mat');
+Utils.topoplotStandalone([mean(avg_space_reliability_space, 2); nan(4,1)], ...
+    montage.locs, 'electrodes', 'labels', 'whitebk','on', ...
+    'style','both', 'maplimits', [cBarMin cBarMax]);
+colormap(jet);       % Or parula, hot, cool, autumn, winter, etc.
+colorbar;  
+
+title('Average Reliability Over Time Topographical Map', 'FontSize', 14);
+ylabel(colorbar, "Reliability",'FontSize', 12);
+
+% Plot single-electrode classificaiton across time, on scalp topographical map
+subplot(1,2,2);
+cBarMin = min(mean(accuraciesTime, 2));
+cBarMax = max(mean(accuraciesTime, 2));
+
+montage = load('+Utils/locsEGI124.mat');
+Utils.topoplotStandalone(accuraciesTime, ...
+    montage.locs, 'electrodes', 'labels', 'whitebk','on', ...
+    'style','both', 'maplimits', [cBarMin cBarMax]);
+colormap(jet);       % Or parula, hot, cool, autumn, winter, etc.
+colorbar;  
+
+title('Electrode Classification Accuracy Topographical Map', 'FontSize', 14);
+ylabel(colorbar, "Accuracy", 'FontSize', 12 );
+
+% Make axes background transparent
+set(gca, 'Color', 'White');
+% Make figure transparent for saving
+set(gcf, 'Color', 'White');
+
+set(gcf, 'Position', [200,200,1300,500]);
+
+saveas(gcf, 'Figs/topoPlotComparison_accuracy_vs_reliability.jpg');
