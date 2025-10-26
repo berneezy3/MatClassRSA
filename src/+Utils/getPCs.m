@@ -42,7 +42,7 @@ function [y, V, nPC] = getPCs(X, PCs)
 % TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 % SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     
-    [U,S,V] = svd(X);
+    [~,S,V] = svd(X);
 
     % This graph shows how many PCs explain 
     diagS = diag(S);
@@ -62,8 +62,8 @@ function [y, V, nPC] = getPCs(X, PCs)
         nPC = c;
     end
 
-    xPC = X * V;
-    y = xPC(:,1:nPC);
+    V = V(:,1:nPC);
+    y = X * V;
     
     disp(['Got ' num2str(nPC) ' PC(s)']);
 
