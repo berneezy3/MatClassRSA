@@ -37,7 +37,8 @@ function fig = plotDendrogram(RDM, varargin)
 %       abbreviations, full-length color names, or RGB color triplets.  
 %       Default 'black'.
 %   'normalization' - If set to true, this parameter will scale the branch 
-%       heights (dissimilarities), to fall between 0 and 1. Default false.
+%       heights (distances) by the maximum distance in the set, such that 
+%       the maximum displayed distance becomes 1. Default false.
 %
 % OUTPUTS:
 %   'fig': figure corresponding to output plot
