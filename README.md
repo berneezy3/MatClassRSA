@@ -15,7 +15,7 @@ MatClassRSA is organized into modules of user-called functions. The modules are 
 2. **Reliability.** This module contains functions to estimate the reliability of the data. Reliability can be calculated across available sensors and time points, as well as across varying sample sizes.
 3. **Classification.** This module contains the main classification functions. Currently LDA, SVM (including hyperparameter optimization), and Random Forest classifiers are supported. The module includes functions for cross validation and user-specified train-test partitioning for multiclass and pairwise classifications. Classification functions also include simple permutation testing.
 4. **RDM Computation.** This module includes RDM construction from classifier confusion matrices and pairwise accuracy matrices, as well as directly from the original data (with cross validation) based on Euclidean distance or Pearson correlation.
-5. **Visualization.** This module includes a function to directly visualize RDMs, as well as functions that display the proximity space of an RDM as a dendrogram, multidimensional scaling plot, or minimum spanning tree.
+5. **Visualization.** This module includes a function to directly visualize RDMs, as well as functions that display the proximity space of an RDM as a dendrogram, Multidimensional Scaling plot, or Minimum Spanning Tree.
 
 ### Sub-directories
 
