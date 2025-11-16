@@ -52,18 +52,20 @@ To use MatClassRSA:
 
 Download the latest version of this package at https://github.com/berneezy3/MatClassRSA/
 
-The external dependency, LIBSVM, must be set up before any SVM classifications can be
-performed. Once inside the MatClassRSA main directory, navigate to
-src/libsvm-3.21/matlab
-and refer to the README file there for LIBSVM installation instructions.
+The external dependency, LIBSVM, must be set up before any SVM classifications 
+can be performed. Once inside the MatClassRSA main directory, navigate to
+src/libsvm-3.21/matlab and refer to the README file there for LIBSVM 
+installation instructions.
 
-Upon startup of Matlab, run the following in the Matlab IDE to add the MatClassRSA functions into your search path:
+Upon startup of Matlab, run the following in the Matlab IDE to add the 
+MatClassRSA functions into your search path:
 
 > MatClassRSAPath = ‘path/to/your/directory/in/char/format’;
 > addpath(genpath(MatClassRSAPath));
 
-MatClassRSA functions will be runnable from this point.  To automatically import MatClassRSA upon Matlab startup, 
-please create a ‘startup.m’ somewhere in your Matlab search path (this can be found using the command “path”), 
+MatClassRSA functions will be runnable from this point.  To automatically 
+import MatClassRSA upon Matlab startup, please create a ‘startup.m’ 
+somewhere in your Matlab search path (this can be found using the command “path”), 
 and add the above lines into it.  
 
 Conditions of Use:
@@ -71,34 +73,27 @@ Conditions of Use:
 MatClassRSA is a free MATLAB software; users are free to redistribute and/or modify it under the terms of 
 The 3-Clause BSD License (New BSD License) published in the public domain.  The terms of the license are as follows:
 
-Copyright 2017 Bernard C. Wang, Anthony M. Norcia, and Blair Kaneshiro
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that 
-the following conditions are met:
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the 
-following disclaimer.
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and 
-the following disclaimer in the documentation and/or other materials provided with the distribution.
-3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or 
-promote products derived from this software without specific prior written permission.
+Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
+Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED 
-WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A 
-PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR 
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-POSSIBILITY OF SUCH DAMAGE.
+Permission is hereby granted, free of charge, to any person obtaining 
+a copy of this software and associated documentation files (the 
+"Software"), to deal in the Software without restriction, including 
+without limitation the rights to use, copy, modify, merge, publish, 
+distribute, sublicense, and/or sell copies of the Software, and to 
+permit persons to whom the Software is furnished to do so, subject to 
+the following conditions:
 
+The above copyright notice and this permission notice shall be included 
+in all copies or substantial portions of the Software.
 
-When MatClassRSA is used for research, please consider citing the publication describing the software package:
-Bernard C. Wang, Anthony M. Norcia, and Blair Kaneshiro (2017). MatClassRSA: A Matlab Toolbox for M/EEG Classification 
-and Visualization of Proximity Matrices. bioRxiv preprint 194563; doi: https://doi.org/10.1101/194563.
-
-For commercial use of MatClassRSA please contact Bernard Wang at: bernardcwang@gmail.com
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS 
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF 
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY 
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Support:
 For questions, comments, suggestions, feature requests, and bug reports, please contact bernardcwang@gmail.com
-
-The EEG data for the example analyses presented here can be downloaded from the Stanford Digital Repository: 
-https://purl.stanford.edu/bq914sc3730
