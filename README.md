@@ -70,9 +70,8 @@ and add the above lines into it.
 
 Conditions of Use:
 
-MatClassRSA is a free MATLAB software; users are free to redistribute and/or 
-modify it under the terms of The 3-Clause BSD License (New BSD License) 
-published in the public domain.  The terms of the license are as follows:
+MatClassRSA is release uner the MIT License 
+(https://choosealicense.com/licenses/mit) as follow:
 
 Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
