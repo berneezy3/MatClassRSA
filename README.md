@@ -13,11 +13,11 @@ Systems Neuroscience 2.4 (2008)
 
 For more information regarding the toolbox, please refer to the user manual:
 
-# INSERT LINK To Manual here #
+* insert manual link here
 
 Sub-directories:
 
-/ExampleData - this directory will be created with the script:
+/ExampleData - this directory will be created when the script:
 
     /IllustrativeAnalyses/illustrative_0_downloadExampleData.m
 
@@ -70,7 +70,7 @@ and add the above lines into it.
 
 Conditions of Use:
 
-MatClassRSA is release uner the MIT License 
+MatClassRSA is released under the MIT License 
 (https://choosealicense.com/licenses/mit) as follow:
 
 Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
