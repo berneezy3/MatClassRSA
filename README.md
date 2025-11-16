@@ -1,77 +1,69 @@
 # MatClassRSA
-Matlab toolbox for conducting classification and Representational 
-Similarity Analyses (RSA) on M/EEG and other stimulus response data. 
+A MATLAB toolbox for M/EEG classification, proximity matrix construction, and visualization.
 
-RSA is a paradigm that allows quantitative comparison between stimulus 
-responses between different modalities (e.g. EEG, behavioral data) by 
-abstracting results into a dissimilartiy matrix.  More about RSA can be 
-read here:
+M/EEG classification involves constructing a statistical model from categorically labeled data observations. Such a model can then be used to predict labels of new observations. 
+Representational Similarity Analysis (RSA) is a paradigm that allows quantitative comparison between stimulus responses across different data modalities (e.g., EEG, behavioral data) by abstracting data from each modality into Representational Dissimilarity Matrices (RDMs) that can be directly compared in a common unit space. Classification is useful for RSA, as pairwise classifier accuracies or multiclass classifier confusions can serve as measures of distance or similarity, respectively, across a stimulus set and can thus be used to construct the RDMs used for RSA.
 
-Nikolaus Kriegeskorte, Marieke Mur, and Peter A Bandettini. “Representational sim-
-ilarity analysis - connecting the branches of systems neuroscience”. In: Frontiers in
-Systems Neuroscience 2.4 (2008)
+## Information about the toolbox
 
-For more information regarding the toolbox, please refer to the user manual:
+For more information regarding the toolbox, please refer to the User Manual in this repository.
 
-* insert manual link here
+### Modules
 
-Sub-directories:
+MatClassRSA is organized into modules of user-called functions. The modules are as follows:
+1. **Preprocessing.** This module includes functions to shuffle data trials (while retaining correct mapping to stimulus labels and participant labels if specified), average single trials from a given category (and participant, if specified), and normalize data from each sensor on the basis of SNR.
+2. **Reliability.** This module contains functions to estimate the reliability of the data. Reliability can be calculated across available sensors and time points, as well as across varying sample sizes.
+3. **Classification.** This module contains the main classification functions. Currently LDA, SVM (including hyperparameter optimization), and Random Forest classifiers are supported. The module includes functions for cross validation and user-specified train-test partitioning for multiclass and pairwise classifications. Classification functions also include simple permutation testing.
+4. **RDM Computation.** This module includes RDM construction from classifier confusion matrices and pairwise accuracy matrices, as well as directly from the original data (with cross validation) based on Euclidean distance or Pearson correlation.
+5. **Visualization.** This module includes a function to directly visualize RDMs, as well as functions that display the proximity space of an RDM as a dendrogram, multidimensional scaling plot, or minimum spanning tree.
 
-/ExampleData - this directory will be created when the script:
+### Sub-directories
 
-    /IllustrativeAnalyses/illustrative_0_downloadExampleData.m
+* **/ExampleData.** MatClassRSA includes illustrative analyses and example function calls that use example data. Due to their size, example data files are not provided in this repository, but can be automatically downloaded into this folder using the [illustrative_0_downloadExampleData.m](https://github.com/berneezy3/MatClassRSA/blob/master/IllustrativeAnalyses/illustrative_0_downloadExampleData.m) script in the IllustrativeAnalyses folder.
 
-is run.  Data for the ilustrative analyses and example function calls will 
-be stored here.
+* **/ExampleFunctionCalls.** Contains specific example calls to the various MatClassRSA functions.
 
-/ExampleFunctionCalls - Contains specific example calls to the various 
-MatClassRSA functions.
+* **/src.** Location of all MatClassRSA functions and helper functions as well as the LIBSVM package. 
 
-/src - Location of all MatClassRSA functions and helper functions.
+* **/IllustrativeAnalyses.** Location of illustrative analysis scripts.
 
-/IllustrativeAnalyses - Locations of examples and illustrative analyses.
-
-
-Dependencies:
+### Dependencies
 
 The software was tested on recent versions of MATLAB including R2021a
 and R2024b.
 
-The software requires two Matlab toolboxes:  the Statistics and Machine 
+The software requires two MATLAB toolboxes:  the Statistics and Machine 
 Learning Toolbox and the Parallel Computing Toolbox.  Some of the 
 illustrative analyses also require the Image Processing Toolbox.
 
-The sole external dependency is LIBSVM, which is included in the src folder of the Mat-
-ClassRSA GitHub repository:
+The sole external dependency is LIBSVM, which is included in the src folder of this repository:
 
-Chang, Chih-Chung and Lin, Chih-Jen (2011). LIBSVM: A library for support vector machines.
+*Chang, Chih-Chung and Lin, Chih-Jen (2011). LIBSVM: A library for support vector machines.
 ACM transactions on intelligent systems and technology (TIST), 2(3), 1-27. Software available
-at http://www.csie.ntu.edu.tw/~cjlin/libsvm.
+at http://www.csie.ntu.edu.tw/~cjlin/libsvm.*
 
-To use MatClassRSA: 
-
-Download the latest version of this package at https://github.com/berneezy3/MatClassRSA/
-
-The external dependency, LIBSVM, must be set up before any SVM classifications 
+LIBSVM must be set up before any SVM classifications 
 can be performed. Once inside the MatClassRSA main directory, navigate to
 src/libsvm-3.21/matlab and refer to the README file there for LIBSVM 
 installation instructions.
 
+## Getting started
+
+To use MatClassRSA, download the latest version of this package at https://github.com/berneezy3/MatClassRSA/
+
 Upon startup of Matlab, run the following in the Matlab IDE to add the 
 MatClassRSA functions into your search path:
 
-> MatClassRSAPath = ‘path/to/your/directory/in/char/format’;
-> addpath(genpath(MatClassRSAPath));
+```
+MatClassRSAPath = ‘path/to/your/directory/in/char/format’;
+addpath(genpath(MatClassRSAPath));
+```
+MatClassRSA functions will be runnable from this point.  
 
-MatClassRSA functions will be runnable from this point.  To automatically 
-import MatClassRSA upon Matlab startup, please create a ‘startup.m’ 
-somewhere in your Matlab search path (this can be found using the command “path”), 
-and add the above lines into it.  
-
-Conditions of Use:
+## Conditions of use
 
 MatClassRSA is released under the MIT License 
-(https://choosealicense.com/licenses/mit) as follow:
+(https://choosealicense.com/licenses/mit) as follows:
 
 Copyright (c) 2025 Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, 
 Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro.
@@ -95,6 +87,6 @@ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Support:
+## Support
 For questions, comments, suggestions, feature requests, and bug reports, 
-please contact blairbo@ccrma.stanford.edu or bernardcwang@gmail.com
+please contact blairbo@ccrma.stanford.edu or bernardcwang@gmail.com.
