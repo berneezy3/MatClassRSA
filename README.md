@@ -1,37 +1,66 @@
 # MatClassRSA
-Classification toolbox in Matlab for EEG data.  
+Matlab toolbox for conducting classification and Representational 
+Similarity Analyses (RSA) on M/EEG and other stimulus response data. 
 
-This dir contains original Matlab functions from the EEGLAB (formerly ICA/EEG)
-Matlab toolbox, all released under the Gnu public license (see eeglablicence.txt). 
-See the EEGLAB tutorial and reference paper (URLs given below) for more information.
+RSA is a paradigm that allows quantitative comparison between stimulus 
+responses between different modalities (e.g. EEG, behavioral data) by 
+abstracting results into a dissimilartiy matrix.  More about RSA can be 
+read here:
+
+Nikolaus Kriegeskorte, Marieke Mur, and Peter A Bandettini. “Representational sim-
+ilarity analysis - connecting the branches of systems neuroscience”. In: Frontiers in
+Systems Neuroscience 2.4 (2008)
+
+For more information regarding the toolbox, please refer to the user manual:
+
+# INSERT LINK To Manual here #
 
 Sub-directories:
 
-/src - Location of all MatClassRSA functions and helper functions
+/ExampleData - this directory will be created with the script:
 
-/examples - Locations of examples and illustrative analyses
+    /IllustrativeAnalyses/illustrative_0_downloadExampleData.m
+
+is run.  Data for the ilustrative analyses and example function calls will 
+be stored here.
+
+/ExampleFunctionCalls - Contains specific example calls to the various 
+MatClassRSA functions.
+
+/src - Location of all MatClassRSA functions and helper functions.
+
+/IllustrativeAnalyses - Locations of examples and illustrative analyses.
+
 
 Dependencies:
 
-The software is compatible with Matlab 2016b and above.  Some functions may be usable on earlier versions of MATLAB, 
-but it has not been fully tested on previous versions.  
-The software requires two Matlab toolboxes:  the Statistics and Machine Learning Toolbox and the Image Processing Toolbox.
+The software was tested on recent versions of MATLAB including R2021a
+and R2024b.
 
-To use EEGLAB: 
+The software requires two Matlab toolboxes:  the Statistics and Machine 
+Learning Toolbox and the Parallel Computing Toolbox.  Some of the 
+illustrative analyses also require the Image Processing Toolbox.
+
+The sole external dependency is LIBSVM, which is included in the src folder of the Mat-
+ClassRSA GitHub repository:
+
+Chang, Chih-Chung and Lin, Chih-Jen (2011). LIBSVM: A library for support vector machines.
+ACM transactions on intelligent systems and technology (TIST), 2(3), 1-27. Software available
+at http://www.csie.ntu.edu.tw/~cjlin/libsvm.
+
+To use MatClassRSA: 
 
 Download the latest version of this package at https://github.com/berneezy3/MatClassRSA/
 
+The external dependency, LIBSVM, must be set up before any SVM classifications can be
+performed. Once inside the MatClassRSA main directory, navigate to
+src/libsvm-3.21/matlab
+and refer to the README file there for LIBSVM installation instructions.
+
 Upon startup of Matlab, run the following in the Matlab IDE to add the MatClassRSA functions into your search path:
 
-> downloadPath = <Your download directory here, in char array format>;
-
-> addpath([downloadPath 'src/Classification/libsvm-3.21/matlab']);
-
-> addpath([downloadPath 'src/Classification/']);
-
-> addpath([downloadPath 'src/RDM_Computation/');
-
-> addpath([downloadPath 'src/Visualization']);
+> MatClassRSAPath = ‘path/to/your/directory/in/char/format’;
+> addpath(genpath(MatClassRSAPath));
 
 MatClassRSA functions will be runnable from this point.  To automatically import MatClassRSA upon Matlab startup, 
 please create a ‘startup.m’ somewhere in your Matlab search path (this can be found using the command “path”), 
