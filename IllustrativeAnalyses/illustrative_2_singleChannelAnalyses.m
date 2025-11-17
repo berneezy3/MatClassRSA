@@ -106,7 +106,7 @@ plot(1:nSpace, mean(avg_space_reliability_space, 2)-std(avg_space_reliability_sp
 xlim([0,nSpace+1]);
 xlabel('Electrode Index');
 ylabel('Reliability');
-title('Average Reliability Over Time for all Electrodes (+- SD)');
+title('Reliability (Averaged Over Time) for each Electrode (+- SD)');
 
 annotation ('textbox', [0.48, 0.5, 0.1, 0.1], ...
     'String', {

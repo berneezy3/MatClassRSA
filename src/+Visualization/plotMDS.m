@@ -11,16 +11,13 @@ function fig = plotMDS(RDM, varargin)
 %               symmetrical along the diagonal
 %
 % OPTIONAL NAME-VALUE INPUTS:
-%   'nodeColors': a vector of colors, whose order corresponds to the order 
-%       of labels in the confusion matrix.  For example, if user inputs: 
-%        ['yellow' 'magenta' 'cyan' 'red' 'green' 'blue' 'white' 'black'],  
-%       then class 1 would be yellow, class 2 would be magenta... class 8 
-%       would be black.  Colors can be expressed as an RGB triplet 
-%       ([1 1 0]), short name ('y') or long name ('yellow').  See Matlab 
-%       color specification documentation for more info: 
-%           https://www.mathworks.com/help/matlab/ref/colorspec.html
+%   'nodeColors': a matrix of rgb color values of size [numClasses, 3],
+%       where the second dimension contains the r, g, and b, values between
+%       0 and 1.
 %   'nodeLabels': A matrix of alphanumeric labels, whose order corresponds 
 %       to the labels in the confusion matrix. e.g. ['cat' 'dog' 'fish']
+%   'markerSize': Specified value for marker size used in node labeling,
+%       default 5
 %   'dimensions': Choose which MDS dimensions to display (default [1 2]).
 %   'xLim': Set range of the X-axis with array of length 2, [xMin xMax].
 %   'yLim': Set range of the Y-axis with an array of length 2, [yMin yMax].
@@ -68,8 +65,9 @@ function fig = plotMDS(RDM, varargin)
     ip.FunctionName = 'plotMDS';
     ip.addRequired('RDM',@ismatrix);
     options = [1, 0];
-    ip.addParameter('nodeColors', [], @(x) assert(isvector(x))); 
+    ip.addParameter('nodeColors', [], @(x) assert(ismatrix(x))); 
     ip.addParameter('nodeLabels', [], @(x) assert(isvector(x)));
+    ip.addParameter('markerSize', 5, @(x) assert(isnumeric(x)));
     ip.addParameter('classical', 1, @(x) assert(isnumeric(x)));
 
     % which dimensions of MDS to plot
@@ -194,12 +192,14 @@ function fig = plotMDS(RDM, varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
     % CASE: COLOR
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
     elseif ~isempty(ip.Results.nodeColors) && isempty(ip.Results.nodeLabels)
-        
+        colors = ip.Results.nodeColors;
         for i = 1:r
-            plot( Y(i,xDim) ,Y(i,yDim) , 'o', 'MarkerSize', 15, 'LineWidth', 4, ...
-                'MarkerEdgeColor', ip.Results.nodeColors{i}, ...
-                'MarkerFaceColor', ip.Results.nodeColors{i});
+            plot( Y(i,xDim) ,Y(i,yDim) , 'o', 'MarkerSize', ip.Results.markerSize, 'LineWidth', 4, ...
+                'MarkerEdgeColor', colors(i,:), ...
+                'MarkerFaceColor', colors(i,:));
+            hold on;
         end
             xlim([xMin xMax]);
             ylim([yMin yMax]);

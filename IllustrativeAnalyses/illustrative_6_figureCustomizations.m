@@ -54,10 +54,6 @@ stimImages = {stim1, stim2, stim3, stim4, stim5, stim6};
 stimImagePaths = ["stimulus01.png'", "stimulus13.png", "stimulus25.png",...
     "stimulus37.png", "stimulus49.png", "stimulus62.png"];
 %% Confusion Matrix Visualization
-
-% Change as needed
-iconpath = './6ClassStim/';
-
 % ---------------------- Preprocessing Steps -------------------------
 [xShuf, yShuf] = Preprocessing.shuffleData(X, labels6, 'rngType', rnd_seed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
@@ -68,124 +64,130 @@ xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 % ---------------------------- Classification ----------------------------
 M = Classification.crossValidateMulti(xAvg, yAvg, 'classifier', 'LDA', 'PCA', 0.99);
 
-
 figure;
 Visualization.plotMatrix(M.CM, 'colorbar', 0, ...
                             'colorMap', 'summer', ...
-                            'matrixLabels', 1);
-                        
-% Remove default ticks
-set(gca, 'XTick', [], 'YTick', []);
-
-% Offset for placing the images
-offset = 0.5;  
+                            'matrixLabels', 1);                    
+mainAx = gca;
+hold(mainAx, 'on');
 
 N = length(stimImages);
 
-% Clear default tick labels but keep ticks in place
-set(gca, 'XTick', 1:length(stimImages), 'XTickLabel', []);
-set(gca, 'YTick', 1:length(stimImages), 'YTickLabel', []);
+% ---------------- Plot ----------------
+
+yl = get(mainAx,'YLim');
+xl = get(mainAx,'XLim');
+
+% Determine direction of Y
+if strcmp(get(mainAx,'YDir'), 'reverse')
+    rowCenter = @(i) i;          % top = 1
+else
+    rowCenter = @(i) N - i + 1;  % top = N
+end
+
+
+% Image width and height
+imgHeight = 0.8;   
+imgWidth  = 0.8;   
+
+% X location to the left of the confusion matrix
+xLeft = xl(1) - imgWidth - 0.1; 
+
+for i = 1:N
+    yc = rowCenter(i);            
+    yBottom = yc - imgHeight/2;
+    yTop    = yc + imgHeight/2;
+    image(mainAx, [xLeft, xLeft + imgWidth], [yBottom, yTop], stimImages{i}, ...
+        'Clipping', 'off');
+end
+
+% Prevent autoscaling
+set(mainAx, 'YLim', yl, 'XLim', xl);
+
+% Compute the bottom row Y coordinate:
+
+bottomY = yl(1);
+if strcmp(get(mainAx,'YDir'),'reverse')
+    bottomY = yl(2);
+end
+
+% Image height (small)
+imgHeightX = 0.8;
+imgOffset = -0.8;
+
+for i = 1:N
+    % match the column width
+    xLeftCol  = i - 0.4;
+    xRightCol = i + 0.4;
+
+    % below the matrix
+    yBottom = bottomY - imgOffset - imgHeightX;
+    yTop    = bottomY - imgOffset;
+
+    image(mainAx, [xLeftCol, xRightCol], [yBottom, yTop], stimImages{i}, ...
+        'Clipping', 'off');
+end
+
+set(mainAx, 'XTick', [], 'YTick', []);
+
+ylabel(mainAx, 'True Labels', ...
+    'FontSize', 22, ...
+    'FontWeight', 'bold', ...
+    'Units', 'normalized', ...
+    'Position', [-0.15, 0.5, 0]);
 
 fig = gcf;
 fig.Units = 'normalized';
-fig.Position = [0.1 0.1 0.7 0.8];  % Wider and taller than default
+fig.Position = [0.1, 0.1, 0.8, 0.9];  
 
-mainAx = gca;
-colorbar(mainAx);  
-mainAx = gca;
-mainPos = get(mainAx, 'Position');
-mainPos(2) = mainPos(2) + 0.1 * mainPos(4);  % Shift matrix up slightly
-mainPos(4) = mainPos(4) * 0.85;              % Slightly reduce height
-mainPos(1) = mainPos(1) + 0.07;  % increase this if needed
-mainPos(3) = mainPos(3) * 0.92;  % optional: slightly reduce width to maintain fit
+mainPos = get(mainAx, 'Position'); 
+
+mainPos(2) = mainPos(2) + 0.1;    
+mainPos(4) = mainPos(4) - 0.1;  
 set(mainAx, 'Position', mainPos);
 
+% Move axes right and shrink width
+mainPos(1) = mainPos(1) + 0.1;     
+mainPos(3) = mainPos(3) - 0.1;    
 
-mainPos = get(mainAx, 'Position');
-N = length(stimImages);
+set(mainAx, 'Position', mainPos);
 
-for i = 1:N
-    ax = axes('Position', [ ...
-        mainPos(1) + (i - 1) * mainPos(3)/N, ...  % X position (step across)
-        mainPos(2) - mainPos(4)*0.15, ...          % Y position (below matrix)
-        mainPos(3)/N, ...                         % Width
-        mainPos(4)*0.15]);                        % Height (adjust as needed)
-    
-    imshow(stimImages{i});
-    axis off
-end
+xlabel(mainAx, 'Predicted Labels', 'Units', 'normalized', 'Position', ...
+    [0.5, -0.15, 0], 'fontSize', 22, 'FontWeight', 'bold');
 
-xlabel(mainAx, 'Predicted Labels', 'Units', 'normalized', 'Position', [0.5, -0.15, 0], 'fontSize', 16, 'FontWeight', 'bold');
+title(mainAx, '6-Class Confusion Matrix', ...
+    'fontSize', 26);
 
-% Add stimulus images as y-tick labels
-for i = 1:N
-    ax = axes('Position', [ ...
-        mainPos(1) - mainPos(3)*0.15, ...        % X to the left of matrix
-        mainPos(2) + (N - i) * mainPos(4)/N, ... % Y
-        mainPos(3)*0.15, ...                     % Width
-        mainPos(4)/N]);                          % Height
-    imshow(stimImages{i});
-    axis off
-end
+c = colorbar(mainAx);
+c.FontSize = 22;
+c.TickLabelInterpreter = 'none';
 
-ylabel(mainAx, 'True Labels', ...
-    'FontSize', 16, ...
-    'FontWeight', 'bold', ...
-    'Units', 'normalized', ...
-    'Position', [-0.15, 0.5, 0]);  % Shift left (x) and center (y)
 
-set(gcf, 'Position', [100,500,250,250]);
-title(mainAx, '6-Class Classification on Visual Stimulus Evoked ERP', 'fontSize', 20);
-
-%% Dendrogram  Visualization
-
+%% MDS Visualization
 
 RDM = RDM_Computation.computeCMRDM(M.CM);
 
-Visualization.plotDendrogram(RDM);
+Visualization.plotMDS(RDM);
 
-% Remove default ticks
-set(gca, 'XTick', [], 'YTick', []);
+% Assume stimImages is a cell array of image matrices
+axMDS = gca;
+hold on
 
-% Offset for placing the images
-offset = 0.5;  
+% Get the axis limits to convert coordinates to normalized figure units
+xRange = xlim(axMDS);
+yRange = ylim(axMDS);
 
-N = length(stimImages);
+for i = 1:size(coords,1)
+    % Convert from data to normalized figure position
+    xNorm = (coords(i,1) - xRange(1)) / diff(xRange);
+    yNorm = (coords(i,2) - yRange(1)) / diff(yRange);
 
-% Clear default tick labels but keep ticks in place
-set(gca, 'XTick', 1:length(stimImages), 'XTickLabel', []);
-set(gca, 'YTick', 1:length(stimImages), 'YTickLabel', []);
+    % Define a small axes for each image
+    imgSize = 0.06;  % adjust for scale
+    axImg = axes('Position', [xNorm - imgSize/2, yNorm - imgSize/2, imgSize, imgSize]);
 
-fig = gcf;
-fig.Units = 'normalized';
-fig.Position = [0.1 0.1 0.7 0.8];  % Wider and taller than default
-
-mainAx = gca;
-
-mainPos = get(mainAx, 'Position');
-mainPos(2) = mainPos(2) + 0.1 * mainPos(4);  % Shift matrix up slightly
-mainPos(4) = mainPos(4) * 0.85;              % Slightly reduce height
-mainPos(1) = mainPos(1) + 0.07;  % increase this if needed
-mainPos(3) = mainPos(3) * 0.92;  % optional: slightly reduce width to maintain fit
-set(mainAx, 'Position', mainPos);
-
-
-mainPos = get(mainAx, 'Position');
-N = length(stimImages);
-
-for i = 1:N
-    ax = axes('Position', [ ...
-        mainPos(1) + (i - 1) * mainPos(3)/N, ...  % X position (step across)
-        mainPos(2) - mainPos(4)*0.15, ...          % Y position (below matrix)
-        mainPos(3)/N, ...                         % Width
-        mainPos(4)*0.15]);                        % Height (adjust as needed)
-    
     imshow(stimImages{i});
     axis off
 end
 
-xlabel(mainAx, 'Stimuli', 'Units', 'normalized', 'Position', [0.5, -0.15, 0], 'fontSize', 16, 'FontWeight', 'bold');
-
-
-
-title(mainAx, '6-Class Classification on Visual Stimulus Evoked ERP', 'fontSize', 20);
+axes(axMDS);  % Restore focus to the main plot

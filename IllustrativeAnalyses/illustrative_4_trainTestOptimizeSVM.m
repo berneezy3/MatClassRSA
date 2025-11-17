@@ -86,7 +86,7 @@ catLabels = {'HB', 'HF', 'AB', 'AF', 'FV', 'IO'};
 % for either C (linear kernel) or Gamma (rbf and linear kernels), is set as
 % logspace((-5), 5, 5) or [1.0e–5, 3.1623e–3, 1.0000e+0, 3.1623e+2, 1.0e+5];
 
-% Lets test iterating over these default values with crossValidateMulti_opt 
+% Lets test, iterating over these default values with crossValidateMulti_opt 
 % on a dataset, to see how well the default SVM classification goes
 
 % Preprocessing Steps
@@ -110,63 +110,42 @@ set(gca, 'fontsize', 14)
 % Gamma: ~0.0032
 % C: ~316
 
-%% SVM vs LDA: Train and Test on Partitioned Data
+%% SVM vs LDA: Train and Test
 
 % Lets compare default LDA and SVM grid search optimized models, generated
 % on the same dataset.
 
 % ---------------------- Preprocessing Steps -------------------------
-[xShuf, yShuf] = Preprocessing.shuffleData(X, labels6, 'rngType', rnd_seed);  % Shuffle Data
+[xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rnd_seed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
 [xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', ...
     'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
-% ----------- Partition the data for training and testing --------------
 
-% (90% Train, 0 Development, 10% Test) data partitioning
-partition = Utils.trainDevTestPart(xAvg, 1, [0.9, 0, 0.1]);
-
-% needed for cvData() function call
-ip.Results.PCA = 0;
-ip.Results.PCAinFold = 0;
-
-% Split data into train and test partitions
-[cvDataObj,V,nPCs] = Utils.cvData(xAvg, yAvg, partition, ip, 1, 0);
-
-% ---------------------------- Training -------------------------------
 % Training LDA
-MLDA = Classification.trainMulti(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, ...
-    'classifier', 'LDA', 'PCA', 0.99);
+MLDA = Classification.crossValidateMulti(xAvg, yAvg, ...
+    'classifier', 'LDA', 'PCA', 0.99, 'rngType', rnd_seed);
 
 % Training SVM
-MSVM = Classification.trainMulti_opt(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, ...
-    'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 0.99);
+MSVM = Classification.crossValidateMulti_opt(xAvg, yAvg, ...
+    'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 0.99, 'rngType', rnd_seed);
 
-
-% ---------------------------- Testing -------------------------------
-% Testing LDA
-PLDA = Classification.predict(MLDA, cvDataObj.testXall{1}, 'actualLabels', ...
-    cvDataObj.testYall{1});
-
-% Testing SVM
-PSVM = Classification.predict(MSVM, cvDataObj.testXall{1}, 'actualLabels', ...
-    cvDataObj.testYall{1});
 
 % ----------------------------- Plot ----------------------------------
 figure;
 set(gcf, 'Position', [150,300,1200,500]);
 subplot(1,2,1)
-Visualization.plotMatrix(PLDA.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+Visualization.plotMatrix(MLDA.CM, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6);
                         
-title(sprintf('LDA: %.2f%% Accuracy', PLDA.accuracy*100'));
+title(sprintf('LDA: %.2f%% Accuracy', MLDA.accuracy*100'));
 set(gca, 'fontsize', 14)
 
 subplot(1,2,2)
-Visualization.plotMatrix(PSVM.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+Visualization.plotMatrix(MSVM.CM, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6);
                         
-title(sprintf('SVM: %.2f%% Accuracy', PSVM.accuracy*100'));
+title(sprintf('SVM: %.2f%% Accuracy', MSVM.accuracy*100'));
 set(gca, 'fontsize', 14)
 
 sgtitle('SVM vs LDA: Default Classification Parameters', ...
@@ -209,7 +188,7 @@ gamma_fine = logspace(-1.8, -3, ngamma);
 % Classify
 MSVM = Classification.crossValidateMulti_opt(xAvg, yAvg, ...
     'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 0.99, 'gammaSpace', ...
-    gamma_fine, 'CSpace', C_fine);
+    gamma_fine, 'CSpace', C_fine, 'rngType', rnd_seed);
 
 % Average across the 10 fold cross validation results
 avgGamma_Opt = mean(MSVM.gamma_opt); % Best Gamma
@@ -223,12 +202,17 @@ Visualization.plotMatrix(MSVM.CM, 'colorbar', 1, 'matrixLabels', 1, ...
 title(sprintf('Improved SVM Accuracy: %.2f%% Accuracy', MSVM.accuracy*100'));
 set(gca, 'fontsize', 14)
 
+% ---- New Best -----
+% Accuracy: ~81.61%
+% Gamma: 0.0146
+% C: 1000
+
 
 %% SVM vs LDA: After Hyperparameter Tuning
 
 % Classify using newly fine tuned hyperparameters Gamma and C
 MSVM = Classification.trainMulti(cvDataObj.trainXall{1}, cvDataObj.trainYall{1}, ...
-    'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 0.99, 'Gamma', avgGamma_Opt, 'C', avgC_Opt);
+    'classifier', 'SVM', 'kernel', 'rbf', 'PCA', 0.99, 'Gamma', avgGamma_Opt, 'C', avgC_Opt, 'rngType', rnd_seed);
 
 % Predict using newly trained model
 PSVM = Classification.predict(MSVM, cvDataObj.testXall{1}, 'actualLabels', cvDataObj.testYall{1});
@@ -255,7 +239,7 @@ sgtitle('SVM vs LDA: Fine Hyperparameter Tuning', ...
     'FontWeight', 'bold');
 
 annotation ('textbox', [0.40, 0.45, 0.2, 0.18], ...
-    'String', sprintf('After more refined hyperparameter tuning, RBF Kernel SVM Classification outperforms LDA'),...
+    'String', sprintf('After refined hyperparameter tuning, RBF Kernel SVM Classification matches LDA'),...
     'FontSize', 18, ...
     'EdgeColor','none', ...
     'BackgroundColor', [173/255, 216/255, 230/255], ...
