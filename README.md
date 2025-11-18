@@ -6,6 +6,8 @@ Representational Similarity Analysis (RSA) is a paradigm that allows quantitativ
 
 ## Information about the toolbox
 
+MatClassRSA was created by [Bernard C. Wang](https://github.com/berneezy3), [Raymond Gifford](https://raymondgifford.com/), [Nathan C. L. Kong](https://scholar.google.com/citations?user=Iz9qpyUAAAAJ&hl=en&oi=sra), [Feng Ruan](https://fengruan.github.io/), [Anthony M. Norcia](https://profiles.stanford.edu/anthony-norcia), and [Blair Kaneshiro](https://ccrma.stanford.edu/~blairbo/).
+
 For more information regarding the toolbox, please refer to the User Manual in this repository.
 
 ### Modules
