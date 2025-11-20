@@ -65,7 +65,7 @@ MatClassRSA functions will be runnable from this point.
 ## Citing the toolbox
 
 If using MatClassRSA, please cite the following items:
-* *Bernard C. Wang, Nathan C. L. Kong, Feng Ruan, Raymond Gifford, Anthony M. Norcia, and Blair Kaneshiro (2025). [MatClassRSA v2 Release: A MATLAB Toolbox for M/EEG Classification, Proximity Matrix Construction, and Visualization.](https://www.biorxiv.org/content/10.1101/2025.11.19.689115) bioRxiv 2025.11.19.689115. doi:10.1101/2025.11.19.689115*
+* *Bernard C. Wang, Raymond Gifford, Nathan C. L. Kong, Feng Ruan, Anthony M. Norcia, and Blair Kaneshiro (2025). [MatClassRSA v2 Release: A MATLAB Toolbox for M/EEG Classification, Proximity Matrix Construction, and Visualization](https://www.biorxiv.org/content/10.1101/2025.11.19.689115). bioRxiv 2025.11.19.689115. doi:10.1101/2025.11.19.689115*
 * Please also cite the Zenodo record and DOI for the GitHub release, as referenced in the bibliography of the above preprint.
 
 In addition, if using any of the toolbox's example data in outside projects, please cite the following dataset:
