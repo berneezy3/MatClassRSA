@@ -84,8 +84,6 @@ stimImages = {stim1, stim2, stim3, stim4, stim5, stim6};
 stimImagePaths = ["stimulus01.png'", "stimulus13.png", "stimulus25.png",...
     "stimulus37.png", "stimulus49.png", "stimulus62.png"];
 
-
-
 %% Find most reliable electrode at determined reliable timepoints
 close
 
@@ -324,5 +322,3 @@ set(gca, 'Color', 'White');
 set(gcf, 'Color', 'White');
 
 set(gcf, 'Position', [200,200,1300,500]);
-
-saveas(gcf, 'Figs/topoPlotComparison_accuracy_vs_reliability.jpg');
