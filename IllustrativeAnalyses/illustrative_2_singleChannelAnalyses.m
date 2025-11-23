@@ -84,8 +84,6 @@ stimImages = {stim1, stim2, stim3, stim4, stim5, stim6};
 stimImagePaths = ["stimulus01.png'", "stimulus13.png", "stimulus25.png",...
     "stimulus37.png", "stimulus49.png", "stimulus62.png"];
 
-
-
 %% Find most reliable electrode at determined reliable timepoints
 close
 
@@ -106,7 +104,7 @@ plot(1:nSpace, mean(avg_space_reliability_space, 2)-std(avg_space_reliability_sp
 xlim([0,nSpace+1]);
 xlabel('Electrode Index');
 ylabel('Reliability');
-title('Average Reliability Over Time for all Electrodes (+- SD)');
+title('Reliability (Averaged Over Time) for each Electrode (+- SD)');
 
 annotation ('textbox', [0.48, 0.5, 0.1, 0.1], ...
     'String', {
@@ -324,5 +322,3 @@ set(gca, 'Color', 'White');
 set(gcf, 'Color', 'White');
 
 set(gcf, 'Position', [200,200,1300,500]);
-
-saveas(gcf, 'Figs/topoPlotComparison_accuracy_vs_reliability.jpg');

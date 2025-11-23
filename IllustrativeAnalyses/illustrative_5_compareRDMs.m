@@ -94,7 +94,7 @@ RDMpm = RDM_Computation.shiftPairwiseAccuracyRDM(MPW.AM);
 
 % -------------------------- Visualization ------------------------------
 figure;
-set(gcf, 'Position', [150,300,1200,1200]);
+set(gcf, 'Position', [150,300,1600,1800]);
 subplot(3,2,1);
 Visualization.plotMatrix(RDMmc, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6, ...
@@ -149,8 +149,6 @@ annotation ('textbox', [0.45, 0.32, 0.1, 0.1], ...
     'BackgroundColor', [173/255, 216/255, 230/255], ...
     'HorizontalAlignment', 'center', ...
     'VerticalAlignment', 'middle');
-
-saveas(gcf, 'Figs/fig24_pairwise_vs_multiclass_rdms.jpg');
 
 %% Multi-class vs Pairwise Classification
 
@@ -235,8 +233,6 @@ annotation ('textbox', [0.45, 0.32, 0.1, 0.1], ...
     'BackgroundColor', [173/255, 216/255, 230/255], ...
     'HorizontalAlignment', 'center', ...
     'VerticalAlignment', 'middle');
-
-saveas(gcf, 'Figs/fig24_pairwise_vs_multiclass_rdms.jpg');
 %% Compare Pearson and Classification RMD, 72-Class
 singleElectrodeX = squeeze(X(96,:,:));
 
@@ -250,14 +246,14 @@ xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
     'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 
-
 M = Classification.crossValidateMulti(xAvg, yAvg, 'PCA', 0.99);
 
 ClassRDM = RDM_Computation.computeCMRDM(M.CM);
 
-% -------------------------------- Plot ---------------------------------
+%% -------------------------------- Plot ---------------------------------
 
 nodeColors = zeros(72,3);
+
 for i = 1:6
     idx = (1:12) + (i-1)*12;   % 1:12, 13:24, ..., 61:72
     nodeColors(idx, :) = repmat(rgb6{i}, 12, 1);
@@ -269,7 +265,7 @@ subplot(2,2,1)
 Visualization.plotMatrix(PearsonRDM.RDM, 'colorbar', 1, 'matrixLabels', 0, ...
     'colorMap', 'summer', 'rankType', 'p');
  
-title(sprintf('Pearson RDM'));
+title(sprintf('Pearson RDM (Percent Rank)'));
 set(gca, 'fontsize', 16)
 
 subplot(2,2,2)
@@ -280,22 +276,21 @@ title(sprintf('Classification RDM'));
 set(gca, 'fontsize', 16)
 
 subplot(2,2,3)
-Visualization.plotMST(PearsonRDM.RDM);
+Visualization.plotMDS(PearsonRDM.RDM, 'nodeColors', nodeColors);
  
-title(sprintf('Pearson MST'));
+title(sprintf('Pearson MDS'));
 set(gca, 'fontsize', 16)
 
 subplot(2,2,4)
-Visualization.plotMST(ClassRDM, 'nodeColors', nodeColors);
+Visualization.plotMDS(ClassRDM, 'nodeColors', nodeColors);
 
-title(sprintf('Classification MST'));
+title(sprintf('Classification MDS'));
 set(gca, 'fontsize', 16)
 
 sgtitle('Computed Pearson and 72-Class Classification RDM', ...
     'FontSize', 20, ...
     'FontWeight', 'bold');
 
-saveas(gcf, 'Figs/fig27_pearson_vs_classification_rdms_72Class.jpg');
 %% Compare Pearson and Euclidean RDMs At Timepoint
 
 % Visualize selected timepoint of interest
@@ -356,14 +351,14 @@ subplot(3,2,1)
 Visualization.plotMatrix(PearsonRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
     'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
  
-title(sprintf('Pearson RDM'));
+title(sprintf('Pearson RDM (Percent Rank)'));
 set(gca, 'fontsize', 16)
 
 subplot(3,2,2)
 Visualization.plotMatrix(EuclidRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
     'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
                         
-title(sprintf('Euclidean RDM'));
+title(sprintf('Euclidean RDM (Percent Rank)'));
 set(gca, 'fontsize', 16)
 
 subplot(3,2,3)
@@ -398,4 +393,104 @@ sgtitle('Single Timepoint (144 ms), Visualized Pearson and Euclidean RDM', ...
     'FontSize', 20, ...
     'FontWeight', 'bold');
 
-saveas(gcf, 'Figs/fig26_pearson_vs_euclidean_timepoint.jpg');
+%% Compare Pearson and Euclidean RDMs At Single Electrode
+
+% Visualize selected timepoint of interest
+figure();
+set(gcf, 'Position', [10,600,500,500]);
+
+for i = 1:6
+    
+    % Subset out the data for the current stim category
+    % time x trials
+    temp = squeeze(xAvg(96, :, yAvg==i));
+    
+    % Plot current mean and color by category
+    % We take the mean across the 2nd (trial) dimension
+    % Color the mean black and use a larger linewidth
+    plot(t, mean(temp,2), 'color', rgb6{i},...
+        'linewidth', 2);
+    
+    hold on
+    
+    % Our aesthetics from before
+    grid on
+    xlabel('Time (msec)'); ylabel('Voltage (\muV)')
+    
+    xlim([-112 512])
+    set(gca, 'fontsize', 16)
+    
+    % Get current axis limits
+    xLimits = xlim;
+    yLimits = ylim;
+      
+end
+
+% Draw line at timepoint of interest
+xline(t(17), '--k', 'LineWidth', 1.5);
+title('Electrode 96, 6-Class ERPs Averaged across Trials');
+set(gca, 'fontsize', 16)
+
+% Add legend
+legendTemp = catLabelsElaborate;
+legendTemp{end+1} = 'Timepoint selected';
+legend(legendTemp);
+
+% Subset data at time point of interest
+singleElectrodeX = squeeze(X(96,:,:));
+
+% ---------------------------- Compute RDMs --------------------------------
+PearsonRDM = RDM_Computation.computePearsonRDM(singleElectrodeX, labels6, ...
+    'rngType', rnd_seed);
+
+EuclidRDM = RDM_Computation.computeEuclideanRDM(singleElectrodeX, labels6, ...
+    'rngType', rnd_seed);
+
+% ------------------------------ Plot -------------------------------
+figure;
+set(gcf, 'Position', [150,300,1100,1100]);
+subplot(3,2,1)
+Visualization.plotMatrix(PearsonRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
+ 
+title(sprintf('Pearson RDM (Percent Rank)'));
+set(gca, 'fontsize', 16)
+
+subplot(3,2,2)
+Visualization.plotMatrix(EuclidRDM.RDM, 'colorbar', 1, 'matrixLabels', 1, ...
+    'axisLabels', catLabels, 'axisColors', rgb6, 'colorMap', 'summer', 'rankType', 'p');
+                        
+title(sprintf('Euclidean RDM (Percent Rank)'));
+set(gca, 'fontsize', 16)
+
+subplot(3,2,3)
+Visualization.plotMDS(RDMmc, 'nodeLabels', catLabels, 'nodeColors', rgb6);
+                        
+title(sprintf('Pearson MDS'));
+set(gca, 'fontsize', 16)
+
+subplot(3,2,4)
+Visualization.plotMDS(RDMpm, 'nodeLabels', catLabels, 'nodeColors', rgb6);
+                        
+title(sprintf('Euclidean MDS'));
+set(gca, 'fontsize', 16)
+
+subplot(3,2,5)
+Visualization.plotMST(PearsonRDM.RDM, ...
+    'nodeLabels', catLabels, 'nodeColors', rgb6, 'nodeLabelSize', 28, ...
+    'lineColor', rgb6{1}, 'lineWidth', 3);
+ 
+title(sprintf('Pearson MST'));
+set(gca, 'fontsize', 16)
+
+subplot(3,2,6)
+Visualization.plotMST(EuclidRDM.RDM, ...
+    'nodeLabels', catLabels, 'nodeColors', rgb6, 'nodeLabelSize', 28, ...
+    'lineColor', rgb6{1}, 'lineWidth', 3);
+
+title(sprintf('Euclidean MST'));
+set(gca, 'fontsize', 16)
+
+sgtitle('Single Electrode (96) Pearson and Euclidean RDM', ...
+    'FontSize', 20, ...
+    'FontWeight', 'bold');

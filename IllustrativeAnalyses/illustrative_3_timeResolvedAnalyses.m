@@ -269,7 +269,7 @@ annotation ('textbox', [0.47, 0.45, 0.1, 0.1], ...
 % Preprocessing Steps
 [xShuf, yShuf] = Preprocessing.shuffleData(X, labels6, 'rngType', rnd_seed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 15);  % Average Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 15, 'rngType', rnd_seed);  % Average Data
 
 % Define bin sizes from 1 to 40 with step size 1
 binSizes = 1:40;
@@ -285,7 +285,7 @@ allAccuracies = cell(numBinsTested, 1);
 for i = 1:numBinsTested
     timeBinSize = binSizes(i);
     numBins = floor((numTimePoints - timeBinSize) / stepSize) + 1; % Compute bins
-    
+
     accuracies = zeros(numBins, 1);
     
     % Sliding window classification for this bin size
@@ -322,12 +322,15 @@ grid on;
 figure;
 set(gcf, 'Position', [300,300,900,800]);
 
+timeCenters = ((0:numBins-1) * stepSize) + (timeBinSize/2);
+
 subplot(2,1,1);
 
-plot(t(timeAxis), allAccuracies{6}, '-o', 'LineWidth', 2);
+plot(t((round(timeCenters))), allAccuracies{6}, '-o', 'LineWidth', 2);
 xlabel('Centered Window Time (ms)');
 ylabel('Classification Accuracy');
 title(sprintf('Sliding Window Classification (Window = 6, Step = %d)', stepSize));
+xlim([-100, 500]);
 ylim([0, 1]); % Accuracy range
 grid on;
 
@@ -449,7 +452,7 @@ subplot(1,2,1)
 
 stimPath = 'UnitTests/testVisualizations/6ClassStim';
 
-Visualization.plotDendrogram(RDMAll,'yLim', [0 1], 'nodeLabels', catLabels, 'nodeColors', rgb6, 'iconPath', stimPath);
+Visualization.plotDendrogram(RDMAll, 'nodeLabels', catLabels, 'nodeColors', rgb6);
 
 title('All Timepoints');
 set(gca, 'fontsize', 16); 
@@ -458,7 +461,7 @@ hold on
 
 subplot(1,2,2)
 
-Visualization.plotDendrogram(RDMBest,'yLim', [0 1], 'nodeLabels', catLabels, 'nodeColors', rgb6, 'iconPath', stimPath);
+Visualization.plotDendrogram(RDMBest, 'nodeLabels', catLabels, 'nodeColors', rgb6);
 
 title('Best Timepoints');
 set(gca, 'fontsize', 16);

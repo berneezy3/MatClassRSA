@@ -265,7 +265,7 @@ annotation ('textbox', [0.38, 0.4, 0.2, 0.2], ...
     'VerticalAlignment', 'middle');
 
 
-%% Noise Normalization Important for Transfer Learning
+%% Noise Normalization Important for Transfer Learning SVM
 
 % load 3D training participant data
 trainParticipant = load('S01.mat');
@@ -280,7 +280,7 @@ testParticipant3 = load('S08.mat');
 
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rnd_seed);  % Shuffle Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 30, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 % SVM classificaiton
 M = Classification.trainMulti_opt(xAvg, yAvg, 'PCA', 0.99, ...
@@ -291,20 +291,20 @@ M = Classification.trainMulti_opt(xAvg, yAvg, 'PCA', 0.99, ...
 
 % Preprocessing steps for test participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant1.X, testParticipant1.labels6, 'rngType', rnd_seed);  % Shuffle Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 30, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 P3 = Classification.predict(M, xAvg, 'actualLabels', yAvg);
 
 % Preprocessing steps for test participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant2.X, testParticipant2.labels6, 'rngType', rnd_seed);  % Shuffle Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 30, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 P4 = Classification.predict(M, xAvg, 'actualLabels', yAvg);
 
 
 % Preprocessing steps for test participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant3.X, testParticipant3.labels6, 'rngType', rnd_seed);  % Shuffle Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 30, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 P7 = Classification.predict(M, xAvg, 'actualLabels', yAvg);
 
@@ -315,7 +315,7 @@ P7 = Classification.predict(M, xAvg, 'actualLabels', yAvg);
 % Preprocessing steps for train participant
 [xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rnd_seed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 40, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 % SVM classificaiton
 M = Classification.trainMulti_opt(xAvg, yAvg, 'PCA', 0.99, ...
@@ -327,23 +327,27 @@ M = Classification.trainMulti_opt(xAvg, yAvg, 'PCA', 0.99, ...
 % Preprocessing steps for test participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant1.X, testParticipant1.labels6, 'rngType', rnd_seed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 40, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 P3Norm = Classification.predict(M, xAvg, 'actualLabels', yAvg);
 
 % Preprocessing steps for test participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant2.X, testParticipant2.labels6, 'rngType', rnd_seed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 40, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 P4Norm = Classification.predict(M, xAvg, 'actualLabels', yAvg);
 
 % Preprocessing steps for test participant
 [xShuf, yShuf] = Preprocessing.shuffleData(testParticipant3.X, testParticipant3.labels6, 'rngType', rnd_seed);  % Shuffle Data
 xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
-[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 40, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
 
 P7Norm = Classification.predict(M, xAvg, 'actualLabels', yAvg);
+
+% Compute colorbar limits
+climMax = max(P3.CM(:));
+cbTicks = [0, climMax/2, climMax];
 
 % ---------------------------- Plot --------------------------------------
 figure;
@@ -352,43 +356,231 @@ set(gcf, 'Position', [150,300,1800,1100]);
 subplot(2,3,1)
 Visualization.plotMatrix(P3.CM, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6);
-title(sprintf('Test Participant 1: %.2f%% Accuracy', P3.accuracy*100'));
-set(gca, 'fontsize', 14)
+title(sprintf('S04: %.2f%% Accuracy', P3.accuracy*100'));
+caxis([0 climMax]);
+cb1 = colorbar;
+set(cb1, 'Ticks', cbTicks);
+set(gca, 'fontsize', 22)
 
 subplot(2,3,2)
 Visualization.plotMatrix(P4.CM, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6);
-title(sprintf('Test Participant 2: %.2f%% Accuracy', P4.accuracy*100'));
-set(gca, 'fontsize', 14)
+title(sprintf('S05: %.2f%% Accuracy', P4.accuracy*100'));
+caxis([0 climMax]);
+cb1 = colorbar;
+set(cb1, 'Ticks', cbTicks);
+set(gca, 'fontsize', 22)
 
 subplot(2,3,3)
 Visualization.plotMatrix(P7.CM, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6);
-title(sprintf('Test Participant 3: %.2f%% Accuracy', P7.accuracy*100'));
-set(gca, 'fontsize', 14)
+title(sprintf('S08: %.2f%% Accuracy', P7.accuracy*100'));
+caxis([0 climMax]);
+cb1 = colorbar;
+set(cb1, 'Ticks', cbTicks);
+set(gca, 'fontsize', 22)
 
 subplot(2,3,4)
 Visualization.plotMatrix(P3Norm.CM, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6);
-title(sprintf('Test Participant 1: %.2f%% Accuracy', P3Norm.accuracy*100'));
-set(gca, 'fontsize', 14)
+title(sprintf('S04: %.2f%% Accuracy', P3Norm.accuracy*100'));
+set(gca, 'fontsize', 22)
+caxis([0 climMax]);
+cb1 = colorbar;
+set(cb1, 'Ticks', cbTicks);
 
 subplot(2,3,5)
 Visualization.plotMatrix(P4Norm.CM, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6);
-title(sprintf('Test Participant 2: %.2f%% Accuracy', P4Norm.accuracy*100'));
-set(gca, 'fontsize', 14)
+title(sprintf('S05: %.2f%% Accuracy', P4Norm.accuracy*100'));
+set(gca, 'fontsize', 22)
+caxis([0 climMax]);
+cb2 = colorbar;
+set(cb2, 'Ticks', cbTicks);
 
 subplot(2,3,6)
 Visualization.plotMatrix(P7Norm.CM, 'colorbar', 1, 'matrixLabels', 1, ...
                             'axisLabels', catLabels, 'axisColors', rgb6);
-title(sprintf('Test Participant 3: %.2f%% Accuracy', P7Norm.accuracy*100'));
-set(gca, 'fontsize', 14)
+title(sprintf('S08: %.2f%% Accuracy', P7Norm.accuracy*100'));
+set(gca, 'fontsize', 22)
+caxis([0 climMax]);
+cb3 = colorbar;
+set(cb3, 'Ticks', cbTicks);
 
 
 sgtitle('Transfer Learning from One Participant to Others Within the Same Experiment', ...
     'FontSize', 20, ...
     'FontWeight', 'bold');
+
+annotation ('textbox', [0.48, 0.45, 0.1, 0.1], ...
+    'String', sprintf('Noise Normalization may help to standardize noise between participants, helping to reduce risk of overfitting to noise-driven covariance structure'),...
+    'FontSize', 20, ...
+    'EdgeColor','none', ...
+    'BackgroundColor', [173/255, 216/255, 230/255], ...
+    'HorizontalAlignment', 'center', ...
+    'VerticalAlignment', 'middle');
+
+annotation ('textbox', [0.007, 0.7, 0.101, 0.101], ...
+    'String', sprintf('No Noise Normalization'),...
+    'FontSize', 24, ...
+    'EdgeColor','none', ...
+    'BackgroundColor', [173/255, 216/255, 230/255], ...
+    'HorizontalAlignment', 'center', ...
+    'VerticalAlignment', 'middle');
+
+annotation ('textbox', [0.007, 0.2, 0.101, 0.101], ...
+    'String', sprintf('Noise Normalization'),...
+    'FontSize', 24, ...
+    'EdgeColor','none', ...
+    'BackgroundColor', [173/255, 216/255, 230/255], ...
+    'HorizontalAlignment', 'center', ...
+    'VerticalAlignment', 'middle');
+
+
+%% Noise Normalization Important for Transfer Learning LDA 
+% load 3D training participant data
+trainParticipant = load('S01.mat');
+
+% load 3D test participant data
+testParticipant1 = load('S04.mat');
+testParticipant2 = load('S05.mat');
+testParticipant3 = load('S08.mat');
+
+
+% --------- Train on Participant 1, without Noise Normalization -----------
+
+% Preprocessing steps for train participant
+[xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rnd_seed);  % Shuffle Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+% SVM classificaiton
+M = Classification.trainMulti(xAvg, yAvg, 'PCA', 0.99, ...
+   'classifier', 'LDA', 'rngType', rnd_seed);
+
+
+% --------- Test on Other Paricipants, Without Noise Normalization --------
+
+% Preprocessing steps for test participant
+[xShuf, yShuf] = Preprocessing.shuffleData(testParticipant1.X, testParticipant1.labels6, 'rngType', rnd_seed);  % Shuffle Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+P3 = Classification.predict(M, xAvg, 'actualLabels', yAvg);
+
+% Preprocessing steps for test participant
+[xShuf, yShuf] = Preprocessing.shuffleData(testParticipant2.X, testParticipant2.labels6, 'rngType', rnd_seed);  % Shuffle Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+P4 = Classification.predict(M, xAvg, 'actualLabels', yAvg);
+
+
+% Preprocessing steps for test participant
+[xShuf, yShuf] = Preprocessing.shuffleData(testParticipant3.X, testParticipant3.labels6, 'rngType', rnd_seed);  % Shuffle Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xShuf, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+P7 = Classification.predict(M, xAvg, 'actualLabels', yAvg);
+
+
+% -------- Training on Participant 1, with Noise Normalization ------------
+
+% Preprocessing steps for train participant
+[xShuf, yShuf] = Preprocessing.shuffleData(trainParticipant.X, trainParticipant.labels6, 'rngType', rnd_seed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+% SVM classificaiton
+M = Classification.trainMulti(xAvg, yAvg, 'PCA', 0.99, ...
+   'classifier', 'LDA', 'rngType', rnd_seed);
+
+
+% ----- Predicting on all other Participants, with Noise Normalization ----
+
+% Preprocessing steps for test participant
+[xShuf, yShuf] = Preprocessing.shuffleData(testParticipant1.X, testParticipant1.labels6, 'rngType', rnd_seed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+P3Norm = Classification.predict(M, xAvg, 'actualLabels', yAvg);
+
+% Preprocessing steps for test participant
+[xShuf, yShuf] = Preprocessing.shuffleData(testParticipant2.X, testParticipant2.labels6, 'rngType', rnd_seed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+P4Norm = Classification.predict(M, xAvg, 'actualLabels', yAvg);
+
+% Preprocessing steps for test participant
+[xShuf, yShuf] = Preprocessing.shuffleData(testParticipant3.X, testParticipant3.labels6, 'rngType', rnd_seed);  % Shuffle Data
+xNorm = Preprocessing.noiseNormalization(xShuf, yShuf);  % Normalize Data
+[xAvg, yAvg] = Preprocessing.averageTrials(xNorm, yShuf, 10, 'handleRemainder', 'newGroup', 'rngType', rnd_seed);  % Apply group averaging
+
+P7Norm = Classification.predict(M, xAvg, 'actualLabels', yAvg);
+
+% Compute colorbar limits
+climMax = max(P4Norm.CM(:));
+cbTicks = [0, climMax/2, climMax];
+
+% ---------------------------- Plot --------------------------------------
+figure;
+set(gcf, 'Position', [150,300,1800,1100]);
+
+subplot(2,3,1)
+Visualization.plotMatrix(P3.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6);
+title(sprintf('S04: %.2f%% Accuracy', P3.accuracy*100'));
+caxis([0 climMax]);
+cb1 = colorbar;
+set(cb1, 'Ticks', cbTicks);
+set(gca, 'fontsize', 22)
+
+subplot(2,3,2)
+Visualization.plotMatrix(P4.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6);
+title(sprintf('S05: %.2f%% Accuracy', P4.accuracy*100'));
+caxis([0 climMax]);
+cb1 = colorbar;
+set(cb1, 'Ticks', cbTicks);
+set(gca, 'fontsize', 22)
+
+subplot(2,3,3)
+Visualization.plotMatrix(P7.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6);
+title(sprintf('S08: %.2f%% Accuracy', P7.accuracy*100'));
+caxis([0 climMax]);
+cb1 = colorbar;
+set(cb1, 'Ticks', cbTicks);
+set(gca, 'fontsize', 22)
+
+subplot(2,3,4)
+Visualization.plotMatrix(P3Norm.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6);
+title(sprintf('S04: %.2f%% Accuracy', P3Norm.accuracy*100'));
+set(gca, 'fontsize', 22)
+caxis([0 climMax]);
+cb1 = colorbar;
+set(cb1, 'Ticks', cbTicks);
+
+subplot(2,3,5)
+Visualization.plotMatrix(P4Norm.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6);
+title(sprintf('S05: %.2f%% Accuracy', P4Norm.accuracy*100'));
+set(gca, 'fontsize', 22)
+caxis([0 climMax]);
+cb2 = colorbar;
+set(cb2, 'Ticks', cbTicks);
+
+subplot(2,3,6)
+Visualization.plotMatrix(P7Norm.CM, 'colorbar', 1, 'matrixLabels', 1, ...
+                            'axisLabels', catLabels, 'axisColors', rgb6);
+title(sprintf('S08: %.2f%% Accuracy', P7Norm.accuracy*100'));
+set(gca, 'fontsize', 22)
+caxis([0 climMax]);
+cb3 = colorbar;
+set(cb3, 'Ticks', cbTicks);
+
+
+sgtitle('Transfer Learning from One Participant to Others Within the Same Experiment', ...
+    'FontSize', 22, ...
+   'FontWeight', 'bold');
 
 annotation ('textbox', [0.48, 0.45, 0.1, 0.1], ...
     'String', sprintf('Noise Normalization may help to standardize noise between participants, helping to reduce risk of overfitting to noise-driven covariance structure'),...
@@ -407,7 +599,7 @@ annotation ('textbox', [0.008, 0.7, 0.101, 0.101], ...
     'VerticalAlignment', 'middle');
 
 annotation ('textbox', [0.008, 0.2, 0.101, 0.101], ...
-    'String', sprintf('Normalization'),...
+    'String', sprintf('Noise Normalization'),...
     'FontSize', 25, ...
     'EdgeColor','none', ...
     'BackgroundColor', [173/255, 216/255, 230/255], ...

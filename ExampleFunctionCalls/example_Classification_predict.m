@@ -33,9 +33,8 @@
 
 clear all; close all; clc;
 
-load('exampleModel.mat');
 trainParticipant = load('S01.mat');
-testParticipant = load('TestData2016Paper');
+testParticipant = load('S06.mat');
 rngSeed = 6;
 
 %% Partitioning Data of Single Participant, tainMulti(), LDA Model, no PCA
