@@ -454,7 +454,7 @@
                 
                 % conduct grid search here
                 [gamma_opt_perm, C_opt_perm] = Utils.nestedCvGridSearch(...
-                     X, Y, ip, cvDataObj);
+                     permTestTrainX, permTestTrainY, ip, permCvDataObj);
 
                 gammaDist(i) = gamma_opt_perm;
                 cDist(i) = C_opt_perm;
