@@ -452,7 +452,7 @@ subplot(1,2,1)
 
 stimPath = 'UnitTests/testVisualizations/6ClassStim';
 
-Visualization.plotDendrogram(RDMAll,'yLim', [0 1], 'nodeLabels', catLabels, 'nodeColors', rgb6, 'iconPath', stimPath);
+Visualization.plotDendrogram(RDMAll, 'nodeLabels', catLabels, 'nodeColors', rgb6);
 
 title('All Timepoints');
 set(gca, 'fontsize', 16); 
@@ -461,7 +461,7 @@ hold on
 
 subplot(1,2,2)
 
-Visualization.plotDendrogram(RDMBest,'yLim', [0 1], 'nodeLabels', catLabels, 'nodeColors', rgb6, 'iconPath', stimPath);
+Visualization.plotDendrogram(RDMBest, 'nodeLabels', catLabels, 'nodeColors', rgb6);
 
 title('Best Timepoints');
 set(gca, 'fontsize', 16);
