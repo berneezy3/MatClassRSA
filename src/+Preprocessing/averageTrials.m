@@ -334,7 +334,7 @@ for pp = 1:nP % Iterate through the participants
                     
                     whichObs{end + 1} = remInd;
                     
-                    disp(YALL(whichObs{end}))
+                    % disp(YALL(whichObs{end})) debug most recent grouping
 
                     
                     % CASE: APPEND TO LAST GROUP W/ REMAINDER

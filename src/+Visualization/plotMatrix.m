@@ -44,6 +44,8 @@ function  [img, fig] = plotMatrix(RDM, varargin)
 %   - 'matrixLabels' -  Use this parameter to choose whether or not to display 
 %       values for each square in the matrix.  Ignore parameter to turn off, 
 %       enter any value to turn on.
+%   - 'roundLabels' - Use this parameter to round matrix values to the
+%       nearest whole number. Boolean. Default True.
 %   - 'FontSize' - Set font size of matrix and axis labels. Default 15
 %   - 'ticks' - Set number of ticks on the colorbar, Default 5
 %   - 'textRotation' - Set rotation of text.  Default 0
@@ -100,6 +102,7 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     ip.addParameter('colormap', '');
     ip.addParameter('colorbar', '');
     ip.addParameter('matrixLabels', 0);
+    ip.addParameter('roundLabels', 1);
     ip.addParameter('matrixLabelColor', 'black');
     ip.addParameter('FontSize', 15, @(x) isnumeric(x));
     ip.addParameter('ticks', 5, @(x) (isnumeric(x) && x>0));
@@ -127,8 +130,11 @@ function  [img, fig] = plotMatrix(RDM, varargin)
     end
 
     if (ip.Results.matrixLabels == 1)
-        % Round values to nearest whole number for display
-        roundedVals = round(RDM);
+
+        if (ip.Results.roundLabels == 1)
+            % Round values to nearest whole number for display
+            roundedVals = round(RDM);
+        end
         
         % Create strings (integer-style)
         textStrings = arrayfun(@(x) sprintf('%d', x), roundedVals, 'UniformOutput', false);

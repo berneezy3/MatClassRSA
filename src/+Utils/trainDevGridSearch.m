@@ -117,7 +117,9 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
         gamma_opt = gammaSpace(colIndex);
 
         % Close the waitbar when done
-        close(hWait);
+        if exist('hWait', 'var') && isvalid(hWait)
+            close(hWait);
+        end
 
         
     elseif (strcmpi(kernel, 'linear'))
@@ -151,7 +153,9 @@ function [gamma_opt, C_opt] = trainDevGridSearch(trainX, trainY, devX, devY, ip)
         gamma_opt = 0;
         
         % Close the waitbar when done
-        close(hWait);
+        if exist('hWait', 'var') && isvalid(hWait)
+            close(hWait);
+        end
         
     else
         disp('The kernel is not correctly specified');

@@ -38,3 +38,7 @@ src/ExampleData/*
 
 # do not ignore these files
 !src/ExampleData/.gitkeep
+
+/Figs/
+
+/temp/
