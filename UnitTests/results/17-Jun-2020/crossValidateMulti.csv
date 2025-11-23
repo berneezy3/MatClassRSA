@@ -1,3 +1,0 @@
-functionName,dataset,accuracy,shuffle,classifier,optimization,averageTrials,dataSplit
-crossValidateMulti_opt/predict,Steven_500,0.723076923076923,on,LDA,on,on,N/A
-crossValidate_opt/predict,S06,0.60077519379845,on,LDA,on,off,N/A

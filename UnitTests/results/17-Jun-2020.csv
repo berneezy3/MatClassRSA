@@ -1,3 +1,0 @@
-functionName,dataset,accuracy,shuffle,classifier,optimization,averageTrials,dataSplit
-trainMulti_opt/predict,Steven_500,0.794871794871795,on,SVM,on,on,90/10
-trainMulti_opt/predict,S06,0.711538461538462,on,SVM,on,off,90/10
