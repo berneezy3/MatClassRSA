@@ -96,13 +96,11 @@ function [M, trainData] = trainMulti(X, Y, varargin)
 %       than 0, then classification will be performed over n permutation 
 %       iterations. Default value is 0 (off).
 %       -- implementation notes --
-%       This function repeats the following steps for each permutation:
-%           - select the first fold of training, test data (permutation 
-%               testing will only run on this fold)
-%           - shuffle the training labels
-%           - train classifier on shuffled training data
-%           - use the classifier to predict test data labels
-%           - store the classification accuracy of this permutation
+%       The permutation testing for this function is carried out by the 
+%       predict() function, consistent with the steps described in the 
+%       crossValidateMulti() function. Please refer to the permutations 
+%       section in the crossValidateMulti() function documentation or the 
+%       code docstring to learn more.
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 

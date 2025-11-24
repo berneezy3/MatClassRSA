@@ -94,17 +94,11 @@ t function [M, permTestData] = trainPairs(X, Y, varargin)
 %       actual permutation testing will take place if the output model from
 %       this function is passed into predict().
 %       --implementation notes--
-%       This function is implemented by repeatsfor each decision boundary:
-%           - select the train, test data of the first fold (permutation 
-%             testing will only operate on this fold)
-%           - select the data from this fold that representing the two 
-%             classes of interest
-%           - For each permutation, repeat the following steps:
-%               - permute training labels
-%               - train a two-class classifier on the permuted training data
-%               - use the two-class classifier to predict test data labels
-%               - store the classification accuracy of this permutation and 
-%                 decision boundary
+%       The permutation testing for this function is carried out by the 
+%       predict() function, consistent with the steps described in the 
+%       crossValidatePairs() function. Please refer to the permutations 
+%       section in the crossValidatePairs() function documentation or the 
+%       code docstring to learn more.
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 

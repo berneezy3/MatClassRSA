@@ -21,6 +21,14 @@ function P = predict(M, X, varargin)
 %       corresponds to the second output from trainMulti_opt(), trainPairs(), 
 %       or trainPairs_opt().  This input is required if permutation testing 
 %       is turned on.
+%       --note on permutation testing--
+%       Permutation testing in this function depends on which function and 
+%       classifier was called to train the model (trainMulti(), 
+%       trainMulti_opt(), trainPairs(), trainPairs_opt()). For instance, if 
+%       trainMulti() was used, then the permutation testing implementation 
+%       is designed to match that of crossValidateMulti().  Please refer 
+%       to the permutations section in the corresponding crossValidate 
+%       function documentation or the code docstring to learn more.
 %
 % OUTPUT ARGS 
 %   P - Prediciton output produced by classifyPredict(), which may slightly 
