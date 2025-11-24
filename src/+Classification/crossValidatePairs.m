@@ -104,6 +104,16 @@
 %       testing will be turned off.  If it is set to an integer n greater 
 %       than 0, then classification will be performed over n permutation 
 %       iterations. Default value is 0 (off).  
+%       --implementation notes--
+%       This function repeats the following steps for each decision 
+%       boundary:
+%           - select the train, test data of the first fold (permutation testing will only operate on this fold)
+%           - select the data from this fold that representing the two classes of interest
+%           - For each permutation, repeat the following steps:
+%               - permute training labels
+%               - train a two-class classifier on the permuted training data
+%               - use the two-class classifier to predict test data labels
+%               - store the classification accuracy of this permutation and decision boundary
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 

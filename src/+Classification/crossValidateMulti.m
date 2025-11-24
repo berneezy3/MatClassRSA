@@ -104,6 +104,15 @@ function C = crossValidateMulti(X, Y, varargin)
 %       testing will be turned off.  If it is set to an integer n greater 
 %       than 0, then classification will be performed over n permutation 
 %       iterations. Default value is 0 (off). 
+%       -- implementation notes --
+%       This function is implemented by repeats the following steps for 
+%       each permutation:
+%           - select the first fold of training, test data (permutation 
+%               testing will only run on this fold)
+%           - shuffle the training labels
+%           - train classifier on shuffled training data
+%           - use the classifier to predict test data labels
+%           - store the classification accuracy of this permutation
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to 'true' will set the
 %       mean along the feature dimension to be 0.  Setting to 'false' turns it 

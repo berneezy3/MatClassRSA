@@ -144,9 +144,6 @@ function [gamma_opt, C_opt] = nestedCvGridSearch(X, Y, ip, cvDataObj, excludeInd
 
     gamma_opt = gammaSpace(yInd);
     C_opt = cSpace(xInd);
-    
-   
-
 
 end
 

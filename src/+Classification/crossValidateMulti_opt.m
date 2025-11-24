@@ -113,6 +113,16 @@
 %       testing will be turned off.  If it is set to an integer n greater 
 %       than 0, then classification will be performed over n permutation 
 %       iterations. Default value is 0 (off).  
+%       --implementation notes--
+%       This function repeats the following steps for each permutation:
+%           - select the first fold of training, test data to operate on 
+%               (permutation testing will only run on this fold)
+%           - shuffle the training labels
+%           - do  hyperparameter optimization (either using the development 
+%               fold or a nested cross validation on the training data, 
+%               depending on what option is specified)
+%           - Use the classifier to predict test data labels
+%           - store the classification accuracy of this permutation
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
 %       mean along the feature dimension to be 0.  Setting to 0 turns it 
