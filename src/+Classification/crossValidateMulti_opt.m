@@ -116,12 +116,12 @@
 %       --implementation notes--
 %       This function repeats the following steps for each permutation:
 %           - select the first fold of training, test data to operate on 
-%               (permutation testing will only run on this fold)
-%           - shuffle the training labels
-%           - do  hyperparameter optimization (either using the development 
+%               (permutation testing will run only on this fold)
+%           - permute the training labels
+%           - do hyperparameter optimization (using either the development 
 %               fold or a nested cross validation on the training data, 
-%               depending on what option is specified)
-%           - Use the classifier to predict test data labels
+%               depending on which option is specified)
+%           - use the classifier to predict test data labels
 %           - store the classification accuracy of this permutation
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the

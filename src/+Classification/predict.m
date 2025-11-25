@@ -23,10 +23,12 @@ function P = predict(M, X, varargin)
 %       is turned on.
 %       --note on permutation testing--
 %       Permutation testing in this function depends on which function and 
-%       classifier was called to train the model (trainMulti(), 
-%       trainMulti_opt(), trainPairs(), trainPairs_opt()). For instance, if 
+%       classifier was called to train the model (i.e., trainMulti(), 
+%       trainMulti_opt(), trainPairs(), trainPairs_opt()). Specifically, 
+%       for each train function, details of permutation testing are given 
+%       in the corresponding crossValidate function. For instance, if 
 %       trainMulti() was used, then the permutation testing implementation 
-%       is designed to match that of crossValidateMulti().  Please refer 
+%       is designed to match that of crossValidateMulti(). Please refer 
 %       to the permutations section in the corresponding crossValidate 
 %       function documentation or the code docstring to learn more.
 %

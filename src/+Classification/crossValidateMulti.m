@@ -105,12 +105,11 @@ function C = crossValidateMulti(X, Y, varargin)
 %       than 0, then classification will be performed over n permutation 
 %       iterations. Default value is 0 (off). 
 %       -- implementation notes --
-%       This function is implemented by repeats the following steps for 
-%       each permutation:
+%       This function repeats the following steps for each permutation:
 %           - select the first fold of training, test data (permutation 
-%               testing will only run on this fold)
-%           - shuffle the training labels
-%           - train classifier on shuffled training data
+%               testing will run only on this fold)
+%           - permute the training labels
+%           - train classifier on training data (with permuted labels)
 %           - use the classifier to predict test data labels
 %           - store the classification accuracy of this permutation
 %   'center' - This variable controls data centering, also known as 

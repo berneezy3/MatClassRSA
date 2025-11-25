@@ -111,16 +111,16 @@ function C = crossValidatePairs_opt(X, Y, varargin)
 %       iterations. Default value is 0 (off).  
 %       --implementation notes--
 %       This function repeats the following steps for each permutation:
-%           - select the first fold of training, test data to operate on 
-%               (permutation testing will only operate on this fold)
-%           - shuffle the training labels
-%           - do hyperparameter optimization (either using the development 
+%           - select the first fold of training, test data (permutation 
+%             testing will run only on this fold)
+%           - permute the training labels
+%           - do hyperparameter optimization (using either the development 
 %               fold or a nested cross validation on the training data, 
-%               depending on what option is specified)
-%           - Train classifier on permuted data
-%           - Predict the labels of the test data
-%           - Use the function decValues2PairwiseAcc() to convert the 
-%               decision values from libSVM to pairwise permutation testing 
+%               depending on which option is specified)
+%           - train classifier on training data (with permuted labels)
+%           - use the classifier to predict test data labels
+%           - use the helper function decValues2PairwiseAcc() to convert 
+%               the LIBSVM decision values to pairwise permutation testing 
 %               accuracies
 %   'center' - This variable controls data centering, also known as 
 %       mean centering.  Setting this to any non-zero value will set the
