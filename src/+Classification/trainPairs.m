@@ -1,4 +1,4 @@
-t function [M, permTestData] = trainPairs(X, Y, varargin)
+function [M, permTestData] = trainPairs(X, Y, varargin)
 % -------------------------------------------------------------------------
 % M = Classification.trainPairs(X, Y, varargin)
 % P = Classification.predict(M, X, Y)
