@@ -71,6 +71,8 @@ function [RDM, params] = computeCMRDM(M, varargin)
 %   'logarithmic' - computes distance 
 %       D = log2(distpower*M + 1) ./ log2(distpower + 1) (see below for
 %       specification of distpower).
+%   'none' - do not perform any distance conversion (for example, if values
+%       in the input matrix are already distances).
 %   
 % 'distpower' -- Integer > 0 (default 1)
 %   Distpower is used in the 'power' and 'logarithmic' options of the
