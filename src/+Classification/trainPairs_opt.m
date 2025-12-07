@@ -132,7 +132,26 @@
 %        true - scaling turned on 
 %
 % OUTPUT ARGS 
-%   M - Classification output to be passed into predict().
+%   M - Classification output to be passed into predict().  
+%       --subfields--
+%       M.classificationInfo - additional parameters/info for classification
+%       M.mdl - classification model which is used in predict() to classify
+%           labels of new data
+%       M.classifier - classifier selected for training
+%       M.functionName - the name of the current function in string format
+%       M.cvDataObj - object containing data and labels after PCA
+%       M.permutation - please see 'permutations' section in the input
+%           arguments
+%       M.ip - input parser object for this function
+%       M.elapsedTime - time elapsed for train current model in seconds.
+%           Could be used to gauge permutation testing duration.
+%       M.maxAccuracy - best performing classification accuracy obtained 
+%           during optimization (using gammaOpt and C_opt)
+%       M.gammaOpt - optimal value for SVM hyperparameter gamma
+%       M.C_opt - optimal value for SVM hyperparameter C
+%       M.scale - please see section for 'scale' input argument.  
+%  permTestData - Struct containing training data for use in permutation
+%       testing, which is to be conducted in predict()
 %
 % MatClassRSA dependencies (all +Utils): initInputParser(),
 %   convert2double(), subsetTrainTestMatrices(), initPairwiseCellMat()
@@ -249,7 +268,7 @@
             end
         end
     % END PAIRWISE LDA/RF
-    % START SVM skipping the pairwise split to decrease runtime
+    % START SVM (skipping the pairwise split to decrease runtime)
     elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
         
         

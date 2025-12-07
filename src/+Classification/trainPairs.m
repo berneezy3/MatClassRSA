@@ -117,7 +117,22 @@ function [M, permTestData] = trainPairs(X, Y, varargin)
 %        true - scaling turned on 
 %
 % OUTPUT ARGS 
-%   M - Classification output to be passed into predict().
+%   M - Classification output to be passed into predict().  
+%       --subfields--
+%       M.classificationInfo - additional parameters/info for classification
+%       M.mdl - classification model which is used in predict() to classify
+%           labels of new data
+%       M.classifier - classifier selected for training
+%       M.functionName - the name of the current function in string format
+%       M.cvDataObj - object containing data and labels after PCA
+%       M.permutation - please see 'permutations' section in the input
+%           arguments
+%       M.ip - input parser object for this function
+%       M.elapsedTime - time elapsed for train current model in seconds.
+%           Could be used to gauge permutation testing duration.
+%       M.scale - please see section for 'scale' input argument.  
+%  permTestData - Struct containing training data for use in permutation
+%       testing, which is to be conducted in predict().
 %
 % MatClassRSA dependencies (all +Utils): initInputParser(),
 %   convert2double(), verifySVMParameters(), subsetTrainTestMatrices(),
@@ -257,13 +272,23 @@ function [M, permTestData] = trainPairs(X, Y, varargin)
                 ' ''rngType'', ''default'' ) ' ]);
             tempM.classifierInfo.numClasses = numClasses;
             M.cvDataObj = cvDataObj;
-            M.classifierInfo{k} =  tempM.classifierInfo;
             M.classificationInfo{k} = tempM.classificationInfo;
             M.mdl{k} = tempM.mdl;
             M.scale{k} = tempM.scale;
             permTestData{k} = tempM.cvDataObj;
         end
-
+    
+    elseif  strcmp( upper(ip.Results.classifier), 'SVM') && (ip.Results.PCA <= 0)
+        
+        [~, tempM] = evalc([' Classification.trainMulti(X, Y, ' ...
+            ' ''classifier'', ip.Results.classifier, ''PCA'', ip.Results.PCA, '...
+            ' ''kernel'', ip.Results.kernel,'...
+            ' ''center'', ip.Results.center, ' ...
+            ' ''scale'', ip.Results.scale, ' ...
+            ' ''rngType'', ''default'' ) ' ]);
+        
+        M = tempM;
+        
     end
 
     disp('trainPairs() finished');

@@ -282,7 +282,7 @@ function C = crossValidatePairs_opt(X, Y, varargin)
     
     %%%%% PCA, CENTERING, SCALING and CV DATA PARTITIONING %%%%% 
     % Split Data into fold (w/ or w/o PCA)
-    if (ip.Results.PCA>0 && ip.Results.PCA>0)
+    if (ip.Results.PCA>0)
         disp('Conducting Principal Component Analysis');
     else
         disp('Skipping Principal Component Analysis');

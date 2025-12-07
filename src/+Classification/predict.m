@@ -487,9 +487,10 @@ function P = predict(M, X, varargin)
             'classifier', M.classificationInfo.classifier);
         
         %Permutation Testing
+        trainLabels = ip.Results.permTestData.Y;
         if ip.Results.permutations > 0
             
-            numClasses = length(unique(M.trainLabels));
+            numClasses = length(unique(trainLabels));
             accMatDist = zeros(numClasses, numClasses, ip.Results.permutations);
             pValMat = NaN(numClasses, numClasses);
             

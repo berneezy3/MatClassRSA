@@ -1,4 +1,4 @@
-function [M, trainData] = trainMulti(X, Y, varargin)
+function [M, permTestData] = trainMulti(X, Y, varargin)
 % -------------------------------------------------------------------------
 % [M, trainData] = Classification.trainMulti(trainData, testData); 
 % P = Classification.predict(M, X, Y)
@@ -122,14 +122,19 @@ function [M, trainData] = trainMulti(X, Y, varargin)
 %   M - Classification output to be passed into predict().  
 %       --subfields--
 %       M.classificationInfo - additional parameters/info for classification
-%       M.mdl - classification model which is used in predict to predict
-%           the labels of new data
+%       M.mdl - classification model which is used in predict() to classify
+%           labels of new data
 %       M.classifier - classifier selected for training
-%       M.trainData - data used to train classification model
-%       M.trainLabels - labels used to train classification model
 %       M.functionName - the name of the current function in string format
-%       M.permutationMdls - cell array containing all permutation models
 %       M.cvDataObj - object containing data and labels after PCA
+%       M.permutation - please see 'permutations' section in the input
+%           arguments
+%       M.ip - input parser object for this function
+%       M.elapsedTime - time elapsed for train current model in seconds.
+%           Could be used to gauge permutation testing duration.
+%       M.scale - please see section for 'scale' input argument.  
+%  permTestData - Struct containing training data for use in permutation
+%       testing, which is to be conducted in predict().
 %
 % MatClassRSA dependencies (all +Utils): initInputParser(),
 %   checkInputDataShape(), verifySVMParameters(),
@@ -281,17 +286,15 @@ function [M, trainData] = trainMulti(X, Y, varargin)
     M.classificationInfo = classifierInfo;
     M.mdl = mdl;
     M.scale = scale;
-    M.pairwise = 0;
     M.classifier = ip.Results.classifier;
     M.functionName = namestr;
-    M.pairwise = 0;
     M.cvDataObj = cvDataObj;
     M.permutations = ip.Results.permutations;
     M.ip = ip;
     
-    trainData = struct();
-    trainData.X = cvDataObj.trainXall{1};
-    trainData.Y = Y;
+    permTestData = struct();
+    permTestData.X = cvDataObj.trainXall{1};
+    permTestData.Y = Y;
     
     M.elapsedTime = toc(train_time);
 
