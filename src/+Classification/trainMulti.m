@@ -127,10 +127,10 @@ function [M, permTestData] = trainMulti(X, Y, varargin)
 %       M.classifier - classifier selected for training
 %       M.functionName - the name of the current function in string format
 %       M.cvDataObj - object containing data and labels after PCA
-%       M.permutation - please see 'permutations' section in the input
+%       M.permutations - please see 'permutations' section in the input
 %           arguments
 %       M.ip - input parser object for this function
-%       M.elapsedTime - time elapsed for train current model in seconds.
+%       M.elapsedTime - time elapsed for training current model in seconds.
 %           Could be used to gauge permutation testing duration.
 %       M.scale - please see section for 'scale' input argument.  
 %  permTestData - Struct containing training data for use in permutation

@@ -125,7 +125,7 @@ function [M, permTestData] = trainPairs(X, Y, varargin)
 %       M.classifier - classifier selected for training
 %       M.functionName - the name of the current function in string format
 %       M.cvDataObj - object containing data and labels after PCA
-%       M.permutation - please see 'permutations' section in the input
+%       M.permutations - please see 'permutations' section in the input
 %           arguments
 %       M.ip - input parser object for this function
 %       M.elapsedTime - time elapsed for train current model in seconds.
